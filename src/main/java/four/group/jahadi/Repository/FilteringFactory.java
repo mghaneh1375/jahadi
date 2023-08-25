@@ -1,6 +1,8 @@
 package four.group.jahadi.Repository;
 
+import four.group.jahadi.Validator.ObjectIdValidator;
 import lombok.NoArgsConstructor;
+import org.bson.types.ObjectId;
 
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
@@ -62,7 +64,10 @@ public class FilteringFactory {
                 if (operator == Filtering.Operator.in || operator == Filtering.Operator.nin) {
                     Set<Object> list = new HashSet<>();
                     for (String value : filterSplit[2].split(";")) {
-                        list.add(nestedObject(typeParameterClass, value, nested));
+                        if(ObjectIdValidator.isValid(value))
+                            list.add(new ObjectId(value));
+                        else
+                            nestedObject(typeParameterClass, value, nested);
                     }
 
                     // add the filter to the filtering object

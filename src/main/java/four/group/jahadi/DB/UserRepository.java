@@ -39,6 +39,6 @@ public class UserRepository extends Common {
     @Override
     void init() {
         table = "user";
-        documentMongoCollection = JahadiApplication.mongoDatabase.getCollection(table);
+//        documentMongoCollection = JahadiApplication.mongoDatabase.getCollection(table);
     }
 }

@@ -6,6 +6,8 @@ import four.group.jahadi.Models.PaginatedResponse;
 import four.group.jahadi.Repository.DrugRepository;
 import four.group.jahadi.Repository.FilteringFactory;
 import org.bson.types.ObjectId;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -26,15 +28,16 @@ public class DrugService extends AbstractService<Drug, DrugData> {
     private DrugRepository drugRepository;
 
     @Override
-    public PaginatedResponse<Drug> list(List<String> filters) {
+    public String list(Object ... filters) {
 
-        Pageable pageable = PageRequest.of(0, 10);
+//        Pageable pageable = PageRequest.of(0, 10);
+//
+//        Page<Drug> all = drugRepository.findAllWithFilter(Drug.class,
+//                FilteringFactory.parseFromParams(filters, Drug.class), pageable
+//        );
 
-        Page<Drug> all = drugRepository.findAllWithFilter(Drug.class,
-                FilteringFactory.parseFromParams(filters, Drug.class), pageable
-        );
-
-        return returnPaginateResponse(all);
+        return null;
+//        return returnPaginateResponse(all);
     }
 
     @Override

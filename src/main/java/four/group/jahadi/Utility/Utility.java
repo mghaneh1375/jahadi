@@ -3,82 +3,35 @@ package four.group.jahadi.Utility;
 import org.bson.Document;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 public class Utility {
 
-    private static final Pattern justNumPattern = Pattern.compile("^\\d+$");
-    private static final Pattern passwordStrengthPattern = Pattern.compile("^(?=.*[0-9])(?=.*[A-z])(?=\\S+$).{8,}$");
-
-    public static Document searchInDocumentsKeyVal(List<Document> arr, String key, Object val) {
-
-        if (arr == null)
-            return null;
-
-        for (Document doc : arr) {
-            if (doc.containsKey(key) && doc.get(key).equals(val))
-                return doc;
-        }
-
-        return null;
+    public static String convertDateToJalali(Date date) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        String[] dateTime = simpleDateFormat.format(date).split(" ");
+        String[] splited = dateTime[0].split("-");
+        return JalaliCalendar.gregorianToJalali(new JalaliCalendar.YearMonthDate(splited[0], splited[1], splited[2])).format("/") + " - " + dateTime[1];
     }
 
-    public static Document searchInDocumentsKeyVal(List<Document> arr, String key, Object val,
-                                                   String key2, Object val2) {
-
-        if (arr == null)
-            return null;
-
-        for (Document doc : arr) {
-            if (doc.containsKey(key) && doc.get(key).equals(val) &&
-                    doc.containsKey(key2) && (
-                    (val2 == null && doc.get(key2) == null) ||
-                            (doc.get(key2) != null && doc.get(key2).equals(val2))
-            ))
-                return doc;
-        }
-
-        return null;
-    }
-
-    public static int searchInDocumentsKeyValIdx(List<Document> arr, String key, Object val,
-                                                 String key2, Object val2) {
-
-        if (arr == null)
-            return -1;
-
-        for (int i = 0; i < arr.size(); i++) {
-            Document doc = arr.get(i);
-            if (doc.containsKey(key) && doc.get(key).equals(val) && (
-                    (val2 == null && doc.get(key2) == null) ||
-                            (doc.get(key2) != null && doc.get(key2).equals(val2))
-            ))
-                return i;
-        }
-
-        return -1;
-    }
-
-    public static int searchInDocumentsKeyValIdx(List<Document> arr, String key, Object val) {
-
-        if (arr == null)
-            return -1;
-
-        for (int i = 0; i < arr.size(); i++) {
-            if (arr.get(i).containsKey(key) && arr.get(i).get(key).equals(val))
-                return i;
-        }
-
-        return -1;
-    }
-
-    public static String convertStringToDate(String date, String delimeter) {
-        return date.substring(0, 4) + delimeter + date.substring(4, 6) + delimeter + date.substring(6, 8);
+    public static String getToday(String delimeter) {
+        Locale loc = new Locale("en_US");
+        SolarCalendar sc = new SolarCalendar();
+        return String.valueOf(sc.year) + delimeter + String.format(loc, "%02d",
+                sc.month) + delimeter + String.format(loc, "%02d", sc.date);
     }
 
     public static int convertStringToDate(String date) {
         return Integer.parseInt(date.substring(0, 4) + date.substring(5, 7) + date.substring(8, 10));
+    }
+
+    public static String convertIntToDate(Integer d) {
+        String date = d + "";
+        return date.substring(0, 4) + "/" + date.substring(4, 6) + "/" + date.substring(6, 8);
     }
 
     public static String convertPersianDigits(String number) {
@@ -194,6 +147,7 @@ public class Utility {
 
     public static void printException(Exception x) {
 
+        x.printStackTrace();
         System.out.println(x.getMessage());
         int limit = x.getStackTrace().length > 5 ? 5 : x.getStackTrace().length;
         for (int i = 0; i < limit; i++)

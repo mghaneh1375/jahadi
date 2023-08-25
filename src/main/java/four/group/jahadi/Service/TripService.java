@@ -4,13 +4,15 @@ import four.group.jahadi.DTO.TripData;
 import four.group.jahadi.Models.PaginatedResponse;
 import four.group.jahadi.Models.Trip;
 import org.bson.types.ObjectId;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.List;
 
 public class TripService extends AbstractService<Trip, TripData> {
 
     @Override
-    PaginatedResponse<Trip> list(List<String> filters) {
+    public String list(Object ... filters) {
         return null;
     }
 

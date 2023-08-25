@@ -1,20 +1,14 @@
 package four.group.jahadi.Service;
 
-import com.mongodb.BasicDBObject;
 import four.group.jahadi.DTO.UserData;
 import four.group.jahadi.Enums.Access;
 import four.group.jahadi.Enums.AccountStatus;
 import four.group.jahadi.Enums.Sex;
-import four.group.jahadi.Models.Drug;
-import four.group.jahadi.Models.PaginatedResponse;
+import four.group.jahadi.Models.Group;
 import four.group.jahadi.Models.User;
 import four.group.jahadi.Repository.FilteringFactory;
 import four.group.jahadi.Repository.UserRepository;
-import four.group.jahadi.Security.JwtTokenProvider;
-import four.group.jahadi.Utility.Cache;
-import four.group.jahadi.Utility.PairValue;
 import four.group.jahadi.Utility.Utility;
-import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -25,61 +19,27 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.mongodb.client.model.Filters.*;
+import static four.group.jahadi.Utility.Utility.generateErr;
 import static four.group.jahadi.Utility.Utility.generateSuccessMsg;
+
 
 @Service
 public class UserService extends AbstractService<User, UserData> {
 
-    private static ArrayList<Cache> cachedToken = new ArrayList<>();
     @Autowired
     private PasswordEncoder passwordEncoder;
-    @Autowired
-    private JwtTokenProvider jwtTokenProvider;
-
-    private static PasswordEncoder passwordEncoderStatic;
-
-    public boolean isOldPassCorrect(String password, String dbPassword) {
-        return passwordEncoder.matches(password, dbPassword);
-    }
-
-    @Autowired
-    public void setStaticFoo(PasswordEncoder p) {
-        passwordEncoderStatic = p;
-    }
-
-    public String getEncPass(String username, String pass) {
-        deleteFromCache(username);
-        return passwordEncoder.encode(pass);
-    }
-
-    public static String getEncPassStatic(String pass) {
-        return passwordEncoderStatic.encode(Utility.convertPersianDigits(pass));
-    }
 
     public String getEncPass(String pass) {
         return passwordEncoder.encode(Utility.convertPersianDigits(pass));
-    }
-
-    public void deleteFromCache(String username) {
-
-        if(1 == 1)
-            return;
-
-        for (int i = 0; i < cachedToken.size(); i++) {
-            if (((PairValue) (cachedToken.get(i)).getKey()).getKey().equals(username)) {
-                cachedToken.remove(i);
-                return;
-            }
-        }
     }
 
     @Autowired
     private UserRepository userRepository;
 
     @Override
-    PaginatedResponse<User> list(List<String> filters) {
-        return null;
+    public String list(Object... filters) {
+        return generateSuccessMsg("data", convertObjectsToJSONList(userRepository.findAll()));
+
     }
 
     @Override
@@ -87,37 +47,44 @@ public class UserService extends AbstractService<User, UserData> {
         return null;
     }
 
-    public static PairValue existSMS(String username) {
-
-        Document doc = activationRepository.findOne(
-                and(
-                        eq("username", username),
-                        gt("created_at", System.currentTimeMillis() - SMS_RESEND_MSEC)
-                )
-                , new BasicDBObject("token", 1).append("created_at", 1)
-        );
-
-        if (doc != null)
-            return new PairValue(doc.getString("token"), SMS_RESEND_SEC - (System.currentTimeMillis() - doc.getLong("created_at")) / 1000);
-
-        return null;
-    }
-
     @Override
-    public String store(UserData userData) {
+    public String store(UserData dto) {
 
-        userData.setPassword(getEncPass(userData.getPassword()));
-        PairValue existTokenP = existSMS(jsonObject.getString("username"));
+        if(userRepository.countByPhone(dto.getPhone()) > 0)
+            return generateErr("شماره همراه وارد شده در سیستم موجود است");
 
-        if (existTokenP != null)
-            return generateSuccessMsg("token", existTokenP.getKey(),
-                    new PairValue("reminder", existTokenP.getValue())
-            );
+        if(userRepository.countByNID(dto.getNid()) > 0)
+            return generateErr("کد ملی وارد شده در سیستم موجود است");
 
-        User user = userRepository.insert(populateEntity(null, userData));
+
+        dto.setPassword(getEncPass(dto.getPassword()));
+//        PairValue existTokenP = existSMS(jsonObject.getString("username"));
+//
+//        if (existTokenP != null)
+//            return generateSuccessMsg("token", existTokenP.getKey(),
+//                    new PairValue("reminder", existTokenP.getValue())
+//            );
+
+        User user = userRepository.insert(populateEntity(null, dto));
         // todo : send activation code
         return generateSuccessMsg("id", user.get_id());
     }
+
+//    public static PairValue existSMS(String username) {
+//
+//        Document doc = activationRepository.findOne(
+//                and(
+//                        eq("username", username),
+//                        gt("created_at", System.currentTimeMillis() - SMS_RESEND_MSEC)
+//                )
+//                , new BasicDBObject("token", 1).append("created_at", 1)
+//        );
+//
+//        if (doc != null)
+//            return new PairValue(doc.getString("token"), SMS_RESEND_SEC - (System.currentTimeMillis() - doc.getLong("created_at")) / 1000);
+//
+//        return null;
+//    }
 
     @Override
     User populateEntity(User user, UserData userData) {
@@ -139,7 +106,9 @@ public class UserService extends AbstractService<User, UserData> {
         user.setSex(userData.getSex().equals(Sex.MALE.getName()) ? Sex.MALE : Sex.FEMALE);
 
         if(isNew) {
-            user.setAccesses(new ArrayList<Access>(){{add(Access.JAHADI);}});
+            user.setAccesses(new ArrayList<>() {{
+                add(Access.JAHADI);
+            }});
             user.setStatus(AccountStatus.PENDING);
         }
 
@@ -149,12 +118,6 @@ public class UserService extends AbstractService<User, UserData> {
     @Override
     User findById(ObjectId id) {
         return null;
-    }
-
-    public boolean exist(List<String> filters) {
-        return userRepository.findAllWithFilter(User.class,
-                FilteringFactory.parseFromParams(filters, User.class)
-        ).size() > 0;
     }
 
     public User findByPhone(String phone) {

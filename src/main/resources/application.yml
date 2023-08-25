@@ -4,6 +4,7 @@ spring:
       host: 'localhost'
       port: 27017
       database: 'jahadi'
+      auto-index-creation: true
 server:
   port: 8080
 logging:

@@ -9,8 +9,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 
-import static four.group.jahadi.JahadiApplication.userRepository;
-
 
 @Service
 public class MyUserDetails implements UserDetailsService {
@@ -23,7 +21,7 @@ public class MyUserDetails implements UserDetailsService {
         Document user = cached.get(username);
 
         if(user == null) {
-            user = userRepository.findByUsername(username);
+//            user = userRepository.findByUsername(username);
             if (user == null)
                 throw new UsernameNotFoundException("User '" + username + "' not found");
             else
