@@ -1,40 +1,59 @@
 package four.group.jahadi.Service;
 
-import four.group.jahadi.DTO.UserData;
+import four.group.jahadi.DTO.SignUp.*;
 import four.group.jahadi.Enums.Access;
 import four.group.jahadi.Enums.AccountStatus;
-import four.group.jahadi.Enums.Sex;
+import four.group.jahadi.Models.Activation;
 import four.group.jahadi.Models.Group;
 import four.group.jahadi.Models.User;
+import four.group.jahadi.Repository.ActivationRepository;
 import four.group.jahadi.Repository.FilteringFactory;
+import four.group.jahadi.Repository.GroupRepository;
 import four.group.jahadi.Repository.UserRepository;
+import four.group.jahadi.Security.JwtTokenProvider;
+import four.group.jahadi.Utility.Cache;
+import four.group.jahadi.Utility.PairValue;
 import four.group.jahadi.Utility.Utility;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-import static four.group.jahadi.Utility.Utility.generateErr;
-import static four.group.jahadi.Utility.Utility.generateSuccessMsg;
+import static four.group.jahadi.Utility.StaticValues.*;
+import static four.group.jahadi.Utility.Utility.*;
 
 
 @Service
-public class UserService extends AbstractService<User, UserData> {
+public class UserService extends AbstractService<User, SignUpData> {
+
+    private static ArrayList<Cache> cachedToken = new ArrayList<>();
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private ActivationRepository activationRepository;
+
+    @Autowired
+    private GroupRepository groupRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public String getEncPass(String pass) {
-        return passwordEncoder.encode(Utility.convertPersianDigits(pass));
-    }
-
     @Autowired
-    private UserRepository userRepository;
+    private JwtTokenProvider jwtTokenProvider;
+
+    public String getEncPass(String pass) {
+        return passwordEncoder.encode(convertPersianDigits(pass));
+    }
 
     @Override
     public String list(Object... filters) {
@@ -43,12 +62,31 @@ public class UserService extends AbstractService<User, UserData> {
     }
 
     @Override
-    String update(ObjectId id, UserData dto) {
+    String update(ObjectId id, SignUpData dto, Object ... params) {
         return null;
     }
 
+    public String checkUniqueness(SignUpStep1Data dto) {
+
+        if (userRepository.countByPhone(dto.getPhone()) > 0)
+            return generateErr("شماره همراه وارد شده در سیستم موجود است");
+
+        if (userRepository.countByNID(dto.getNid()) > 0)
+            return generateErr("کد ملی وارد شده در سیستم موجود است");
+
+        return JSON_OK;
+    }
+
+    public String checkGroup(SignUpStep3Data dto) {
+
+        if(groupRepository.countByCode(dto.getGroupCode()) == 0)
+            return generateErr("کد گروه نامعتبر است");
+
+        return JSON_OK;
+    }
+
     @Override
-    public String store(UserData dto) {
+    public String store(SignUpData dto, Object ... params) {
 
         if(userRepository.countByPhone(dto.getPhone()) > 0)
             return generateErr("شماره همراه وارد شده در سیستم موجود است");
@@ -56,8 +94,12 @@ public class UserService extends AbstractService<User, UserData> {
         if(userRepository.countByNID(dto.getNid()) > 0)
             return generateErr("کد ملی وارد شده در سیستم موجود است");
 
+        if(dto.getGroupCode() != null) {
+            Group group = groupRepository.findByCode(dto.getGroupCode());
+            if (group == null)
+                return generateErr("کد گروه موردنظر در سیستم وجود ندارد");
+        }
 
-        dto.setPassword(getEncPass(dto.getPassword()));
 //        PairValue existTokenP = existSMS(jsonObject.getString("username"));
 //
 //        if (existTokenP != null)
@@ -70,24 +112,89 @@ public class UserService extends AbstractService<User, UserData> {
         return generateSuccessMsg("id", user.get_id());
     }
 
-//    public static PairValue existSMS(String username) {
+
+    public String groupStore(GroupSignUpData dto) {
+
+        if(userRepository.countByPhone(dto.getPhone()) > 0)
+            return generateErr("شماره همراه وارد شده در سیستم موجود است");
+
+        if(userRepository.countByNID(dto.getNid()) > 0)
+            return generateErr("کد ملی وارد شده در سیستم موجود است");
+
+//        PairValue existTokenP = existSMS(jsonObject.getString("username"));
 //
-//        Document doc = activationRepository.findOne(
-//                and(
-//                        eq("username", username),
-//                        gt("created_at", System.currentTimeMillis() - SMS_RESEND_MSEC)
-//                )
-//                , new BasicDBObject("token", 1).append("created_at", 1)
-//        );
-//
-//        if (doc != null)
-//            return new PairValue(doc.getString("token"), SMS_RESEND_SEC - (System.currentTimeMillis() - doc.getLong("created_at")) / 1000);
-//
-//        return null;
-//    }
+//        if (existTokenP != null)
+//            return generateSuccessMsg("token", existTokenP.getKey(),
+//                    new PairValue("reminder", existTokenP.getValue())
+//            );
+
+        User user = userRepository.insert(populateEntity(null, dto));
+        // todo : send activation code
+        return generateSuccessMsg("id", user.get_id());
+    }
+
+    public String forgetPass(String NID) {
+
+        if (!Utility.validationNationalCode(NID))
+            return JSON_NOT_VALID_PARAMS;
+
+        Optional<User> user = userRepository.findByNID(NID);
+        if(user.isEmpty())
+            return generateErr("کد ملی وارد شده در سامانه موجود نمی باشد");
+
+        return sendSMS(NID, user.get().getPhone());
+    }
+
+    private String sendSMS(String NID, String phone) {
+
+        PairValue existTokenP = existSMS(phone);
+
+        if (existTokenP != null)
+            return generateSuccessMsg("token", existTokenP.getKey(),
+                    new PairValue("reminder", existTokenP.getValue())
+            );
+
+        String token = sendNewSMS(NID, phone);
+
+        return generateSuccessMsg("token", token,
+                new PairValue("reminder", SMS_RESEND_SEC)
+        );
+
+    }
+
+    private String sendNewSMS(String NID, String phone) {
+
+        int code = Utility.randInt();
+        String token = Utility.randomString(20);
+        long now = System.currentTimeMillis();
+
+        new Thread(() -> {
+
+            activationRepository.deleteByPhone(phone, now);
+
+            Activation activation = new Activation();
+            activation.setCode(code);
+            activation.setToken(token);
+            activation.setCreatedAt(now);
+            activation.setPhone(phone);
+            activation.setNid(NID);
+
+            activationRepository.insert(activation);
+
+            Utility.sendSMS(phone, code + "" , "", "", "activationCode");
+
+        }).start();
+
+        return token;
+    }
+
+    public PairValue existSMS(String phone) {
+        Optional<Activation> activation = activationRepository.findByPhone(phone, System.currentTimeMillis() - SMS_RESEND_MSEC);
+        return activation.map(value -> new PairValue(value.getToken(), SMS_RESEND_SEC - (System.currentTimeMillis() - value.getCreatedAt()) / 1000)).orElse(null);
+    }
 
     @Override
-    User populateEntity(User user, UserData userData) {
+    User populateEntity(User user, SignUpData userData) {
 
         boolean isNew = false;
 
@@ -96,16 +203,74 @@ public class UserService extends AbstractService<User, UserData> {
             isNew = true;
         }
 
-        user.setFirstName(userData.getFirstName());
-        user.setLastName(userData.getLastName());
+        user.setName(userData.getName());
+        user.setBloodType(userData.getBloodType());
         user.setPhone(userData.getPhone());
-        user.setNID(userData.getNid());
-        user.setEducationalField(userData.getEducationalField());
+        user.setNid(userData.getNid());
+        user.setFatherName(userData.getFatherName());
         user.setBirthDay(userData.getBirthDay());
-        user.setSpecification(userData.getSpecification());
-        user.setSex(userData.getSex().equals(Sex.MALE.getName()) ? Sex.MALE : Sex.FEMALE);
+        user.setField(userData.getField());
+        user.setUniversity(userData.getUniversity());
+        user.setUniversityYear(userData.getUniversityYear());
+
+        if(userData.getDiseases() != null)
+            user.setDiseases(userData.getDiseases());
+
+        if(userData.getAllergies() != null)
+            user.setAllergies(userData.getAllergies());
+
+        if(userData.getAbilities() != null)
+            user.setAbilities(userData.getAbilities());
+
+        user.setSex(userData.getSex());
+        user.setNearbyName(userData.getNearbyName());
+        user.setNearbyPhone(userData.getNearbyPhone());
 
         if(isNew) {
+
+            if(userData.getGroupCode() != null) {
+                Group group = groupRepository.findByCode(userData.getGroupCode());
+                user.setGroupId(group.get_id());
+            }
+
+            user.setPassword(getEncPass(userData.getPassword()));
+            user.setAccesses(new ArrayList<>() {{
+                add(Access.JAHADI);
+            }});
+            user.setStatus(AccountStatus.PENDING);
+        }
+
+        return user;
+    }
+
+    User populateEntity(User user, GroupSignUpData userData) {
+
+        boolean isNew = false;
+
+        if(user == null) {
+            user = new User();
+            isNew = true;
+        }
+
+        user.setName(userData.getName());
+        user.setPhone(userData.getPhone());
+        user.setNid(userData.getNid());
+        user.setFatherName(userData.getFatherName());
+        user.setBirthDay(userData.getBirthDay());
+        user.setField(userData.getField());
+        user.setUniversity(userData.getUniversity());
+        user.setUniversityYear(userData.getUniversityYear());
+        user.setSex(userData.getSex());
+
+        user.setGroupName(userData.getGroupName());
+        user.setTrips(userData.getTrips());
+        user.setMembers(userData.getMembers());
+        user.setOrganizationDependency(userData.getOrganizationDependency());
+        user.setFamiliarWith(userData.getFamiliarWith());
+
+        if(isNew) {
+
+            user.setPassword(getEncPass(userData.getPassword()));
             user.setAccesses(new ArrayList<>() {{
                 add(Access.JAHADI);
             }});
@@ -118,6 +283,70 @@ public class UserService extends AbstractService<User, UserData> {
     @Override
     User findById(ObjectId id) {
         return null;
+    }
+
+    public String checkCode(CheckCodeRequest checkCodeRequest) {
+
+        if (!Utility.validationNationalCode(checkCodeRequest.getNid()))
+            return JSON_NOT_VALID_PARAMS;
+
+        if (checkCodeRequest.getToken().length() != 20)
+            return JSON_NOT_VALID_PARAMS;
+
+        if (checkCodeRequest.getCode() < 100000 || checkCodeRequest.getCode() > 999999)
+            return Utility.generateErr("کد وارد شده معتبر نمی باشد.");
+
+        Optional<Activation> activation = activationRepository.findByNidAndCodeAndToken(
+                checkCodeRequest.getNid(), checkCodeRequest.getCode(), checkCodeRequest.getToken()
+        );
+
+        if (activation.isEmpty())
+            return generateErr("کد وارد شده معتبر نیست");
+
+        if(activation.get().getCreatedAt() < System.currentTimeMillis() - SMS_RESEND_MSEC)
+            return generateErr("کد موردنظر شما منقضی شده است");
+
+        return JSON_OK;
+    }
+
+    public String resetPassword(ResetPasswordRequest request) {
+
+        if (!Utility.validationNationalCode(request.getNid()))
+            return JSON_NOT_VALID_PARAMS;
+
+        if (request.getToken().length() != 20)
+            return JSON_NOT_VALID_PARAMS;
+
+        if (request.getCode() < 100000 || request.getCode() > 999999)
+            return generateErr("کد وارد شده معتبر نمی باشد.");
+
+        if (!request.getPassword().equals(request.getRepeatPassword()))
+            return generateErr("رمزجدید و تکرار آن یکسان نیستند.");
+
+        if (request.getPassword().length() < 6)
+            return generateErr("رمزجدید انتخاب شده قوی نیست.");
+
+        Optional<Activation> activation = activationRepository.findByNidAndCodeAndToken(request.getNid(),
+                request.getCode(), request.getToken()
+        );
+
+        if (activation.isEmpty())
+            return generateErr("کد وارد شده معتبر نیست");
+
+        if (activation.get().getCreatedAt() < System.currentTimeMillis() - SMS_VALIDATION_EXPIRATION_MSEC_LONG)
+            return generateErr("توکن موردنظر منقضی شده است.");
+
+        activationRepository.delete(activation.get());
+
+        Optional<User> user = userRepository.findByNID(activation.get().getNid());
+        if(user.isEmpty())
+            return JSON_NOT_UNKNOWN;
+
+        User u = user.get();
+        u.setPassword(getEncPass(request.getPassword()));
+        userRepository.save(u);
+
+        return JSON_OK;
     }
 
     public User findByPhone(String phone) {
@@ -133,105 +362,100 @@ public class UserService extends AbstractService<User, UserData> {
 
         return tmp.size() > 0 ? tmp.get(0) : null;
     }
-//
-//    public String toggleStatus(ObjectId userId) {
-//
-//        Document user = userRepository.findById(userId);
-//        if(user == null)
-//            return null;
-//
-//        switch (user.getString("status")) {
-//            case "active":
-//                user.put("status", "deActive");
-//                break;
-//            case "deActive":
-//                user.put("status", "active");
-//                break;
-//            default:
-//                return null;
-//        }
-//
-//        userRepository.updateOne(
-//                eq("_id", userId),
-//                set("status", user.getString("status"))
-//        );
-//
-//        return Utility.generateSuccessMsg("newStatus", user.getString("status"));
-//    }
-//
-//    public String signIn(String username, String password, boolean checkPass
-//    ) throws NotActivateAccountException {
-//
-//        try {
-//
-////            if(checkPass) {
-////                PairValue p = new PairValue(username, password);
-//
-////                for (int i = 0; i < cachedToken.size(); i++) {
-////                    if (cachedToken.get(i).equals(p)) {
-////                        if (cachedToken.get(i).checkExpiration())
-////                            return (String) cachedToken.get(i).getValue();
-////
-////                        cachedToken.remove(i);
-////                        break;
-////                    }
-////                }
-////            }
-//
-//            Document user = userRepository.findByUnique(username, false);
-//
-//            if(user == null || user.containsKey("remove_at"))
-//                throw new CustomException("نام کاربری و یا رمزعبور اشتباه است.", HttpStatus.UNPROCESSABLE_ENTITY);
-//
-//            if (!DEV_MODE && checkPass) {
-//                if (!passwordEncoder.matches(password, user.getString("password")))
-//                    throw new CustomException("نام کاربری و یا رمزعبور اشتباه است.", HttpStatus.UNPROCESSABLE_ENTITY);
-//            }
-//
-//            if (!user.getString("status").equals("active"))
-//                throw new NotActivateAccountException("اکانت شما غیرفعال شده است.");
-//
-//            username = user.containsKey("phone") ?
-//                    user.getString("phone") :
-//                    user.getString("mail");
-//
-//            String token = jwtTokenProvider.createToken(username, (user.getBoolean("level")) ? Role.ROLE_ADMIN : Role.ROLE_CLIENT);
-//
-////            if(checkPass)
-////                cachedToken.add(new Cache(TOKEN_EXPIRATION, token, new PairValue(user.getString("username"), password)));
-//
-//            return Utility.generateSuccessMsg(
-//                    "token", token,
-//                    new PairValue("user", UserController.isAuth(user))
-//            );
-//
-//        } catch (AuthenticationException x) {
-//            throw new CustomException("نام کاربری و یا رمزعبور اشتباه است.", HttpStatus.UNPROCESSABLE_ENTITY);
-//        }
-//    }
-//
-//    public void logout(String token) {
-//        for (int i = 0; i < cachedToken.size(); i++) {
-//            if (cachedToken.get(i).getValue().equals(token)) {
-//                cachedToken.remove(i);
-//                return;
-//            }
-//        }
-//    }
-//
-//    public Document whoAmI(HttpServletRequest req) {
-//        try {
-//
-//            Document u = userRepository.findByUsername(jwtTokenProvider.getUsername(jwtTokenProvider.resolveToken(req), false));
-//
-//            if(u == null || u.containsKey("remove_at"))
-//                return null;
-//
-//            return u;
-//        }
-//        catch (Exception x) {
-//            return null;
-//        }
-//    }
+
+    public String toggleStatus(ObjectId userId) {
+
+        Optional<User> user = userRepository.findById(userId);
+        if(user.isEmpty())
+            return JSON_NOT_VALID_ID;
+
+        User u = user.get();
+
+        switch (u.getStatus()) {
+            case ACTIVE:
+                u.setStatus(AccountStatus.BLOCKED);
+                break;
+            case PENDING:
+            case BLOCKED:
+                u.setStatus(AccountStatus.ACTIVE);
+                break;
+            default:
+                return JSON_NOT_VALID_PARAMS;
+        }
+
+        userRepository.save(u);
+
+        return Utility.generateSuccessMsg("newStatus", u.getStatus().getName());
+    }
+
+    public String signIn(SignInData data) {
+
+        try {
+
+            if(!DEV_MODE) {
+
+                for (int i = 0; i < cachedToken.size(); i++) {
+                    if (cachedToken.get(i).equals(data)) {
+                        if (cachedToken.get(i).checkExpiration())
+                            return (String) cachedToken.get(i).getValue();
+
+                        cachedToken.remove(i);
+                        break;
+                    }
+                }
+            }
+
+            Optional<User> user = userRepository.findByNID(data.getNid());
+
+            if(user.isEmpty() || user.get().getRemoveAt() != null)
+                return generateErr("نام کاربری و یا رمزعبور اشتباه است.");
+
+            if (!DEV_MODE) {
+                if (!passwordEncoder.matches(data.getPassword(), user.get().getPassword()))
+                    return generateErr("نام کاربری و یا رمزعبور اشتباه است.");
+            }
+
+            if (!user.get().getStatus().equals(AccountStatus.ACTIVE))
+                return generateErr("اکانت شما غیرفعال می باشد.");
+
+            String token = jwtTokenProvider.createToken(data.getNid(), user.get().getAccesses());
+
+            if(!DEV_MODE)
+                cachedToken.add(new Cache(TOKEN_EXPIRATION, token, data));
+
+            return Utility.generateSuccessMsg("data", token);
+
+        } catch (AuthenticationException x) {
+            return generateErr("نام کاربری و یا رمزعبور اشتباه است.");
+        }
+    }
+
+    public void logout(String token) {
+
+        for (int i = 0; i < cachedToken.size(); i++) {
+            if (cachedToken.get(i).getValue().equals(token)) {
+                cachedToken.remove(i);
+                return;
+            }
+        }
+
+        jwtTokenProvider.removeTokenFromCache(token.replace("Bearer ", ""));
+
+    }
+
+    public User whoAmI(HttpServletRequest req) {
+        try {
+
+            Optional<User> u = userRepository.findByNID(jwtTokenProvider.getUsername(jwtTokenProvider.resolveToken(req)));
+
+            if(u.isEmpty() || u.get().getRemoveAt() != null)
+                return null;
+
+            return u.get();
+        }
+        catch (Exception x) {
+            return null;
+        }
+    }
 
 }

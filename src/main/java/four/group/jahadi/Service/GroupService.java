@@ -47,7 +47,7 @@ public class GroupService extends AbstractService<Group, GroupData> {
     }
 
     @Override
-    String update(ObjectId id, GroupData dto) {
+    String update(ObjectId id, GroupData dto, Object ... params) {
         return null;
     }
 
@@ -56,7 +56,7 @@ public class GroupService extends AbstractService<Group, GroupData> {
         return drug.orElse(null);
     }
 
-    public String store(GroupData data) {
+    public String store(GroupData data, Object ... params) {
 
         if(userRepository.countActiveBy_id(data.getOwner()) == 0)
             return generateErr("مسئول موردنظر وجود ندارد");

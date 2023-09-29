@@ -22,8 +22,8 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
     public class ValidateToken {
 
-        private String token;
-        private long issue;
+        String token;
+        long issue;
 
         ValidateToken(String token) {
             this.token = token;
@@ -103,7 +103,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
         try {
             if (token != null && jwtTokenProvider.validateAuthToken(token)) {
-                Authentication auth = jwtTokenProvider.getAuthentication(token, false);
+                Authentication auth = jwtTokenProvider.getAuthentication(token);
                 SecurityContextHolder.getContext().setAuthentication(auth);
                 validateTokens.add(new ValidateToken(token));
                 return true;
@@ -114,27 +114,5 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         }
 
         return false;
-    }
-
-    public String isSocketAuth(HttpServletRequest request) {
-
-        String token = jwtTokenProvider.resolveToken(request);
-
-        if(token != null) {
-
-            try {
-                if (jwtTokenProvider.validateSocketToken(token)) {
-                    Authentication auth = jwtTokenProvider.getAuthentication(token, true);
-                    SecurityContextHolder.getContext().setAuthentication(auth);
-                    return token;
-                }
-            } catch (CustomException ex) {
-                SecurityContextHolder.clearContext();
-                return null;
-            }
-
-        }
-
-        return null;
     }
 }

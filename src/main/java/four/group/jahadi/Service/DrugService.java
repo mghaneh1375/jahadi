@@ -47,13 +47,13 @@ public class DrugService extends AbstractService<Drug, DrugData> {
     }
 
     @Override
-    public String store(DrugData data) {
+    public String store(DrugData data, Object ... params) {
         Drug drug = drugRepository.insert(populateEntity(null, data));
         return generateSuccessMsg("id", drug.get_id());
     }
 
     @Override
-    public String update(ObjectId id, DrugData drugData) {
+    public String update(ObjectId id, DrugData drugData, Object ... params) {
 
         Optional<Drug> module = drugRepository.findById(id);
 

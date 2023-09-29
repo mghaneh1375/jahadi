@@ -1,9 +1,6 @@
 package four.group.jahadi.Models;
 
-import four.group.jahadi.Enums.Access;
-import four.group.jahadi.Enums.AccountStatus;
-import four.group.jahadi.Enums.Color;
-import four.group.jahadi.Enums.Sex;
+import four.group.jahadi.Enums.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,9 +9,7 @@ import org.bson.types.ObjectId;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
-import org.springframework.data.mongodb.core.mapping.MongoId;
 
-import javax.persistence.Id;
 import java.io.Serializable;
 import java.util.List;
 
@@ -26,25 +21,66 @@ import java.util.List;
 @Document(collection = "user")
 public class User extends Model implements Serializable {
 
-    @Field("first_name")
-    private String firstName;
-
-    @Field("last_name")
-    private String lastName;
+    private String name;
 
     @JsonIgnore
     private String password;
 
+
+    @Field("father_name")
+    private String fatherName;
+
+    @Field("birth_day")
+    private String birthDay;
+
+    @Field("university_year")
+    private Integer universityYear;
+
+    private String field;
+    private String university;
+
+    @Field("NID")
+    private String nid;
+
+    private String phone;
+    private Sex sex;
+    private String abilities;
+    private String diseases;
+    private String allergies;
+
+    @Field("blood_type")
+    private BloodType bloodType;
+
+    @Field("nearby_name")
+    private String nearbyName;
+
+    @Field("nearby_phone")
+    private String nearbyPhone;
+
     private Color color;
     private String pic;
-    private Sex sex;
-    private String NID;
-    private String phone;
-    private String educationalField;
-    private String specification;
-    private String birthDay;
+
     private List<Access> accesses;
     private List<String> notifs;
-    private ObjectId groupId;
     private AccountStatus status;
+
+
+    @Field("group_name")
+    private String groupName;
+
+    @Field("organization_dependency")
+    private String organizationDependency;
+
+    private String trips;
+    private Integer members;
+
+    @Field("familiar_with")
+    private String familiarWith;
+
+    @Field("remove_at")
+    private Long removeAt;
+
+
+    @Field("group_id")
+    private ObjectId groupId;
 }

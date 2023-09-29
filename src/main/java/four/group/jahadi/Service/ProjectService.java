@@ -107,7 +107,7 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
     }
 
     @Override
-    String update(ObjectId id, ProjectData dto) {
+    String update(ObjectId id, ProjectData dto, Object ... params) {
         return null;
     }
 
@@ -116,7 +116,7 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
         return project.orElse(null);
     }
 
-    public String store(ProjectData data) {
+    public String store(ProjectData data, Object ... params) {
 
         if(groupRepository.countBy_idIn(data.getGroupIds()) != data.getGroupIds().size())
             return generateErr("آی دی گروه ها نامعتبر است");

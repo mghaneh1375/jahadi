@@ -1,15 +1,28 @@
 package four.group.jahadi.Utility;
 
+import four.group.jahadi.Kavenegar.KavenegarApi;
+import four.group.jahadi.Kavenegar.excepctions.ApiException;
+import four.group.jahadi.Kavenegar.excepctions.HttpException;
+import four.group.jahadi.Kavenegar.models.SendResult;
+import four.group.jahadi.Validator.PhoneValidator;
 import org.bson.Document;
 import org.json.JSONObject;
 
+import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Random;
 import java.util.regex.Pattern;
 
+import static four.group.jahadi.Utility.StaticValues.DEV_MODE;
+
 public class Utility {
+
+    private static final String AB = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    private static SecureRandom rnd = new SecureRandom();
+    private static Random random = new Random();
 
     public static String convertDateToJalali(Date date) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
@@ -154,4 +167,67 @@ public class Utility {
             System.out.println(x.getStackTrace()[i]);
 
     }
+
+    public static int randInt() {
+
+        if (DEV_MODE)
+            return 111111;
+
+        int r = 0;
+        for (int i = 0; i < 6; i++) {
+            int x = random.nextInt(10);
+
+            while (x == 0)
+                x = random.nextInt(10);
+
+            r += x * Math.pow(10, i);
+        }
+
+        return r;
+    }
+
+    public static String randomString(int len) {
+        StringBuilder sb = new StringBuilder(len);
+        for (int i = 0; i < len; i++)
+            sb.append(AB.charAt(rnd.nextInt(AB.length())));
+        return sb.toString();
+    }
+
+    public static boolean sendSMS(String receptor, String token,
+                                  String token2, String token3,
+                                  String template
+    ) {
+
+        if(DEV_MODE)
+            return true;
+
+        receptor = convertPersianDigits(receptor);
+
+        if(!PhoneValidator.isValid(receptor)) {
+            System.out.println("not valid phone num");
+            return false;
+        }
+
+        try {
+            KavenegarApi api = new KavenegarApi("79535344745641433164454E622F6F2B436F7741744B637442576673554B636A");
+            SendResult Result = api.verifyLookup(receptor, token, token2, token3, template);
+
+            if(Result.getStatus() == 6 ||
+                    Result.getStatus() == 11 ||
+                    Result.getStatus() == 13 ||
+                    Result.getStatus() == 14 ||
+                    Result.getStatus() == 100
+            )
+                return false;
+
+            return true;
+        } catch (HttpException ex) {
+            System.out.print("HttpException  : " + ex.getMessage());
+        } catch (ApiException ex) {
+            System.out.print("ApiException : " + ex.getMessage());
+        }
+
+        return false;
+    }
+
 }

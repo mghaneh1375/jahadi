@@ -1,73 +1,40 @@
 package four.group.jahadi.Routes;
 
+import four.group.jahadi.Enums.AccountStatus;
+import four.group.jahadi.Exception.NotActivateAccountException;
+import four.group.jahadi.Exception.UnAuthException;
+import four.group.jahadi.Models.User;
 import four.group.jahadi.Security.JwtTokenFilter;
-import org.bson.Document;
-import org.bson.types.ObjectId;
+import four.group.jahadi.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletRequest;
 
 public class Router {
 
-//    private final static JwtTokenFilter JWT_TOKEN_FILTER = new JwtTokenFilter();
-//    @Autowired
-//    private UserService userService;
-//
-//    protected Document getUser(HttpServletRequest request)
-//            throws NotActivateAccountException, NotCompleteAccountException, UnAuthException {
-//
-//        boolean auth = new JwtTokenFilter().isAuth(request);
-//
-//        if (auth) {
-//            Document u = userService.whoAmI(request);
-//            if (u != null) {
-//                if (!u.getString("status").equals("active")) {
-//                    JwtTokenFilter.removeTokenFromCache(request.getHeader("Authorization").replace("Bearer ", ""));
-//                    throw new NotActivateAccountException("Account not activated");
-//                }
-//
-//                if (Authorization.isPureStudent(u.getList("accesses", String.class))) {
-////                    if (!u.containsKey("pic"))
-////                        throw new NotCompleteAccountException("Account not complete");
-//                }
-//
-//                return u;
-//            }
-//        }
-//
-//        throw new UnAuthException("Token is not valid");
-//    }
-//
-//    protected Document getStudentUser(HttpServletRequest request)
-//            throws NotActivateAccountException, NotCompleteAccountException,
-//            UnAuthException, NotAccessException {
-//
-//        boolean auth = new JwtTokenFilter().isAuth(request);
-//
-//        if (auth) {
-//            Document u = userService.whoAmI(request);
-//            if (u != null) {
-//
-//                if (!u.getString("status").equals("active")) {
-//                    JwtTokenFilter.removeTokenFromCache(request.getHeader("Authorization").replace("Bearer ", ""));
-//                    throw new NotActivateAccountException("Account not activated");
-//                }
-//
-//                if (!Authorization.isStudent(u.getList("accesses", String.class)))
-//                    throw new NotAccessException("Access denied");
-//
-//                if (
-//                        (!u.containsKey("NID") && !u.containsKey("passport_no")) ||
-//                                !u.containsKey("pic")
-//                )
-//                    throw new NotCompleteAccountException("Account not complete");
-//
-//                return u;
-//            }
-//        }
-//
-//        throw new UnAuthException("Token is not valid");
-//    }
+    @Autowired
+    private UserService userService;
+
+    protected User getUser(HttpServletRequest request)
+            throws NotActivateAccountException, UnAuthException {
+
+        boolean auth = new JwtTokenFilter().isAuth(request);
+
+        if (auth) {
+            User u = userService.whoAmI(request);
+
+            if (u != null) {
+                if (!u.getStatus().equals(AccountStatus.ACTIVE)) {
+                    JwtTokenFilter.removeTokenFromCache(request.getHeader("Authorization").replace("Bearer ", ""));
+                    throw new NotActivateAccountException("Account not activated");
+                }
+
+                return u;
+            }
+        }
+
+        throw new UnAuthException("Token is not valid");
+    }
 //
 //    protected void getAdminPrivilegeUserVoid(HttpServletRequest request)
 //            throws NotActivateAccountException, UnAuthException, NotAccessException {

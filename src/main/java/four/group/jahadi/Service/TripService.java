@@ -17,12 +17,12 @@ public class TripService extends AbstractService<Trip, TripData> {
     }
 
     @Override
-    String update(ObjectId id, TripData dto) {
+    String update(ObjectId id, TripData dto, Object ... params) {
         return null;
     }
 
     @Override
-    String store(TripData dto) {
+    String store(TripData dto, Object ... params) {
         return null;
     }
 

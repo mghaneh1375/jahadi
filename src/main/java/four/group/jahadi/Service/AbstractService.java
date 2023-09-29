@@ -88,9 +88,9 @@ public abstract class AbstractService <T, D> {
 
     public abstract String list(Object ... filters);
 
-    abstract String update(ObjectId id, D dto);
+    abstract String update(ObjectId id, D dto, Object ... params);
 
-    abstract String store(D dto);
+    abstract String store(D dto, Object ... params);
 
     abstract T findById(ObjectId id);
 

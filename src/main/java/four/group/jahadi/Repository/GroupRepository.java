@@ -18,6 +18,12 @@ public interface GroupRepository extends MongoRepository<Group, ObjectId>, Filte
     @Query(value = "{_id: {$in : ?0}}", count = true)
     Integer countBy_idIn(List<ObjectId> ids);
 
+    @Query(value = "{code: ?0}", count = true)
+    Integer countByCode(Integer code);
+
+    @Query(value = "{code: ?0}", fields = "{_id: 1}")
+    Group findByCode(Integer code);
+
     @Query(value = "{_id: {$in : ?0}}", fields = "{ 'name': 1, 'color': 1 }")
     List<GroupDigest> findBy_idIn(List<ObjectId> ids);
 
