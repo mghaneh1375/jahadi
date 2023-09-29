@@ -1,17 +1,13 @@
 package four.group.jahadi.Service;
 
 import four.group.jahadi.DTO.DrugData;
+import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Models.Drug;
-import four.group.jahadi.Models.PaginatedResponse;
 import four.group.jahadi.Repository.DrugRepository;
-import four.group.jahadi.Repository.FilteringFactory;
 import org.bson.types.ObjectId;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,7 +24,7 @@ public class DrugService extends AbstractService<Drug, DrugData> {
     private DrugRepository drugRepository;
 
     @Override
-    public String list(Object ... filters) {
+    public ResponseEntity<List<Drug>> list(Object ... filters) {
 
 //        Pageable pageable = PageRequest.of(0, 10);
 //
@@ -41,9 +37,11 @@ public class DrugService extends AbstractService<Drug, DrugData> {
     }
 
     @Override
-    public Drug findById(ObjectId id) {
-        Optional<Drug> drug = drugRepository.findById(id);
-        return drug.orElse(null);
+    public ResponseEntity<Drug> findById(ObjectId id, Object ... params) {
+        return new ResponseEntity<>(
+                drugRepository.findById(id).orElseThrow(InvalidIdException::new),
+                HttpStatus.OK
+        );
     }
 
     @Override

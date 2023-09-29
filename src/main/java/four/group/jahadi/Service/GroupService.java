@@ -1,25 +1,18 @@
 package four.group.jahadi.Service;
 
 import four.group.jahadi.DTO.GroupData;
-import four.group.jahadi.DTO.UserData;
+import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Models.Group;
-import four.group.jahadi.Models.PaginatedResponse;
 import four.group.jahadi.Models.User;
-import four.group.jahadi.Repository.FilteringFactory;
 import four.group.jahadi.Repository.GroupRepository;
 import four.group.jahadi.Repository.UserRepository;
 import org.bson.types.ObjectId;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 import static four.group.jahadi.Utility.Utility.generateErr;
 import static four.group.jahadi.Utility.Utility.generateSuccessMsg;
@@ -34,16 +27,16 @@ public class GroupService extends AbstractService<Group, GroupData> {
     private UserRepository userRepository;
 
     @Override
-    public String list(Object ... filters) {
+    public ResponseEntity<List<Group>> list(Object ... filters) {
 
         List<Group> groups = filters[0] == null ? groupRepository.findAll() :
                 groupRepository.findLikeName(filters[0].toString());
 
         List<ObjectId> userIds = groups.stream().map(Group::getOwner).toList();
-
         List<User> users = userRepository.findBy_idIn(userIds);
 
-        return generateSuccessMsg("data", convertObjectsToJSONList(groups, users));
+//        return generateSuccessMsg("data", convertObjectsToJSONList(groups, users));
+        return null;
     }
 
     @Override
@@ -51,9 +44,11 @@ public class GroupService extends AbstractService<Group, GroupData> {
         return null;
     }
 
-    public Group findById(ObjectId id) {
-        Optional<Group> drug = groupRepository.findById(id);
-        return drug.orElse(null);
+    public ResponseEntity<Group> findById(ObjectId id, Object ... params) {
+        return new ResponseEntity<>(
+                groupRepository.findById(id).orElseThrow(InvalidIdException::new),
+                HttpStatus.OK
+        );
     }
 
     public String store(GroupData data, Object ... params) {
@@ -69,7 +64,7 @@ public class GroupService extends AbstractService<Group, GroupData> {
         catch (Exception x) {
             return generateErr("نام وارد شده تکراری است");
         }
-        return generateSuccessMsg("id", group.get_id());
+        return generateSuccessMsg("id", group.getId());
     }
 
 //    public String update(ObjectId id, ModuleData moduleData) {

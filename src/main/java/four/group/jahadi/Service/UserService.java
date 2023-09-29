@@ -3,6 +3,10 @@ package four.group.jahadi.Service;
 import four.group.jahadi.DTO.SignUp.*;
 import four.group.jahadi.Enums.Access;
 import four.group.jahadi.Enums.AccountStatus;
+import four.group.jahadi.Enums.Sex;
+import four.group.jahadi.Exception.BadRequestException;
+import four.group.jahadi.Exception.InvalidCodeException;
+import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Models.Activation;
 import four.group.jahadi.Models.Group;
 import four.group.jahadi.Models.User;
@@ -18,9 +22,12 @@ import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
@@ -56,9 +63,18 @@ public class UserService extends AbstractService<User, SignUpData> {
     }
 
     @Override
-    public String list(Object... filters) {
-        return generateSuccessMsg("data", convertObjectsToJSONList(userRepository.findAll()));
-
+    public ResponseEntity<List<User>> list(Object... filters) {
+        return new ResponseEntity<>(
+                userRepository.findAll(
+                        (AccountStatus) filters[0], (Access) filters[1],
+                        filters[2] != null ? filters[2].toString() : null,
+                        filters[3] != null ? filters[3].toString() : null,
+                        filters[4] != null ? filters[4].toString() : null,
+                        (Sex) filters[5],
+                        filters[6] != null ? filters[6].toString() : null
+                ),
+                HttpStatus.OK
+        );
     }
 
     @Override
@@ -95,9 +111,7 @@ public class UserService extends AbstractService<User, SignUpData> {
             return generateErr("کد ملی وارد شده در سیستم موجود است");
 
         if(dto.getGroupCode() != null) {
-            Group group = groupRepository.findByCode(dto.getGroupCode());
-            if (group == null)
-                return generateErr("کد گروه موردنظر در سیستم وجود ندارد");
+            groupRepository.findByCode(dto.getGroupCode()).orElseThrow(InvalidCodeException::new);
         }
 
 //        PairValue existTokenP = existSMS(jsonObject.getString("username"));
@@ -109,7 +123,7 @@ public class UserService extends AbstractService<User, SignUpData> {
 
         User user = userRepository.insert(populateEntity(null, dto));
         // todo : send activation code
-        return generateSuccessMsg("id", user.get_id());
+        return generateSuccessMsg("id", user.getId());
     }
 
 
@@ -130,7 +144,7 @@ public class UserService extends AbstractService<User, SignUpData> {
 
         User user = userRepository.insert(populateEntity(null, dto));
         // todo : send activation code
-        return generateSuccessMsg("id", user.get_id());
+        return generateSuccessMsg("id", user.getId());
     }
 
     public String forgetPass(String NID) {
@@ -229,8 +243,8 @@ public class UserService extends AbstractService<User, SignUpData> {
         if(isNew) {
 
             if(userData.getGroupCode() != null) {
-                Group group = groupRepository.findByCode(userData.getGroupCode());
-                user.setGroupId(group.get_id());
+                Group group = groupRepository.findByCode(userData.getGroupCode()).orElseThrow(InvalidCodeException::new);
+                user.setGroupId(group.getId());
             }
 
             user.setPassword(getEncPass(userData.getPassword()));
@@ -281,8 +295,13 @@ public class UserService extends AbstractService<User, SignUpData> {
     }
 
     @Override
-    User findById(ObjectId id) {
-        return null;
+    public ResponseEntity<User> findById(ObjectId id, Object ... params) {
+
+        return new ResponseEntity<>(
+                userRepository.findById(id).orElseThrow(InvalidIdException::new),
+                HttpStatus.OK
+        );
+
     }
 
     public String checkCode(CheckCodeRequest checkCodeRequest) {
@@ -388,7 +407,7 @@ public class UserService extends AbstractService<User, SignUpData> {
         return Utility.generateSuccessMsg("newStatus", u.getStatus().getName());
     }
 
-    public String signIn(SignInData data) {
+    public ResponseEntity<String> signIn(SignInData data) {
 
         try {
 
@@ -397,7 +416,10 @@ public class UserService extends AbstractService<User, SignUpData> {
                 for (int i = 0; i < cachedToken.size(); i++) {
                     if (cachedToken.get(i).equals(data)) {
                         if (cachedToken.get(i).checkExpiration())
-                            return (String) cachedToken.get(i).getValue();
+                            return new ResponseEntity<>(
+                                    (String) cachedToken.get(i).getValue(),
+                                    HttpStatus.OK
+                            );
 
                         cachedToken.remove(i);
                         break;
@@ -408,25 +430,39 @@ public class UserService extends AbstractService<User, SignUpData> {
             Optional<User> user = userRepository.findByNID(data.getNid());
 
             if(user.isEmpty() || user.get().getRemoveAt() != null)
-                return generateErr("نام کاربری و یا رمزعبور اشتباه است.");
+                return new ResponseEntity<>(
+                        "نام کاربری و یا رمزعبور اشتباه است.",
+                        HttpStatus.BAD_REQUEST
+                );
 
             if (!DEV_MODE) {
                 if (!passwordEncoder.matches(data.getPassword(), user.get().getPassword()))
-                    return generateErr("نام کاربری و یا رمزعبور اشتباه است.");
+                    return new ResponseEntity<>(
+                            "نام کاربری و یا رمزعبور اشتباه است.",
+                            HttpStatus.BAD_REQUEST
+                    );
             }
 
             if (!user.get().getStatus().equals(AccountStatus.ACTIVE))
-                return generateErr("اکانت شما غیرفعال می باشد.");
+                return new ResponseEntity<>(
+                        "اکانت شما غیرفعال می باشد.",
+                        HttpStatus.BAD_REQUEST
+                );
 
             String token = jwtTokenProvider.createToken(data.getNid(), user.get().getAccesses());
 
             if(!DEV_MODE)
                 cachedToken.add(new Cache(TOKEN_EXPIRATION, token, data));
 
-            return Utility.generateSuccessMsg("data", token);
+            return new ResponseEntity<>(
+                    token, HttpStatus.OK
+            );
 
         } catch (AuthenticationException x) {
-            return generateErr("نام کاربری و یا رمزعبور اشتباه است.");
+            return new ResponseEntity<>(
+                    "نام کاربری و یا رمزعبور اشتباه است.",
+                    HttpStatus.BAD_REQUEST
+            );
         }
     }
 
@@ -458,4 +494,40 @@ public class UserService extends AbstractService<User, SignUpData> {
         }
     }
 
+    public void changeStatus(ObjectId userId, AccountStatus status) {
+        User user = userRepository.findById(userId).orElseThrow(InvalidIdException::new);
+        user.setStatus(status);
+        userRepository.save(user);
+    }
+
+    public void changePassword(ObjectId userId, PasswordData passwordData) {
+        User user = userRepository.findById(userId).orElseThrow(InvalidIdException::new);
+        user.setPassword(passwordEncoder.encode(passwordData.getPassword()));
+        userRepository.save(user);
+    }
+
+    public void setPic(ObjectId id, MultipartFile file) {
+
+        if(file == null)
+            throw new BadRequestException();
+
+        User user = userRepository.findById(id).orElseThrow(InvalidIdException::new);
+
+        String picPath = "ad";
+
+        user.setPic(picPath);
+        userRepository.save(user);
+
+    }
+
+    public void setGroup(ObjectId id, Integer code) {
+
+        Group group = groupRepository.findByCode(code).orElseThrow(InvalidCodeException::new);
+
+        User user = userRepository.findById(id).orElseThrow(InvalidIdException::new);
+        user.setGroupId(group.getId());
+        user.setGroupName(group.getName());
+        userRepository.save(user);
+
+    }
 }

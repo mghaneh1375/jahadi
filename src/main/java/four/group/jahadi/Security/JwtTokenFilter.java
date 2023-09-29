@@ -2,8 +2,10 @@ package four.group.jahadi.Security;
 
 import four.group.jahadi.Exception.CustomException;
 import four.group.jahadi.Utility.PairValue;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -18,6 +20,7 @@ import static four.group.jahadi.Utility.StaticValues.TOKEN_EXPIRATION;
 
 
 // We should use OncePerRequestFilter since we are doing a database call, there is no point in doing this more than once
+@Component
 public class JwtTokenFilter extends OncePerRequestFilter {
 
     public class ValidateToken {
@@ -42,6 +45,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         }
     }
 
+    @Autowired
     private JwtTokenProvider jwtTokenProvider;
     public static final ArrayList<ValidateToken> validateTokens = new ArrayList<>();
     public static final ArrayList<PairValue> blackListTokens = new ArrayList<>();
@@ -55,14 +59,6 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                 return;
             }
         }
-    }
-
-    public JwtTokenFilter(JwtTokenProvider jwtTokenProvider) {
-        this.jwtTokenProvider = jwtTokenProvider;
-    }
-
-    public JwtTokenFilter() {
-        jwtTokenProvider = new JwtTokenProvider();
     }
 
     @Override

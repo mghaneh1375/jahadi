@@ -24,7 +24,8 @@ public class GroupAPIRoutes {
     @GetMapping(value = "list")
     @ResponseBody
     public String list(@RequestParam(required = false, value = "name") String name) {
-        return groupService.list(name);
+//        return groupService.list(name);
+        return null;
     }
 
     @PostMapping(value = "store")

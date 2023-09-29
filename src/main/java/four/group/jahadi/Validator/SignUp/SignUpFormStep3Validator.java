@@ -21,11 +21,13 @@ public class SignUpFormStep3Validator implements ConstraintValidator<ValidatedSi
         boolean isErrored = false;
         JSONObject errs = new JSONObject();
 
-        if(value.getNearbyName() == null || value.getGroupCode() == null ||
-                value.getNearbyPhone() == null
-        ) {
+        if(value.getNearbyName() == null || value.getNearbyPhone() == null) {
             errs.put("data", "لطفا اطلاعات تمامی فیلدها را وارد نمایید");
-            isErrored = true;
+
+            context.disableDefaultConstraintViolation();
+            context.buildConstraintViolationWithTemplate(errs.toString()).addConstraintViolation();
+
+            return false;
         }
 
         if(value.getNearbyName().length() < 3) {
@@ -33,7 +35,7 @@ public class SignUpFormStep3Validator implements ConstraintValidator<ValidatedSi
             isErrored = true;
         }
 
-        if(value.getGroupCode().toString().length() != 6) {
+        if(value.getGroupCode() != null && value.getGroupCode().toString().length() != 6) {
             errs.put("groupCode", "کد گروه نامعتبر است");
             isErrored = true;
         }

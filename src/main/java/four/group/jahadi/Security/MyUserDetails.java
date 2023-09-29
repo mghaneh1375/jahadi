@@ -18,7 +18,7 @@ public class MyUserDetails implements UserDetailsService {
     private static HashMap<String, User> cached = new HashMap<>();
 
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

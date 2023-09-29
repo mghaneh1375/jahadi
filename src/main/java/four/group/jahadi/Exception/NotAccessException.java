@@ -1,18 +1,14 @@
 package four.group.jahadi.Exception;
 
-public class NotAccessException extends Exception {
+public class NotAccessException extends RuntimeException {
 
     private static final long serialVersionUID = 58L;
 
-    private final String message;
-
-    public NotAccessException(String message) {
-        this.message = message;
-    }
+    public NotAccessException() {}
 
     @Override
     public String getMessage() {
-        return message;
+        return "شما اجازه دسترسی به این امکان را ندارید";
     }
 
 }

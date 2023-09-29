@@ -32,7 +32,8 @@ public class ProjectAPIRoutes {
                        @RequestParam(value = "justActive", required = false) Boolean justActive,
                        @RequestParam(value = "justArchive", required = false) Boolean justArchive
     ) {
-        return projectService.list(name, justActive, justArchive);
+//        return projectService.list(name, justActive, justArchive);
+        return null;
     }
 
 

@@ -1,13 +1,18 @@
 package four.group.jahadi.Service;
 
 import four.group.jahadi.DTO.NoteData;
+import four.group.jahadi.Exception.InvalidIdException;
+import four.group.jahadi.Exception.NotAccessException;
 import four.group.jahadi.Models.Note;
 import four.group.jahadi.Repository.NoteRepository;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import java.util.Date;
+import java.util.List;
 
 import static four.group.jahadi.Utility.StaticValues.*;
 import static four.group.jahadi.Utility.Utility.generateSuccessMsg;
@@ -19,14 +24,25 @@ public class NoteService extends AbstractService<Note, NoteData> {
     NoteRepository noteRepository;
 
     @Override
-    public String list(Object... filters) {
-        return null;
+    public ResponseEntity<List<Note>> list(Object... filters) {
+        return new ResponseEntity<>(
+                noteRepository.findByUserId((ObjectId) filters[0]),
+                HttpStatus.OK
+        );
     }
 
     @Override
     public String update(ObjectId id, NoteData dto, Object ... params) {
 
+        Note note = noteRepository.findById(id).orElseThrow(InvalidIdException::new);
 
+        if(!note.getUserId().equals(params[0]))
+            throw new NotAccessException();
+
+        note.setUpdatedAt(new Date());
+        note.setTitle(dto.getTitle());
+        note.setDescription(dto.getDescription());
+        noteRepository.save(note);
 
         return JSON_OK;
     }
@@ -40,28 +56,32 @@ public class NoteService extends AbstractService<Note, NoteData> {
         note.setDescription(dto.getDescription());
         note.setTitle(dto.getTitle());
         note.setUserId(userId);
+        note.setUpdatedAt(new Date());
 
         note = noteRepository.insert(note);
 
-        return generateSuccessMsg("data", note.get_id().toString());
+        return generateSuccessMsg("data", note.getId().toString());
     }
 
     @Override
-    Note findById(ObjectId id) {
-        return null;
+    public ResponseEntity<Note> findById(ObjectId id, Object ... params) {
+
+        Note note = noteRepository.findById(id).orElseThrow(InvalidIdException::new);
+
+        if(!note.getUserId().equals(params[0]))
+            throw new NotAccessException();
+
+        return new ResponseEntity<>(note, HttpStatus.OK);
     }
 
     public String remove(ObjectId id, ObjectId userId) {
 
-        Optional<Note> note = noteRepository.findById(id);
+        Note note = noteRepository.findById(id).orElseThrow(InvalidIdException::new);
 
-        if(note.isEmpty())
-            return JSON_NOT_VALID_ID;
-
-        if(!note.get().get_id().equals(userId))
+        if(!note.getUserId().equals(userId))
             return JSON_NOT_ACCESS;
 
-        noteRepository.delete(note.get());
+        noteRepository.delete(note);
         return JSON_OK;
     }
 }

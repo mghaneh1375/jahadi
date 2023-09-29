@@ -1,17 +1,15 @@
 package four.group.jahadi.Models;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.bson.types.ObjectId;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
-import org.springframework.data.mongodb.core.mapping.MongoId;
 
-import javax.persistence.Id;
 import java.util.Date;
 
 @Getter
@@ -19,25 +17,18 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Document(collection = "note")
-public class Note {
-
-    @Id
-    @MongoId
-    @Field("_id")
-    private ObjectId _id;
-
-    @Field("created_at")
-    @CreatedDate
-    private Date createdAt;
+public class Note extends Model {
 
     @Field("updated_at")
     @UpdateTimestamp
+    @JsonSerialize(using = DateSerialization.class)
     private Date updatedAt;
 
     private String title;
     private String description;
 
     @Field("user_id")
+    @JsonSerialize(using = ObjectIdSerialization.class)
     private ObjectId userId;
 
 }

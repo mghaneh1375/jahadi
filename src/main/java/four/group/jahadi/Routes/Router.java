@@ -15,10 +15,13 @@ public class Router {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private JwtTokenFilter jwtTokenFilter;
+
     protected User getUser(HttpServletRequest request)
             throws NotActivateAccountException, UnAuthException {
 
-        boolean auth = new JwtTokenFilter().isAuth(request);
+        boolean auth = jwtTokenFilter.isAuth(request);
 
         if (auth) {
             User u = userService.whoAmI(request);

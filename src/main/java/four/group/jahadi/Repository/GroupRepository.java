@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface GroupRepository extends MongoRepository<Group, ObjectId>, FilterableRepository<Group> {
@@ -22,7 +23,7 @@ public interface GroupRepository extends MongoRepository<Group, ObjectId>, Filte
     Integer countByCode(Integer code);
 
     @Query(value = "{code: ?0}", fields = "{_id: 1}")
-    Group findByCode(Integer code);
+    Optional<Group> findByCode(Integer code);
 
     @Query(value = "{_id: {$in : ?0}}", fields = "{ 'name': 1, 'color': 1 }")
     List<GroupDigest> findBy_idIn(List<ObjectId> ids);

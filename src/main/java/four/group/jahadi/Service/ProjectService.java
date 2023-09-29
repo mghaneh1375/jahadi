@@ -2,6 +2,7 @@ package four.group.jahadi.Service;
 
 import four.group.jahadi.DTO.Digest.GroupDigest;
 import four.group.jahadi.DTO.ProjectData;
+import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Models.Group;
 import four.group.jahadi.Models.Project;
 import four.group.jahadi.Repository.FilteringFactory;
@@ -13,12 +14,13 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.*;
 
-import static four.group.jahadi.Utility.StaticValues.JSON_NOT_VALID_PARAMS;
 import static four.group.jahadi.Utility.StaticValues.JSON_OK;
 import static four.group.jahadi.Utility.Utility.*;
 
@@ -36,7 +38,7 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
     // 2- justActives
     // 3- justArchives
     @Override
-    public String list(Object ... filters) {
+    public ResponseEntity<List<Project>> list(Object ... filters) {
 
         List<String> filtersList = new ArrayList<>();
 
@@ -52,7 +54,7 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
             filtersList.add("endAt|lt|" + today);
 
         if(filters.length > 3 && filters[3] != null) {
-            List<String> groupIds = groupRepository.findByUserId((ObjectId) filters[3]).stream().map(Group::get_id)
+            List<String> groupIds = groupRepository.findByUserId((ObjectId) filters[3]).stream().map(Group::getId)
                     .map(ObjectId::toString).toList();
             filtersList.add("groupIds|in|" + String.join(";", groupIds));
         }
@@ -75,7 +77,7 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
                 JSONObject jsonObject = new JSONObject(new ObjectMapper().writeValueAsString(x));
 
                 jsonObject.remove("_id");
-                jsonObject.put("id", x.get_id().toString());
+                jsonObject.put("id", x.getId().toString());
                 jsonObject.put("createdAt", convertDateToJalali(x.getCreatedAt()));
                 jsonObject.put("startAt", convertIntToDate(x.getStartAt()));
                 jsonObject.put("endAt", convertIntToDate(x.getEndAt()));
@@ -90,15 +92,13 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
             } catch (IOException ignore) {}
         });
 
-        return generateSuccessMsg("data", jsonArray);
+//        return generateSuccessMsg("data", jsonArray);
+        return null;
     }
 
     public String setProgress(ObjectId id, int progress) {
 
-        Project project = findById(id);
-
-        if(project == null)
-            return JSON_NOT_VALID_PARAMS;
+        Project project = projectRepository.findById(id).orElseThrow(InvalidIdException::new);
 
         project.setProgress(progress);
         projectRepository.save(project);
@@ -111,9 +111,11 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
         return null;
     }
 
-    public Project findById(ObjectId id) {
-        Optional<Project> project = projectRepository.findById(id);
-        return project.orElse(null);
+    public ResponseEntity<Project> findById(ObjectId id, Object ... params) {
+        return new ResponseEntity<>(
+                projectRepository.findById(id).orElseThrow(InvalidIdException::new),
+                HttpStatus.OK
+        );
     }
 
     public String store(ProjectData data, Object ... params) {
@@ -135,7 +137,7 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
         catch (Exception x) {
             return generateErr("نام وارد شده تکراری است");
         }
-        return generateSuccessMsg("id", project.get_id());
+        return generateSuccessMsg("id", project.getId());
     }
 
     @Override

@@ -1,5 +1,6 @@
 package four.group.jahadi.Models;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,10 +21,11 @@ public abstract class Model implements Serializable {
     @Id
     @MongoId
     @Field("_id")
-    @JsonIgnore
-    private ObjectId _id;
+    @JsonSerialize(using = ObjectIdSerialization.class)
+    private ObjectId id;
 
     @Field("created_at")
     @CreatedDate
+    @JsonSerialize(using = DateSerialization.class)
     private Date createdAt;
 }

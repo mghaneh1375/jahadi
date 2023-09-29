@@ -5,7 +5,7 @@ import four.group.jahadi.Exception.CustomException;
 import four.group.jahadi.Utility.PairValue;
 import io.jsonwebtoken.*;
 import org.bson.types.ObjectId;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -34,9 +34,8 @@ public class JwtTokenProvider {
      */
     final static private String secretKey = "{MIP0kK^PGU;l/{";
 
-    @Value("${security.jwt.token.expire-length:3600000}")
-
-    private static MyUserDetails myUserDetails = new MyUserDetails();
+    @Autowired
+    private MyUserDetails myUserDetails;
 
     private String getSharedKeyBytes() {
         return Base64.getEncoder().encodeToString(secretKey.getBytes());

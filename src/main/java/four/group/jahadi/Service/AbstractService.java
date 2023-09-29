@@ -15,6 +15,7 @@ import org.json.JSONObject;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
 
 import java.io.IOException;
 import java.util.List;
@@ -33,11 +34,11 @@ public abstract class AbstractService <T, D> {
             Model modelWithUser = (Model) x;
 
             JSONObject jsonObject = new JSONObject(x);
-            jsonObject.remove("_id");
-            jsonObject.put("id", modelWithUser.get_id().toString());
+//            jsonObject.remove("_id");
+//            jsonObject.put("id", modelWithUser.get_id().toString());
 
-            if(jsonObject.has("createdAt"))
-                jsonObject.put("createdAt", Utility.convertDateToJalali(modelWithUser.getCreatedAt()));
+//            if(jsonObject.has("createdAt"))
+//                jsonObject.put("createdAt", Utility.convertDateToJalali(modelWithUser.getCreatedAt()));
 
             jsonArray.put(jsonObject);
         });
@@ -67,12 +68,12 @@ public abstract class AbstractService <T, D> {
 
             JSONObject jsonObject = new JSONObject(x);
             jsonObject.remove("_id");
-            jsonObject.put("id", modelWithUser.get_id().toString());
+            jsonObject.put("id", modelWithUser.getId().toString());
 
             if(jsonObject.has("createdAt"))
                 jsonObject.put("createdAt", Utility.convertDateToJalali(modelWithUser.getCreatedAt()));
 
-            User user = users.stream().filter(itr -> modelWithUser.getOwner().equals(itr.get_id())).findFirst().orElse(null);
+            User user = users.stream().filter(itr -> modelWithUser.getOwner().equals(itr.getId())).findFirst().orElse(null);
             JSONObject userJSON = user == null ? null : new JSONObject(modelMapper.map(user, UserData.class));
 
             if(user != null)
@@ -86,13 +87,13 @@ public abstract class AbstractService <T, D> {
         return jsonArray;
     }
 
-    public abstract String list(Object ... filters);
+    public abstract ResponseEntity<List<T>> list(Object ... filters);
 
     abstract String update(ObjectId id, D dto, Object ... params);
 
     abstract String store(D dto, Object ... params);
 
-    abstract T findById(ObjectId id);
+    public abstract ResponseEntity<T> findById(ObjectId id, Object ...params);
 
     T populateEntity(T t, D d) {
         return (T) modelMapper.map(d, t.getClass());

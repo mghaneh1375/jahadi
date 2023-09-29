@@ -1,14 +1,22 @@
 package four.group.jahadi.Routes.API;
 
 import four.group.jahadi.DTO.SignUp.*;
+import four.group.jahadi.Exception.NotActivateAccountException;
+import four.group.jahadi.Exception.UnAuthException;
+import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Service.UserService;
 import four.group.jahadi.Validator.ObjectIdConstraint;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 
 import static four.group.jahadi.Utility.StaticValues.JSON_OK;
 import static four.group.jahadi.Utility.Utility.convertPersianDigits;
@@ -16,7 +24,7 @@ import static four.group.jahadi.Utility.Utility.convertPersianDigits;
 @RestController
 @RequestMapping(path = "/api/user")
 @Validated
-public class UserAPIRoutes {
+public class UserAPIRoutes extends Router {
 
     @Autowired
     UserService userService;
@@ -27,10 +35,18 @@ public class UserAPIRoutes {
 //        return userService.store(userData);
 //    }
 
-    @GetMapping(value = "list")
+    @PutMapping(value = "setPic")
     @ResponseBody
-    public String list() {
-        return userService.list();
+    public void setPic(HttpServletRequest request,
+                       @RequestBody MultipartFile file) throws UnAuthException, NotActivateAccountException {
+        userService.setPic(getUser(request).getId(), file);
+    }
+
+    @PutMapping(value = "setGroup/{code}")
+    @ResponseBody
+    public void setGroup(HttpServletRequest request,
+                         @PathVariable @Min(1111) @Max(999999) Integer code) throws UnAuthException, NotActivateAccountException {
+        userService.setGroup(getUser(request).getId(), code);
     }
 
     @PostMapping(value = "checkSignUpFormStep1")
@@ -57,15 +73,9 @@ public class UserAPIRoutes {
         return userService.checkGroup(data);
     }
 
-    @PutMapping(value = "/toggleStatus")
-    @ResponseBody
-    public String toggleStatus(@RequestBody @ObjectIdConstraint ObjectId id) {
-        return userService.toggleStatus(id);
-    }
-
     @PostMapping(value = "/signIn")
     @ResponseBody
-    public String signIn(@RequestBody @Valid SignInData signInData) {
+    public ResponseEntity<String> signIn(@RequestBody @Valid SignInData signInData) {
         return userService.signIn(signInData);
     }
 
