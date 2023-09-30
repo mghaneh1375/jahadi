@@ -13,7 +13,8 @@ public class SignInData {
     @Override
     public boolean equals(Object o) {
 
-        if(o instanceof SignInData sign) {
+        if(o instanceof SignInData) {
+            SignInData sign = (SignInData) o;
             return sign.getNid().equals(nid) &&
                     sign.getPassword().equals(password);
         }
