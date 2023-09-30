@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static four.group.jahadi.Utility.Utility.generateErr;
 import static four.group.jahadi.Utility.Utility.generateSuccessMsg;
@@ -32,7 +33,7 @@ public class GroupService extends AbstractService<Group, GroupData> {
         List<Group> groups = filters[0] == null ? groupRepository.findAll() :
                 groupRepository.findLikeName(filters[0].toString());
 
-        List<ObjectId> userIds = groups.stream().map(Group::getOwner).toList();
+        List<ObjectId> userIds = groups.stream().map(Group::getOwner).collect(Collectors.toList());
         List<User> users = userRepository.findBy_idIn(userIds);
 
 //        return generateSuccessMsg("data", convertObjectsToJSONList(groups, users));

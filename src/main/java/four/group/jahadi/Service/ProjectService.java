@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static four.group.jahadi.Utility.StaticValues.JSON_OK;
 import static four.group.jahadi.Utility.Utility.*;
@@ -55,7 +56,7 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
 
         if(filters.length > 3 && filters[3] != null) {
             List<String> groupIds = groupRepository.findByUserId((ObjectId) filters[3]).stream().map(Group::getId)
-                    .map(ObjectId::toString).toList();
+                    .map(ObjectId::toString).collect(Collectors.toList());
             filtersList.add("groupIds|in|" + String.join(";", groupIds));
         }
 
@@ -64,7 +65,7 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
         );
 
         List<ObjectId> groupIds = projects.stream().map(Project::getGroupIds)
-                .flatMap(Collection::stream).toList();
+                .flatMap(Collection::stream).collect(Collectors.toList());
 
         List<GroupDigest> groups = groupRepository.findBy_idIn(groupIds);
 
@@ -83,7 +84,7 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
                 jsonObject.put("endAt", convertIntToDate(x.getEndAt()));
 
                 List<JSONObject> groupsTmp = groups.stream().filter(itr -> x.getGroupIds().contains(itr.get_id()))
-                        .map(AbstractService::getDTO).toList();
+                        .map(AbstractService::getDTO).collect(Collectors.toList());
 
                 jsonObject.put("groups", groupsTmp);
 
