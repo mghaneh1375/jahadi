@@ -24,41 +24,88 @@ public class SignUpFormStep2ForGroupsValidator implements ConstraintValidator<Va
             isErrored = true;
         }
 
-        if(value.getTrips() == null) {
-            errs.put("trips", "لطفا تعداد اردوهای جهادی خود را وارد نمایید");
+        if(value.getTotalTrips() == null) {
+            errs.put("totalTrips", "لطفا تعداد کل اردوهای جهادی خود را وارد نمایید");
             isErrored = true;
         }
 
-        if(value.getMembers() == null) {
-            errs.put("members", "لطفا تعداد جهادگران خود را وارد نمایید");
+        if(value.getRecentTrips() == null) {
+            errs.put("recentTrips", "لطفا تعداد اردوهای جهادی سال اخیر خود را وارد نمایید");
             isErrored = true;
         }
 
-        if(value.getFamiliarWith() == null) {
-            errs.put("familiarWith", "لطفا نحوه آشنایی خود با نرم افزار ما را وارد نمایید");
+        if(value.getRecentMembers() == null) {
+            errs.put("recentMembers", "لطفا تعداد جهادگران سال اخیر خود را وارد نمایید");
             isErrored = true;
         }
 
-        if(value.getOrganizationDependency() == null) {
-            errs.put("organizationDependency", "لطفا وضعیت انتساب به دانشگاه یا سازمانی خود را وارد نمایید");
+        if(value.getTotalMembers() == null) {
+            errs.put("totalMembers", "لطفا تعداد کل جهادگران خود را وارد نمایید");
             isErrored = true;
         }
 
-        if(
-                value.getPasswordRepeat() == null ||
-                        value.getPassword() == null
-        ) {
-            errs.put("data", "لطفا رمزعبور و تکرار آن را وارد نمایید");
+        if(value.getManagersCount() == null) {
+            errs.put("managersCount", "لطفا تعداد افراد مدیریتی خود را وارد نمایید");
             isErrored = true;
         }
 
-        if(!value.getPasswordRepeat().equals(value.getPassword())) {
-            errs.put("password", "رمزعبور وارد شده با تکرار آن یکسان نیست");
+        if(value.getMembersPerTrip() == null) {
+            errs.put("managersCount", "لطفا تعداد نفر اردو خود را وارد نمایید");
             isErrored = true;
         }
 
-        if(value.getPassword().length() < 6) {
-            errs.put("password", "رمزعبور وارد شده معتبر نمی باشد");
+        if(value.getAtlasCode() == null) {
+            errs.put("atlasCode", "لطفا کد اطلس خود را وارد نمایید");
+            isErrored = true;
+        }
+
+        if(value.getAddress() == null) {
+            errs.put("address", "لطفا نشانی پایگاه را وارد نمایید");
+            isErrored = true;
+        }
+
+        if(value.getTel() == null || value.getTel().length() < 5) {
+            errs.put("tel", "لطفا تلفن ثابت را وارد نمایید");
+            isErrored = true;
+        }
+
+        if(value.getEstablishYear() == null) {
+            errs.put("establishYear", "لطفا سال تاسیس را وارد نمایید");
+            isErrored = true;
+        }
+
+        if(value.getLodgment() == null) {
+            errs.put("lodgment", "لطفا محل استقرار گروه را وارد نمایید");
+            isErrored = true;
+        }
+
+        if(value.getGroupRegistrationPlace() == null) {
+            errs.put("groupRegistrationPlace", "لطفا محل ثبت گروه را وارد نمایید");
+            isErrored = true;
+        }
+
+        if(value.getTripFrequency() == null) {
+            errs.put("tripFrequency", "لطفا بسامد برگزاری اردوها را وارد نمایید");
+            isErrored = true;
+        }
+
+        if(value.getTripRadius() == null) {
+            errs.put("tripRadius", "لطفا شعاع برگزاری اردو را وارد نمایید");
+            isErrored = true;
+        }
+
+        if(value.getPlatform() == null) {
+            errs.put("platform", "لطفا پلتفرم را وارد نمایید");
+            isErrored = true;
+        }
+
+        if(value.getTripDays() == null) {
+            errs.put("tripDays", "لطفا تعداد روز اردو را وارد نمایید");
+            isErrored = true;
+        }
+
+        if(value.getRegionsCount() == null) {
+            errs.put("regionsCount", "لطفا تعداد مناطق را وارد نمایید");
             isErrored = true;
         }
 

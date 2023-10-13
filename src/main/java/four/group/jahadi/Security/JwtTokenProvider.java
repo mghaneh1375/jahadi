@@ -2,7 +2,6 @@ package four.group.jahadi.Security;
 
 import four.group.jahadi.Enums.Access;
 import four.group.jahadi.Exception.CustomException;
-import four.group.jahadi.Utility.PairValue;
 import io.jsonwebtoken.*;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,10 +17,8 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import static four.group.jahadi.Security.JwtTokenFilter.blackListTokens;
-import static four.group.jahadi.Security.JwtTokenFilter.validateTokens;
-import static four.group.jahadi.Utility.StaticValues.TOKEN_EXPIRATION;
 import static four.group.jahadi.Utility.StaticValues.TOKEN_EXPIRATION_MSEC;
 
 
@@ -37,14 +34,16 @@ public class JwtTokenProvider {
     @Autowired
     private MyUserDetails myUserDetails;
 
-    private String getSharedKeyBytes() {
+    public String getSharedKeyBytes() {
         return Base64.getEncoder().encodeToString(secretKey.getBytes());
     }
 
-    public String createToken(String username, List<Access> roles) {
+    public String createToken(String username, List<Access> roles, ObjectId groupId, ObjectId id) {
 
         Claims claims = Jwts.claims().setSubject(username);
-        claims.put("roles", new SimpleGrantedAuthority(roles.get(0).getAuthority()));
+        claims.put("roles", roles.stream().map(e -> new SimpleGrantedAuthority(e.getAuthority())).collect(Collectors.toList()));
+        claims.put("groupId", groupId == null ? null : groupId.toString());
+        claims.put("id", id.toString());
 
         Date now = new Date();
         Date validity = new Date(now.getTime() + TOKEN_EXPIRATION_MSEC);
@@ -127,15 +126,15 @@ public class JwtTokenProvider {
 
     public static void removeTokenFromCache(String token) {
 
-        for(int i = 0; i < validateTokens.size(); i++) {
-
-            if(validateTokens.get(i).token.equals(token)) {
-                blackListTokens.add(new PairValue(token, TOKEN_EXPIRATION + validateTokens.get(i).issue));
-                validateTokens.remove(i);
-                return;
-            }
-
-        }
+//        for(int i = 0; i < validateTokens.size(); i++) {
+//
+//            if(validateTokens.get(i).token.equals(token)) {
+//                blackListTokens.add(new PairValue(token, TOKEN_EXPIRATION + validateTokens.get(i).issue));
+//                validateTokens.remove(i);
+//                return;
+//            }
+//
+//        }
     }
 
 }

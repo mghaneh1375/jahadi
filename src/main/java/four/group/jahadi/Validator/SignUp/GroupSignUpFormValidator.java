@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-public class GroupSignUpFormValidator implements ConstraintValidator<ValidatedGroupSignUpForm, GroupSignUpFormValidator> {
+public class GroupSignUpFormValidator implements ConstraintValidator<ValidatedGroupSignUpForm, GroupSignUpData> {
 
     @Autowired
     ModelMapper modelMapper;
@@ -18,7 +18,7 @@ public class GroupSignUpFormValidator implements ConstraintValidator<ValidatedGr
     }
 
     @Override
-    public boolean isValid(GroupSignUpFormValidator value, ConstraintValidatorContext context) {
+    public boolean isValid(GroupSignUpData value, ConstraintValidatorContext context) {
 
         SignUpStep1Data signUpStep1Data = modelMapper.map(value, SignUpStep1Data.class);
 

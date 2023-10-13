@@ -1,9 +1,6 @@
 package four.group.jahadi.Models;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -16,6 +13,7 @@ import javax.persistence.Id;
 @NoArgsConstructor
 @AllArgsConstructor
 @Document(collection = "activation")
+@Builder
 public class Activation {
 
     @Id
@@ -23,10 +21,10 @@ public class Activation {
     @Field("_id")
     private ObjectId _id;
 
-    private org.bson.Document user;
+    private User user;
     private String token;
     private String phone;
-    private String nid;
     private Integer code;
     private Long createdAt;
+    private Boolean validated;
 }

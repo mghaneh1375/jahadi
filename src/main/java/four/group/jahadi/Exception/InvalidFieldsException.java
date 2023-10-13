@@ -1,6 +1,6 @@
 package four.group.jahadi.Exception;
 
-public class InvalidFieldsException extends Exception {
+public class InvalidFieldsException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 

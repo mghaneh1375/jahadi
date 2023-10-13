@@ -24,7 +24,6 @@ public class SignUpFormStep2Validator implements ConstraintValidator<ValidatedSi
             isErrored = true;
         }
 
-
         if(isErrored) {
             context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate(errs.toString()).addConstraintViolation();

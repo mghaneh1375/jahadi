@@ -1,5 +1,6 @@
 package four.group.jahadi.Security;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -10,6 +11,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -18,6 +20,8 @@ import javax.servlet.http.HttpServletResponse;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
+    @Autowired
+    private JwtTokenFilter jwtTokenFilter;
 
     private static final String[] AUTH_WHITELIST = {
             // -- Swagger UI v2
@@ -30,8 +34,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/webjars/**",
             // -- Swagger UI v3 (OpenAPI)
             "/v3/api-docs/**",
-            "/swagger-ui/**"
+            "/swagger-ui/**",
             // other public endpoints of your API may be appended to this array
+            "/api/user/signIn",
+            "/api/user/seed",
+            "/api/user/groupSignUp",
+            "/api/user/checkCode",
+            "/api/user/checkSignUpFormStep1",
+            "/api/user/checkSignUpFormStep2",
+            "/api/user/checkSignUpFormStep3",
+            "/api/user/signUp",
     };
 
     @Override
@@ -52,10 +64,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         http.authorizeRequests()
                 .antMatchers(AUTH_WHITELIST).permitAll()
-                .antMatchers("api/admin/**").hasRole("admin")
+                .antMatchers("/api/admin/**").hasAuthority("ADMIN")
+                .antMatchers("/api/group/**").hasAnyAuthority("ADMIN", "GROUP")
                 .anyRequest()
-                .permitAll()
+                .authenticated()
         ;
+
+        http.addFilterBefore(
+                jwtTokenFilter,
+                UsernamePasswordAuthenticationFilter.class
+        );
+
     }
 
     @Bean

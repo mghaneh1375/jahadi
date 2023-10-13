@@ -4,6 +4,8 @@ import four.group.jahadi.DTO.SignUp.PasswordData;
 import four.group.jahadi.Enums.Access;
 import four.group.jahadi.Enums.AccountStatus;
 import four.group.jahadi.Enums.Sex;
+import four.group.jahadi.Exception.NotActivateAccountException;
+import four.group.jahadi.Exception.UnAuthException;
 import four.group.jahadi.Models.User;
 import four.group.jahadi.Service.UserService;
 import four.group.jahadi.Validator.EnumValidator;
@@ -38,8 +40,8 @@ public class AdminUserAPIRoutes {
 
     @PutMapping(value = "changePassword/{userId}")
     @ResponseBody
-    public void changeStatus(@PathVariable @ObjectIdConstraint ObjectId userId,
-                             @RequestBody @Valid PasswordData passwordData
+    public void changePassword(@PathVariable @ObjectIdConstraint ObjectId userId,
+                               @RequestBody @Valid PasswordData passwordData
     ) {
         userService.changePassword(userId, passwordData);
     }
@@ -53,9 +55,16 @@ public class AdminUserAPIRoutes {
             @RequestParam(required = false, value = "NID") String NID,
             @RequestParam(required = false, value = "phone") String phone,
             @RequestParam(required = false, value = "name") String name,
+            @RequestParam(required = false, value = "justGroupRequests") Boolean justGroupRequests,
             @RequestParam(required = false, value = "groupName") String groupName
     ) {
-        return userService.list(status, access, name, NID, phone, sex, groupName);
+        return userService.list(status, access, name, NID, phone, sex, groupName, null, justGroupRequests);
+    }
+
+    @GetMapping(value = "get/{userId}")
+    @ResponseBody
+    public ResponseEntity<User> get(@PathVariable @ObjectIdConstraint ObjectId userId){
+        return userService.findById(userId);
     }
 
     @PutMapping(value = "setGroup/{userId}/{code}")
@@ -70,4 +79,13 @@ public class AdminUserAPIRoutes {
     public String toggleStatus(@RequestBody @ObjectIdConstraint ObjectId id) {
         return userService.toggleStatus(id);
     }
+
+    @DeleteMapping(value = "removeFromGroup/{userId}/{groupId}")
+    @ResponseBody
+    public void removeFromGroup(final @PathVariable @ObjectIdConstraint ObjectId userId,
+                                final @PathVariable @ObjectIdConstraint ObjectId groupId
+    ) {
+        userService.removeFromGroup(userId, groupId);
+    }
+
 }

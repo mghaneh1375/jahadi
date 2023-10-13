@@ -3,10 +3,10 @@ package four.group.jahadi.Routes.API;
 import four.group.jahadi.DTO.SignUp.*;
 import four.group.jahadi.Exception.NotActivateAccountException;
 import four.group.jahadi.Exception.UnAuthException;
+import four.group.jahadi.Models.User;
 import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Service.UserService;
-import four.group.jahadi.Validator.ObjectIdConstraint;
-import org.bson.types.ObjectId;
+import four.group.jahadi.Tests.Seeder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -18,7 +18,8 @@ import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 
-import static four.group.jahadi.Utility.StaticValues.JSON_OK;
+import java.util.HashMap;
+
 import static four.group.jahadi.Utility.Utility.convertPersianDigits;
 
 @RestController
@@ -28,6 +29,9 @@ public class UserAPIRoutes extends Router {
 
     @Autowired
     UserService userService;
+
+    @Autowired
+    Seeder seeder;
 
 //    @PostMapping(value = "store")
 //    @ResponseBody
@@ -49,65 +53,107 @@ public class UserAPIRoutes extends Router {
         userService.setGroup(getUser(request).getId(), code);
     }
 
-    @PostMapping(value = "checkSignUpFormStep1")
-    @ResponseBody
-    public String checkSignUpFormStep1(@RequestBody @Valid SignUpStep1Data data) {
-        return userService.checkUniqueness(data);
-    }
-
-    @PostMapping(value = "checkSignUpFormStep2")
-    @ResponseBody
-    public String checkSignUpFormStep2(@RequestBody @Valid SignUpStep2Data data) {
-        return JSON_OK;
-    }
-
-    @PostMapping(value = "checkSignUpFormStep2ForGroups")
-    @ResponseBody
-    public String checkSignUpFormStep2ForGroups(@RequestBody @Valid SignUpStep2ForGroupData data) {
-        return JSON_OK;
-    }
-
-    @PostMapping(value = "checkSignUpFormStep3")
-    @ResponseBody
-    public String checkSignUpFormStep3(@RequestBody @Valid SignUpStep3Data data) {
-        return userService.checkGroup(data);
-    }
-
     @PostMapping(value = "/signIn")
     @ResponseBody
     public ResponseEntity<String> signIn(@RequestBody @Valid SignInData signInData) {
         return userService.signIn(signInData);
     }
 
-    @PostMapping(value = "/groupSignUp")
-    @ResponseBody
-    public String groupSignUp(@RequestBody @Valid GroupSignUpData groupSignUpData) {
-        return userService.groupStore(groupSignUpData);
-    }
+    // ******************** INDIVIDUAL SIGNUP ************************
 
     @PostMapping(value = "/signUp")
     @ResponseBody
-    public String signUp(@RequestBody @Valid SignUpData signUpData) {
-        return userService.store(signUpData);
+    public ResponseEntity<String> signUp(@RequestBody @Valid SignUpData signUpData) {
+        return userService.signUp(signUpData);
+    }
+
+    @PostMapping(value = "checkSignUpFormStep1")
+    public ResponseEntity<HashMap<String, Object>> checkSignUpFormStep1(@RequestBody @Valid SignUpStep1Data data) {
+        return userService.checkUniqueness(data);
+    }
+
+    @PostMapping(value = "checkSignUpFormStep2")
+    @ResponseBody
+    public void checkSignUpFormStep2(@RequestBody @Valid SignUpStep2Data data) {}
+
+    @PostMapping(value = "checkSignUpFormStep3")
+    @ResponseBody
+    public void checkSignUpFormStep3(@RequestBody @Valid SignUpStep3Data data) {
+        userService.checkGroup(data);
+    }
+
+    // ****************** GROUP SIGNUP **********************
+
+    @PostMapping(value = "/groupSignUp")
+    @ResponseBody
+    public ResponseEntity<HashMap<String, Object>> groupSignUp(@RequestBody @Valid SignUpStep1ForGroupData data) {
+        return userService.groupStore(data);
+    }
+
+    @PutMapping(value = "signUpStep2ForGroups")
+    public void signUpStep2ForGroups(
+            HttpServletRequest request,
+            @RequestBody @Valid SignUpStep2ForGroupData data
+    ) throws UnAuthException, NotActivateAccountException {
+        userService.signUpStep2ForGroups(getUserWithOutCheckCompleteness(request), data);
+    }
+
+    @PutMapping(value = "signUpStep3ForGroups")
+    public void signUpStep3ForGroups(
+            HttpServletRequest request,
+            @RequestBody @Valid SignUpStep3ForGroupData data
+    ) throws UnAuthException, NotActivateAccountException {
+        userService.signUpStep3ForGroups(getUserWithOutCheckCompleteness(request), data);
+    }
+
+    @PutMapping(value = "signUpStep4ForGroups")
+    public void signUpStep4ForGroups(
+            HttpServletRequest request,
+            @RequestBody @Valid SignUpStep4ForGroupData data
+    ) throws UnAuthException, NotActivateAccountException {
+        userService.signUpStep4ForGroups(getUserWithOutCheckCompleteness(request), data);
     }
 
 
+
+    @PostMapping(value = "/update")
+    public void update(HttpServletRequest request,
+                       @RequestBody @Valid UpdateInfoData updateInfoData) {
+        userService.update(getId(request), updateInfoData);
+    }
+
     @PostMapping(value = "/forgetPassword")
     @ResponseBody
-    public String forgetPassword(@RequestParam String NID) {
+    public ResponseEntity<HashMap<String, Object>> forgetPassword(@RequestParam String NID) {
         return userService.forgetPass(convertPersianDigits(NID));
     }
 
     @PostMapping(value = "/checkCode")
     @ResponseBody
-    public String checkCode(@RequestBody @Valid CheckCodeRequest checkCodeRequest) {
+    public ResponseEntity<String> checkCode(@RequestBody @Valid CheckCodeRequest checkCodeRequest) {
         return userService.checkCode(checkCodeRequest);
     }
 
     @PostMapping(value = "/resetPassword")
+    public void resetPassword(@RequestBody @Valid ResetPasswordRequest request) {
+        userService.resetPassword(request);
+    }
+
+    @PostMapping(value = "/changePassword")
+    public void changePassword(HttpServletRequest request,
+                               @RequestBody @Valid PasswordData passwordData) throws UnAuthException, NotActivateAccountException {
+        userService.changePassword(getUser(request).getId(), passwordData);
+    }
+
+    @GetMapping(value = "myInfo")
     @ResponseBody
-    public String resetPassword(@RequestBody @Valid ResetPasswordRequest request) {
-        return userService.resetPassword(request);
+    public ResponseEntity<User> myInfo(HttpServletRequest request) {
+        return userService.findById(getId(request));
+    }
+
+    @GetMapping(value = "seed")
+    public void seed() {
+        seeder.seed();
     }
 
 }

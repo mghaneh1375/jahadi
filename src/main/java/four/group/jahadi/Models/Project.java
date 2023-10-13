@@ -1,18 +1,14 @@
 package four.group.jahadi.Models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import four.group.jahadi.Enums.Color;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.bson.types.ObjectId;
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.springframework.data.annotation.CreatedDate;
+import lombok.*;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
@@ -21,7 +17,8 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Document("project")
-public class Project extends Model implements Serializable {
+@Builder
+public class Project extends Model {
 
     @Indexed(unique = true)
     private String name;
@@ -29,18 +26,16 @@ public class Project extends Model implements Serializable {
     private Color color;
     private int progress = 0;
 
-    @Field("group_ids")
-    @JsonIgnore
-    private List<ObjectId> groupIds;
-
-    @Field("trip_ids")
-    @JsonIgnore
-    private List<ObjectId> tripIds;
-
     @Field("start_at")
-    private Integer startAt;
+    @JsonSerialize(using = DateSerialization.class)
+    private Date startAt;
 
     @Field("end_at")
-    private Integer endAt;
+    @JsonSerialize(using = DateSerialization.class)
+    private Date endAt;
+
+    @Field("group_accesses")
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    private List<GroupAccess> groupAccesses;
 
 }

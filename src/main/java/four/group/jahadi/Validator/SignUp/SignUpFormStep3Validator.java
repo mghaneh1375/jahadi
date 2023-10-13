@@ -21,18 +21,15 @@ public class SignUpFormStep3Validator implements ConstraintValidator<ValidatedSi
         boolean isErrored = false;
         JSONObject errs = new JSONObject();
 
-        if(value.getNearbyName() == null || value.getNearbyPhone() == null) {
+        if(value.getNearbyName() == null || value.getNearbyPhone() == null ||
+                value.getPassword() == null || value.getPasswordRepeat() == null
+        ) {
             errs.put("data", "لطفا اطلاعات تمامی فیلدها را وارد نمایید");
 
             context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate(errs.toString()).addConstraintViolation();
 
             return false;
-        }
-
-        if(value.getNearbyName().length() < 3) {
-            errs.put("nearbyName", "لطفا نام و نسبت فرد مذکور را وارد نمایید");
-            isErrored = true;
         }
 
         if(value.getGroupCode() != null && value.getGroupCode().toString().length() != 6) {
@@ -45,21 +42,8 @@ public class SignUpFormStep3Validator implements ConstraintValidator<ValidatedSi
             isErrored = true;
         }
 
-        if(
-                value.getPasswordRepeat() == null ||
-                        value.getPassword() == null
-        ) {
-            errs.put("data", "لطفا رمزعبور و تکرار آن را وارد نمایید");
-            isErrored = true;
-        }
-
         if(!value.getPasswordRepeat().equals(value.getPassword())) {
             errs.put("password", "رمزعبور وارد شده با تکرار آن یکسان نیست");
-            isErrored = true;
-        }
-
-        if(value.getPassword().length() < 6) {
-            errs.put("password", "رمزعبور وارد شده معتبر نمی باشد");
             isErrored = true;
         }
 

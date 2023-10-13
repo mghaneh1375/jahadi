@@ -1,16 +1,19 @@
 package four.group.jahadi.Routes.API.AdminAPIRoutes;
 
 import four.group.jahadi.DTO.ProjectData;
+import four.group.jahadi.Models.Project;
 import four.group.jahadi.Service.ProjectService;
 import four.group.jahadi.Validator.ObjectIdConstraint;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import java.util.List;
 
 @RestController
 @RequestMapping(value = "/api/admin/project")
@@ -22,26 +25,29 @@ public class ProjectAPIRoutes {
 
     @PostMapping(value = "/store")
     @ResponseBody
-    public String store(@RequestBody @Valid ProjectData projectData) {
+    public ResponseEntity<Project> store(@RequestBody @Valid ProjectData projectData) {
         return projectService.store(projectData);
     }
 
     @GetMapping(value = "/list")
     @ResponseBody
-    public String list(@RequestParam(value = "name", required = false) String name,
-                       @RequestParam(value = "justActive", required = false) Boolean justActive,
-                       @RequestParam(value = "justArchive", required = false) Boolean justArchive
+    public ResponseEntity<List<Project>> list(@RequestParam(value = "name", required = false) String name,
+                                              @RequestParam(value = "justActive", required = false) Boolean justActive,
+                                              @RequestParam(value = "justArchive", required = false) Boolean justArchive
     ) {
-//        return projectService.list(name, justActive, justArchive);
-        return null;
+        return projectService.list(name, justActive, justArchive);
     }
 
+    @GetMapping(value = "/get/{id}")
+    public ResponseEntity<Project> get(@PathVariable @ObjectIdConstraint ObjectId id) {
+        return projectService.findById(id);
+    }
 
     @PutMapping(value = "/setProgress/{id}")
-    @ResponseBody
-    public String setProgress(@PathVariable @ObjectIdConstraint ObjectId id,
-                              @RequestParam(value = "progress") @Min(0) @Max(100) int progress) {
-        return projectService.setProgress(id, progress);
+    public void setProgress(@PathVariable @ObjectIdConstraint ObjectId id,
+                            @RequestParam(value = "progress") @Min(0) @Max(100) int progress) {
+        projectService.setProgress(id, progress);
     }
+
 
 }

@@ -17,13 +17,7 @@ public class StaticValues {
 
 
 
-    public final static Boolean DEV_MODE = true;
-
-    public final static BasicDBObject USER_DIGEST = new BasicDBObject("_id", 1)
-            .append("first_name", 1)
-            .append("last_name", 1)
-            .append("NID", 1)
-            .append("pic", 1);
+    public final static Boolean DEV_MODE = false;
 
     public static final BasicDBObject JUST_ID = new BasicDBObject("_id", 1);
 

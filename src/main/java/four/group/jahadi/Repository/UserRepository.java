@@ -5,6 +5,7 @@ import four.group.jahadi.Enums.AccountStatus;
 import four.group.jahadi.Enums.Sex;
 import four.group.jahadi.Models.User;
 import org.bson.types.ObjectId;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -18,11 +19,18 @@ public interface UserRepository extends MongoRepository<User, ObjectId>, Filtera
     @Query(value = "{'_id':  ?0, 'status':  'ACTIVE'}", count = true)
     Integer countActiveBy_id(ObjectId id);
 
-    @Query(value = "{ '_id': { $in: ?0 } }", fields = "{ 'first_name': 1, 'last_name': 1, 'phone': 1, 'pic': 1, 'color': 1  }")
+    @Query(value = "{ '_id': { $in: ?0 } }", fields = "{ 'name': 1, 'phone': 1, 'pic': 1, 'color': 1  }")
     List<User> findBy_idIn(List<ObjectId> ids);
+
+    @NotNull
+    @Query(value = "{ '_id': ?0 }", fields = "{ 'notifs': 0  }")
+    Optional<User> findById(@NotNull ObjectId id);
 
     @Query(value = "{'nid':  ?0}")
     Optional<User> findByNID(String nid);
+
+    @Query(value = "{'phone':  ?0}")
+    Optional<User> findByPhone(String phone);
 
 //    @Query(value = "{'removeAt':  null, $or: [ {$where: ':#{#status} == null'}, { 'status': :#{#status} } ] }")
 //    List<User> findAll(@Param(value = "status") AccountStatus status, @Param(value = "access") Access access);
@@ -35,8 +43,12 @@ public interface UserRepository extends MongoRepository<User, ObjectId>, Filtera
             + "?#{ [4] == null ? { $where : 'true'} : { 'phone' : [4] } },"
             + "?#{ [5] == null ? { $where : 'true'} : { 'sex' : [5] } },"
             + "?#{ [6] == null ? { $where : 'true'} : { 'group_name' : [6] } },"
+            + "?#{ [7] == null ? { $where : 'true'} : { 'group_id' : [7] } },"
+            + "?#{ [8] == null ? { $where : 'true'} : { 'members' : {$exists: [8]} } },"
             + "]}", fields = "{'id': 1, 'createdAt': 1, 'name': 1, 'nid': 1, 'phone': 1, 'sex': 1, 'groupName': 1, 'status': 1, 'accesses': 1}")
-    List<User> findAll(AccountStatus status, Access access, String name, String NID, String phone, Sex sex, String groupName);
+    List<User> findAll(AccountStatus status, Access access, String name,
+                       String NID, String phone, Sex sex, String groupName,
+                       ObjectId groupId, Boolean justGroupRequests);
 
     @Query(value = "{'phone':  ?0}", count = true)
     Integer countByPhone(String phone);

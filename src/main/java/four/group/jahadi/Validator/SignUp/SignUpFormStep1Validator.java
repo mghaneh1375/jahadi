@@ -35,31 +35,6 @@ public class SignUpFormStep1Validator implements ConstraintValidator<ValidatedSi
             return false;
         }
 
-        if(value.getName().length() < 3) {
-            errs.put("name", "لطفا نام خود را وارد نمایید");
-            isErrored = true;
-        }
-
-        if(value.getFatherName().length() < 3) {
-            errs.put("fatherName", "لطفا نام پدر خود را وارد نمایید");
-            isErrored = true;
-        }
-
-        if(value.getUniversity().length() < 3) {
-            errs.put("university", "لطفا دانشگاه خود را وارد نمایید");
-            isErrored = true;
-        }
-
-        if(value.getField().length() < 3) {
-            errs.put("field", "لطفا رشته تحصیلی خود را وارد نمایید");
-            isErrored = true;
-        }
-
-        if(value.getUniversityYear() < 1300 || value.getUniversityYear() > 1403) {
-            errs.put("universityYear", "سال تحصیل نامعتبر است");
-            isErrored = true;
-        }
-
         if(ObjectUtils.isEmpty(value.getBirthDay()) ||
                 !DateValidator.isValid(value.getBirthDay()) ||
                 Integer.parseInt(value.getBirthDay().split("\\/")[0]) > 1385

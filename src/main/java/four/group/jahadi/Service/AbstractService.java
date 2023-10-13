@@ -1,20 +1,17 @@
 package four.group.jahadi.Service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import four.group.jahadi.DTO.Digest.DTO;
 import four.group.jahadi.DTO.UserData;
 import four.group.jahadi.Models.Model;
 import four.group.jahadi.Models.ModelWithUser;
-import four.group.jahadi.Models.PaginatedResponse;
 import four.group.jahadi.Models.User;
 import four.group.jahadi.Utility.Utility;
 import org.bson.types.ObjectId;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 
 import java.io.IOException;
@@ -89,9 +86,9 @@ public abstract class AbstractService <T, D> {
 
     public abstract ResponseEntity<List<T>> list(Object ... filters);
 
-    abstract String update(ObjectId id, D dto, Object ... params);
+    public abstract void update(ObjectId id, D dto, Object ... params);
 
-    abstract String store(D dto, Object ... params);
+    public abstract ResponseEntity<T> store(D dto, Object ... params);
 
     public abstract ResponseEntity<T> findById(ObjectId id, Object ...params);
 

@@ -1,11 +1,10 @@
 package four.group.jahadi.DTO;
 
+import four.group.jahadi.DTO.Trip.TripStep1Data;
 import four.group.jahadi.Enums.Color;
 import four.group.jahadi.Validator.ValidatedProject;
 import lombok.*;
-import org.bson.types.ObjectId;
 
-import java.io.Serializable;
 import java.util.List;
 
 @NoArgsConstructor
@@ -15,13 +14,11 @@ import java.util.List;
 @ValidatedProject
 public class ProjectData {
 
-    List<ObjectId> groupIds;
-
     String name;
     Color color;
 
-    String startAt;
-    String endAt;
+    Long startAt;
+    Long endAt;
 
-    List<String> tripNos;
+    List<TripStep1Data> trips = null;
 }

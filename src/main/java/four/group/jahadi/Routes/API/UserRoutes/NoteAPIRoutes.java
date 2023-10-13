@@ -27,19 +27,18 @@ public class NoteAPIRoutes extends Router {
 
     @PostMapping(value = "store")
     @ResponseBody
-    public String store(HttpServletRequest request,
-                        @RequestBody @Valid NoteData noteData
+    public ResponseEntity<Note> store(HttpServletRequest request,
+                                      @RequestBody @Valid NoteData noteData
     ) throws UnAuthException, NotActivateAccountException {
         return noteService.store(noteData, getUser(request).getId());
     }
 
     @PutMapping(value = "update/{id}")
-    @ResponseBody
-    public String update(HttpServletRequest request,
+    public void update(HttpServletRequest request,
                          @PathVariable @ObjectIdConstraint ObjectId id,
                          @RequestBody @Valid NoteData noteData
     ) throws UnAuthException, NotActivateAccountException {
-        return noteService.update(id, noteData, getUser(request).getId());
+        noteService.update(id, noteData, getUser(request).getId());
     }
 
     @GetMapping(value = "list")

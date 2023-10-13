@@ -1,7 +1,10 @@
 package four.group.jahadi.Service;
 
 import four.group.jahadi.DTO.GroupData;
+import four.group.jahadi.Enums.Access;
+import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Exception.InvalidIdException;
+import four.group.jahadi.Exception.NotAccessException;
 import four.group.jahadi.Models.Group;
 import four.group.jahadi.Models.User;
 import four.group.jahadi.Repository.GroupRepository;
@@ -13,10 +16,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static four.group.jahadi.Utility.Utility.generateErr;
-import static four.group.jahadi.Utility.Utility.generateSuccessMsg;
 
 @Service
 public class GroupService extends AbstractService<Group, GroupData> {
@@ -36,13 +38,21 @@ public class GroupService extends AbstractService<Group, GroupData> {
         List<ObjectId> userIds = groups.stream().map(Group::getOwner).collect(Collectors.toList());
         List<User> users = userRepository.findBy_idIn(userIds);
 
-//        return generateSuccessMsg("data", convertObjectsToJSONList(groups, users));
-        return null;
+        groups.forEach(x -> x.setUser(users.stream().filter(itr -> x.getOwner().equals(itr.getId())).findFirst().orElse(null)));
+
+        return new ResponseEntity<>(groups, HttpStatus.OK);
     }
 
     @Override
-    String update(ObjectId id, GroupData dto, Object ... params) {
-        return null;
+    public void update(ObjectId id, GroupData dto, Object ... params) {
+
+        Group group = groupRepository.findById(id).orElseThrow(InvalidIdException::new);
+
+        group.setOwner(dto.getOwner());
+        group.setName(dto.getName());
+        group.setColor(dto.getColor());
+
+        groupRepository.save(group);
     }
 
     public ResponseEntity<Group> findById(ObjectId id, Object ... params) {
@@ -52,10 +62,10 @@ public class GroupService extends AbstractService<Group, GroupData> {
         );
     }
 
-    public String store(GroupData data, Object ... params) {
+    public ResponseEntity<Group> store(GroupData data, Object ... params) {
 
         if(userRepository.countActiveBy_id(data.getOwner()) == 0)
-            return generateErr("مسئول موردنظر وجود ندارد");
+            throw new InvalidFieldsException("مسئول موردنظر وجود ندارد");
 
         Group group = populateEntity(new Group(), data);
 
@@ -63,24 +73,45 @@ public class GroupService extends AbstractService<Group, GroupData> {
             groupRepository.insert(group);
         }
         catch (Exception x) {
-            return generateErr("نام وارد شده تکراری است");
+            throw new InvalidFieldsException("نام وارد شده تکراری است");
         }
-        return generateSuccessMsg("id", group.getId());
+
+        return new ResponseEntity<>(group, HttpStatus.OK);
     }
 
-//    public String update(ObjectId id, ModuleData moduleData) {
-//
-//        Optional<Module> module = moduleRepository.findById(id);
-//
-//        if(!module.isPresent())
-//            return JSON_NOT_VALID_ID;
-//
-//        moduleRepository.save(populateModuleEntity(module.get(), moduleData));
-//        return JSON_OK;
-//    }
-//
-//    public void remove(ObjectId id) {
-//        moduleRepository.deleteById(id);
-//    }
+    public void changeCode(ObjectId groupId, int code) {
 
+        if(groupId == null)
+            throw new NotAccessException();
+
+        Group group = groupRepository.findById(groupId).orElseThrow(InvalidIdException::new);
+        group.setCode(code);
+        groupRepository.save(group);
+    }
+
+    public void toggleActivityStatus(ObjectId groupId, String password) {
+        Group group = groupRepository.findById(groupId).orElseThrow(InvalidIdException::new);
+        group.setActive(!group.isActive());
+        groupRepository.save(group);
+    }
+
+    public void setNewOwner(ObjectId groupId, ObjectId userId) {
+
+        User newOwner = userRepository.findById(userId).orElseThrow(InvalidIdException::new);
+        Group group = groupRepository.findById(groupId).orElseThrow(InvalidIdException::new);
+
+        Optional<User> oldOwner = userRepository.findById(group.getOwner());
+        oldOwner.ifPresent(user -> {
+            user.getAccesses().remove(Access.GROUP);
+            userRepository.save(user);
+        });
+
+        group.setOwner(userId);
+        groupRepository.save(group);
+
+        if(!newOwner.getAccesses().contains(Access.GROUP)) {
+            newOwner.getAccesses().add(Access.GROUP);
+            userRepository.save(newOwner);
+        }
+    }
 }

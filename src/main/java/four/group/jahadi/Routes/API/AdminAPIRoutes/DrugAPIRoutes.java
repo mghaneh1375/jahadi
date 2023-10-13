@@ -22,7 +22,7 @@ public class DrugAPIRoutes {
 
     @PostMapping(value = "store")
     @ResponseBody
-    public String store(final @RequestBody @Valid DrugData drugData) {
+    public ResponseEntity<Drug> store(final @RequestBody @Valid DrugData drugData) {
         return drugService.store(drugData);
     }
 

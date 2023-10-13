@@ -15,7 +15,6 @@ import java.util.Date;
 import java.util.List;
 
 import static four.group.jahadi.Utility.StaticValues.*;
-import static four.group.jahadi.Utility.Utility.generateSuccessMsg;
 
 @Service
 public class NoteService extends AbstractService<Note, NoteData> {
@@ -32,7 +31,7 @@ public class NoteService extends AbstractService<Note, NoteData> {
     }
 
     @Override
-    public String update(ObjectId id, NoteData dto, Object ... params) {
+    public void update(ObjectId id, NoteData dto, Object ... params) {
 
         Note note = noteRepository.findById(id).orElseThrow(InvalidIdException::new);
 
@@ -43,12 +42,10 @@ public class NoteService extends AbstractService<Note, NoteData> {
         note.setTitle(dto.getTitle());
         note.setDescription(dto.getDescription());
         noteRepository.save(note);
-
-        return JSON_OK;
     }
 
     @Override
-    public String store(NoteData dto, Object ... params) {
+    public ResponseEntity<Note> store(NoteData dto, Object ... params) {
 
         ObjectId userId = (ObjectId) params[0];
 
@@ -60,7 +57,7 @@ public class NoteService extends AbstractService<Note, NoteData> {
 
         note = noteRepository.insert(note);
 
-        return generateSuccessMsg("data", note.getId().toString());
+        return new ResponseEntity<>(note, HttpStatus.OK);
     }
 
     @Override

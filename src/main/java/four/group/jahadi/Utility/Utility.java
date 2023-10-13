@@ -31,6 +31,7 @@ public class Utility {
         return JalaliCalendar.gregorianToJalali(new JalaliCalendar.YearMonthDate(splited[0], splited[1], splited[2])).format("/") + " - " + dateTime[1];
     }
 
+
     public static String getToday(String delimeter) {
         Locale loc = new Locale("en_US");
         SolarCalendar sc = new SolarCalendar();
@@ -185,6 +186,20 @@ public class Utility {
 
         return r;
     }
+    public static int randIntForGroupCode() {
+
+        int r = 0;
+        for (int i = 0; i < 6; i++) {
+            int x = random.nextInt(10);
+
+            while (x == 0)
+                x = random.nextInt(10);
+
+            r += x * Math.pow(10, i);
+        }
+
+        return r;
+    }
 
     public static String randomString(int len) {
         StringBuilder sb = new StringBuilder(len);
@@ -209,7 +224,7 @@ public class Utility {
         }
 
         try {
-            KavenegarApi api = new KavenegarApi("79535344745641433164454E622F6F2B436F7741744B637442576673554B636A");
+            KavenegarApi api = new KavenegarApi("6D3779666A7065566E323932566E526B69756F44564530554752435771647443423336474D6B6F7579556B3D");
             SendResult Result = api.verifyLookup(receptor, token, token2, token3, template);
 
             if(Result.getStatus() == 6 ||

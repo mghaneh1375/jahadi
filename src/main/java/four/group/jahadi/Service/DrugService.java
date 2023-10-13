@@ -11,11 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
-import static four.group.jahadi.Utility.StaticValues.JSON_NOT_VALID_ID;
-import static four.group.jahadi.Utility.StaticValues.JSON_OK;
-import static four.group.jahadi.Utility.Utility.generateSuccessMsg;
 
 @Service
 public class DrugService extends AbstractService<Drug, DrugData> {
@@ -45,21 +41,15 @@ public class DrugService extends AbstractService<Drug, DrugData> {
     }
 
     @Override
-    public String store(DrugData data, Object ... params) {
-        Drug drug = drugRepository.insert(populateEntity(null, data));
-        return generateSuccessMsg("id", drug.get_id());
+    public ResponseEntity<Drug> store(DrugData data, Object ... params) {
+        return new ResponseEntity<>(drugRepository.insert(populateEntity(null, data)), HttpStatus.OK);
     }
 
     @Override
-    public String update(ObjectId id, DrugData drugData, Object ... params) {
+    public void update(ObjectId id, DrugData drugData, Object ... params) {
 
-        Optional<Drug> module = drugRepository.findById(id);
-
-        if(!module.isPresent())
-            return JSON_NOT_VALID_ID;
-
-        drugRepository.save(populateEntity(module.get(), drugData));
-        return JSON_OK;
+        Drug drug = drugRepository.findById(id).orElseThrow(InvalidIdException::new);
+        drugRepository.save(populateEntity(drug, drugData));
     }
 
     @Override

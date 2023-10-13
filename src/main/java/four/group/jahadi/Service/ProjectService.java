@@ -1,28 +1,26 @@
 package four.group.jahadi.Service;
 
-import four.group.jahadi.DTO.Digest.GroupDigest;
 import four.group.jahadi.DTO.ProjectData;
+import four.group.jahadi.DTO.Trip.TripStep1Data;
+import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Models.Group;
+import four.group.jahadi.Models.GroupAccess;
 import four.group.jahadi.Models.Project;
+import four.group.jahadi.Models.Trip;
 import four.group.jahadi.Repository.FilteringFactory;
 import four.group.jahadi.Repository.GroupRepository;
 import four.group.jahadi.Repository.ProjectRepository;
-import four.group.jahadi.Utility.Utility;
+import four.group.jahadi.Repository.TripRepository;
 import org.bson.types.ObjectId;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static four.group.jahadi.Utility.StaticValues.JSON_OK;
 import static four.group.jahadi.Utility.Utility.*;
 
 @Service
@@ -33,6 +31,9 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
 
     @Autowired
     private GroupRepository groupRepository;
+
+    @Autowired
+    private TripRepository tripRepository;
 
     // filters:
     // 1- name
@@ -64,93 +65,124 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
                 FilteringFactory.parseFromParams(filtersList, Project.class)
         );
 
-        List<ObjectId> groupIds = projects.stream().map(Project::getGroupIds)
-                .flatMap(Collection::stream).collect(Collectors.toList());
-
-        List<GroupDigest> groups = groupRepository.findBy_idIn(groupIds);
-
-        JSONArray jsonArray = new JSONArray();
-
-        projects.forEach(x -> {
-
-            try {
-
-                JSONObject jsonObject = new JSONObject(new ObjectMapper().writeValueAsString(x));
-
-                jsonObject.remove("_id");
-                jsonObject.put("id", x.getId().toString());
-                jsonObject.put("createdAt", convertDateToJalali(x.getCreatedAt()));
-                jsonObject.put("startAt", convertIntToDate(x.getStartAt()));
-                jsonObject.put("endAt", convertIntToDate(x.getEndAt()));
-
-                List<JSONObject> groupsTmp = groups.stream().filter(itr -> x.getGroupIds().contains(itr.get_id()))
-                        .map(AbstractService::getDTO).collect(Collectors.toList());
-
-                jsonObject.put("groups", groupsTmp);
-
-                jsonArray.put(jsonObject);
-
-            } catch (IOException ignore) {}
-        });
-
-//        return generateSuccessMsg("data", jsonArray);
-        return null;
+        return new ResponseEntity<>(projects, HttpStatus.OK);
     }
 
-    public String setProgress(ObjectId id, int progress) {
+    public void setProgress(ObjectId id, int progress) {
 
         Project project = projectRepository.findById(id).orElseThrow(InvalidIdException::new);
 
         project.setProgress(progress);
         projectRepository.save(project);
-
-        return JSON_OK;
     }
 
     @Override
-    String update(ObjectId id, ProjectData dto, Object ... params) {
-        return null;
+    public void update(ObjectId id, ProjectData dto, Object ... params) {
+
+        Project project = projectRepository.findById(id).orElseThrow(InvalidIdException::new);
+        // todo: check for update policies
+
+        project = populateEntity(project, dto);
+
+        try {
+            projectRepository.save(project);
+        }
+        catch (Exception x) {
+            throw new InvalidFieldsException("نام وارد شده تکراری است");
+        }
     }
 
     public ResponseEntity<Project> findById(ObjectId id, Object ... params) {
+
+        Project project = projectRepository.findById(id).orElseThrow(InvalidIdException::new);
+
+        List<GroupAccess> groupAccesses = project.getGroupAccesses();
+        List<ObjectId> groupIds = groupAccesses.stream().map(GroupAccess::getGroupId).collect(Collectors.toList());
+
+        List<Group> groups = groupRepository.findBy_idIn(groupIds);
+        List<GroupAccess> groupAccessesWithGroup = new ArrayList<>();
+
+        for(GroupAccess groupAccess : groupAccesses) {
+            groups.stream().filter(e -> e.getId().equals(groupAccess.getGroupId())).findFirst().ifPresent(e -> {
+                groupAccess.setGroup(e);
+                groupAccessesWithGroup.add(groupAccess);
+            });
+        }
+
+        project.setGroupAccesses(groupAccesses);
+
         return new ResponseEntity<>(
-                projectRepository.findById(id).orElseThrow(InvalidIdException::new),
+                project,
                 HttpStatus.OK
         );
     }
 
-    public String store(ProjectData data, Object ... params) {
+    public ResponseEntity<Project> store(ProjectData data, Object ... params) {
 
-        if(groupRepository.countBy_idIn(data.getGroupIds()) != data.getGroupIds().size())
-            return generateErr("آی دی گروه ها نامعتبر است");
+        if(data.getTrips() != null) {
+            List<ObjectId> groupIds = data.getTrips().stream()
+                    .map(TripStep1Data::getOwner)
+                    .collect(Collectors.toList());
 
-//        data.getTripNos().forEach(x -> {
-//
-//
-//
-//        });
+            if (groupRepository.countBy_idIn(groupIds) != groupIds.size())
+                throw new InvalidFieldsException("آی دی گروه ها نامعتبر است");
+        }
 
-        Project project = populateEntity(new Project(), data);
+        Project project = populateEntity(null, data);
 
         try {
             projectRepository.insert(project);
         }
         catch (Exception x) {
-            return generateErr("نام وارد شده تکراری است");
+            throw new InvalidFieldsException("نام وارد شده تکراری است");
         }
-        return generateSuccessMsg("id", project.getId());
+
+        if(data.getTrips() != null) {
+            final int[] idx = {1};
+            data.getTrips().forEach(x -> {
+
+                Trip trip = Trip
+                        .builder()
+                        .projectId(project.getId())
+                        .name(project.getName() + " - " + idx[0]).build();
+
+                idx[0]++;
+                trip.setOwner(x.getOwner());
+                tripRepository.save(trip);
+
+            });
+        }
+
+        return new ResponseEntity<>(project, HttpStatus.OK);
     }
 
     @Override
     Project populateEntity(Project project, ProjectData projectData) {
 
+        if(project == null)
+            return Project.builder()
+                    .groupAccesses(projectData.getTrips()
+                            .stream().map(e -> GroupAccess.builder()
+                                    .groupId(e.getOwner())
+                                    .writeAccess(e.getWriteAccess())
+                                    .build()
+                            ).collect(Collectors.toList()))
+                    .name(projectData.getName())
+                    .color(projectData.getColor())
+                    .startAt(new Date(projectData.getStartAt()))
+                    .endAt(new Date(projectData.getEndAt())).build();
+
         project.setName(projectData.getName());
         project.setColor(projectData.getColor());
-        project.setStartAt(Utility.convertStringToDate(projectData.getStartAt()));
-        project.setEndAt(Utility.convertStringToDate(projectData.getEndAt()));
-        project.setGroupIds(projectData.getGroupIds());
+        project.setStartAt(new Date(projectData.getStartAt()));
+        project.setEndAt(new Date(projectData.getEndAt()));
 
         return project;
+    }
+
+    public ResponseEntity<List<Project>> myProjects(ObjectId groupId) {
+        List<Project> projects = projectRepository.findByOwner(groupId);
+        return new ResponseEntity<>(projects, HttpStatus.OK);
     }
 
 }
