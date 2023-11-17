@@ -3,12 +3,14 @@ package four.group.jahadi.Routes.API.GroupAPIRoutes;
 import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Service.GroupService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import java.util.HashMap;
 
 @RestController
 @RequestMapping(value = "api/group/group")
@@ -22,6 +24,12 @@ public class ManageGroupAPIRoutes extends Router {
     public void changeCode(HttpServletRequest request,
                            @RequestBody @Min(100000) @Max(111111) int code) {
         groupService.changeCode(getGroup(request), code);
+    }
+
+    @GetMapping(value = "statisticData")
+    @ResponseBody
+    public ResponseEntity<HashMap<String, Object>> statisticData(HttpServletRequest request) {
+        return groupService.statisticData(getGroup(request));
     }
 
 }

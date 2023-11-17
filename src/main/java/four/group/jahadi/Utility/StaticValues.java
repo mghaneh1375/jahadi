@@ -17,7 +17,7 @@ public class StaticValues {
 
 
 
-    public final static Boolean DEV_MODE = false;
+    public final static Boolean DEV_MODE = true;
 
     public static final BasicDBObject JUST_ID = new BasicDBObject("_id", 1);
 

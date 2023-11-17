@@ -19,6 +19,9 @@ public class SignUpStep3Data {
     @Size(min = 3, max = 50)
     private String nearbyName;
 
+    @Size(min = 2, max = 50)
+    private String nearbyRel;
+
     @JustNumeric
     private String nearbyPhone;
 

@@ -1,5 +1,6 @@
 package four.group.jahadi.Models;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Getter;
 import org.bson.types.ObjectId;
@@ -23,5 +24,6 @@ public abstract class Model implements Serializable {
     @Field("created_at")
     @CreatedDate
     @JsonSerialize(using = DateSerialization.class)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Date createdAt;
 }

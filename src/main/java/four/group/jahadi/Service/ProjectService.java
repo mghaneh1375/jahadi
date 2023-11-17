@@ -2,6 +2,7 @@ package four.group.jahadi.Service;
 
 import four.group.jahadi.DTO.ProjectData;
 import four.group.jahadi.DTO.Trip.TripStep1Data;
+import four.group.jahadi.Enums.Status;
 import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Models.Group;
@@ -21,7 +22,6 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static four.group.jahadi.Utility.Utility.*;
 
 @Service
 public class ProjectService extends AbstractService<Project, ProjectData> {
@@ -37,47 +37,98 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
 
     // filters:
     // 1- name
-    // 2- justActives
-    // 3- justArchives
+    // 2- status
     @Override
-    public ResponseEntity<List<Project>> list(Object ... filters) {
+    public ResponseEntity<List<Project>> list(Object... filters) {
 
-        List<String> filtersList = new ArrayList<>();
+        List<List<Object>> filtersList = new ArrayList<>();
 
-        if(filters[0] != null)
-            filtersList.add("name|regex|" + filters[0]);
+        if (filters[0] != null)
+            filtersList.add(new ArrayList<>(){
+                {
+                    add("name");
+                    add("regex");
+                    add(filters[0]);
+                }
+            });
 
-        int today = convertStringToDate(getToday("/"));
+        Date today = new Date();
 
-        if(filters[1] != null && (boolean)filters[1])
-            filtersList.add("startAt|gt|" + today);
+        if (filters[1] != null) {
 
-        if(filters[2] != null && (boolean)filters[2])
-            filtersList.add("endAt|lt|" + today);
+            if (Objects.equals(filters[1], Status.IN_PROGRESS)) {
+                filtersList.add(new ArrayList<>() {
+                    {
+                        add("startAt");
+                        add("lt");
+                        add(today);
+                    }
+                });
+                filtersList.add(new ArrayList<>() {
+                    {
+                        add("endAt");
+                        add("gt");
+                        add(today);
+                    }
+                });
+            }
 
-        if(filters.length > 3 && filters[3] != null) {
+            else if(Objects.equals(filters[1], Status.FINISHED)) {
+                filtersList.add(new ArrayList<>() {
+                    {
+                        add("endAt");
+                        add("lt");
+                        add(today);
+                    }
+                });
+            }
+        }
+
+        if (filters.length > 3 && filters[3] != null) {
             List<String> groupIds = groupRepository.findByUserId((ObjectId) filters[3]).stream().map(Group::getId)
                     .map(ObjectId::toString).collect(Collectors.toList());
-            filtersList.add("groupIds|in|" + String.join(";", groupIds));
+            filtersList.add(new ArrayList<>(){
+                {
+                    add("groupIds");
+                    add("in");
+                    add(String.join(";", groupIds));
+                }
+            });
         }
 
         List<Project> projects = projectRepository.findAllWithFilter(Project.class,
-                FilteringFactory.parseFromParams(filtersList, Project.class)
+                FilteringFactory.abstractParseFromParams(filtersList, Project.class)
         );
+
+        projects.forEach(x -> x.setGroupNames(new ArrayList<>()));
+
+        List<Group> groups = groupRepository.findBy_idIn(projects.stream()
+                .map(Project::getGroupIds).collect(Collectors.toList())
+                .stream().flatMap(List::stream).distinct().collect(Collectors.toList())
+        );
+
+        projects.forEach(project -> {
+
+            for(Group group : groups) {
+
+                if (project.getGroupIds().stream().noneMatch(x -> x.equals(group.getId())))
+                    continue;
+
+                project.getGroupNames().add(group.getName());
+            }
+        });
 
         return new ResponseEntity<>(projects, HttpStatus.OK);
     }
 
     public void setProgress(ObjectId id, int progress) {
-
         Project project = projectRepository.findById(id).orElseThrow(InvalidIdException::new);
-
         project.setProgress(progress);
         projectRepository.save(project);
     }
 
     @Override
-    public void update(ObjectId id, ProjectData dto, Object ... params) {
+    public void update(ObjectId id, ProjectData dto, Object... params) {
 
         Project project = projectRepository.findById(id).orElseThrow(InvalidIdException::new);
         // todo: check for update policies
@@ -86,30 +137,19 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
 
         try {
             projectRepository.save(project);
-        }
-        catch (Exception x) {
+        } catch (Exception x) {
             throw new InvalidFieldsException("نام وارد شده تکراری است");
         }
     }
 
-    public ResponseEntity<Project> findById(ObjectId id, Object ... params) {
+    public ResponseEntity<Project> findById(ObjectId id, Object... params) {
 
         Project project = projectRepository.findById(id).orElseThrow(InvalidIdException::new);
 
-        List<GroupAccess> groupAccesses = project.getGroupAccesses();
-        List<ObjectId> groupIds = groupAccesses.stream().map(GroupAccess::getGroupId).collect(Collectors.toList());
-
-        List<Group> groups = groupRepository.findBy_idIn(groupIds);
-        List<GroupAccess> groupAccessesWithGroup = new ArrayList<>();
-
-        for(GroupAccess groupAccess : groupAccesses) {
-            groups.stream().filter(e -> e.getId().equals(groupAccess.getGroupId())).findFirst().ifPresent(e -> {
-                groupAccess.setGroup(e);
-                groupAccessesWithGroup.add(groupAccess);
-            });
-        }
-
-        project.setGroupAccesses(groupAccesses);
+        project.setGroupNames(
+                groupRepository.findBy_idIn(project.getGroupIds())
+                .stream().map(Group::getName).collect(Collectors.toList())
+        );
 
         return new ResponseEntity<>(
                 project,
@@ -117,41 +157,44 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
         );
     }
 
-    public ResponseEntity<Project> store(ProjectData data, Object ... params) {
+    public ResponseEntity<Project> store(ProjectData data, Object... params) {
 
-        if(data.getTrips() != null) {
-            List<ObjectId> groupIds = data.getTrips().stream()
-                    .map(TripStep1Data::getOwner)
-                    .collect(Collectors.toList());
+        List<ObjectId> groupIds = data.getTrips().stream()
+                .map(x -> x.stream().map(TripStep1Data::getOwner).collect(Collectors.toList()))
+                .flatMap(List::stream).distinct().collect(Collectors.toList());
 
-            if (groupRepository.countBy_idIn(groupIds) != groupIds.size())
-                throw new InvalidFieldsException("آی دی گروه ها نامعتبر است");
-        }
+        if (groupRepository.countBy_idIn(groupIds) != groupIds.size())
+            throw new InvalidFieldsException("آی دی گروه ها نامعتبر است");
 
         Project project = populateEntity(null, data);
 
         try {
             projectRepository.insert(project);
-        }
-        catch (Exception x) {
+        } catch (Exception x) {
             throw new InvalidFieldsException("نام وارد شده تکراری است");
         }
 
-        if(data.getTrips() != null) {
-            final int[] idx = {1};
-            data.getTrips().forEach(x -> {
+        final int[] idx = {1};
+        data.getTrips().forEach(x -> {
 
-                Trip trip = Trip
-                        .builder()
-                        .projectId(project.getId())
-                        .name(project.getName() + " - " + idx[0]).build();
+            Trip trip = Trip
+                    .builder()
+                    .projectId(project.getId())
+                    .name(project.getName() + " - " + idx[0]).build();
 
-                idx[0]++;
-                trip.setOwner(x.getOwner());
-                tripRepository.save(trip);
+            idx[0]++;
 
-            });
-        }
+            List<GroupAccess> groupsWithAccess = new ArrayList<>();
+            x.forEach(tripStep1Data -> groupsWithAccess.add(GroupAccess.builder()
+                            .groupId(tripStep1Data.getOwner())
+                            .writeAccess(tripStep1Data.getWriteAccess())
+                            .build()
+                    )
+            );
+
+            trip.setGroupsWithAccess(groupsWithAccess);
+            tripRepository.save(trip);
+        });
 
         return new ResponseEntity<>(project, HttpStatus.OK);
     }
@@ -159,14 +202,12 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
     @Override
     Project populateEntity(Project project, ProjectData projectData) {
 
-        if(project == null)
+        if (project == null)
             return Project.builder()
-                    .groupAccesses(projectData.getTrips()
-                            .stream().map(e -> GroupAccess.builder()
-                                    .groupId(e.getOwner())
-                                    .writeAccess(e.getWriteAccess())
-                                    .build()
-                            ).collect(Collectors.toList()))
+                    .groupIds(projectData.getTrips().stream()
+                            .map(x -> x.stream().map(TripStep1Data::getOwner)
+                                    .collect(Collectors.toList()))
+                            .flatMap(List::stream).distinct().collect(Collectors.toList()))
                     .name(projectData.getName())
                     .color(projectData.getColor())
                     .startAt(new Date(projectData.getStartAt()))
@@ -180,8 +221,16 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
         return project;
     }
 
-    public ResponseEntity<List<Project>> myProjects(ObjectId groupId) {
-        List<Project> projects = projectRepository.findByOwner(groupId);
+    public ResponseEntity<List<Project>> myProjects(ObjectId groupId, ObjectId userId) {
+
+        List<Project> projects = new ArrayList<>();
+        if(groupId != null)
+            projects = projectRepository.findByOwner(Collections.singletonList(groupId));
+        else {
+            List<Trip> trips = tripRepository.findActivesProjectIdsByAreaOwnerId(new Date(), userId);
+            if(trips.size() > 0)
+                projects = projectRepository.findByIds(trips.stream().map(Trip::getProjectId).collect(Collectors.toList()));
+        }
         return new ResponseEntity<>(projects, HttpStatus.OK);
     }
 

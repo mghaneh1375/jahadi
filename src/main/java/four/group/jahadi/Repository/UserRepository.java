@@ -22,6 +22,12 @@ public interface UserRepository extends MongoRepository<User, ObjectId>, Filtera
     @Query(value = "{ '_id': { $in: ?0 } }", fields = "{ 'name': 1, 'phone': 1, 'pic': 1, 'color': 1  }")
     List<User> findBy_idIn(List<ObjectId> ids);
 
+    @Query(value = "{ $and: [{'_id': { $in: ?0 }}, {'groupId': ?1}] }", count = true)
+    Integer countByIdsAndGroupId(List<ObjectId> ids, ObjectId groupId);
+
+    @Query(value = "{ 'groupId': ?0 }", count = true)
+    Integer countByGroupId(ObjectId groupId);
+
     @NotNull
     @Query(value = "{ '_id': ?0 }", fields = "{ 'notifs': 0  }")
     Optional<User> findById(@NotNull ObjectId id);
@@ -45,7 +51,7 @@ public interface UserRepository extends MongoRepository<User, ObjectId>, Filtera
             + "?#{ [6] == null ? { $where : 'true'} : { 'group_name' : [6] } },"
             + "?#{ [7] == null ? { $where : 'true'} : { 'group_id' : [7] } },"
             + "?#{ [8] == null ? { $where : 'true'} : { 'members' : {$exists: [8]} } },"
-            + "]}", fields = "{'id': 1, 'createdAt': 1, 'name': 1, 'nid': 1, 'phone': 1, 'sex': 1, 'groupName': 1, 'status': 1, 'accesses': 1}")
+            + "]}", fields = "{'id': 1, 'createdAt': 1, 'name': 1, 'nid': 1, 'phone': 1, 'sex': 1, 'groupName': 1, 'status': 1, 'accesses': 1, 'field': 1}")
     List<User> findAll(AccountStatus status, Access access, String name,
                        String NID, String phone, Sex sex, String groupName,
                        ObjectId groupId, Boolean justGroupRequests);

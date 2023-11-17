@@ -1,5 +1,6 @@
 package four.group.jahadi.Models;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.*;
 import org.bson.types.ObjectId;
@@ -16,14 +17,18 @@ import java.util.List;
 @AllArgsConstructor
 @Document(collection = "trip")
 @Builder
-public class Trip extends ModelWithUser {
+public class Trip extends Model {
 
     private String name;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Integer no;
-    private List<Area> areas = new ArrayList();
+
+    private List<Area> areas = new ArrayList<>();
 
     @Field("project_id")
     @JsonSerialize(using = ObjectIdSerialization.class)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private ObjectId projectId;
 
     @Field("start_at")
@@ -35,9 +40,14 @@ public class Trip extends ModelWithUser {
     private Date endAt;
 
     @Field("daily_start_at")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String dailyStartAt;
 
     @Field("daily_end_at")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String dailyEndAt;
+
+    @Field("groups_with_access")
+    private List<GroupAccess> groupsWithAccess;
 
 }

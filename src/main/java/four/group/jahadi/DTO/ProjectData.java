@@ -5,6 +5,8 @@ import four.group.jahadi.Enums.Color;
 import four.group.jahadi.Validator.ValidatedProject;
 import lombok.*;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.List;
 
 @NoArgsConstructor
@@ -14,11 +16,14 @@ import java.util.List;
 @ValidatedProject
 public class ProjectData {
 
+    @Size(min = 2, max = 50)
     String name;
     Color color;
 
     Long startAt;
     Long endAt;
 
-    List<TripStep1Data> trips = null;
+    @NotNull
+    @Size(min = 1)
+    List<List<TripStep1Data>> trips;
 }

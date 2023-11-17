@@ -5,10 +5,12 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import four.group.jahadi.Enums.Color;
 import lombok.*;
+import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import org.springframework.data.annotation.Transient;
 import java.util.Date;
 import java.util.List;
 
@@ -34,8 +36,12 @@ public class Project extends Model {
     @JsonSerialize(using = DateSerialization.class)
     private Date endAt;
 
-    @Field("group_accesses")
+    @Field("group_ids")
+    @JsonIgnore
+    private List<ObjectId> groupIds;
+
+    @Transient
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
-    private List<GroupAccess> groupAccesses;
+    private List<String> groupNames;
 
 }

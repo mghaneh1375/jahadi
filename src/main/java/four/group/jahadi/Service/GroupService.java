@@ -6,8 +6,10 @@ import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Exception.NotAccessException;
 import four.group.jahadi.Models.Group;
+import four.group.jahadi.Models.Trip;
 import four.group.jahadi.Models.User;
 import four.group.jahadi.Repository.GroupRepository;
+import four.group.jahadi.Repository.TripRepository;
 import four.group.jahadi.Repository.UserRepository;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -29,17 +33,25 @@ public class GroupService extends AbstractService<Group, GroupData> {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private ProjectService projectService;
+
+    @Autowired
+    private TripService tripService;
+
+    public static void fillGroupByUsers(List<Group> groups, UserRepository userRepository) {
+        List<ObjectId> userIds = groups.stream().map(Group::getOwner).collect(Collectors.toList());
+        List<User> users = userRepository.findBy_idIn(userIds);
+        groups.forEach(x -> x.setUser(users.stream().filter(itr -> x.getOwner().equals(itr.getId())).findFirst().orElse(null)));
+    }
+
     @Override
     public ResponseEntity<List<Group>> list(Object ... filters) {
 
         List<Group> groups = filters[0] == null ? groupRepository.findAll() :
                 groupRepository.findLikeName(filters[0].toString());
 
-        List<ObjectId> userIds = groups.stream().map(Group::getOwner).collect(Collectors.toList());
-        List<User> users = userRepository.findBy_idIn(userIds);
-
-        groups.forEach(x -> x.setUser(users.stream().filter(itr -> x.getOwner().equals(itr.getId())).findFirst().orElse(null)));
-
+        fillGroupByUsers(groups, userRepository);
         return new ResponseEntity<>(groups, HttpStatus.OK);
     }
 
@@ -113,5 +125,20 @@ public class GroupService extends AbstractService<Group, GroupData> {
             newOwner.getAccesses().add(Access.GROUP);
             userRepository.save(newOwner);
         }
+    }
+
+    public ResponseEntity<HashMap<String, Object>> statisticData(ObjectId groupId) {
+
+        HashMap<String, Object> statisticData = new HashMap<>();
+
+        statisticData.put("members", userRepository.countByGroupId(groupId));
+        statisticData.put("surgeries", 0);
+        statisticData.put("postRef", 0);
+        statisticData.put("totalCosts", 0);
+        statisticData.put("totalRefs", 0);
+        statisticData.put("activeProjects", projectService.myProjects(groupId, null).getBody());
+        statisticData.put("activeTrips", tripService.inProgressTripsForGroupAccess(groupId).getBody());
+
+        return new ResponseEntity<>(statisticData, HttpStatus.OK);
     }
 }

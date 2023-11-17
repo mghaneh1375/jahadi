@@ -3,12 +3,11 @@ package four.group.jahadi.Models;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import four.group.jahadi.Enums.Color;
 import lombok.*;
-import org.bson.types.ObjectId;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -32,5 +31,9 @@ public class Group extends ModelWithUser {
     @Field("is_active")
     @Builder.Default
     private boolean isActive = true;
+
+    @Transient
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    private List<Area> areas;
 
 }

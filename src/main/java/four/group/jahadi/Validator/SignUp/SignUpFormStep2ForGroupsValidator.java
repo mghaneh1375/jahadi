@@ -1,10 +1,13 @@
 package four.group.jahadi.Validator.SignUp;
 
 import four.group.jahadi.DTO.SignUp.SignUpStep2ForGroupData;
+import four.group.jahadi.Enums.GroupRegistrationPlace;
+import four.group.jahadi.Enums.Lodgment;
 import org.json.JSONObject;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
+import java.util.Objects;
 
 public class SignUpFormStep2ForGroupsValidator implements ConstraintValidator<ValidatedSignUpFormStep2ForGroups, SignUpStep2ForGroupData> {
 
@@ -81,6 +84,38 @@ public class SignUpFormStep2ForGroupsValidator implements ConstraintValidator<Va
 
         if(value.getGroupRegistrationPlace() == null) {
             errs.put("groupRegistrationPlace", "لطفا محل ثبت گروه را وارد نمایید");
+            isErrored = true;
+        }
+
+        if(value.getLodgment() != null &&
+                Objects.equals(value.getLodgment(), Lodgment.OTHER) &&
+                value.getLodgmentOther() == null
+        )  {
+            errs.put("lodgment", "لطفا محل استقرار گروه را وارد نمایید");
+            isErrored = true;
+        }
+
+        if(value.getLodgment() != null &&
+                !Objects.equals(value.getLodgment(), Lodgment.OTHER) &&
+                value.getLodgmentOther() != null
+        )  {
+            errs.put("lodgment", "محل استقرار گروه نامعتبر است");
+            isErrored = true;
+        }
+
+        if(value.getGroupRegistrationPlace() != null &&
+                Objects.equals(value.getGroupRegistrationPlace(), GroupRegistrationPlace.OTHER) &&
+                value.getGroupRegistrationPlaceOther() == null
+        ) {
+            errs.put("groupRegistrationPlace", "لطفا محل ثبت گروه را وارد نمایید");
+            isErrored = true;
+        }
+
+        if(value.getGroupRegistrationPlace() != null &&
+                !Objects.equals(value.getGroupRegistrationPlace(), GroupRegistrationPlace.OTHER) &&
+                value.getGroupRegistrationPlaceOther() != null
+        ) {
+            errs.put("groupRegistrationPlace", "محل ثبت گروه نامعتبر است");
             isErrored = true;
         }
 

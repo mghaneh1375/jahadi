@@ -34,7 +34,7 @@ public class AreaAPIRoutes extends Router {
             @RequestBody @Valid AreaData areaData
     ) throws UnAuthException, NotActivateAccountException {
         User user = getUser(request);
-        return areaService.store(areaData, user.getAccesses().contains(Access.ADMIN), tripId);
+        return areaService.store(areaData, user.getAccesses().contains(Access.ADMIN), tripId, user.getGroupId());
     }
 
 //    @PutMapping(value = "update/{tripId}")

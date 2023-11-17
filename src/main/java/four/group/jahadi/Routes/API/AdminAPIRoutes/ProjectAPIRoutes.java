@@ -1,6 +1,7 @@
 package four.group.jahadi.Routes.API.AdminAPIRoutes;
 
 import four.group.jahadi.DTO.ProjectData;
+import four.group.jahadi.Enums.Status;
 import four.group.jahadi.Models.Project;
 import four.group.jahadi.Service.ProjectService;
 import four.group.jahadi.Validator.ObjectIdConstraint;
@@ -32,10 +33,9 @@ public class ProjectAPIRoutes {
     @GetMapping(value = "/list")
     @ResponseBody
     public ResponseEntity<List<Project>> list(@RequestParam(value = "name", required = false) String name,
-                                              @RequestParam(value = "justActive", required = false) Boolean justActive,
-                                              @RequestParam(value = "justArchive", required = false) Boolean justArchive
+                                              @RequestParam(value = "status", required = false) Status status
     ) {
-        return projectService.list(name, justActive, justArchive);
+        return projectService.list(name, status);
     }
 
     @GetMapping(value = "/get/{id}")

@@ -24,6 +24,9 @@ public interface ProjectRepository extends MongoRepository<Project, ObjectId>, F
     List<User> findAll(String name, Boolean justActive, Boolean justArchive, Date now);
 
     @Query(value = "{'group_ids': {$in: ?0}}")
-    List<Project> findByOwner(ObjectId owner);
+    List<Project> findByOwner(List<ObjectId> owner);
+
+    @Query(value = "{'_id': {$in: ?0}}")
+    List<Project> findByIds(List<ObjectId> ids);
 
 }

@@ -28,4 +28,21 @@ public class SignUpStep4ForGroupData {
     List<MedicalExpertise> medicalExpertises;
 
 
+    private boolean adultEducation = false;
+    private boolean childEducation = false;
+    private boolean freeGlass = false;
+    private boolean freeHearingAids = false;
+    private boolean popEsmirTest = false;
+    private boolean cancerTest = false;
+    private boolean socialWorkAssistance = false;
+    private boolean quitAddiction = false;
+    private boolean familyPsychology = false;
+    private boolean urineAnalysis = false;
+    private boolean bloodCellsCountTest = false;
+    private boolean bioChemTest = false;
+    private boolean hormonTest = false;
+    private boolean movementHelpEquipments = false;
+
+
+
 }

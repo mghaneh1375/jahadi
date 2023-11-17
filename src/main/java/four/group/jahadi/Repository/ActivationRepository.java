@@ -20,7 +20,13 @@ public interface ActivationRepository extends MongoRepository<Activation, Object
     @Query(value = "{phone: ?0, code: ?1, token: ?2}")
     Optional<Activation> findByPhoneAndCodeAndToken(String NID, Integer code, String token);
 
+    @Query(value = "{nid: ?0, code: ?1, token: ?2}")
+    Optional<Activation> findByNIDAndCodeAndToken(String NID, Integer code, String token);
+
     @Query(value = "{phone: ?0, created_at:  {$lt: ?1}}", delete = true)
     void deleteByPhone(String phone, long createdAt);
+
+    @Query(value = "{created_at:  {$lt: ?0}}", delete = true)
+    void deleteExpired(long createdAt);
 
 }

@@ -43,7 +43,7 @@ public class UserAPIRoutes extends Router {
     @ResponseBody
     public void setPic(HttpServletRequest request,
                        @RequestBody MultipartFile file) throws UnAuthException, NotActivateAccountException {
-        userService.setPic(getUser(request).getId(), file);
+        userService.setPic(getUserWithOutCheckCompleteness(request).getId(), file);
     }
 
     @PutMapping(value = "setGroup/{code}")
@@ -74,7 +74,8 @@ public class UserAPIRoutes extends Router {
 
     @PostMapping(value = "checkSignUpFormStep2")
     @ResponseBody
-    public void checkSignUpFormStep2(@RequestBody @Valid SignUpStep2Data data) {}
+    public void checkSignUpFormStep2(@RequestBody @Valid SignUpStep2Data data) {
+    }
 
     @PostMapping(value = "checkSignUpFormStep3")
     @ResponseBody
@@ -115,7 +116,6 @@ public class UserAPIRoutes extends Router {
     }
 
 
-
     @PostMapping(value = "/update")
     public void update(HttpServletRequest request,
                        @RequestBody @Valid UpdateInfoData updateInfoData) {
@@ -126,6 +126,14 @@ public class UserAPIRoutes extends Router {
     @ResponseBody
     public ResponseEntity<HashMap<String, Object>> forgetPassword(@RequestParam String NID) {
         return userService.forgetPass(convertPersianDigits(NID));
+    }
+
+    @PostMapping(value = "/checkForgetPassCode")
+    @ResponseBody
+    public ResponseEntity<String> checkForgetPassCode(
+            @RequestBody @Valid CheckForgetPassCodeRequest checkCodeRequest
+    ) {
+        return userService.checkForgetPassCode(checkCodeRequest);
     }
 
     @PostMapping(value = "/checkCode")

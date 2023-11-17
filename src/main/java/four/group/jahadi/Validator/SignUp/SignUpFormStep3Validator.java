@@ -22,7 +22,8 @@ public class SignUpFormStep3Validator implements ConstraintValidator<ValidatedSi
         JSONObject errs = new JSONObject();
 
         if(value.getNearbyName() == null || value.getNearbyPhone() == null ||
-                value.getPassword() == null || value.getPasswordRepeat() == null
+                value.getNearbyRel() == null || value.getPassword() == null ||
+                value.getPasswordRepeat() == null
         ) {
             errs.put("data", "لطفا اطلاعات تمامی فیلدها را وارد نمایید");
 

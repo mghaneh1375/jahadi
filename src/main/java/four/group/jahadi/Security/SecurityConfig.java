@@ -40,10 +40,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/api/user/seed",
             "/api/user/groupSignUp",
             "/api/user/checkCode",
+            "/api/user/checkForgetPassCode",
             "/api/user/checkSignUpFormStep1",
             "/api/user/checkSignUpFormStep2",
             "/api/user/checkSignUpFormStep3",
             "/api/user/signUp",
+            "/api/user/forgetPassword",
+            "/api/user/resetPassword",
     };
 
     @Override
@@ -66,6 +69,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(AUTH_WHITELIST).permitAll()
                 .antMatchers("/api/admin/**").hasAuthority("ADMIN")
                 .antMatchers("/api/group/**").hasAnyAuthority("ADMIN", "GROUP")
+                .antMatchers("/api/area/**").hasAnyAuthority("ADMIN", "GROUP")
                 .anyRequest()
                 .authenticated()
         ;

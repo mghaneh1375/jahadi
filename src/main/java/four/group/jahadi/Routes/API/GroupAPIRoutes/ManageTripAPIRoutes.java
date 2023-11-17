@@ -1,8 +1,9 @@
-package four.group.jahadi.Routes.API;
+package four.group.jahadi.Routes.API.GroupAPIRoutes;
 
 import four.group.jahadi.DTO.Trip.TripStep1Data;
 import four.group.jahadi.DTO.Trip.TripStep2Data;
 import four.group.jahadi.Enums.Access;
+import four.group.jahadi.Enums.Status;
 import four.group.jahadi.Exception.NotActivateAccountException;
 import four.group.jahadi.Exception.UnAuthException;
 import four.group.jahadi.Models.Trip;
@@ -18,11 +19,12 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
-@RequestMapping(value = "/api/trip")
+@RequestMapping(value = "api/group/trip")
 @Validated
-public class TripAPIRoutes extends Router {
+public class ManageTripAPIRoutes extends Router {
 
     @Autowired
     private TripService tripService;
@@ -44,8 +46,16 @@ public class TripAPIRoutes extends Router {
     ) throws UnAuthException, NotActivateAccountException {
         User user = getUser(request);
         tripService.update(tripId, tripStep2Data,
-                user.getAccesses().contains(Access.ADMIN), user.getId()
+                user.getAccesses().contains(Access.ADMIN), user.getGroupId()
         );
+    }
+
+    @GetMapping(value = "myTrips")
+    public ResponseEntity<List<Trip>> myTrips(
+            HttpServletRequest request,
+            @RequestParam(value = "status", required = false) Status status
+    ) {
+        return tripService.list(getGroup(request), status);
     }
 
 }

@@ -24,7 +24,10 @@ public class Activation {
     private User user;
     private String token;
     private String phone;
+    private String nid;
     private Integer code;
-    private Long createdAt;
     private Boolean validated;
+
+    @Field("created_at")
+    private Long createdAt;
 }

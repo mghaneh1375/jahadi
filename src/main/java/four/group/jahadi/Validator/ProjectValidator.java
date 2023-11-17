@@ -19,7 +19,7 @@ public class ProjectValidator implements ConstraintValidator<ValidatedProject, P
         boolean isErrored = false;
         JSONObject errs = new JSONObject();
 
-        if (value.getName() == null || value.getName().length() < 3) {
+        if (value.getName() == null) {
             errs.put("name", "لطفا نام پروژه را وارد نمایید (حداقل 3 کاراکتر)");
             isErrored = true;
         }

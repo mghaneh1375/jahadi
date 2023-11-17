@@ -87,6 +87,57 @@ public class FilteringFactory {
         return filtering;
     }
 
+    public static <T> Filtering abstractParseFromParams(List<List<Object>> filter, Class<T> typeParameterClass) {
+
+        Filtering filtering = new Filtering();
+
+        // a filter is in the format: key|operator|value
+        for (List<Object> filterSplit : filter) {
+
+            // check if the filter is in the correct format
+            if (filterSplit.size() != 3) {
+                throw new IllegalArgumentException("Filtering parameter is not in the correct format");
+            }
+
+            try {
+                // parse the operator
+                Filtering.Operator operator = Filtering.Operator.fromString(filterSplit.get(1).toString());
+
+                // the key can be nested, so we split by . to get the nested keys
+                // example1: key1.key2.key3 will result in nested = [key1, key2, key3]
+                // example2: key1 will result in nested = [key1]
+                String[] nested = filterSplit.get(0).toString().split("\\.");
+
+                // if the operator is "in" or "nin", we need to split the value by ; to get the list of values
+                // "in" and nin are the only operators that can have multiple values
+                // "in" checks if the value is in the list of values
+                // "nin" checks if the value is not in the list of values
+                if (operator == Filtering.Operator.in || operator == Filtering.Operator.nin) {
+                    Set<Object> list = new HashSet<>();
+                    for (String value : filterSplit.get(2).toString().split(";")) {
+                        if(ObjectIdValidator.isValid(value))
+                            list.add(new ObjectId(value));
+                        else
+                            nestedObject(typeParameterClass, value, nested);
+                    }
+
+                    // add the filter to the filtering object
+                    filtering.addFilter(filterSplit.get(0).toString(), operator, list);
+                } else {
+
+                    // add the filter to the filtering object
+                    filtering.addFilter(filterSplit.get(0).toString(), Filtering.Operator.fromString(filterSplit.get(1).toString()),
+                            abstractNestedObject(typeParameterClass, filterSplit.get(2), nested));
+                }
+            } catch (NoSuchFieldException e) {
+                throw new IllegalArgumentException("Filtering parameter not allowed: " + filterSplit.get(0).toString());
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return filtering;
+    }
+
     // this method uses recursion to get the last primitive type in the nested keys by travelling down the object tree
     // this recursion method is safe because in the worst case, the number of recursive calls is equal to the number of nested keys
     // in contradiction to the popular belief, recursion is not always bad and when you need to travel down an object tree, it is the best solution
@@ -103,6 +154,33 @@ public class FilteringFactory {
         // not only have reached the last nested key, but we also have the type of the field
         // using the type of the field, we can get the correct converter from the map and convert the value
         return Optional.of(converterForClass.get(field.getType()).convert(value)).orElseThrow(() ->
+                new IllegalArgumentException("Filtering not supported for: ." + nested[0]));
+    }
+
+
+    // this method uses recursion to get the last primitive type in the nested keys by travelling down the object tree
+    // this recursion method is safe because in the worst case, the number of recursive calls is equal to the number of nested keys
+    // in contradiction to the popular belief, recursion is not always bad and when you need to travel down an object tree, it is the best solution
+    private static Object abstractNestedObject(Class classParameter, Object value, String[] nested) throws NoSuchFieldException, IllegalAccessException {
+
+        if(1 == 1)
+            return value;
+
+        Field field = classParameter.getDeclaredField(nested[0]);
+        if (nested.length > 1) {
+            // if there are more nested keys, we need to travel down the object tree
+            // we do this by calling this method again by removing the first nested key and passing the type of the field
+            // along with the value and the remaining nested keys
+            return abstractNestedObject(field.getType(), value, Arrays.copyOfRange(nested, 1, nested.length));
+        }
+
+        if(field.getType().equals(value.getClass()))
+            return value;
+
+        // when nested.length == 1, we have reached the last nested key
+        // not only have reached the last nested key, but we also have the type of the field
+        // using the type of the field, we can get the correct converter from the map and convert the value
+        return Optional.of(converterForClass.get(field.getType()).convert(value.toString())).orElseThrow(() ->
                 new IllegalArgumentException("Filtering not supported for: ." + nested[0]));
     }
 }

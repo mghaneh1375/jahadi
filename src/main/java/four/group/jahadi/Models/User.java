@@ -2,6 +2,7 @@ package four.group.jahadi.Models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import four.group.jahadi.DTO.SignUp.SignUpStep3ForGroupData;
 import four.group.jahadi.Enums.*;
 import lombok.*;
 import org.bson.types.ObjectId;
@@ -9,6 +10,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
 
 
@@ -44,9 +46,12 @@ public class User extends Model implements Serializable {
     private String university;
 
     @Field("NID")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String nid;
 
     private String phone;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Sex sex;
 
 
@@ -71,6 +76,10 @@ public class User extends Model implements Serializable {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private BloodType bloodType;
 
+    @Field("nearby_rel")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String nearbyRel;
+
     @Field("nearby_name")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String nearbyName;
@@ -91,6 +100,7 @@ public class User extends Model implements Serializable {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<String> notifs;
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private AccountStatus status;
 
     @Field("group_name")
@@ -171,6 +181,14 @@ public class User extends Model implements Serializable {
     @Field("group_registration_place")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private GroupRegistrationPlace groupRegistrationPlace;
+
+    @Field("lodgment_other")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String lodgmentOther;
+
+    @Field("group_registration_place_other")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String groupRegistrationPlaceOther;
 
     @Field("trip_frequency")
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -261,6 +279,93 @@ public class User extends Model implements Serializable {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Integer geneticallyBedCount;
 
+    @Field("optometry_equip_1")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Integer optometryEquip1;
+
+    @Field("optometry_equip_2")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Integer optometryEquip2;
+
+    @Field("optometry_equip_3")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Integer optometryEquip3;
+
+    @Field("optometry_equip_4")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Integer optometryEquip4;
+
+    @Field("optometry_equip_5")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Integer optometryEquip5;
+
+    @Field("audiologist_equip_1")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Integer audiologistEquip1;
+
+    @Field("audiologist_equip_2")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Integer audiologistEquip2;
+
+    @Field("audiologist_equip_3")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Integer audiologistEquip3;
+
+    @Field("audiologist_equip_4")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Integer audiologistEquip4;
+
+    @Field("audiologist_equip_5")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Integer audiologistEquip5;
+
+    @Field("imaging_equip_1")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Integer imagingEquip1;
+
+    @Field("imaging_equip_2")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Integer imagingEquip2;
+
+    @Field("imaging_equip_3")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Integer imagingEquip3;
+
+    @Field("laboratory_equip_1")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Integer laboratoryEquip1;
+
+    @Field("laboratory_equip_2")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Integer laboratoryEquip2;
+
+    @Field("laboratory_equip_3")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Integer laboratoryEquip3;
+
+    @Field("laboratory_equip_4")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Integer laboratoryEquip4;
+
+    @Field("laboratory_equip_5")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Integer laboratoryEquip5;
+
+    @Field("media_equip_1")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Integer mediaEquip1;
+
+    @Field("media_equip_2")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Integer mediaEquip2;
+
+    @Field("media_equip_3")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Integer mediaEquip3;
+
+    @Field("custom_equips")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private HashMap<String, Integer> customEquips;
 
     @Field("screening_sicknesses")
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -283,5 +388,62 @@ public class User extends Model implements Serializable {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     List<MedicalExpertise> medicalExpertises;
 
+
+
+    @Field("adult_education")
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+    private boolean adultEducation = false;
+
+    @Field("child_education")
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+    private boolean childEducation = false;
+
+    @Field("free_glass")
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+    private boolean freeGlass = false;
+
+    @Field("free_hearing_aids")
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+    private boolean freeHearingAids = false;
+
+    @Field("pop_esmir_test")
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+    private boolean popEsmirTest = false;
+
+    @Field("cancer_test")
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+    private boolean cancerTest = false;
+
+    @Field("social_work_assistance")
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+    private boolean socialWorkAssistance = false;
+
+    @Field("quit_addiction")
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+    private boolean quitAddiction = false;
+
+    @Field("family_psychology")
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+    private boolean familyPsychology = false;
+
+    @Field("urine_analysis")
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+    private boolean urineAnalysis = false;
+
+    @Field("blood_cells_count_test")
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+    private boolean bloodCellsCountTest = false;
+
+    @Field("bio_chem_test")
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+    private boolean bioChemTest = false;
+
+    @Field("hormon_test")
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+    private boolean hormonTest = false;
+
+    @Field("movement_help_equipments")
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+    private boolean movementHelpEquipments = false;
 
 }

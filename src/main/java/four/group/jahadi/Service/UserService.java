@@ -5,11 +5,10 @@ import four.group.jahadi.Enums.Access;
 import four.group.jahadi.Enums.AccountStatus;
 import four.group.jahadi.Enums.Sex;
 import four.group.jahadi.Exception.*;
-import four.group.jahadi.Models.Activation;
-import four.group.jahadi.Models.Group;
-import four.group.jahadi.Models.User;
+import four.group.jahadi.Models.*;
 import four.group.jahadi.Repository.ActivationRepository;
 import four.group.jahadi.Repository.GroupRepository;
+import four.group.jahadi.Repository.TripRepository;
 import four.group.jahadi.Repository.UserRepository;
 import four.group.jahadi.Security.JwtTokenProvider;
 import four.group.jahadi.Utility.Cache;
@@ -45,6 +44,9 @@ public class UserService extends AbstractService<User, SignUpData> {
 
     @Autowired
     private GroupRepository groupRepository;
+
+    @Autowired
+    private TripRepository tripRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -136,7 +138,7 @@ public class UserService extends AbstractService<User, SignUpData> {
         User user = new User();
         copyProperties(dto, user);
 
-        return sendSMS(user);
+        return sendSMS(user, true);
     }
 
     public void checkGroup(SignUpStep3Data dto) {
@@ -163,6 +165,14 @@ public class UserService extends AbstractService<User, SignUpData> {
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setStatus(AccountStatus.PENDING);
         user.setAccesses(Collections.singletonList(Access.JAHADI));
+
+        user.setNearbyName(dto.getNearbyName());
+        user.setNearbyPhone(dto.getNearbyPhone());
+        user.setNearbyRel(dto.getNearbyRel());
+        user.setAllergies(dto.getAllergies());
+        user.setDiseases(dto.getDiseases());
+        user.setAbilities(dto.getAbilities());
+        user.setBloodType(dto.getBloodType());
 
         activationRepository.delete(activation);
         userRepository.insert(user);
@@ -201,10 +211,10 @@ public class UserService extends AbstractService<User, SignUpData> {
                 () -> new InvalidFieldsException("کد ملی وارد شده در سامانه موجود نمی باشد")
         );
 
-        return sendSMS(user);
+        return sendSMS(user, false);
     }
 
-    private ResponseEntity<HashMap<String, Object>> sendSMS(User user) {
+    private ResponseEntity<HashMap<String, Object>> sendSMS(User user, boolean storeUserDoc) {
 
         PairValue existTokenP = existSMS(user.getPhone());
         HashMap<String, Object> output = new HashMap<>();
@@ -214,7 +224,7 @@ public class UserService extends AbstractService<User, SignUpData> {
             output.put("reminder", existTokenP.getValue());
         }
         else {
-            String token = sendNewSMS(user);
+            String token = sendNewSMS(user, storeUserDoc);
             output.put("token", token);
             output.put("reminder", SMS_RESEND_SEC);
         }
@@ -222,7 +232,7 @@ public class UserService extends AbstractService<User, SignUpData> {
         return new ResponseEntity<>(output, HttpStatus.OK);
     }
 
-    private String sendNewSMS(User user) {
+    private String sendNewSMS(User user, boolean storeUserDoc) {
 
         int code = Utility.randInt();
         String token = Utility.randomString(20);
@@ -233,15 +243,19 @@ public class UserService extends AbstractService<User, SignUpData> {
             activationRepository.deleteByPhone(user.getPhone(), now);
 
             Activation activation = Activation.builder()
-                    .phone(user.getPhone())
-                    .user(user)
                     .token(token)
                     .code(code)
                     .createdAt(now)
                     .build();
 
-            activationRepository.insert(activation);
+            if(storeUserDoc) {
+                activation.setUser(user);
+                activation.setPhone(user.getPhone());
+            }
+            else
+                activation.setNid(user.getNid());
 
+            activationRepository.insert(activation);
             Utility.sendSMS(user.getPhone(), code + "", "", "", "activation");
 
         }).start();
@@ -305,7 +319,7 @@ public class UserService extends AbstractService<User, SignUpData> {
 
         User user = activation.getUser();
 
-        if(user.getCid() != null) {
+        if(user.getCid() != null && userRepository.countByNID(user.getNid()) == 0) {
 
             userRepository.insert(user);
             activationRepository.delete(activation);
@@ -323,6 +337,24 @@ public class UserService extends AbstractService<User, SignUpData> {
         return new ResponseEntity<>("", HttpStatus.OK);
     }
 
+
+    public ResponseEntity<String> checkForgetPassCode(CheckForgetPassCodeRequest checkCodeRequest) {
+
+        Activation activation = activationRepository.findByNIDAndCodeAndToken(
+                checkCodeRequest.getNid(), checkCodeRequest.getCode(), checkCodeRequest.getToken()
+        ).orElseThrow(() -> {
+            throw new InvalidFieldsException("کد وارد شده نامعتبر است");
+        });
+
+        if (activation.getCreatedAt() < System.currentTimeMillis() - SMS_RESEND_MSEC)
+            throw new InvalidFieldsException("کد موردنظر شما منقضی شده است");
+
+        activation.setValidated(true);
+        activationRepository.save(activation);
+
+        return new ResponseEntity<>("", HttpStatus.OK);
+    }
+
     public void resetPassword(ResetPasswordRequest request) {
 
         if (!Utility.validationNationalCode(request.getNid()))
@@ -334,27 +366,26 @@ public class UserService extends AbstractService<User, SignUpData> {
         if (request.getCode() < 100000 || request.getCode() > 999999)
             throw new InvalidFieldsException("کد وارد شده معتبر نمی باشد.");
 
+         Activation activation =
+                 activationRepository.findByNIDAndCodeAndToken(request.getNid(), request.getCode(), request.getToken())
+                 .orElseThrow(() -> {
+                     throw new InvalidFieldsException("کد وارد شده نامعتبر است");
+                 });
+
+         if(!activation.getValidated())
+             throw new NotAccessException();
+
         if (!request.getPassword().equals(request.getRepeatPassword()))
             throw new InvalidFieldsException("رمزجدید و تکرار آن یکسان نیستند.");
 
         if (request.getPassword().length() < 6)
             throw new InvalidFieldsException("رمزجدید انتخاب شده قوی نیست.");
 
-//        Activation activation = activationRepository.findByPhoneAndCodeAndToken(
-//                request.getNid(), request.getCode(), request.getToken()
-//        ).orElseThrow(() -> {
-//            throw new InvalidFieldsException("کد وارد شده معتبر نیست");
-//        });
-//
-//        if (activation.getCreatedAt() < System.currentTimeMillis() - SMS_VALIDATION_EXPIRATION_MSEC_LONG)
-//            throw new InvalidFieldsException("توکن موردنظر منقضی شده است.");
-//
-//        activationRepository.delete(activation);
+        activationRepository.delete(activation);
 
-//        User user = userRepository.findByPhone(activation.getPhone()).orElseThrow(InvalidIdException::new);
-//
-//        user.setPassword(getEncPass(request.getPassword()));
-//        userRepository.save(user);
+        User user = userRepository.findByNID(activation.getNid()).orElseThrow(InvalidIdException::new);
+        user.setPassword(getEncPass(request.getPassword()));
+        userRepository.save(user);
     }
 
     public String toggleStatus(ObjectId userId) {
@@ -562,7 +593,7 @@ public class UserService extends AbstractService<User, SignUpData> {
         if (userRepository.countByNID(dto.getNid()) > 0)
             throw new InvalidFieldsException("کد ملی وارد شده در سیستم موجود است");
 
-        return sendSMS(populateEntity(dto));
+        return sendSMS(populateEntity(dto), true);
     }
 
     public void signUpStep2ForGroups(User user, SignUpStep2ForGroupData dto) {
@@ -582,6 +613,24 @@ public class UserService extends AbstractService<User, SignUpData> {
     public void signUpStep4ForGroups(User user, SignUpStep4ForGroupData dto) {
         copyProperties(dto, user);
         userRepository.save(user);
+    }
+
+    public ResponseEntity<List<User>> findGroupMembersByRegionOwner(ObjectId userId, ObjectId groupId) {
+
+        List<Trip> trips =
+                tripRepository.findActivesProjectIdsByAreaOwnerId(new Date(), userId);
+
+        if(trips.size() == 0)
+            throw new NotAccessException();
+
+        return new ResponseEntity<>(
+                userRepository.findAll(
+                        AccountStatus.ACTIVE, Access.JAHADI,
+                        null, null, null, null,
+                        null, groupId, null
+                ),
+                HttpStatus.OK
+        );
     }
 
 }

@@ -10,8 +10,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
+import java.util.HashMap;
 import java.util.List;
 
 @RestController
@@ -50,4 +52,11 @@ public class AdminGroupAPIRoutes {
         groupService.setNewOwner(groupId, userId);
     }
 
+    @GetMapping(value = "groupStatisticData/{groupId}")
+    @ResponseBody
+    public ResponseEntity<HashMap<String, Object>> statisticData(
+            @PathVariable @ObjectIdConstraint ObjectId groupId
+    ) {
+        return groupService.statisticData(groupId);
+    }
 }

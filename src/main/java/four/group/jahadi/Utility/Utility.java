@@ -5,16 +5,13 @@ import four.group.jahadi.Kavenegar.excepctions.ApiException;
 import four.group.jahadi.Kavenegar.excepctions.HttpException;
 import four.group.jahadi.Kavenegar.models.SendResult;
 import four.group.jahadi.Validator.PhoneValidator;
-import org.bson.Document;
 import org.json.JSONObject;
 
 import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 import java.util.Random;
-import java.util.regex.Pattern;
 
 import static four.group.jahadi.Utility.StaticValues.DEV_MODE;
 
