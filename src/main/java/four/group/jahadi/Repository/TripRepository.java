@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface TripRepository extends MongoRepository<Trip, ObjectId>, FilterableRepository<Trip> {
@@ -21,6 +22,25 @@ public interface TripRepository extends MongoRepository<Trip, ObjectId>, Filtera
     @Query(value = "{$and: [{'startAt': {$lte: ?0}}, {'endAt': {$gte: ?0}}, {'groupsWithAccess.groupId': ?1}]  }", fields = "{'projectId': false, 'areas.members': false, 'createdAt': false}")
     List<Trip> findActivesByGroupId(Date curr, ObjectId groupId);
 
-    @Query(value = "{$and: [{'startAt': {$gte: ?0}}, {'areas.ownerId': ?1}]  }")
-    List<Trip> findNotStartedByAreaOwnerId(Date curr, ObjectId areaOwnerId);
+    @Query(value = "{$and: [{'startAt': {$gte: ?0}}, {'areas.id': ?1}, {'areas.ownerId': ?2}]  }")
+    Optional<Trip> findNotStartedByAreaOwnerId(Date curr, ObjectId areaId, ObjectId areaOwnerId);
+
+    @Query(value = "{$and: [{'endAt': {$gte: ?0}}, {'areas.ownerId': ?1}]  }",
+            fields = "{'groupsWithAccess': false, 'projectId':  false, " +
+                    "'createdAt':  false, 'areas.members': false, " +
+                    "'areas.ownerId': false, 'areas.country': false," +
+                    "'areas.city': false, 'areas.state': false, 'areas.lat': false," +
+                    "'areas.lng': false, 'areas.dispatchers': false, 'areas.modules': false}"
+    )
+    List<Trip> findNotFinishedByAreaOwnerId(Date curr, ObjectId areaOwnerId);
+
+
+    @Query(value = "{'areas.id': ?0, 'areas.ownerId': ?1}", fields = "{'areas.members': true, 'areas.id': true}")
+    Optional<Trip> getMembersByAreaIdAndOwnerId(ObjectId areaId, ObjectId areaOwnerId);
+
+    @Query(value = "{'areas.id': ?0, 'areas.ownerId': ?1}")
+    Optional<Trip> findByAreaIdAndOwnerId(ObjectId areaId, ObjectId areaOwnerId);
+
+    @Query(value = "{$and: [{'areas.id': ?0}, {$or: [{'areas.ownerId': ?1}, {'areas.members': ?1}]}]  }")
+    Optional<Trip> findByAreaIdAndResponsibleId(ObjectId areaId, ObjectId userId);
 }

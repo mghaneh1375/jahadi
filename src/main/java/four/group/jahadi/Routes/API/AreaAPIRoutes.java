@@ -7,7 +7,7 @@ import four.group.jahadi.Exception.UnAuthException;
 import four.group.jahadi.Models.Area;
 import four.group.jahadi.Models.User;
 import four.group.jahadi.Routes.Router;
-import four.group.jahadi.Service.AreaService;
+import four.group.jahadi.Service.Area.AreaService;
 import four.group.jahadi.Validator.ObjectIdConstraint;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;

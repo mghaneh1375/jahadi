@@ -3,13 +3,11 @@ package four.group.jahadi.Service;
 import four.group.jahadi.DTO.ModuleData;
 import four.group.jahadi.Models.Module;
 import four.group.jahadi.Models.PaginatedResponse;
-import four.group.jahadi.Repository.FilteringFactory;
 import four.group.jahadi.Repository.ModuleRepository;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -50,7 +48,7 @@ public class ModuleService {
 
     public String store(ModuleData moduleData) {
         Module newModule = moduleRepository.insert(populateModuleEntity(null, moduleData));
-        return generateSuccessMsg("id", newModule.get_id());
+        return generateSuccessMsg("id", newModule.getId());
     }
 
     public String update(ObjectId id, ModuleData moduleData) {
@@ -81,5 +79,9 @@ public class ModuleService {
         module.setHasAccessToUploadDoc(moduleData.isHasAccessToUploadDoc());
 
         return module;
+    }
+
+    public ResponseEntity<List<Module>> findAllDigests() {
+        return new ResponseEntity<>(moduleRepository.findAllDigests(), HttpStatus.OK);
     }
 }

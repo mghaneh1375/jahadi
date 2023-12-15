@@ -62,14 +62,16 @@ public class ExceptionHandler extends ResponseEntityExceptionHandler {
             errors.append(error.getField()).append(": ").append(error.getDefaultMessage());
 
         for (ObjectError error : ex.getBindingResult().getGlobalErrors())
-            errors.append(error.getObjectName()).append(": ").append(error.getDefaultMessage());
+            errors.append(error.getDefaultMessage());
 
         headers.add("Content-Type", "application/json");
 
         return new ResponseEntity<>(
-                new JSONObject().put("status", "nok").put("msg", errors.toString()).toString(),
+                new JSONObject()
+                        .put("status", "nok")
+                        .put("fields", new JSONObject(errors.toString())).toString(),
                 headers,
-                HttpStatus.BAD_REQUEST);
+                HttpStatus.NOT_ACCEPTABLE);
     }
 
     @Override

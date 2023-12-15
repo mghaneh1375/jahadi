@@ -28,16 +28,16 @@ public class PublicAPIRoutes {
     }
 
 
-    @GetMapping(value = "/getStates/{stateId}")
+    @GetMapping(value = "/getStates/{countryId}")
     @ResponseBody
-    public ResponseEntity<List<State>> getStates(@PathVariable @ObjectIdConstraint ObjectId stateId) {
-        return cityService.getStates(stateId);
+    public ResponseEntity<List<State>> getStates(@PathVariable @ObjectIdConstraint ObjectId countryId) {
+        return cityService.getStates(countryId);
     }
 
-    @GetMapping(value = "/getCities/{cityId}")
+    @GetMapping(value = "/getCities/{stateId}")
     @ResponseBody
-    public ResponseEntity<List<City>> getCities(@PathVariable @ObjectIdConstraint ObjectId cityId) {
-        return cityService.getCities(cityId);
+    public ResponseEntity<List<City>> getCities(@PathVariable @ObjectIdConstraint ObjectId stateId) {
+        return cityService.getCities(stateId);
     }
 
 }

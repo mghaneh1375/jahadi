@@ -48,6 +48,7 @@ public class Trip extends Model {
     private String dailyEndAt;
 
     @Field("groups_with_access")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<GroupAccess> groupsWithAccess;
 
 }

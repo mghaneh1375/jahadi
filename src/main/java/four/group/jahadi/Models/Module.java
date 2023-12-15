@@ -1,6 +1,7 @@
 package four.group.jahadi.Models;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,17 +18,16 @@ import javax.persistence.Id;
 @NoArgsConstructor
 @AllArgsConstructor
 @Document(collection = "module")
-public class Module  {
-
-    @Id
-    @MongoId
-    @Field("_id")
-    private ObjectId _id;
+public class Module extends Model {
 
     private String name;
     private String section;
+
+    @JsonIgnore
     private boolean hasAccessToFullDocs;
+    @JsonIgnore
     private boolean hasAccessToUploadDoc;
+    @JsonIgnore
     private boolean canSuggestDrug;
 
     public void setName(String name) {

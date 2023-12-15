@@ -71,7 +71,7 @@ public class ModuleAPIRoutes {
             return generateErr("id is not valid");
 
         JSONObject jsonObject = new JSONObject()
-                    .put("id", module.get_id().toString())
+                    .put("id", module.getId().toString())
                     .put("name", module.getName())
                     .put("section", module.getSection())
                     .put("canSuggestDrug", module.isCanSuggestDrug()

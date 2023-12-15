@@ -19,11 +19,16 @@ public interface UserRepository extends MongoRepository<User, ObjectId>, Filtera
     @Query(value = "{'_id':  ?0, 'status':  'ACTIVE'}", count = true)
     Integer countActiveBy_id(ObjectId id);
 
-    @Query(value = "{ '_id': { $in: ?0 } }", fields = "{ 'name': 1, 'phone': 1, 'pic': 1, 'color': 1  }")
+    @Query(value = "{ '_id': { $in: ?0 } }",
+            fields = "{ 'name': 1, 'nid': 1,  'phone': 1, 'field': 1, 'pic': 1, 'color': 1, 'sex': 1  }"
+    )
     List<User> findBy_idIn(List<ObjectId> ids);
 
     @Query(value = "{ $and: [{'_id': { $in: ?0 }}, {'groupId': ?1}] }", count = true)
     Integer countByIdsAndGroupId(List<ObjectId> ids, ObjectId groupId);
+
+    @Query(value = "{'_id': { $in: ?0 }}", count = true)
+    Integer countByIds(List<ObjectId> ids);
 
     @Query(value = "{ 'groupId': ?0 }", count = true)
     Integer countByGroupId(ObjectId groupId);
