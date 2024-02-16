@@ -36,7 +36,7 @@ public class MembersServiceInArea {
 
     public ResponseEntity<List<User>> members(ObjectId userId, ObjectId areaId) {
         return new ResponseEntity<>(
-                userRepository.findBy_idIn(fetchMemberIds(tripRepository, userId, areaId)),
+                userRepository.findByIdsIn(fetchMemberIds(tripRepository, userId, areaId)),
                 HttpStatus.OK
         );
     }

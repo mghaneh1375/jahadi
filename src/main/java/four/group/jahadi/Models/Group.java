@@ -1,6 +1,7 @@
 package four.group.jahadi.Models;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import four.group.jahadi.Enums.Color;
 import lombok.*;
 import org.springframework.data.annotation.Transient;
@@ -23,6 +24,7 @@ public class Group extends ModelWithUser {
     private String name;
 
     @Builder.Default
+    @JsonSerialize(using = ColorSerialization.class)
     private Color color = Color.BLUE;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -36,4 +38,7 @@ public class Group extends ModelWithUser {
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     private List<Area> areas;
 
+    @Transient
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    private Integer tripsCount;
 }

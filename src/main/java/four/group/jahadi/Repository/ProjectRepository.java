@@ -26,7 +26,14 @@ public interface ProjectRepository extends MongoRepository<Project, ObjectId>, F
     @Query(value = "{'group_ids': {$in: ?0}}")
     List<Project> findByOwner(List<ObjectId> owner);
 
+    @Query(value = "{'name': ?0}", count = true)
+    Integer countByName(String name);
+
     @Query(value = "{'_id': {$in: ?0}}")
     List<Project> findByIds(List<ObjectId> ids);
+
+
+    @Query(value = "{'_id': {$in: ?0}}", fields = "{'name': 1}")
+    List<Project> findDigestByIds(List<ObjectId> ids);
 
 }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.*;
 import org.bson.types.ObjectId;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
@@ -24,7 +25,8 @@ public class Trip extends Model {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Integer no;
 
-    private List<Area> areas = new ArrayList<>();
+    @Builder.Default
+    private List<Area> areas = List.of();
 
     @Field("project_id")
     @JsonSerialize(using = ObjectIdSerialization.class)
@@ -33,10 +35,12 @@ public class Trip extends Model {
 
     @Field("start_at")
     @JsonSerialize(using = DateSerialization.class)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Date startAt;
 
     @Field("end_at")
     @JsonSerialize(using = DateSerialization.class)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Date endAt;
 
     @Field("daily_start_at")
@@ -50,5 +54,9 @@ public class Trip extends Model {
     @Field("groups_with_access")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<GroupAccess> groupsWithAccess;
+
+    @Transient
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    private String project;
 
 }

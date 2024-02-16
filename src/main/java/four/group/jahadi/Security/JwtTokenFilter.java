@@ -22,6 +22,7 @@ import static four.group.jahadi.Utility.StaticValues.TOKEN_EXPIRATION;
 // We should use OncePerRequestFilter since we are doing a database call, there is no point in doing this more than once
 @Component
 public class JwtTokenFilter extends OncePerRequestFilter {
+    public static final ArrayList<PairValue> blackListTokens = new ArrayList<>();
 
     public class ValidateToken {
 
@@ -47,18 +48,10 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
-//    public static final ArrayList<ValidateToken> validateTokens = new ArrayList<>();
-    public static final ArrayList<PairValue> blackListTokens = new ArrayList<>();
 
     public static void removeTokenFromCache(String token) {
 
-//        for(int i = 0; i < validateTokens.size(); i++) {
-//            if(validateTokens.get(i).token.equals(token)) {
-//                blackListTokens.add(new PairValue(token, TOKEN_EXPIRATION + validateTokens.get(i).issue));
-//                validateTokens.remove(i);
-//                return;
-//            }
-//        }
+        blackListTokens.add(new PairValue(token, TOKEN_EXPIRATION + System.currentTimeMillis()));
     }
 
     @Override
@@ -72,37 +65,16 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         String token = jwtTokenProvider.resolveToken(request);
 
         if(token != null) {
-
-//            for (PairValue blackListToken : blackListTokens) {
-//                if (blackListToken.getKey().equals(token))
-//                    return false;
-//            }
-//
-//            for(Iterator<ValidateToken> iterator = validateTokens.iterator(); iterator.hasNext();) {
-//
-//                ValidateToken v = iterator.next();
-//                if(v == null) {
-//                    iterator.remove();
-//                    continue;
-//                }
-//
-//                if(v.equals(token)) {
-//
-//                    if(v.isValidateYet())
-//                        return true;
-//                    else
-//                        iterator.remove();
-//
-//                    break;
-//                }
-//            }
+            for (PairValue blackListToken : blackListTokens) {
+                if (blackListToken.getKey().equals(token))
+                    return false;
+            }
         }
 
         try {
             if (token != null && jwtTokenProvider.validateAuthToken(token)) {
                 Authentication auth = jwtTokenProvider.getAuthentication(token);
                 SecurityContextHolder.getContext().setAuthentication(auth);
-//                validateTokens.add(new ValidateToken(token));
                 return true;
             }
         } catch (CustomException ex) {

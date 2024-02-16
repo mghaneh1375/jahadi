@@ -36,11 +36,10 @@ public class AdminGroupAPIRoutes {
         return groupService.store(groupData);
     }
 
-    @PutMapping(value = "toggleActivityStatus/{groupId}")
+    @PutMapping(value = "toggleActivityStatus/{userId}")
     @ResponseBody
-    public void toggleActivityStatus(final @PathVariable @ObjectIdConstraint ObjectId groupId,
-                                     final @RequestBody @NotBlank String password) {
-        groupService.toggleActivityStatus(groupId, password);
+    public void toggleActivityStatus(final @PathVariable @ObjectIdConstraint ObjectId userId) {
+        groupService.toggleActivityStatus(userId);
     }
 
 

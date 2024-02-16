@@ -1,7 +1,9 @@
 package four.group.jahadi.DTO;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import four.group.jahadi.DTO.Trip.TripStep1Data;
 import four.group.jahadi.Enums.Color;
+import four.group.jahadi.Models.ColorDeserialization;
 import four.group.jahadi.Validator.ValidatedProject;
 import lombok.*;
 
@@ -18,6 +20,8 @@ public class ProjectData {
 
     @Size(min = 2, max = 50)
     String name;
+
+    @JsonDeserialize(using = ColorDeserialization.class)
     Color color;
 
     Long startAt;

@@ -10,6 +10,7 @@ import four.group.jahadi.Models.User;
 import four.group.jahadi.Service.UserService;
 import four.group.jahadi.Validator.EnumValidator;
 import four.group.jahadi.Validator.ObjectIdConstraint;
+import io.swagger.v3.oas.annotations.Operation;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -31,10 +32,11 @@ public class AdminUserAPIRoutes {
 
     @PutMapping(value = "changeStatus/{userId}/{status}")
     @ResponseBody
+    @Operation(summary = "Available values for status parameter: 1- ACTIVE, 2- PENDING, 3- BLOCKED")
     public void changeStatus(@PathVariable @ObjectIdConstraint ObjectId userId,
-                             @PathVariable @EnumValidator(enumClazz = AccountStatus.class) AccountStatus status
+                             @PathVariable @EnumValidator(enumClazz = AccountStatus.class) String status
     ) {
-        userService.changeStatus(userId, status);
+        userService.changeStatus(userId, AccountStatus.valueOf(status.toUpperCase()));
     }
 
 
@@ -86,6 +88,13 @@ public class AdminUserAPIRoutes {
                                 final @PathVariable @ObjectIdConstraint ObjectId groupId
     ) {
         userService.removeFromGroup(userId, groupId);
+    }
+
+    @DeleteMapping(value = "remove/{userId}")
+    @ResponseBody
+    public void changeStatus(@PathVariable @ObjectIdConstraint ObjectId userId
+    ) {
+        userService.remove(userId);
     }
 
 }

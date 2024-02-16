@@ -17,6 +17,7 @@ public class YearValidator implements ConstraintValidator<Year, String> {
 
     @Override
     public boolean isValid(String in, ConstraintValidatorContext constraintValidatorContext) {
+        if(in == null) return true;
         return pattern.matcher(Utility.convertPersianDigits(in)).matches();
     }
 }

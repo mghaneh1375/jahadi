@@ -1,7 +1,9 @@
 package four.group.jahadi.Models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import four.group.jahadi.Enums.AccessInModuleArea;
 import lombok.*;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Transient;
@@ -33,8 +35,7 @@ public class ModuleInArea {
     @Field("module_name")
     private String moduleName;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    @JsonSerialize(using = ObjectIdListSerialization.class)
+    @JsonIgnore
     @Builder.Default
     private List<ObjectId> members = new ArrayList<>();
 
@@ -43,8 +44,16 @@ public class ModuleInArea {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<User> users;
 
+    @Transient
+//    @JsonSerialize(using = OwnerSerialization.class)
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    @JsonSerialize(using = ObjectIdListSerialization.class)
+    private List<User> secretaryUsers;
+
+    @Transient
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private List<AccessInModuleArea> accesses;
+
+    @JsonIgnore
     @Builder.Default
     private List<ObjectId> secretaries = new ArrayList<>();
 

@@ -15,6 +15,7 @@ public class PositiveValidator implements ConstraintValidator<Positive, Integer>
 
     @Override
     public boolean isValid(Integer integer, ConstraintValidatorContext constraintValidatorContext) {
+        if(integer == null) return true;
         return integer >= 0;
     }
 }

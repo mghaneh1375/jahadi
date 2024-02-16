@@ -5,15 +5,17 @@ import four.group.jahadi.Enums.Access;
 import four.group.jahadi.Enums.AccountStatus;
 import four.group.jahadi.Enums.Sex;
 import four.group.jahadi.Exception.*;
-import four.group.jahadi.Models.*;
+import four.group.jahadi.Models.Activation;
+import four.group.jahadi.Models.Group;
+import four.group.jahadi.Models.Trip;
+import four.group.jahadi.Models.User;
 import four.group.jahadi.Repository.ActivationRepository;
 import four.group.jahadi.Repository.GroupRepository;
 import four.group.jahadi.Repository.TripRepository;
 import four.group.jahadi.Repository.UserRepository;
 import four.group.jahadi.Security.JwtTokenProvider;
-import four.group.jahadi.Utility.Cache;
-import four.group.jahadi.Utility.PairValue;
-import four.group.jahadi.Utility.Utility;
+import four.group.jahadi.Utility.*;
+import org.apache.commons.beanutils.BeanUtilsBean;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,10 +26,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
+import static four.group.jahadi.Utility.FileUtils.removeFile;
+import static four.group.jahadi.Utility.FileUtils.uploadFile;
 import static four.group.jahadi.Utility.StaticValues.*;
-import static four.group.jahadi.Utility.Utility.*;
+import static four.group.jahadi.Utility.Utility.convertPersianDigits;
 import static org.springframework.beans.BeanUtils.copyProperties;
 
 
@@ -35,6 +40,7 @@ import static org.springframework.beans.BeanUtils.copyProperties;
 public class UserService extends AbstractService<User, SignUpData> {
 
     private static ArrayList<Cache> cachedToken = new ArrayList<>();
+    public final static String PICS_FOLDER = "userPics";
 
     @Autowired
     private UserRepository userRepository;
@@ -60,17 +66,37 @@ public class UserService extends AbstractService<User, SignUpData> {
 
     @Override
     public ResponseEntity<List<User>> list(Object... filters) {
+
+        List<User> users = userRepository.findAll(
+                (AccountStatus) filters[0], (Access) filters[1],
+                filters[2] != null ? filters[2].toString() : null,
+                filters[3] != null ? filters[3].toString() : null,
+                filters[4] != null ? filters[4].toString() : null,
+                (Sex) filters[5],
+                filters[6] != null ? filters[6].toString() : null,
+                filters[7] != null ? (ObjectId) filters[7] : null,
+                filters[8] != null ? (Boolean) filters[8] : null
+        );
+
+        if (filters[8] != null && (Boolean) filters[8]) {
+            users.forEach(user -> {
+
+                AccountStatus accountStatus = AccountStatus.PENDING;
+
+                if (user.getGroupId() != null) {
+                    Optional<Group> tmp = groupRepository.findById(user.getGroupId());
+                    if (tmp.isPresent())
+                        accountStatus = tmp.get().isActive() ? AccountStatus.ACTIVE :
+                                AccountStatus.PENDING;
+                }
+
+                user.setGroupStatus(accountStatus);
+
+            });
+        }
+
         return new ResponseEntity<>(
-                userRepository.findAll(
-                        (AccountStatus) filters[0], (Access) filters[1],
-                        filters[2] != null ? filters[2].toString() : null,
-                        filters[3] != null ? filters[3].toString() : null,
-                        filters[4] != null ? filters[4].toString() : null,
-                        (Sex) filters[5],
-                        filters[6] != null ? filters[6].toString() : null,
-                        filters[7] != null ? (ObjectId) filters[7] : null,
-                        filters[8] != null ? (Boolean) filters[8] : null
-                ),
+                users,
                 HttpStatus.OK
         );
     }
@@ -83,47 +109,13 @@ public class UserService extends AbstractService<User, SignUpData> {
     public void update(ObjectId id, UpdateInfoData dto) {
 
         User user = userRepository.findById(id).orElseThrow(InvalidIdException::new);
-
-        if (dto.getName() != null)
-            user.setName(dto.getName());
-
-        if (dto.getBirthDay() != null)
-            user.setBirthDay(dto.getBirthDay());
-
-        if (dto.getFatherName() != null)
-            user.setFatherName(dto.getFatherName());
-
-        if (dto.getField() != null)
-            user.setField(dto.getField());
-
-        if (dto.getUniversity() != null)
-            user.setUniversity(dto.getUniversity());
-
-        if (dto.getUniversityYear() != null)
-            user.setUniversityYear(dto.getUniversityYear());
-
-        if (dto.getNearbyName() != null)
-            user.setNearbyName(dto.getNearbyName());
-
-        if (dto.getNearbyPhone() != null)
-            user.setNearbyPhone(dto.getNearbyPhone());
-
-        if (dto.getAllergies() != null)
-            user.setAllergies(dto.getAllergies());
-
-        if (dto.getDiseases() != null)
-            user.setDiseases(dto.getDiseases());
-
-        if (dto.getAbilities() != null)
-            user.setAbilities(dto.getAbilities());
-
-        if (dto.getSex() != null)
-            user.setSex(dto.getSex());
-
-        if (dto.getBloodType() != null)
-            user.setBloodType(dto.getBloodType());
-
-        userRepository.save(user);
+        BeanUtilsBean notNull = new NullAwareBeanUtilsBean();
+        try {
+            notNull.copyProperties(user, dto);
+            userRepository.save(user);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 
@@ -157,7 +149,7 @@ public class UserService extends AbstractService<User, SignUpData> {
 
         User user = activation.getUser();
 
-        if(group != null) {
+        if (group != null) {
             user.setGroupId(group.getId());
             user.setGroupName(group.getName());
         }
@@ -222,8 +214,7 @@ public class UserService extends AbstractService<User, SignUpData> {
         if (existTokenP != null) {
             output.put("token", existTokenP.getKey().toString());
             output.put("reminder", existTokenP.getValue());
-        }
-        else {
+        } else {
             String token = sendNewSMS(user, storeUserDoc);
             output.put("token", token);
             output.put("reminder", SMS_RESEND_SEC);
@@ -248,11 +239,10 @@ public class UserService extends AbstractService<User, SignUpData> {
                     .createdAt(now)
                     .build();
 
-            if(storeUserDoc) {
+            if (storeUserDoc) {
                 activation.setUser(user);
                 activation.setPhone(user.getPhone());
-            }
-            else
+            } else
                 activation.setNid(user.getNid());
 
             activationRepository.insert(activation);
@@ -299,8 +289,13 @@ public class UserService extends AbstractService<User, SignUpData> {
         if (id == null)
             throw new BadRequestException();
 
+        User user = userRepository.findById(id).orElseThrow(InvalidIdException::new);
+        user.getAccesses().stream().filter(access -> access.equals(Access.GROUP))
+                .findFirst().flatMap(access -> groupRepository.findById(user.getGroupId()))
+                .ifPresent(group -> user.setGroupCode(group.getCode()));
+
         return new ResponseEntity<>(
-                userRepository.findById(id).orElseThrow(InvalidIdException::new),
+                user,
                 HttpStatus.OK
         );
 
@@ -319,7 +314,7 @@ public class UserService extends AbstractService<User, SignUpData> {
 
         User user = activation.getUser();
 
-        if(user.getCid() != null && userRepository.countByNID(user.getNid()) == 0) {
+        if (user.getCid() != null && userRepository.countByNID(user.getNid()) == 0) {
 
             userRepository.insert(user);
             activationRepository.delete(activation);
@@ -328,8 +323,7 @@ public class UserService extends AbstractService<User, SignUpData> {
                     jwtTokenProvider.createToken(user.getNid(), user.getAccesses(), user.getGroupId(), user.getId()),
                     HttpStatus.OK
             );
-        }
-        else {
+        } else {
             activation.setValidated(true);
             activationRepository.save(activation);
         }
@@ -366,14 +360,14 @@ public class UserService extends AbstractService<User, SignUpData> {
         if (request.getCode() < 100000 || request.getCode() > 999999)
             throw new InvalidFieldsException("کد وارد شده معتبر نمی باشد.");
 
-         Activation activation =
-                 activationRepository.findByNIDAndCodeAndToken(request.getNid(), request.getCode(), request.getToken())
-                 .orElseThrow(() -> {
-                     throw new InvalidFieldsException("کد وارد شده نامعتبر است");
-                 });
+        Activation activation =
+                activationRepository.findByNIDAndCodeAndToken(request.getNid(), request.getCode(), request.getToken())
+                        .orElseThrow(() -> {
+                            throw new InvalidFieldsException("کد وارد شده نامعتبر است");
+                        });
 
-         if(!activation.getValidated())
-             throw new NotAccessException();
+        if (!activation.getValidated())
+            throw new NotAccessException();
 
         if (!request.getPassword().equals(request.getRepeatPassword()))
             throw new InvalidFieldsException("رمزجدید و تکرار آن یکسان نیستند.");
@@ -505,14 +499,14 @@ public class UserService extends AbstractService<User, SignUpData> {
 
     public void logout(String token) {
 
-        for (int i = 0; i < cachedToken.size(); i++) {
-            if (cachedToken.get(i).getValue().equals(token)) {
-                cachedToken.remove(i);
-                return;
-            }
-        }
+//        for (int i = 0; i < cachedToken.size(); i++) {
+//            if (cachedToken.get(i).getValue().equals(token)) {
+//                cachedToken.remove(i);
+//                return;
+//            }
+//        }
 
-        jwtTokenProvider.removeTokenFromCache(token.replace("Bearer ", ""));
+        JwtTokenProvider.removeTokenFromCache(token.replace("Bearer ", ""));
 
     }
 
@@ -547,13 +541,25 @@ public class UserService extends AbstractService<User, SignUpData> {
         if (file == null)
             throw new BadRequestException();
 
+        if (file.getSize() > ONE_MB * 5)
+            throw new RuntimeException("حداکثر حجم مجاز 5MB می باشد");
+
+        String fileType = FileUtils.uploadImage(file);
+
+        if (fileType == null)
+            throw new RuntimeException("فرمت فایل موردنظر معتبر نمی باشد.");
+
+        String filename = uploadFile(file, PICS_FOLDER);
+        if (filename == null)
+            throw new RuntimeException("خطای ناشناخته هنگام بارگداری فایل");
+
         User user = userRepository.findById(id).orElseThrow(InvalidIdException::new);
 
-        String picPath = "ad";
+        if (user.getPic() != null && !user.getPic().isEmpty())
+            removeFile(user.getPic(), PICS_FOLDER);
 
-        user.setPic(picPath);
+        user.setPic(filename);
         userRepository.save(user);
-
     }
 
     public void setGroup(ObjectId id, Integer code) {
@@ -583,8 +589,6 @@ public class UserService extends AbstractService<User, SignUpData> {
     }
 
 
-
-
     public ResponseEntity<HashMap<String, Object>> groupStore(SignUpStep1ForGroupData dto) {
 
         if (userRepository.countByPhone(dto.getPhone()) > 0)
@@ -598,7 +602,7 @@ public class UserService extends AbstractService<User, SignUpData> {
 
     public void signUpStep2ForGroups(User user, SignUpStep2ForGroupData dto) {
 
-        if(groupRepository.findByName(dto.getGroupName()).isPresent())
+        if (groupRepository.findByName(dto.getGroupName()).isPresent())
             throw new InvalidFieldsException("نام گروه جهادی در سیستم موجود است");
 
         copyProperties(dto, user);
@@ -620,7 +624,7 @@ public class UserService extends AbstractService<User, SignUpData> {
         List<Trip> trips =
                 tripRepository.findActivesProjectIdsByAreaOwnerId(new Date(), userId);
 
-        if(trips.size() == 0)
+        if (trips.size() == 0)
             throw new NotAccessException();
 
         return new ResponseEntity<>(
@@ -633,4 +637,28 @@ public class UserService extends AbstractService<User, SignUpData> {
         );
     }
 
+    public void remove(ObjectId userId) {
+        User user = userRepository.findById(userId).orElseThrow(InvalidIdException::new);
+        user.setDeletedAt(new Date());
+        userRepository.save(user);
+    }
+
+    public ResponseEntity<User> info(ObjectId userId) {
+
+        User user = userRepository.findDigestById(userId).orElseThrow(InvalidIdException::new);
+
+        user.setRole(user.getAccesses().contains(Access.ADMIN) ? Access.ADMIN :
+                user.getAccesses().contains(Access.GROUP) ? Access.GROUP : Access.JAHADI
+        );
+
+        if(Objects.equals(user.getRole(), Access.JAHADI)) {
+            user.setHasActiveRegion(tripRepository.existNotFinishedByAreaOwnerId(new Date(), userId));
+            user.setHasActiveTask(tripRepository.existNotFinishedResponsibleId(new Date(), userId));
+        }
+
+        return new ResponseEntity<>(
+                user,
+                HttpStatus.OK
+        );
+    }
 }

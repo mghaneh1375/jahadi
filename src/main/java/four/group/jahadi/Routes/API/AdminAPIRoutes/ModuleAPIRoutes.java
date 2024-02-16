@@ -61,23 +61,4 @@ public class ModuleAPIRoutes {
         return moduleService.list(filters);
     }
 
-
-    @GetMapping(value = "get/{id}")
-    @ResponseBody
-    public String get(@PathVariable @ObjectIdConstraint ObjectId id) {
-
-        Module module = moduleService.findById(id);
-        if(module == null)
-            return generateErr("id is not valid");
-
-        JSONObject jsonObject = new JSONObject()
-                    .put("id", module.getId().toString())
-                    .put("name", module.getName())
-                    .put("section", module.getSection())
-                    .put("canSuggestDrug", module.isCanSuggestDrug()
-            );
-
-        return generateSuccessMsg("data", jsonObject);
-    }
-
 }

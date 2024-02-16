@@ -26,6 +26,7 @@ public class Area {
     @MongoId
     @Field("_id")
     @JsonSerialize(using = ObjectIdSerialization.class)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private ObjectId id;
 
     @Field("owner_id")
@@ -33,7 +34,11 @@ public class Area {
     @JsonSerialize(using = ObjectIdSerialization.class)
     private ObjectId ownerId;
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonSerialize(using = ColorSerialization.class)
     private Color color;
+
+    @NonNull
     private String name;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -46,6 +51,12 @@ public class Area {
     private String city;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    private ObjectId stateId;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private ObjectId cityId;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Double lat;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -53,10 +64,12 @@ public class Area {
 
     @Field("start_at")
     @JsonSerialize(using = DateSerialization.class)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Date startAt;
 
     @Field("end_at")
     @JsonSerialize(using = DateSerialization.class)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Date endAt;
 
     @Field("daily_start_at")
@@ -69,13 +82,16 @@ public class Area {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonSerialize(using = ObjectIdListSerialization.class)
+    @Builder.Default
     private List<ObjectId> members = new ArrayList<>();
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    @Builder.Default
     private List<ModuleInArea> modules = new ArrayList<>();
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonSerialize(using = ObjectIdListSerialization.class)
+    @Builder.Default
     private List<ObjectId> dispatchers = new ArrayList<>();
 
     @Transient
@@ -83,6 +99,7 @@ public class Area {
     private User owner;
 
     @JsonIgnore
-    private boolean finished = false;
+    @Builder.Default
+    private Boolean finished = false;
 
 }

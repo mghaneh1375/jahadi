@@ -1,6 +1,7 @@
 package four.group.jahadi.Routes.API.AdminAPIRoutes;
 
 import four.group.jahadi.DTO.ProjectData;
+import four.group.jahadi.DTO.UpdateProjectData;
 import four.group.jahadi.Enums.Status;
 import four.group.jahadi.Models.Project;
 import four.group.jahadi.Service.ProjectService;
@@ -30,6 +31,15 @@ public class ProjectAPIRoutes {
         return projectService.store(projectData);
     }
 
+    @PutMapping(value = "/update/{projectId}")
+    @ResponseBody
+    public void update(
+            @PathVariable @ObjectIdConstraint ObjectId projectId,
+            @RequestBody @Valid UpdateProjectData projectData
+    ) {
+        projectService.update(projectId, projectData);
+    }
+
     @GetMapping(value = "/list")
     @ResponseBody
     public ResponseEntity<List<Project>> list(@RequestParam(value = "name", required = false) String name,
@@ -49,5 +59,9 @@ public class ProjectAPIRoutes {
         projectService.setProgress(id, progress);
     }
 
+    @DeleteMapping(value = "/remove/{id}")
+    public void remove(@PathVariable @ObjectIdConstraint ObjectId id) {
+        projectService.remove(id);
+    }
 
 }

@@ -65,11 +65,20 @@ public class ExceptionHandler extends ResponseEntityExceptionHandler {
             errors.append(error.getDefaultMessage());
 
         headers.add("Content-Type", "application/json");
+        JSONObject errMsg;
+
+        try {
+            errMsg = new JSONObject(errors.toString());
+        }
+        catch (Exception x) {
+            String[] tmp = errors.toString().split(":");
+            errMsg = new JSONObject().put(tmp[0], tmp[1]);
+        }
 
         return new ResponseEntity<>(
                 new JSONObject()
                         .put("status", "nok")
-                        .put("fields", new JSONObject(errors.toString())).toString(),
+                        .put("fields", errMsg).toString(),
                 headers,
                 HttpStatus.NOT_ACCEPTABLE);
     }

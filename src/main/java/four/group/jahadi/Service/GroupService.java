@@ -6,18 +6,17 @@ import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Exception.NotAccessException;
 import four.group.jahadi.Models.Group;
-import four.group.jahadi.Models.Trip;
 import four.group.jahadi.Models.User;
 import four.group.jahadi.Repository.GroupRepository;
 import four.group.jahadi.Repository.TripRepository;
 import four.group.jahadi.Repository.UserRepository;
+import four.group.jahadi.Utility.Utility;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
@@ -31,6 +30,9 @@ public class GroupService extends AbstractService<Group, GroupData> {
     private GroupRepository groupRepository;
 
     @Autowired
+    private TripRepository tripRepository;
+
+    @Autowired
     private UserRepository userRepository;
 
     @Autowired
@@ -41,7 +43,7 @@ public class GroupService extends AbstractService<Group, GroupData> {
 
     public static void fillGroupByUsers(List<Group> groups, UserRepository userRepository) {
         List<ObjectId> userIds = groups.stream().map(Group::getOwner).collect(Collectors.toList());
-        List<User> users = userRepository.findBy_idIn(userIds);
+        List<User> users = userRepository.findGroupUsersByIdsIn(userIds);
         groups.forEach(x -> x.setUser(users.stream().filter(itr -> x.getOwner().equals(itr.getId())).findFirst().orElse(null)));
     }
 
@@ -52,6 +54,7 @@ public class GroupService extends AbstractService<Group, GroupData> {
                 groupRepository.findLikeName(filters[0].toString());
 
         fillGroupByUsers(groups, userRepository);
+        groups.forEach(group -> group.setTripsCount(tripRepository.countByGroupId(group.getId())));
         return new ResponseEntity<>(groups, HttpStatus.OK);
     }
 
@@ -101,8 +104,48 @@ public class GroupService extends AbstractService<Group, GroupData> {
         groupRepository.save(group);
     }
 
-    public void toggleActivityStatus(ObjectId groupId, String password) {
-        Group group = groupRepository.findById(groupId).orElseThrow(InvalidIdException::new);
+    public void toggleActivityStatus(ObjectId userId) {
+
+        User user = userRepository.findById(userId).orElseThrow(InvalidIdException::new);
+        if(user.getTotalMembers() == null)
+            throw new NotAccessException();
+
+        if(user.getGroupId() == null) {
+
+            int code = Utility.randIntForGroupCode();
+            Optional<Group> tmp = groupRepository.findByCode(code);
+
+            while (tmp.isPresent())
+                code = Utility.randIntForGroupCode();
+
+            Group g = Group.builder()
+                    .name(user.getGroupName())
+                    .code(code)
+                    .build();
+
+            g.setOwner(user.getId());
+            groupRepository.insert(g);
+
+            boolean needUpdateUser = false;
+
+            if (!user.getAccesses().contains(Access.GROUP)) {
+                user.getAccesses().add(Access.GROUP);
+                needUpdateUser = true;
+            }
+
+            if (user.getGroupId() == null) {
+                user.setGroupId(g.getId());
+                needUpdateUser = true;
+            }
+
+            if(needUpdateUser)
+                userRepository.save(user);
+
+            return;
+        }
+
+        Group group = groupRepository.findById(user.getGroupId())
+                .orElseThrow(InvalidIdException::new);
         group.setActive(!group.isActive());
         groupRepository.save(group);
     }

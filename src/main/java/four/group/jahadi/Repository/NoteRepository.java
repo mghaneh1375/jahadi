@@ -11,7 +11,7 @@ import java.util.List;
 @Repository
 public interface NoteRepository extends MongoRepository<Note, ObjectId>, FilterableRepository<Note> {
 
-    @Query(value = "{user_id: ?0}", fields = "{'id': 1, 'title': 1}")
+    @Query(value = "{user_id: ?0}", fields = "{'id': 1, 'title': 1, 'updatedAt': 1, 'description': 1}")
     List<Note> findByUserId(ObjectId userId);
 
 }

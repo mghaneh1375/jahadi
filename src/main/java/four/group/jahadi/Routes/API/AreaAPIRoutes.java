@@ -8,6 +8,7 @@ import four.group.jahadi.Models.Area;
 import four.group.jahadi.Models.User;
 import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Service.Area.AreaService;
+import four.group.jahadi.Utility.ValidList;
 import four.group.jahadi.Validator.ObjectIdConstraint;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import javax.validation.constraints.Size;
+import java.util.List;
 
 @RestController
 @RequestMapping(value = "/api/area")
@@ -28,13 +31,13 @@ public class AreaAPIRoutes extends Router {
 
     @PostMapping(value = "store/{tripId}")
     @ResponseBody
-    public ResponseEntity<Area> store(
+    public ResponseEntity<List<Area>> store(
             HttpServletRequest request,
             @PathVariable @ObjectIdConstraint ObjectId tripId,
-            @RequestBody @Valid AreaData areaData
+            @RequestBody @Valid @Size(min = 1) ValidList<AreaData> areas
     ) throws UnAuthException, NotActivateAccountException {
         User user = getUser(request);
-        return areaService.store(areaData, user.getAccesses().contains(Access.ADMIN), tripId, user.getGroupId());
+        return areaService.store(areas, user.getAccesses().contains(Access.ADMIN), tripId, user.getGroupId());
     }
 
 //    @PutMapping(value = "update/{tripId}")

@@ -1,6 +1,7 @@
 package four.group.jahadi.Service.Area;
 
 
+import four.group.jahadi.Enums.AccessInModuleArea;
 import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Exception.NotAccessException;
@@ -16,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -92,22 +94,46 @@ public class ModuleServiceInArea {
                 .getAreas().stream().filter(area -> area.getId().equals(areaId))
                 .findFirst().orElseThrow(RuntimeException::new);
 
+        boolean isOwner = foundArea.getOwnerId().equals(userId);
+
         List<ModuleInArea> modules = foundArea.getModules();
 
-        List<ObjectId> userIds = modules.stream()
-                .map(ModuleInArea::getMembers)
-                .flatMap(List::stream).distinct().collect(Collectors.toList());
+        List<ObjectId> userIds = new ArrayList<>();
 
-        List<User> users = userRepository.findBy_idIn(userIds);
+        for(ModuleInArea module : modules) {
+            userIds.addAll(module.getMembers());
+            userIds.addAll(module.getSecretaries());
+        }
+
+        userIds = userIds.stream().distinct().collect(Collectors.toList());
+
+        List<User> users = userRepository.findByIdsIn(userIds);
         modules.forEach(moduleInArea -> {
 
             List<ObjectId> members = moduleInArea.getMembers();
+            List<ObjectId> secretaries = moduleInArea.getSecretaries();
             List<User> usersInModule = new ArrayList<>();
+            List<User> secretariesInModule = new ArrayList<>();
 
             members.forEach(objectId -> usersInModule.add(users.stream().filter(user -> user.getId().equals(objectId)).findFirst()
                     .get()));
 
+            secretaries.forEach(objectId -> secretariesInModule.add(
+                            users.stream().filter(user -> user.getId().equals(objectId)).findFirst()
+                                    .get()
+                    )
+            );
+
             moduleInArea.setUsers(usersInModule);
+            moduleInArea.setSecretaryUsers(secretariesInModule);
+
+            moduleInArea.setAccesses(isOwner ? Collections.singletonList(AccessInModuleArea.FULL) :
+                    !members.contains(userId) && !secretaries.contains(userId) ? Collections.singletonList(AccessInModuleArea.NONE) :
+                            members.contains(userId) && secretaries.contains(userId) ?
+                                    List.of(AccessInModuleArea.RESPONSIBLE, AccessInModuleArea.SECRETARY) :
+                                    members.contains(userId) ? Collections.singletonList(AccessInModuleArea.RESPONSIBLE) :
+                                            Collections.singletonList(AccessInModuleArea.SECRETARY)
+            );
         });
 
         return new ResponseEntity<>(modules, HttpStatus.OK);

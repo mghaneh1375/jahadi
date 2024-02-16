@@ -6,6 +6,8 @@ import org.json.JSONObject;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
+import static four.group.jahadi.Utility.StaticValues.ONE_DAY_MSEC;
+
 public class ProjectValidator implements ConstraintValidator<ValidatedProject, ProjectData> {
 
     @Override
@@ -34,7 +36,7 @@ public class ProjectValidator implements ConstraintValidator<ValidatedProject, P
             isErrored = true;
         }
 
-        if(value.getStartAt() != null && value.getStartAt() < System.currentTimeMillis()) {
+        if(value.getStartAt() != null && value.getStartAt() < System.currentTimeMillis() - ONE_DAY_MSEC) {
             errs.put("startAt", "تاریخ شروع باید از امروز بزرگ تر باشد");
             isErrored = true;
         }

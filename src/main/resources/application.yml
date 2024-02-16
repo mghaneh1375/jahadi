@@ -5,12 +5,26 @@ spring:
       port: 27017
       database: 'jahadi'
       auto-index-creation: true
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: false
+      fail-on-ignored-properties: false
+      fail-on-invalid-subtype: false
+      fail-on-missing-creator-properties: false
+      fail-on-missing-external-type-id-property: false
+      fail-on-null-creator-properties: false
+      fail-on-null-for-primitives: false
+      fail-on-numbers-for-enums: false
+      fail-on-reading-dup-tree-key: false
+      fail-on-trailing-tokens: false
+      fail-on-unresolved-object-ids: false
 server:
   port: 8080
 logging:
   level:
     org:
       springframework:
+        web: 'TRACE'
         data:
           mongodb:
             core:

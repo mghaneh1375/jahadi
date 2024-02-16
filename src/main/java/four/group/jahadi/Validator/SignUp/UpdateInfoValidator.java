@@ -1,6 +1,9 @@
 package four.group.jahadi.Validator.SignUp;
 
 import four.group.jahadi.DTO.SignUp.*;
+import four.group.jahadi.Enums.GroupRegistrationPlace;
+import four.group.jahadi.Enums.Lodgment;
+import four.group.jahadi.Utility.Utility;
 import four.group.jahadi.Validator.DateValidator;
 import four.group.jahadi.Validator.PhoneValidator;
 import org.json.JSONObject;
@@ -10,6 +13,7 @@ import org.springframework.util.ObjectUtils;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
+import java.util.Objects;
 
 public class UpdateInfoValidator implements ConstraintValidator<ValidatedUpdateInfo, UpdateInfoData> {
 
@@ -27,28 +31,11 @@ public class UpdateInfoValidator implements ConstraintValidator<ValidatedUpdateI
         boolean isErrored = false;
         JSONObject errs = new JSONObject();
 
-        if (value.getName() != null && value.getName().length() < 3) {
-            errs.put("name", "لطفا نام خود را وارد نمایید");
-            isErrored = true;
-        }
-
-        if (value.getFatherName() != null && value.getFatherName().length() < 3) {
-            errs.put("fatherName", "لطفا نام پدر خود را وارد نمایید");
-            isErrored = true;
-        }
-
-        if (value.getUniversity() != null && value.getUniversity().length() < 3) {
-            errs.put("university", "لطفا دانشگاه خود را وارد نمایید");
-            isErrored = true;
-        }
-
-        if (value.getField() != null && value.getField().length() < 3) {
-            errs.put("field", "لطفا رشته تحصیلی خود را وارد نمایید");
-            isErrored = true;
-        }
-
-        if (value.getUniversityYear() != null) {
-            errs.put("universityYear", "سال تحصیل نامعتبر است");
+        if (value.getNearbyPhone() != null &&
+                !ObjectUtils.isEmpty(value.getNearbyPhone()) &&
+                !PhoneValidator.isValid(value.getNearbyPhone())
+        ) {
+            errs.put("nearbyPhone", "شماره همراه وارد شده معتبر نمی باشد");
             isErrored = true;
         }
 
@@ -61,15 +48,49 @@ public class UpdateInfoValidator implements ConstraintValidator<ValidatedUpdateI
             isErrored = true;
         }
 
-        if (value.getNearbyName() != null && value.getNearbyName().length() < 3) {
-            errs.put("nearbyName", "لطفا نام و نسبت فرد مذکور را وارد نمایید");
-            isErrored = true;
-        }
-
         if (value.getNearbyPhone() != null && (
                 ObjectUtils.isEmpty(value.getNearbyPhone()) || !PhoneValidator.isValid(value.getNearbyPhone())
         )) {
             errs.put("nearbyPhone", "شماره همراه وارد شده معتبر نمی باشد");
+            isErrored = true;
+        }
+
+        if (value.getNid() != null && (
+                ObjectUtils.isEmpty(value.getNid()) || !Utility.validationNationalCode(value.getNid())
+        )) {
+            errs.put("NID", "کد ملی وارد شده معتبر نمی باشد");
+            isErrored = true;
+        }
+
+        if(value.getLodgment() != null &&
+                Objects.equals(value.getLodgment(), Lodgment.OTHER) &&
+                value.getLodgmentOther() == null
+        )  {
+            errs.put("lodgment", "لطفا محل استقرار گروه را وارد نمایید");
+            isErrored = true;
+        }
+
+        if(value.getLodgment() != null &&
+                !Objects.equals(value.getLodgment(), Lodgment.OTHER) &&
+                value.getLodgmentOther() != null
+        )  {
+            errs.put("lodgment", "محل استقرار گروه نامعتبر است");
+            isErrored = true;
+        }
+
+        if(value.getGroupRegistrationPlace() != null &&
+                Objects.equals(value.getGroupRegistrationPlace(), GroupRegistrationPlace.OTHER) &&
+                value.getGroupRegistrationPlaceOther() == null
+        ) {
+            errs.put("groupRegistrationPlace", "لطفا محل ثبت گروه را وارد نمایید");
+            isErrored = true;
+        }
+
+        if(value.getGroupRegistrationPlace() != null &&
+                !Objects.equals(value.getGroupRegistrationPlace(), GroupRegistrationPlace.OTHER) &&
+                value.getGroupRegistrationPlaceOther() != null
+        ) {
+            errs.put("groupRegistrationPlace", "محل ثبت گروه نامعتبر است");
             isErrored = true;
         }
 

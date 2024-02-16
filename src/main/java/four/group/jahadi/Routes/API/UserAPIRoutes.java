@@ -5,9 +5,11 @@ import four.group.jahadi.Exception.NotActivateAccountException;
 import four.group.jahadi.Exception.UnAuthException;
 import four.group.jahadi.Models.User;
 import four.group.jahadi.Routes.Router;
+import four.group.jahadi.Security.JwtTokenFilter;
 import four.group.jahadi.Service.UserService;
 import four.group.jahadi.Tests.Seeder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -39,10 +41,11 @@ public class UserAPIRoutes extends Router {
 //        return userService.store(userData);
 //    }
 
-    @PutMapping(value = "setPic")
+    @PutMapping(value = "setPic", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseBody
     public void setPic(HttpServletRequest request,
-                       @RequestBody MultipartFile file) throws UnAuthException, NotActivateAccountException {
+                       @RequestPart("file") MultipartFile file
+    ) throws UnAuthException, NotActivateAccountException {
         userService.setPic(getUserWithOutCheckCompleteness(request).getId(), file);
     }
 
@@ -115,6 +118,16 @@ public class UserAPIRoutes extends Router {
         userService.signUpStep4ForGroups(getUserWithOutCheckCompleteness(request), data);
     }
 
+    @DeleteMapping(value = "logout")
+    public void logout(HttpServletRequest request) {
+        try {
+            String token = request.getHeader("Authorization");
+            userService.logout(token);
+            JwtTokenFilter.removeTokenFromCache(token.replace("Bearer ", ""));
+        } catch (Exception x) {
+            System.out.println(x.getMessage());
+        }
+    }
 
     @PostMapping(value = "/update")
     public void update(HttpServletRequest request,
@@ -159,9 +172,20 @@ public class UserAPIRoutes extends Router {
         return userService.findById(getId(request));
     }
 
+
+    @GetMapping(value = "digest")
+    @ResponseBody
+    public ResponseEntity<User> info(HttpServletRequest request) {
+        return userService.info(getId(request));
+    }
+
     @GetMapping(value = "seed")
     public void seed() {
         seeder.seed();
     }
 
+    @GetMapping(value = "moduleSeeder")
+    public void moduleSeeder() {
+        seeder.moduleSeeder();
+    }
 }

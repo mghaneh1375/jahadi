@@ -28,8 +28,8 @@ public interface GroupRepository extends MongoRepository<Group, ObjectId>, Filte
     @Query(value = "{code: ?0}", fields = "{_id: 1, name:  1}")
     Optional<Group> findByCode(Integer code);
 
-    @Query(value = "{_id: {$in : ?0}}", fields = "{ 'name': 1, 'color': 1, 'isActive': 1 }")
-    List<Group> findBy_idIn(List<ObjectId> ids);
+    @Query(value = "{_id: {$in : ?0}}", fields = "{ 'name': 1, 'color': 1, 'isActive': 1, 'owner': 1 }")
+    List<Group> findByIdsIn(List<ObjectId> ids);
 
     @Query(value = "{owner: ?0}", fields = "{ '_id': 1 }")
     List<Group> findByUserId(ObjectId userId);

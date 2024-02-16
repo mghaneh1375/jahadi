@@ -1,5 +1,6 @@
 package four.group.jahadi.Models;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -25,9 +26,12 @@ public class Note extends Model {
     private Date updatedAt;
 
     private String title;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String description;
 
     @Field("user_id")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonSerialize(using = ObjectIdSerialization.class)
     private ObjectId userId;
 

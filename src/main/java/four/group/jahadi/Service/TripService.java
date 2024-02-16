@@ -28,6 +28,9 @@ public class TripService extends AbstractService<Trip, TripStepData> {
     private GroupRepository groupRepository;
 
     @Autowired
+    private ProjectRepository projectRepository;
+
+    @Autowired
     private UserRepository userRepository;
 
 
@@ -53,7 +56,7 @@ public class TripService extends AbstractService<Trip, TripStepData> {
                 FilteringFactory.abstractParseFromParams(filtersList, Trip.class)
         );
 
-        List<Group> groups = groupRepository.findBy_idIn(findFromTripGroupIds(trips));
+        List<Group> groups = groupRepository.findByIdsIn(findFromTripGroupIds(trips));
 
         trips.forEach(trip -> {
             for (Group group : groups) {
@@ -65,7 +68,7 @@ public class TripService extends AbstractService<Trip, TripStepData> {
             }
         });
 
-        List<User> users = userRepository.findBy_idIn(
+        List<User> users = userRepository.findByIdsIn(
                 trips.stream().map(Trip::getAreas)
                         .map(areas -> areas.stream().map(Area::getOwnerId).collect(Collectors.toList()))
                         .flatMap(List::stream).distinct().collect(Collectors.toList())
@@ -86,13 +89,12 @@ public class TripService extends AbstractService<Trip, TripStepData> {
             trips = tripRepository.findActivesByGroupId(
                     new Date(), groupId
             );
-        }
-        catch (Exception x) {
+        } catch (Exception x) {
             x.printStackTrace();
             return null;
         }
 
-        List<User> users = userRepository.findBy_idIn(
+        List<User> users = userRepository.findByIdsIn(
                 trips.stream().map(Trip::getAreas)
                         .map(areas -> areas.stream().map(Area::getOwnerId).collect(Collectors.toList()))
                         .flatMap(List::stream).distinct().collect(Collectors.toList())
@@ -130,23 +132,28 @@ public class TripService extends AbstractService<Trip, TripStepData> {
     @Override
     public ResponseEntity<Trip> store(TripStepData data, Object... params) {
 
-//        ObjectId projectId = (ObjectId) params[0];
-//
-//        Project project = projectRepository.findById(projectId).orElseThrow(InvalidIdException::new);
-//        // todo : check for update policies
-//
-//        TripStep1Data dto = (TripStep1Data) data;
-//
+        ObjectId projectId = (ObjectId) params[0];
+
+        Project project = projectRepository.findById(projectId).orElseThrow(InvalidIdException::new);
+
+        TripStep1Data dto = (TripStep1Data) data;
+
+//        List<GroupAccess> groupsWithAccess = tr;
+//        groupsWithAccess.add(GroupAccess.builder()
+//                .groupId(dto.getOwner())
+//                .writeAccess(dto.getWriteAccess())
+//                .build()
+//        );
+
 //        Trip trip = Trip
 //                .builder()
+//                .groupsWithAccess()
 //                .projectId(project.getId())
 //                .name(project.getName() + " - ").build();
-//
-//        trip.setOwner(dto.getOwner());
+
 //        tripRepository.save(trip);
 
 //        return new ResponseEntity<>(trip, HttpStatus.OK);
-
         return null;
     }
 
@@ -159,7 +166,7 @@ public class TripService extends AbstractService<Trip, TripStepData> {
 
         List<Trip> activeTrips = tripRepository.findActives(new Date());
 
-        List<Group> groups = groupRepository.findBy_idIn(findFromTripGroupIds(activeTrips));
+        List<Group> groups = groupRepository.findByIdsIn(findFromTripGroupIds(activeTrips));
         groups.forEach(x -> x.setAreas(new ArrayList<>()));
 
         GroupService.fillGroupByUsers(groups, userRepository);
@@ -183,4 +190,35 @@ public class TripService extends AbstractService<Trip, TripStepData> {
                 .flatMap(List::stream).distinct().collect(Collectors.toList());
     }
 
+    public ResponseEntity<List<Trip>> getGroupsTrips(ObjectId groupId) {
+
+        List<Trip> trips = tripRepository.findByGroupId(groupId);
+        List<ObjectId> projectIds = trips.stream().map(Trip::getProjectId)
+                .distinct().collect(Collectors.toList());
+
+        List<Group> groups = groupRepository.findByIdsIn(findFromTripGroupIds(trips));
+        List<User> users = userRepository.findByIdsIn(groups.stream().map(Group::getOwner).distinct().collect(Collectors.toList()));
+
+        groups.forEach(group ->
+                users.stream().filter(user -> user.getId().equals(group.getOwner())).findFirst()
+                        .ifPresent(group::setUser)
+        );
+
+        List<Project> projects = projectRepository.findDigestByIds(projectIds);
+        trips.forEach(trip -> {
+
+            trip.getGroupsWithAccess().forEach(groupAccess ->
+                    groups.stream().filter(group -> group.getId().equals(groupAccess.getGroupId()))
+                            .findFirst().ifPresent(groupAccess::setGroup)
+            );
+
+            projects.stream()
+                    .filter(project -> project.getId().equals(trip.getProjectId()))
+                    .findFirst().ifPresent(project1 ->
+                            trip.setProject(project1.getName())
+                    );
+        });
+
+        return new ResponseEntity<>(trips, HttpStatus.OK);
+    }
 }

@@ -5,6 +5,9 @@ import org.json.JSONObject;
 
 public class StaticValues {
 
+    public final static String SERVER_ADDR = "http://statics.echeck.ir/";
+//    public final static String SERVER_ADDR = "http://192.168.219.29/";
+
     public final static int SMS_RESEND_SEC = 300;
     public final static int SMS_RESEND_MSEC = 1000 * SMS_RESEND_SEC;
     public final static int SMS_VALIDATION_EXPIRATION_MSEC_LONG = 1000 * SMS_RESEND_SEC * 3;
@@ -12,10 +15,9 @@ public class StaticValues {
     public final static int ONE_DAY_MSEC = 60 * 60 * 24 * 1000;
 
     public final static long TOKEN_EXPIRATION_MSEC = 60 * 60 * 24 * 7 * 1000;
-    public final static int TOKEN_EXPIRATION = 60 * 60 * 24 * 7;
-    public final static long SERVER_TOKEN_EXPIRATION_MSEC = 20 * 1000; // 20 s
+    public final static int TOKEN_EXPIRATION = 60 * 60 * 24 * 7 * 1000;
 
-
+    public final static int ONE_MB = 1024 * 1024;
 
     public final static Boolean DEV_MODE = true;
 

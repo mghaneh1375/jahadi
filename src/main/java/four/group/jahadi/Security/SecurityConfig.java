@@ -38,6 +38,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             // other public endpoints of your API may be appended to this array
             "/api/user/signIn",
             "/api/user/seed",
+            "/api/user/moduleSeeder",
             "/api/user/groupSignUp",
             "/api/user/checkCode",
             "/api/user/checkForgetPassCode",
@@ -70,6 +71,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/api/admin/**").hasAuthority("ADMIN")
                 .antMatchers("/api/group/**").hasAnyAuthority("ADMIN", "GROUP")
                 .antMatchers("/api/area/**").hasAnyAuthority("ADMIN", "GROUP")
+                .antMatchers("/api/jahadgar/**").hasAnyAuthority("ADMIN", "GROUP", "JAHADI")
                 .anyRequest()
                 .authenticated()
         ;

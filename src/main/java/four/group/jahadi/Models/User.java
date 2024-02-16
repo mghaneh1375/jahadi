@@ -2,14 +2,15 @@ package four.group.jahadi.Models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import four.group.jahadi.DTO.SignUp.SignUpStep3ForGroupData;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import four.group.jahadi.Enums.*;
 import lombok.*;
 import org.bson.types.ObjectId;
+import javax.persistence.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import java.io.Serializable;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -20,7 +21,7 @@ import java.util.List;
 @AllArgsConstructor
 @Document(collection = "user")
 @Builder
-public class User extends Model implements Serializable {
+public class User extends Model {
 
     private String name;
 
@@ -54,7 +55,6 @@ public class User extends Model implements Serializable {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Sex sex;
 
-
     @Field("remove_at")
     @JsonIgnore
     private Long removeAt;
@@ -62,6 +62,10 @@ public class User extends Model implements Serializable {
     @Field("group_id")
     @JsonIgnore
     private ObjectId groupId;
+
+    @Transient
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    private AccountStatus groupStatus;
     
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String abilities;
@@ -89,13 +93,27 @@ public class User extends Model implements Serializable {
     private String nearbyPhone;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonSerialize(using = ColorSerialization.class)
     private Color color;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonSerialize(using = PicSerialization.class)
     private String pic;
 
     @JsonIgnore
     private List<Access> accesses;
+
+    @Transient
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    private Access role;
+
+    @Transient
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    private Boolean hasActiveRegion;
+
+    @Transient
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    private Boolean hasActiveTask;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<String> notifs;
@@ -106,6 +124,10 @@ public class User extends Model implements Serializable {
     @Field("group_name")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String groupName;
+
+    @Transient
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    private Integer groupCode;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String trips;
@@ -446,4 +468,6 @@ public class User extends Model implements Serializable {
     @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     private boolean movementHelpEquipments = false;
 
+    @JsonIgnore
+    private Date deletedAt;
 }

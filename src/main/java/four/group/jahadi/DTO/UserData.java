@@ -1,6 +1,8 @@
 package four.group.jahadi.DTO;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import four.group.jahadi.Enums.Color;
+import four.group.jahadi.Models.ColorDeserialization;
 import four.group.jahadi.Validator.ValidatedUser;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,7 +19,10 @@ public class UserData {
     private String firstName;
     private String lastName;
     private String password;
+
+    @JsonDeserialize(using = ColorDeserialization.class)
     private Color color;
+
     private String sex;
     private String nid;
     private String phone;

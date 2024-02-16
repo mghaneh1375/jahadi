@@ -55,7 +55,11 @@ public class AreaService extends AbstractService<Area, AreaData> {
     }
 
     @Override
-    public ResponseEntity<Area> store(AreaData dto, Object... params) {
+    public ResponseEntity<Area> store(AreaData data, Object... params) {
+        return null;
+    }
+
+    public ResponseEntity<List<Area>> store(List<AreaData> areas, Object... params) {
 
         ObjectId tripId = (ObjectId) params[1];
 
@@ -68,20 +72,27 @@ public class AreaService extends AbstractService<Area, AreaData> {
         )
             throw new NotAccessException();
 
-        Area area = dto.convertToArea();
+        List<Area> areaModels = new ArrayList<>();
 
-        User owner = userRepository.findById(area.getOwnerId()).orElseThrow(InvalidIdException::new);
+        for(AreaData dto : areas) {
 
-        if (!hasAdminAccess && !Objects.deepEquals(owner.getGroupId(), params[2]))
-            throw new NotAccessException();
+            Area area = dto.convertToArea();
 
-        if (trip.getAreas().stream().anyMatch(area1 -> area1.getName().equals(area.getName())))
-            throw new InvalidFieldsException("منطقه ای با نام مشابه موجود است");
+            User owner = userRepository.findById(area.getOwnerId()).orElseThrow(InvalidIdException::new);
 
-        trip.getAreas().add(area);
+            if (!hasAdminAccess && !Objects.deepEquals(owner.getGroupId(), params[2]))
+                throw new NotAccessException();
+
+            if (trip.getAreas().stream().anyMatch(area1 -> area1.getName().equals(area.getName())))
+                throw new InvalidFieldsException("منطقه ای با نام مشابه موجود است");
+
+            areaModels.add(area);
+        }
+
+        trip.getAreas().addAll(areaModels);
         tripRepository.save(trip);
 
-        return new ResponseEntity<>(area, HttpStatus.OK);
+        return new ResponseEntity<>(areaModels, HttpStatus.OK);
     }
 
     @Override
@@ -102,7 +113,7 @@ public class AreaService extends AbstractService<Area, AreaData> {
                 .getAreas().stream().filter(area -> area.getId().equals(areaId))
                 .findFirst().orElseThrow(RuntimeException::new);
 
-        if(!foundArea.isFinished())
+        if(!foundArea.getFinished())
             throw new InvalidFieldsException("اطلاعات منطقه هنوز نهایی نشده است");
 
         if(dto.getSendNotif())
@@ -111,15 +122,20 @@ public class AreaService extends AbstractService<Area, AreaData> {
     }
 
     public ResponseEntity<List<Trip>> myCartableList(ObjectId userId) {
-        return new ResponseEntity<>(
-                tripRepository.findNotFinishedByAreaOwnerId(new Date(), userId),
-                HttpStatus.OK
-        );
+
+        List<Trip> trips = tripRepository.findNotFinishedByAreaOwnerId(new Date(), userId);
+        if(trips != null && trips.size() > 0)
+            trips.forEach(trip -> {
+                if(trip.getAreas() != null && trip.getAreas().size() > 0)
+                    trip.getAreas().removeIf(area -> !area.getOwnerId().equals(userId));
+            });
+
+        return new ResponseEntity<>(trips, HttpStatus.OK);
     }
 
     public ResponseEntity<HashMap<String, Object>> dashboard(ObjectId userId, ObjectId areaId) {
 
-        List<User> members = userRepository.findBy_idIn(fetchMemberIds(tripRepository, userId, areaId));
+        List<User> members = userRepository.findByIdsIn(fetchMemberIds(tripRepository, userId, areaId));
         AtomicInteger maleMembers = new AtomicInteger();
         AtomicInteger femaleMembers = new AtomicInteger();
 
@@ -165,6 +181,8 @@ public class AreaService extends AbstractService<Area, AreaData> {
 
         foundArea.setCity(city.getName());
         foundArea.setState(state.getName());
+        foundArea.setCityId(city.getId());
+        foundArea.setStateId(state.getId());
         foundArea.setCountry(country.getName());
         foundArea.setDailyStartAt(dto.getDailyStartAt());
         foundArea.setDailyEndAt(dto.getDailyEndAt());
@@ -184,7 +202,7 @@ public class AreaService extends AbstractService<Area, AreaData> {
                 .getAreas().stream().filter(area -> area.getId().equals(areaId))
                 .findFirst().orElseThrow(RuntimeException::new);
 
-        if(foundArea.isFinished())
+        if(foundArea.getFinished())
             return;
 
         if(foundArea.getCity() == null || foundArea.getLat() == null ||

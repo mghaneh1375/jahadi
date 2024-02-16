@@ -22,9 +22,9 @@ import java.util.List;
 @Builder
 public class Project extends Model {
 
-    @Indexed(unique = true)
     private String name;
 
+    @JsonSerialize(using = ColorSerialization.class)
     private Color color;
     private int progress = 0;
 
@@ -43,5 +43,9 @@ public class Project extends Model {
     @Transient
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     private List<String> groupNames;
+
+    @Transient
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    private List<Group> groups;
 
 }

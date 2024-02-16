@@ -2,23 +2,19 @@ package four.group.jahadi.Service;
 
 import four.group.jahadi.DTO.ProjectData;
 import four.group.jahadi.DTO.Trip.TripStep1Data;
+import four.group.jahadi.DTO.UpdateProjectData;
 import four.group.jahadi.Enums.Status;
 import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Exception.InvalidIdException;
-import four.group.jahadi.Models.Group;
-import four.group.jahadi.Models.GroupAccess;
-import four.group.jahadi.Models.Project;
-import four.group.jahadi.Models.Trip;
-import four.group.jahadi.Repository.FilteringFactory;
-import four.group.jahadi.Repository.GroupRepository;
-import four.group.jahadi.Repository.ProjectRepository;
-import four.group.jahadi.Repository.TripRepository;
+import four.group.jahadi.Models.*;
+import four.group.jahadi.Repository.*;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -33,6 +29,8 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
     private GroupRepository groupRepository;
 
     @Autowired
+    private UserRepository userRepository;
+    @Autowired
     private TripRepository tripRepository;
 
     // filters:
@@ -44,7 +42,7 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
         List<List<Object>> filtersList = new ArrayList<>();
 
         if (filters[0] != null)
-            filtersList.add(new ArrayList<>(){
+            filtersList.add(new ArrayList<>() {
                 {
                     add("name");
                     add("regex");
@@ -71,9 +69,7 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
                         add(today);
                     }
                 });
-            }
-
-            else if(Objects.equals(filters[1], Status.FINISHED)) {
+            } else if (Objects.equals(filters[1], Status.FINISHED)) {
                 filtersList.add(new ArrayList<>() {
                     {
                         add("endAt");
@@ -87,7 +83,7 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
         if (filters.length > 3 && filters[3] != null) {
             List<String> groupIds = groupRepository.findByUserId((ObjectId) filters[3]).stream().map(Group::getId)
                     .map(ObjectId::toString).collect(Collectors.toList());
-            filtersList.add(new ArrayList<>(){
+            filtersList.add(new ArrayList<>() {
                 {
                     add("groupIds");
                     add("in");
@@ -100,21 +96,28 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
                 FilteringFactory.abstractParseFromParams(filtersList, Project.class)
         );
 
-        projects.forEach(x -> x.setGroupNames(new ArrayList<>()));
+        projects.forEach(x -> x.setGroups(new ArrayList<>()));
 
-        List<Group> groups = groupRepository.findBy_idIn(projects.stream()
+        List<Group> groups = groupRepository.findByIdsIn(projects.stream()
                 .map(Project::getGroupIds).collect(Collectors.toList())
                 .stream().flatMap(List::stream).distinct().collect(Collectors.toList())
         );
 
+        List<User> users = userRepository.findByIdsIn(groups.stream().map(Group::getOwner).distinct().collect(Collectors.toList()));
+
+        groups.forEach(group ->
+                users.stream().filter(user -> user.getId().equals(group.getOwner())).findFirst()
+                        .ifPresent(group::setUser)
+        );
+
         projects.forEach(project -> {
 
-            for(Group group : groups) {
+            for (Group group : groups) {
 
                 if (project.getGroupIds().stream().noneMatch(x -> x.equals(group.getId())))
                     continue;
 
-                project.getGroupNames().add(group.getName());
+                project.getGroups().add(group);
             }
         });
 
@@ -127,11 +130,20 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
         projectRepository.save(project);
     }
 
-    @Override
-    public void update(ObjectId id, ProjectData dto, Object... params) {
+    @Transactional
+    public void remove(ObjectId id) {
 
         Project project = projectRepository.findById(id).orElseThrow(InvalidIdException::new);
-        // todo: check for update policies
+        if (new Date().after(project.getStartAt()))
+            throw new InvalidFieldsException("پروژه آغاز شده و امکان حدف آن وجود ندارد");
+
+        tripRepository.deleteTripByProjectId(project.getId());
+        projectRepository.delete(project);
+    }
+
+    public void update(ObjectId id, UpdateProjectData dto) {
+
+        Project project = projectRepository.findById(id).orElseThrow(InvalidIdException::new);
 
         project = populateEntity(project, dto);
 
@@ -142,13 +154,17 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
         }
     }
 
+    @Override
+    public void update(ObjectId id, ProjectData dto, Object... params) {
+    }
+
     public ResponseEntity<Project> findById(ObjectId id, Object... params) {
 
         Project project = projectRepository.findById(id).orElseThrow(InvalidIdException::new);
 
         project.setGroupNames(
-                groupRepository.findBy_idIn(project.getGroupIds())
-                .stream().map(Group::getName).collect(Collectors.toList())
+                groupRepository.findByIdsIn(project.getGroupIds())
+                        .stream().map(Group::getName).collect(Collectors.toList())
         );
 
         return new ResponseEntity<>(
@@ -159,6 +175,9 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
 
     public ResponseEntity<Project> store(ProjectData data, Object... params) {
 
+        if(projectRepository.countByName(data.getName()) > 0)
+            throw new InvalidFieldsException("نام وارد شده تکراری است");
+
         List<ObjectId> groupIds = data.getTrips().stream()
                 .map(x -> x.stream().map(TripStep1Data::getOwner).collect(Collectors.toList()))
                 .flatMap(List::stream).distinct().collect(Collectors.toList());
@@ -168,11 +187,7 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
 
         Project project = populateEntity(null, data);
 
-        try {
-            projectRepository.insert(project);
-        } catch (Exception x) {
-            throw new InvalidFieldsException("نام وارد شده تکراری است");
-        }
+        projectRepository.insert(project);
 
         final int[] idx = {1};
         data.getTrips().forEach(x -> {
@@ -180,7 +195,8 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
             Trip trip = Trip
                     .builder()
                     .projectId(project.getId())
-                    .name(project.getName() + " - " + idx[0]).build();
+                    .name(project.getName() + " - " + idx[0])
+                    .build();
 
             idx[0]++;
 
@@ -201,34 +217,34 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
 
     @Override
     Project populateEntity(Project project, ProjectData projectData) {
+        return Project.builder()
+                .groupIds(projectData.getTrips().stream()
+                        .map(x -> x.stream().map(TripStep1Data::getOwner)
+                                .collect(Collectors.toList()))
+                        .flatMap(List::stream).distinct().collect(Collectors.toList()))
+                .name(projectData.getName())
+                .color(projectData.getColor())
+                .startAt(new Date(projectData.getStartAt()))
+                .endAt(new Date(projectData.getEndAt())).build();
+    }
 
-        if (project == null)
-            return Project.builder()
-                    .groupIds(projectData.getTrips().stream()
-                            .map(x -> x.stream().map(TripStep1Data::getOwner)
-                                    .collect(Collectors.toList()))
-                            .flatMap(List::stream).distinct().collect(Collectors.toList()))
-                    .name(projectData.getName())
-                    .color(projectData.getColor())
-                    .startAt(new Date(projectData.getStartAt()))
-                    .endAt(new Date(projectData.getEndAt())).build();
 
+    Project populateEntity(Project project, UpdateProjectData projectData) {
         project.setName(projectData.getName());
         project.setColor(projectData.getColor());
         project.setStartAt(new Date(projectData.getStartAt()));
         project.setEndAt(new Date(projectData.getEndAt()));
-
         return project;
     }
 
     public ResponseEntity<List<Project>> myProjects(ObjectId groupId, ObjectId userId) {
 
         List<Project> projects = new ArrayList<>();
-        if(groupId != null)
+        if (groupId != null)
             projects = projectRepository.findByOwner(Collections.singletonList(groupId));
         else {
             List<Trip> trips = tripRepository.findActivesProjectIdsByAreaOwnerId(new Date(), userId);
-            if(trips.size() > 0)
+            if (trips.size() > 0)
                 projects = projectRepository.findByIds(trips.stream().map(Trip::getProjectId).collect(Collectors.toList()));
         }
         return new ResponseEntity<>(projects, HttpStatus.OK);

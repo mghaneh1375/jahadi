@@ -2,6 +2,7 @@ package four.group.jahadi.Security;
 
 import four.group.jahadi.Enums.Access;
 import four.group.jahadi.Exception.CustomException;
+import four.group.jahadi.Utility.PairValue;
 import io.jsonwebtoken.*;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,10 +16,11 @@ import org.springframework.stereotype.Component;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Base64;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static four.group.jahadi.Security.JwtTokenFilter.blackListTokens;
+import static four.group.jahadi.Utility.StaticValues.TOKEN_EXPIRATION;
 import static four.group.jahadi.Utility.StaticValues.TOKEN_EXPIRATION_MSEC;
 
 
@@ -61,21 +63,6 @@ public class JwtTokenProvider {
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
-    public HashMap<String, Object> getClaims(String token) {
-
-        HashMap<String, Object> output = new HashMap<>();
-
-        Claims claims = Jwts.parser().setSigningKey(getSharedKeyBytes()).parseClaimsJws(token).getBody();
-
-        output.put("_id", new ObjectId(claims.get("user_id").toString()));
-        output.put("username", claims.getSubject());
-        output.put("name", claims.get("name").toString());
-        output.put("targets", claims.get("targets"));
-        output.put("access", claims.get("access"));
-
-        return output;
-    }
-
     public String getUsername(String token) {
         return Jwts.parser().setSigningKey(getSharedKeyBytes()).parseClaimsJws(token).getBody().getSubject();
     }
@@ -89,52 +76,16 @@ public class JwtTokenProvider {
     }
 
     boolean validateAuthToken(String token) {
-        return validateToken(token, false);
-    }
-
-    //token, expiration_time
-    HashMap<String, Long> validatedTokens = new HashMap<>();
-
-    boolean validateSocketToken(String token) {
-        return validateToken(token, true);
-    }
-
-    private boolean validateToken(String token, boolean isForSocket) {
-
         try {
-
-            Jws<Claims> cliams = Jwts.parser().setSigningKey(getSharedKeyBytes()).parseClaimsJws(token);
-
-            if (isForSocket && !cliams.getBody().get("digest").equals(
-                    cliams.getBody().get("user_id") + "_" + cliams.getBody().getSubject() + "_" +
-                            cliams.getBody().get("access")
-            ))
-                return false;
-
-            if(isForSocket)
-                validatedTokens.put(token, cliams.getBody().getExpiration().getTime());
-
+            Jwts.parser().setSigningKey(getSharedKeyBytes()).parseClaimsJws(token);
             return true;
-
-
         } catch (JwtException | IllegalArgumentException e) {
-            System.out.println("expire " + e.getMessage());
             throw new CustomException("Expired or invalid JWT token", HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
     }
 
     public static void removeTokenFromCache(String token) {
-
-//        for(int i = 0; i < validateTokens.size(); i++) {
-//
-//            if(validateTokens.get(i).token.equals(token)) {
-//                blackListTokens.add(new PairValue(token, TOKEN_EXPIRATION + validateTokens.get(i).issue));
-//                validateTokens.remove(i);
-//                return;
-//            }
-//
-//        }
+        blackListTokens.add(new PairValue(token, TOKEN_EXPIRATION + System.currentTimeMillis()));
     }
 
 }

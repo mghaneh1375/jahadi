@@ -1,6 +1,7 @@
 package four.group.jahadi.Service;
 
 import four.group.jahadi.DTO.ModuleData;
+import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Models.Module;
 import four.group.jahadi.Models.PaginatedResponse;
 import four.group.jahadi.Repository.ModuleRepository;
@@ -22,6 +23,10 @@ public class ModuleService {
 
     @Autowired
     private ModuleRepository moduleRepository;
+
+    public ResponseEntity<Module> show(ObjectId id) {
+        return new ResponseEntity<>(moduleRepository.findById(id).orElseThrow(InvalidIdException::new), HttpStatus.OK);
+    }
 
     public PaginatedResponse<Module> list(List<String> filters) {
 
@@ -72,9 +77,9 @@ public class ModuleService {
             module = new Module();
 
         module.setName(moduleData.getName());
-        module.setSection(moduleData.getSection());
-
-        module.setCanSuggestDrug(moduleData.isCanSuggestDrug());
+//        module.setSection(moduleData.getSection());
+//
+//        module.setCanSuggestDrug(moduleData.isCanSuggestDrug());
         module.setHasAccessToFullDocs(moduleData.isHasAccessToFullDocs());
         module.setHasAccessToUploadDoc(moduleData.isHasAccessToUploadDoc());
 
@@ -84,4 +89,5 @@ public class ModuleService {
     public ResponseEntity<List<Module>> findAllDigests() {
         return new ResponseEntity<>(moduleRepository.findAllDigests(), HttpStatus.OK);
     }
+
 }
