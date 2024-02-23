@@ -1,10 +1,11 @@
 package four.group.jahadi.Routes.API;
 
-import four.group.jahadi.Models.City;
-import four.group.jahadi.Models.Country;
-import four.group.jahadi.Models.State;
+import four.group.jahadi.Models.*;
 import four.group.jahadi.Service.CityService;
+import four.group.jahadi.Service.DrugService;
+import four.group.jahadi.Service.ExperimentService;
 import four.group.jahadi.Validator.ObjectIdConstraint;
+import io.swagger.v3.oas.annotations.Operation;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,25 @@ public class PublicAPIRoutes {
 
     @Autowired
     private CityService cityService;
+
+    @Autowired
+    private ExperimentService experimentService;
+
+    @Autowired
+    private DrugService drugService;
+
+    @GetMapping(value = "getAllAvailableExperiments")
+    @ResponseBody
+    public ResponseEntity<List<Experiment>> getAllAvailableExperiments() {
+        return experimentService.list(true);
+    }
+
+    @GetMapping(value = "getDrug/{drugId}")
+    @ResponseBody
+    @Operation(summary = "گرفتن اطلاعات تکمیلی دارو مثل طریقه مصرف و ...")
+    public ResponseEntity<Drug> getDrug(@PathVariable @ObjectIdConstraint ObjectId drugId) {
+        return drugService.findById(drugId);
+    }
 
     @GetMapping(value = "/getCountries")
     @ResponseBody

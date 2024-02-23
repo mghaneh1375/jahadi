@@ -1,9 +1,7 @@
 package four.group.jahadi.Service;
 
-import four.group.jahadi.Exception.InvalidIdException;
-import four.group.jahadi.Models.Area;
+import four.group.jahadi.Models.Area.Area;
 import four.group.jahadi.Models.Notif;
-import four.group.jahadi.Models.Trip;
 import four.group.jahadi.Repository.NotifRepository;
 import four.group.jahadi.Repository.TripRepository;
 import org.bson.types.ObjectId;

@@ -1,6 +1,6 @@
 package four.group.jahadi.Validator;
 
-import four.group.jahadi.DTO.AreaData;
+import four.group.jahadi.DTO.Area.AreaData;
 import org.json.JSONObject;
 
 import javax.validation.ConstraintValidator;

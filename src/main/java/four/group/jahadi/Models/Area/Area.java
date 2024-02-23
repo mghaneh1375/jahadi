@@ -1,9 +1,10 @@
-package four.group.jahadi.Models;
+package four.group.jahadi.Models.Area;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import four.group.jahadi.Enums.Color;
+import four.group.jahadi.Models.*;
 import lombok.*;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -84,6 +85,10 @@ public class Area {
     @JsonSerialize(using = ObjectIdListSerialization.class)
     @Builder.Default
     private List<ObjectId> members = new ArrayList<>();
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @Builder.Default
+    private List<ExperimentInArea> experiments = new ArrayList<>();
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @Builder.Default

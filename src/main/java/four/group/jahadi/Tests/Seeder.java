@@ -2,7 +2,8 @@ package four.group.jahadi.Tests;
 
 import four.group.jahadi.Enums.*;
 import four.group.jahadi.Models.*;
-import four.group.jahadi.Models.Module;
+import four.group.jahadi.Models.Area.Area;
+import four.group.jahadi.Models.Area.ModuleInArea;
 import four.group.jahadi.Repository.*;
 import four.group.jahadi.Tests.Modules.ModuleSeeder;
 import org.bson.types.ObjectId;
@@ -11,7 +12,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class Seeder {

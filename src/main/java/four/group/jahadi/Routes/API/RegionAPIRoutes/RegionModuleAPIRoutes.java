@@ -1,7 +1,7 @@
 package four.group.jahadi.Routes.API.RegionAPIRoutes;
 
 import four.group.jahadi.Models.Module;
-import four.group.jahadi.Models.ModuleInArea;
+import four.group.jahadi.Models.Area.ModuleInArea;
 import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Service.Area.ModuleServiceInArea;
 import four.group.jahadi.Service.ModuleService;

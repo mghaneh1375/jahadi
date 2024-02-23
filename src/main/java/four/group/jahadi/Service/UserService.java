@@ -622,7 +622,7 @@ public class UserService extends AbstractService<User, SignUpData> {
     public ResponseEntity<List<User>> findGroupMembersByRegionOwner(ObjectId userId, ObjectId groupId) {
 
         List<Trip> trips =
-                tripRepository.findActivesProjectIdsByAreaOwnerId(new Date(), userId);
+                tripRepository.findActivesOrNotStartedProjectIdsByAreaOwnerId(new Date(), userId);
 
         if (trips.size() == 0)
             throw new NotAccessException();

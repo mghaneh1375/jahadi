@@ -6,6 +6,8 @@ import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Exception.NotAccessException;
 import four.group.jahadi.Models.*;
+import four.group.jahadi.Models.Area.Area;
+import four.group.jahadi.Models.Area.ModuleInArea;
 import four.group.jahadi.Models.Module;
 import four.group.jahadi.Repository.ModuleRepository;
 import four.group.jahadi.Repository.TripRepository;

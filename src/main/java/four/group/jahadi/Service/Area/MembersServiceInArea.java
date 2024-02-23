@@ -2,7 +2,7 @@ package four.group.jahadi.Service.Area;
 
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Exception.NotAccessException;
-import four.group.jahadi.Models.Area;
+import four.group.jahadi.Models.Area.Area;
 import four.group.jahadi.Models.Trip;
 import four.group.jahadi.Models.User;
 import four.group.jahadi.Repository.TripRepository;

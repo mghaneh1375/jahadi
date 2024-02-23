@@ -17,17 +17,14 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Document(collection = "drug")
-public class Drug {
-
-    @Id
-    @MongoId
-    @Field("_id")
-    private ObjectId _id;
+public class Drug extends Model {
 
     private String name;
-    private int price;
+    private Integer price;
     private String howToUse;
     private String description;
-    private int available;
+    private Integer available;
     private List<ObjectId> replacements;
+    private Boolean visibility;
+    private Integer priority;
 }

@@ -2,7 +2,7 @@ package four.group.jahadi.Service;
 
 import four.group.jahadi.DTO.ModuleForms.ExperimentalFormDTO;
 import four.group.jahadi.Exception.InvalidIdException;
-import four.group.jahadi.Repository.PatientsInAreaRepository;
+import four.group.jahadi.Repository.Area.PatientsInAreaRepository;
 import four.group.jahadi.Repository.TripRepository;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;

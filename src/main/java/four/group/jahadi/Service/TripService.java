@@ -6,6 +6,7 @@ import four.group.jahadi.DTO.Trip.TripStepData;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Exception.NotAccessException;
 import four.group.jahadi.Models.*;
+import four.group.jahadi.Models.Area.Area;
 import four.group.jahadi.Repository.*;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;

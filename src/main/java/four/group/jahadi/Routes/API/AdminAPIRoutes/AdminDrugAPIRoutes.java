@@ -15,7 +15,7 @@ import javax.validation.Valid;
 @RestController
 @RequestMapping(path = "/api/admin/drug")
 @Validated
-public class DrugAPIRoutes {
+public class AdminDrugAPIRoutes {
 
     @Autowired
     DrugService drugService;

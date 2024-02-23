@@ -33,4 +33,12 @@ public class Module extends Model {
     private boolean hasAccessToUploadDoc;
 
     private String icon;
+
+    @Field("is_referral")
+    @JsonIgnore
+    private boolean isReferral = true;
+
+    @Field("inTrip")
+    @JsonIgnore
+    private boolean inTrip = true;
 }

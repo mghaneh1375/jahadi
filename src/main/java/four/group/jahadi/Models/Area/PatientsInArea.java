@@ -1,7 +1,9 @@
-package four.group.jahadi.Models;
+package four.group.jahadi.Models.Area;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import four.group.jahadi.Models.Model;
+import four.group.jahadi.Models.ObjectIdSerialization;
 import lombok.*;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;

@@ -1,10 +1,10 @@
 package four.group.jahadi.Routes.API;
 
-import four.group.jahadi.DTO.AreaData;
+import four.group.jahadi.DTO.Area.AreaData;
 import four.group.jahadi.Enums.Access;
 import four.group.jahadi.Exception.NotActivateAccountException;
 import four.group.jahadi.Exception.UnAuthException;
-import four.group.jahadi.Models.Area;
+import four.group.jahadi.Models.Area.Area;
 import four.group.jahadi.Models.User;
 import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Service.Area.AreaService;

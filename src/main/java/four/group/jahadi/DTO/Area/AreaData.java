@@ -1,8 +1,8 @@
-package four.group.jahadi.DTO;
+package four.group.jahadi.DTO.Area;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import four.group.jahadi.Enums.Color;
-import four.group.jahadi.Models.Area;
+import four.group.jahadi.Models.Area.Area;
 import four.group.jahadi.Models.ColorDeserialization;
 import four.group.jahadi.Validator.ValidatedArea;
 import lombok.Getter;

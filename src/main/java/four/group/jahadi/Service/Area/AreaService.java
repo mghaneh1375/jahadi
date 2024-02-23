@@ -1,6 +1,6 @@
 package four.group.jahadi.Service.Area;
 
-import four.group.jahadi.DTO.AreaData;
+import four.group.jahadi.DTO.Area.AreaData;
 import four.group.jahadi.DTO.Region.RegionRunInfoData;
 import four.group.jahadi.DTO.Region.RegionSendNotifData;
 import four.group.jahadi.Enums.Sex;
@@ -8,7 +8,9 @@ import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Exception.NotAccessException;
 import four.group.jahadi.Models.*;
+import four.group.jahadi.Models.Area.Area;
 import four.group.jahadi.Repository.*;
+import four.group.jahadi.Repository.Area.PatientsInAreaRepository;
 import four.group.jahadi.Service.AbstractService;
 import four.group.jahadi.Service.NotifService;
 import four.group.jahadi.Utility.Utility;
@@ -124,11 +126,15 @@ public class AreaService extends AbstractService<Area, AreaData> {
     public ResponseEntity<List<Trip>> myCartableList(ObjectId userId) {
 
         List<Trip> trips = tripRepository.findNotFinishedByAreaOwnerId(new Date(), userId);
-        if(trips != null && trips.size() > 0)
+        if(trips != null && trips.size() > 0) {
             trips.forEach(trip -> {
-                if(trip.getAreas() != null && trip.getAreas().size() > 0)
-                    trip.getAreas().removeIf(area -> !area.getOwnerId().equals(userId));
+                if (trip.getAreas() != null && trip.getAreas().size() > 0)
+                    trip.getAreas().removeIf(area ->
+                            area.getOwnerId() == null ||
+                            !area.getOwnerId().equals(userId)
+                    );
             });
+        }
 
         return new ResponseEntity<>(trips, HttpStatus.OK);
     }

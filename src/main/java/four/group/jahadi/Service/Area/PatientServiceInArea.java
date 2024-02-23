@@ -6,9 +6,9 @@ import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Exception.NotAccessException;
 import four.group.jahadi.Models.Patient;
-import four.group.jahadi.Models.PatientsInArea;
+import four.group.jahadi.Models.Area.PatientsInArea;
 import four.group.jahadi.Repository.PatientRepository;
-import four.group.jahadi.Repository.PatientsInAreaRepository;
+import four.group.jahadi.Repository.Area.PatientsInAreaRepository;
 import four.group.jahadi.Repository.TripRepository;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
-import java.util.Optional;
 
 @Service
 public class PatientServiceInArea {
