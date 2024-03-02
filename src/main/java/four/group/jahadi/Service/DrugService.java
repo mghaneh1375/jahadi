@@ -3,7 +3,9 @@ package four.group.jahadi.Service;
 import four.group.jahadi.DTO.DrugData;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Models.Drug;
+import four.group.jahadi.Models.DrugLog;
 import four.group.jahadi.Repository.DrugRepository;
+import four.group.jahadi.Repository.DrugLogRepository;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,6 +21,9 @@ public class DrugService extends AbstractService<Drug, DrugData> {
     @Autowired
     private DrugRepository drugRepository;
 
+    @Autowired
+    private DrugLogRepository drugLogRepository;
+    
     @Override
     public ResponseEntity<List<Drug>> list(Object ... filters) {
         List<Drug> drugs;
@@ -58,14 +63,30 @@ public class DrugService extends AbstractService<Drug, DrugData> {
 
     @Override
     public ResponseEntity<Drug> store(DrugData data, Object ... params) {
-        return new ResponseEntity<>(drugRepository.insert(populateEntity(null, data)), HttpStatus.OK);
+        Drug drug = drugRepository.insert(populateEntity(null, data));
+        drugLogRepository.insert(
+            DrugLog
+                .builder()
+                .drugId(drug.getId())
+                .amount(drug.getAvailable())
+                .build()
+        );
+        return new ResponseEntity<>(drug, HttpStatus.OK);
     }
 
     @Override
     public void update(ObjectId id, DrugData drugData, Object ... params) {
-
         Drug drug = drugRepository.findById(id).orElseThrow(InvalidIdException::new);
-        drugRepository.save(populateEntity(drug, drugData));
+        int oldAvailable = drug.getAvailable();
+        drug = populateEntity(drug, drugData);
+        if(drug.getAvailable() != oldAvailable) {
+            DrugLog
+                .builder()
+                .drugId(drug.getId())
+                .amount(drug.getAvailable() - oldAvailable)
+                .build();
+        }
+        drugRepository.save(drug);
     }
 
     @Override
@@ -76,6 +97,11 @@ public class DrugService extends AbstractService<Drug, DrugData> {
 
         drug.setName(drugData.getName());
         drug.setPrice(drugData.getPrice());
+        drug.setHowToUse(drugData.getHowToUse());
+        drug.setDescription(drugData.getDescription());
+        drug.setAvailable(drugData.getAvailable());
+        drug.setVisibility(drugData.getVisibility());
+        drug.setPriority(drugData.getPriority());
 
         return drug;
     }
