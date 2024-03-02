@@ -22,7 +22,8 @@ public class DrugData {
     private String howToUse;
     
     private String description;
-    
+
+    @NotNull
     @Min(value = 0, message = "حداقل مقدار ممکن برای موجودی 0 می باشد")
     @Max(value = 1000000, message = "حداکثر مقدار ممکن برای موجودی 1000000 می باشد")
     private Integer available;
