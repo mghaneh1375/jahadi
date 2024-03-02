@@ -1,55 +1,42 @@
 package four.group.jahadi.DTO;
 
+import lombok.Getter;
+import lombok.Setter;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
 import four.group.jahadi.Validator.ValidatedDrug;
 
+@Getter
+@Setter
 @ValidatedDrug
 public class DrugData {
 
+    @NotNull
+    @Size(min = 2, max = 100, message = "نام باید حداقل 2 و حداکثر 100 کاراکتر باشد")
     private String name;
+    
+    @Size(max = 1000, message = "طریقه مصرف باید حداکثر 1000 کاراکتر باشد")
     private String howToUse;
+    
     private String description;
+    
+    @Min(value = 0, message = "حداقل مقدار ممکن برای موجودی 0 می باشد")
+    @Max(value = 1000000, message = "حداکثر مقدار ممکن برای موجودی 1000000 می باشد")
     private Integer available;
-
-    public String getHowToUse() {
-        return howToUse;
-    }
-
-    public void setHowToUse(String howToUse) {
-        this.howToUse = howToUse;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public Integer getAvailable() {
-        return available;
-    }
-
-    public void setAvailable(Integer available) {
-        this.available = available;
-    }
-
-    public Integer getPrice() {
-        return price;
-    }
-
-    public void setPrice(Integer price) {
-        this.price = price;
-    }
-
+    
+    @Min(value = 0, message = "حداقل مقدار ممکن برای قیمت 0 می باشد")
     private Integer price;
 
-    public String getName() {
-        return name;
-    }
+    @NotNull(message = "لطفا وضعیت نمایش دارو را وارد نمایید")
+    private Boolean visibility;
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    @Min(value = 1, message = "حداقل مقدار ممکن برای اولیت 1 می باشد")
+    @Max(value = 1000, message = "حداکثر مقدار ممکن برای اولویت 1000 می باشد")
+    @NotNull(message = "لطفا اولویت نمایش دارو را وارد نمایید")
+    private Integer priority; 
+
 
 }
