@@ -26,6 +26,15 @@ public class AdminDrugAPIRoutes {
         return drugService.store(drugData);
     }
 
+    @PutMapping(value = "update/{id}")
+    @ResponseBody
+    public void store(
+        final @PathVariable @ObjectIdConstraint ObjectId id, 
+        final @RequestBody @Valid DrugData drugData
+    ) {
+        return drugService.update(id, drugData);
+    }
+    
     @GetMapping(value = "get/{id}")
     @ResponseBody
     public ResponseEntity<Drug> get(@PathVariable @ObjectIdConstraint ObjectId id) {
