@@ -21,15 +21,20 @@ public class DrugService extends AbstractService<Drug, DrugData> {
 
     @Override
     public ResponseEntity<List<Drug>> list(Object ... filters) {
-
-//        Pageable pageable = PageRequest.of(0, 10);
-//
-//        Page<Drug> all = drugRepository.findAllWithFilter(Drug.class,
-//                FilteringFactory.parseFromParams(filters, Drug.class), pageable
-//        );
-
-        return null;
-//        return returnPaginateResponse(all);
+        List<Drug> drugs;
+        boolean isAdmin = (boolean) filters[0];
+        if(filters.length > 1) {
+            String searchKey = filters[1].toString();
+            drugs = isAdmin ? drugRepository.findLikeName() : drugRepository.findLikeNameAndVisible();
+        }
+        else {
+            drugs = isAdmin ? drugRepository.findAllDigests() : drugRepository.findVisibleDigests();
+        }
+        
+        return new ResponseEntity<>(
+                drugs,
+                HttpStatus.OK
+        );
     }
 
     @Override
