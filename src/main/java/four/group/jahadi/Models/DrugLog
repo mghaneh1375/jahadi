@@ -21,4 +21,5 @@ public class DrugLog extends Model {
     private ObjectId drugId;
 
     private Integer amount;
+    private String desc;
 }
