@@ -14,4 +14,7 @@ public interface DrugRepository extends MongoRepository<Drug, ObjectId>, Filtera
 
   @Query(value = "{name:{ $regex: ?0, $options:'i'}}", fields = "{ 'name': 1, '_id': 1 }")
   List<Drug> findLikeName(String name);
+  
+  @Query(fields = "{ 'name': 1, '_id': 1 }")
+  List<Drug> findAllDigests();
 }
