@@ -40,6 +40,17 @@ public class DrugService extends AbstractService<Drug, DrugData> {
         );
     }
 
+    public ResponseEntity<List<Drug>> findReplacements(ObjectId id) {
+        
+        Drug drug = drugRepository.findById(id).orElseThrow(InvalidIdException::new);
+        List<Drug> replacements = drugRepository.findByIds(drug.getReplacements());
+        
+        return new ResponseEntity<>(
+                replacements,
+                HttpStatus.OK
+        );
+    }
+
     @Override
     public ResponseEntity<Drug> store(DrugData data, Object ... params) {
         return new ResponseEntity<>(drugRepository.insert(populateEntity(null, data)), HttpStatus.OK);
