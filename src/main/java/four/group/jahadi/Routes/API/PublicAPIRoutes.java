@@ -40,6 +40,13 @@ public class PublicAPIRoutes {
     public ResponseEntity<Drug> getDrug(@PathVariable @ObjectIdConstraint ObjectId drugId) {
         return drugService.findById(drugId);
     }
+    
+    @GetMapping(value = "getDrugReplacements/{drugId}")
+    @ResponseBody
+    @Operation(summary = "گرفتن داروهای جایگزین یک دارو خاص")
+    public ResponseEntity<List<Drug>> getDrug(@PathVariable @ObjectIdConstraint ObjectId drugId) {
+        return drugService.findReplacements(drugId);
+    }
 
     @GetMapping(value = "/getCountries")
     @ResponseBody
