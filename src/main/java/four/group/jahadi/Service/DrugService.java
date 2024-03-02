@@ -50,6 +50,17 @@ public class DrugService extends AbstractService<Drug, DrugData> {
         );
     }
 
+    public void setReplacements(ObjectId id, List<ObjectId> replacements) {
+        
+        Drug drug = drugRepository.findById(id).orElseThrow(InvalidIdException::new);
+
+        if(drugRepository.countByIds(replacements).size() != ids.size())
+            throw new InvalidIdException();
+
+        drug.setReplacements(replacements);     
+        drugRepository.save(drug);
+    }
+    
     public ResponseEntity<List<Drug>> findReplacements(ObjectId id) {
         
         Drug drug = drugRepository.findById(id).orElseThrow(InvalidIdException::new);
@@ -69,6 +80,7 @@ public class DrugService extends AbstractService<Drug, DrugData> {
                 .builder()
                 .drugId(drug.getId())
                 .amount(drug.getAvailable())
+                .desc("ایجاد دارو توسط ادمین")
                 .build()
         );
         return new ResponseEntity<>(drug, HttpStatus.OK);
@@ -84,6 +96,7 @@ public class DrugService extends AbstractService<Drug, DrugData> {
                 .builder()
                 .drugId(drug.getId())
                 .amount(drug.getAvailable() - oldAvailable)
+                .desc("ویرایش موجودی دارو توسط ادمین")
                 .build();
         }
         drugRepository.save(drug);
@@ -107,6 +120,7 @@ public class DrugService extends AbstractService<Drug, DrugData> {
     }
 
     public void remove(ObjectId id) {
+        //todo: remove logs and check for usage in active trip
         drugRepository.deleteById(id);
     }
 }
