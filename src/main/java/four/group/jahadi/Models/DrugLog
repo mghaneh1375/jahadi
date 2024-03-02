@@ -1,0 +1,26 @@
+package four.group.jahadi.Models;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.bson.types.ObjectId;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.data.mongodb.core.mapping.MongoId;
+
+import javax.persistence.Id;
+import java.util.List;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Document(collection = "drug_logs")
+public class DrugLog extends Model {
+
+    @Field("drug_id")
+    private ObjectId drugId;
+
+    private Integer amount;
+}
