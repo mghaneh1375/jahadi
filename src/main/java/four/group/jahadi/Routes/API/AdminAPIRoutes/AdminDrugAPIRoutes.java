@@ -4,6 +4,7 @@ import four.group.jahadi.DTO.DrugData;
 import four.group.jahadi.Models.Drug;
 import four.group.jahadi.Service.DrugService;
 import four.group.jahadi.Validator.ObjectIdConstraint;
+import io.swagger.v3.oas.annotations.Operation;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping(path = "/api/admin/drug")
@@ -28,11 +30,11 @@ public class AdminDrugAPIRoutes {
 
     @PutMapping(value = "update/{id}")
     @ResponseBody
-    public void store(
+    public void update(
         final @PathVariable @ObjectIdConstraint ObjectId id, 
         final @RequestBody @Valid DrugData drugData
     ) {
-        return drugService.update(id, drugData);
+        drugService.update(id, drugData);
     }
     
     @GetMapping(value = "get/{id}")
@@ -46,7 +48,7 @@ public class AdminDrugAPIRoutes {
     @Operation(summary = "گرفتن اطلاعات مختصر داروها و یا سرچ در داروها برای ادمین", description="پارامتر نام دارو که میتواند بخشی از نام دارو هم باشد اختیاری و برای سرچ کردن است که باید حداقل سه کاراکتر باشد")
     public ResponseEntity<List<Drug>> list(@RequestParam(required=false, value="name") String name) {
         
-        if(name != null && name.length > 2)
+        if(name != null && name.length() > 2)
             return drugService.list(true, name);
         
         return drugService.list(true);

@@ -30,7 +30,7 @@ public class DrugService extends AbstractService<Drug, DrugData> {
         boolean isAdmin = (boolean) filters[0];
         if(filters.length > 1) {
             String searchKey = filters[1].toString();
-            drugs = isAdmin ? drugRepository.findLikeName() : drugRepository.findLikeNameAndVisible();
+            drugs = isAdmin ? drugRepository.findLikeName(searchKey) : drugRepository.findLikeNameAndVisible(searchKey);
         }
         else {
             drugs = isAdmin ? drugRepository.findAllDigests() : drugRepository.findVisibleDigests();
@@ -54,7 +54,7 @@ public class DrugService extends AbstractService<Drug, DrugData> {
         
         Drug drug = drugRepository.findById(id).orElseThrow(InvalidIdException::new);
 
-        if(drugRepository.countByIds(replacements).size() != ids.size())
+        if(drugRepository.countByIds(replacements) != replacements.size())
             throw new InvalidIdException();
 
         drug.setReplacements(replacements);     

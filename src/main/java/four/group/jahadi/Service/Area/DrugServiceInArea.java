@@ -3,9 +3,11 @@ package four.group.jahadi.Service.Area;
 import four.group.jahadi.DTO.Area.AreaDrugsData;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Exception.NotAccessException;
+import four.group.jahadi.Models.Area.Area;
 import four.group.jahadi.Models.Area.AreaDrugs;
 import four.group.jahadi.Models.Drug;
 import four.group.jahadi.Models.DrugLog;
+import four.group.jahadi.Models.Trip;
 import four.group.jahadi.Repository.Area.DrugsInAreaRepository;
 import four.group.jahadi.Repository.DrugRepository;
 import four.group.jahadi.Repository.DrugLogRepository;
@@ -95,7 +97,7 @@ public class DrugServiceInArea {
                                 .drugId(drug.getId())
                                 .amount(-dto.getTotalCount())
                                 .desc(msg)
-                                .build();
+                                .build()
                         );
                         
                         drugs.add(
@@ -175,7 +177,7 @@ public class DrugServiceInArea {
                 .findFirst().orElseThrow(RuntimeException::new);
         
         AreaDrugs areaDrug = drugsInAreaRepository.findById(id).orElseThrow(InvalidIdException::new);
-        int diff = newReminder - areaDrug.reminder;
+        int diff = newReminder - areaDrug.getReminder();
         Drug drug = drugRepository.findById(areaDrug.getDrugId()).orElseThrow(InvalidIdException::new);
         
         if(diff > 0) { // check availability
@@ -190,7 +192,7 @@ public class DrugServiceInArea {
         drug.setAvailable(drug.getAvailable() + diff);
         drugRepository.save(drug);
         
-        drogLogRepository.save(
+        drugLogRepository.save(
             DrugLog
                 .builder()
                 .drugId(drug.getId())

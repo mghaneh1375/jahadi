@@ -6,6 +6,8 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface DrugRepository extends MongoRepository<Drug, ObjectId>, FilterableRepository<Drug> {
 
@@ -18,7 +20,7 @@ public interface DrugRepository extends MongoRepository<Drug, ObjectId>, Filtera
   @Query(value = "{ name: { $regex: ?0, $options:'i'}}", fields = "{ 'name': 1, '_id': 1, 'price': 1, 'visibility': 1, 'available': 1, 'priority': 1 }", sort = "{'priority': 1}")
   List<Drug> findLikeName(String name);
   
-  @Query(fields = "{ 'name': 1, '_id': 1, 'price': 1, 'visibility': 1, 'available': 1, 'priority': 1 }", sort = "{'priority': 1}")
+  @Query(value = "{_id: {$exists: true}}", fields = "{ 'name': 1, '_id': 1, 'price': 1, 'visibility': 1, 'available': 1, 'priority': 1 }", sort = "{'priority': 1}")
   List<Drug> findAllDigests();
   
   @Query(value = "{ name: { $regex: ?0, $options:'i'}, visibility: true }", fields = "{ 'name': 1, '_id': 1 }", sort = "{'priority': 1}")

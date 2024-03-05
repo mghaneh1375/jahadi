@@ -39,7 +39,7 @@ public class PublicAPIRoutes {
     @Operation(summary = "گرفتن اطلاعات مختصر داروها و یا سرچ در داروها برای عموم", description="پارامتر نام دارو که میتواند بخشی از نام دارو هم باشد اختیاری و برای سرچ کردن است که باید حداقل سه کاراکتر باشد")
     public ResponseEntity<List<Drug>> getAllDrugs(@RequestParam(required=false, value="name") String name) {
         
-        if(name != null && name.length > 2)
+        if(name != null && name.length() > 2)
             return drugService.list(false, name);
         
         return drugService.list(false);
@@ -55,7 +55,7 @@ public class PublicAPIRoutes {
     @GetMapping(value = "getDrugReplacements/{drugId}")
     @ResponseBody
     @Operation(summary = "گرفتن داروهای جایگزین یک دارو خاص")
-    public ResponseEntity<List<Drug>> getDrug(@PathVariable @ObjectIdConstraint ObjectId drugId) {
+    public ResponseEntity<List<Drug>> getDrugReplacements(@PathVariable @ObjectIdConstraint ObjectId drugId) {
         return drugService.findReplacements(drugId);
     }
 
