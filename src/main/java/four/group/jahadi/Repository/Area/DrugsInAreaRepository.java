@@ -29,5 +29,5 @@ public interface DrugsInAreaRepository extends MongoRepository<AreaDrugs, Object
     List<AreaDrugs> findAvailableDrugsByAreaId(ObjectId areaId);
 
     @Query(value = "{_id: {$in: ?0}}", delete = true)
-    void removeAreaDrugsById(List<ObjectId> ids);
+    List<AreaDrugs> removeAreaDrugsById(List<ObjectId> ids);
 }
