@@ -109,7 +109,8 @@ public class DrugServiceInArea {
 
     public void advice(ObjectId areaDrugId, Integer amount) {
 
-        AreaDrugs areaDrug = drugsInAreaRepository.findById(areaDrugId)
+        AreaDrugs areaDrug = drugsInAreaRepository
+                .findById(areaDrugId)
                 .orElseThrow(InvalidIdException::new);
 
         if(areaDrug.getReminder() < amount)
