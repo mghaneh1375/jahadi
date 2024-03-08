@@ -1,5 +1,6 @@
 package four.group.jahadi.Service;
 
+import four.group.jahadi.DTO.AdminSignInData;
 import four.group.jahadi.DTO.SignUp.*;
 import four.group.jahadi.Enums.Access;
 import four.group.jahadi.Enums.AccountStatus;
@@ -492,6 +493,25 @@ public class UserService extends AbstractService<User, SignUpData> {
         } catch (AuthenticationException x) {
             return new ResponseEntity<>(
                     "نام کاربری و یا رمزعبور اشتباه است.",
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+    }
+
+    public ResponseEntity<String> adminSignIn(AdminSignInData data) {
+
+        try {
+
+            User u = userRepository.findByNID(data.getNid()).orElseThrow(InvalidIdException::new);
+            String token = jwtTokenProvider.createToken(data.getNid(), u.getAccesses(), u.getGroupId(), u.getId());
+
+            return new ResponseEntity<>(
+                    token, HttpStatus.OK
+            );
+
+        } catch (AuthenticationException x) {
+            return new ResponseEntity<>(
+                    "نام کاربری اشتباه است.",
                     HttpStatus.BAD_REQUEST
             );
         }

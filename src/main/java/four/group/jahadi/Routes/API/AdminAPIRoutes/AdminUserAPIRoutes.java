@@ -1,5 +1,6 @@
 package four.group.jahadi.Routes.API.AdminAPIRoutes;
 
+import four.group.jahadi.DTO.AdminSignInData;
 import four.group.jahadi.DTO.SignUp.PasswordData;
 import four.group.jahadi.Enums.Access;
 import four.group.jahadi.Enums.AccountStatus;
@@ -95,6 +96,12 @@ public class AdminUserAPIRoutes {
     public void changeStatus(@PathVariable @ObjectIdConstraint ObjectId userId
     ) {
         userService.remove(userId);
+    }
+
+    @PostMapping(value = "signIn")
+    @ResponseBody
+    public ResponseEntity<String> signIn(@RequestBody @Valid AdminSignInData dto) {
+        return userService.adminSignIn(dto);
     }
 
 }

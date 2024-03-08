@@ -42,7 +42,7 @@ public class DrugLogFilterValidator implements ConstraintValidator<ValidatedDrug
             isErrored = true;
         }
 
-        if(value.getStartAt() != null && value.getStartAt() < 1709366474000) {
+        if(value.getStartAt() != null && value.getStartAt() < 1709366474000L) {
             errs.put("startAt", "تاریخ شروع بازه معتبر نمی باشد");
             isErrored = true;
         }
