@@ -278,6 +278,7 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
             if(ids.size() == 0)
                 return;
 
+            project.setTripIds(ids);
             result.add(project);
         });
 

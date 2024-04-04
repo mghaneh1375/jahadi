@@ -1,11 +1,11 @@
 package four.group.jahadi.Routes.API.GroupAPIRoutes;
 
+import four.group.jahadi.DTO.AdminSignInData;
 import four.group.jahadi.Enums.Sex;
 import four.group.jahadi.Exception.NotActivateAccountException;
 import four.group.jahadi.Exception.UnAuthException;
 import four.group.jahadi.Models.User;
 import four.group.jahadi.Routes.Router;
-import four.group.jahadi.Service.GroupService;
 import four.group.jahadi.Service.UserService;
 import four.group.jahadi.Validator.ObjectIdConstraint;
 import org.bson.types.ObjectId;
@@ -15,7 +15,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -25,9 +25,6 @@ public class GroupUserAPIRoutes extends Router {
 
     @Autowired
     private UserService userService;
-
-    @Autowired
-    private GroupService groupService;
 
     @GetMapping(value = "list")
     @ResponseBody
@@ -45,6 +42,15 @@ public class GroupUserAPIRoutes extends Router {
     public void removeFromGroup(HttpServletRequest request,
                                 final @PathVariable @ObjectIdConstraint ObjectId userId) {
         userService.removeFromGroup(userId, getGroup(request));
+    }
+
+    @PostMapping(value = "signIn")
+    @ResponseBody
+    public ResponseEntity<String> signIn(
+            HttpServletRequest request,
+            @RequestBody @Valid AdminSignInData dto
+    ) {
+        return userService.groupSignIn(dto, getGroup(request));
     }
 
 }

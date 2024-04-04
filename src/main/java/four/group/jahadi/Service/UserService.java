@@ -498,6 +498,28 @@ public class UserService extends AbstractService<User, SignUpData> {
         }
     }
 
+    public ResponseEntity<String> groupSignIn(AdminSignInData data, ObjectId groupId) {
+
+        try {
+            User u = userRepository.findByNID(data.getNid()).orElseThrow(InvalidIdException::new);
+
+            if(!u.getGroupId().equals(groupId))
+                throw new NotAccessException();
+
+            String token = jwtTokenProvider.createToken(data.getNid(), u.getAccesses(), u.getGroupId(), u.getId());
+
+            return new ResponseEntity<>(
+                    token, HttpStatus.OK
+            );
+
+        } catch (AuthenticationException x) {
+            return new ResponseEntity<>(
+                    "نام کاربری اشتباه است.",
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+    }
+
     public ResponseEntity<String> adminSignIn(AdminSignInData data) {
 
         try {
