@@ -179,7 +179,7 @@ public class GroupService extends AbstractService<Group, GroupData> {
         statisticData.put("postRef", 0);
         statisticData.put("totalCosts", 0);
         statisticData.put("totalRefs", 0);
-        statisticData.put("activeProjects", projectService.myProjects(groupId, null).getBody());
+        statisticData.put("activeProjects", projectService.myProjectsNeedAction(groupId));
         statisticData.put("activeTrips", tripService.inProgressTripsForGroupAccess(groupId).getBody());
 
         return new ResponseEntity<>(statisticData, HttpStatus.OK);

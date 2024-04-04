@@ -250,4 +250,19 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
         return new ResponseEntity<>(projects, HttpStatus.OK);
     }
 
+    public List<Project> myProjectsNeedAction(ObjectId groupId) {
+
+        List<Project> projects =
+                projectRepository.findByOwner(Collections.singletonList(groupId));
+
+        List<Project> result = new ArrayList<>();
+
+        projects.forEach(project -> {
+            if(tripRepository.countByProjectId(project.getId()) == 0)
+                result.add(project);
+        });
+
+        return result;
+    }
+
 }
