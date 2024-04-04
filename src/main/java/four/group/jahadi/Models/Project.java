@@ -49,7 +49,7 @@ public class Project extends Model {
     private List<Group> groups;
 
     @Transient
-    @JsonSerialize(using = ObjectIdSerialization.class)
+    @JsonSerialize(using = ObjectIdListSerialization.class)
     private List<ObjectId> tripIds;
 
 }
