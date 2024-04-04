@@ -6,6 +6,7 @@ import four.group.jahadi.DTO.UpdateProjectData;
 import four.group.jahadi.Enums.Status;
 import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Exception.InvalidIdException;
+import four.group.jahadi.Exception.NotAccessException;
 import four.group.jahadi.Models.*;
 import four.group.jahadi.Repository.*;
 import org.bson.types.ObjectId;
@@ -189,16 +190,13 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
 
         projectRepository.insert(project);
 
-        final int[] idx = {1};
         data.getTrips().forEach(x -> {
 
             Trip trip = Trip
                     .builder()
                     .projectId(project.getId())
-                    .name(project.getName() + " - " + idx[0])
+                    .name(null)
                     .build();
-
-            idx[0]++;
 
             List<GroupAccess> groupsWithAccess = new ArrayList<>();
             x.forEach(tripStep1Data -> groupsWithAccess.add(GroupAccess.builder()
@@ -258,8 +256,29 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
         List<Project> result = new ArrayList<>();
 
         projects.forEach(project -> {
-            if(tripRepository.countByProjectId(project.getId()) == 0)
-                result.add(project);
+
+            List<Trip> trips =
+                    tripRepository.findActivesByGroupId(new Date(), groupId);
+
+            if(trips.size() == 0)
+                return;
+
+            List<ObjectId> ids = new ArrayList<>();
+
+            for (Trip trip : trips) {
+
+                if (trip.getGroupsWithAccess().stream().noneMatch(groupAccess ->
+                        groupAccess.getWriteAccess() && groupAccess.getGroupId().equals(groupId)
+                ))
+                    continue;
+
+                ids.add(trip.getId());
+            }
+
+            if(ids.size() == 0)
+                return;
+
+            result.add(project);
         });
 
         return result;

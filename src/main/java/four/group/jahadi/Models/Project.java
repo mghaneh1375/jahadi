@@ -48,4 +48,8 @@ public class Project extends Model {
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     private List<Group> groups;
 
+    @Transient
+    @JsonSerialize(using = ObjectIdSerialization.class)
+    private List<ObjectId> tripIds;
+
 }
