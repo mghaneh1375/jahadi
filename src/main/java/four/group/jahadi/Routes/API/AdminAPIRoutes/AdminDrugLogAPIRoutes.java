@@ -13,7 +13,7 @@ import javax.validation.Valid;
 import java.util.List;
 
 @RestController
-@RequestMapping(path = "/api/admin/drug_log")
+@RequestMapping(path = "/api/drugs/drug_log")
 @Validated
 public class AdminDrugLogAPIRoutes {
 

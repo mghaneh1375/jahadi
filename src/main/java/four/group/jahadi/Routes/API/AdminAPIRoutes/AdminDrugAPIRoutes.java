@@ -15,7 +15,7 @@ import javax.validation.Valid;
 import java.util.List;
 
 @RestController
-@RequestMapping(path = "/api/admin/drug")
+@RequestMapping(path = "/api/drugs/drug")
 @Validated
 public class AdminDrugAPIRoutes {
 

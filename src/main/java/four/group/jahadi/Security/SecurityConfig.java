@@ -69,6 +69,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.authorizeRequests()
                 .antMatchers(AUTH_WHITELIST).permitAll()
                 .antMatchers("/api/admin/**").hasAuthority("ADMIN")
+                .antMatchers("/api/drugs/**").hasAnyAuthority("ADMIN", "DRUG")
                 .antMatchers("/api/group/**").hasAnyAuthority("ADMIN", "GROUP")
                 .antMatchers("/api/area/**").hasAnyAuthority("ADMIN", "GROUP")
                 .antMatchers("/api/jahadgar/**").hasAnyAuthority("ADMIN", "GROUP", "JAHADI")
