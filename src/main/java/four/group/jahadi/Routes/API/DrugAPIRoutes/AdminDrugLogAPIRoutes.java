@@ -1,4 +1,4 @@
-package four.group.jahadi.Routes.API.AdminAPIRoutes;
+package four.group.jahadi.Routes.API.DrugAPIRoutes;
 
 import four.group.jahadi.DTO.DrugLogFilter;
 import four.group.jahadi.Models.DrugLog;

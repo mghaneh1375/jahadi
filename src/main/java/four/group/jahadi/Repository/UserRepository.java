@@ -19,6 +19,9 @@ public interface UserRepository extends MongoRepository<User, ObjectId>, Filtera
     @Query(value = "{'_id':  ?0, 'status':  'ACTIVE', 'deletedAt': null}", count = true)
     Integer countActiveBy_id(ObjectId id);
 
+    @Query(value = "{'accesses': ?0, 'status':  'ACTIVE', 'deletedAt': null}", count = true)
+    Integer countUsersByAccess(String access);
+
     @Query(value = "{ '_id': { $in: ?0 } }",
             fields = "{ 'name': 1, 'nid': 1, 'phone': 1, 'tel': 1, 'field': 1, 'pic': 1, 'color': 1, 'sex': 1  }"
     )

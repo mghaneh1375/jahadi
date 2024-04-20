@@ -40,6 +40,9 @@ public interface TripRepository extends MongoRepository<Trip, ObjectId>, Filtera
     @Query(value = "{$and: [{'endAt': {$exists: true}}, {'endAt': {$gte: ?0}}, {'groupsWithAccess.groupId': ?1}]  }", fields = "{'projectId': false, 'areas.members': false, 'createdAt': false}")
     List<Trip> findActivesOrNotStartedProjectsByGroupId(Date curr, ObjectId groupId);
 
+    @Query(value = "{$and: [{'endAt': {$exists: true}}, {'endAt': {$gte: ?0}}]  }", fields = "{'projectId': false, 'areas.members': false, 'createdAt': false}")
+    List<Trip> findActivesOrNotStartedProjects(Date curr);
+
     @Query(value = "{$and: [{'startAt': {$gte: ?0}}, {'areas.id': ?1}, {'areas.ownerId': ?2}]  }")
     Optional<Trip> findNotStartedByAreaOwnerId(Date curr, ObjectId areaId, ObjectId areaOwnerId);
 
