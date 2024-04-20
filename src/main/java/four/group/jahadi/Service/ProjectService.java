@@ -258,7 +258,7 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
         projects.forEach(project -> {
 
             List<Trip> trips =
-                    tripRepository.findActivesByGroupId(new Date(), groupId);
+                    tripRepository.findNeedActionByGroupId(new Date(), groupId);
 
             if(trips.size() == 0)
                 return;
