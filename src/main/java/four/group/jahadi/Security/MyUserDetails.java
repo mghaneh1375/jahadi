@@ -23,19 +23,20 @@ public class MyUserDetails implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
-        User user = cached.get(username);
+        User user;
 
-        if(user == null) {
+//        user = cached.get(username);
+//        if(user == null) {
 
             Optional<User> u = userRepository.findByNID(username);
 
             if (u.isEmpty())
                 throw new UsernameNotFoundException("User '" + username + "' not found");
-            else
-                cached.put(username, u.get());
+//            else
+//                cached.put(username, u.get());
 
             user = u.get();
-        }
+//        }
 
         return org.springframework.security.core.userdetails.User
                 .withUsername(username)

@@ -87,7 +87,7 @@ public class TripService extends AbstractService<Trip, TripStepData> {
         List<Trip> trips;
 
         try {
-            trips = tripRepository.findActivesByGroupId(
+            trips = tripRepository.findActivesOrNotStartedProjectsByGroupId(
                     new Date(), groupId
             );
         } catch (Exception x) {
