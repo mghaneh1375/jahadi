@@ -3,6 +3,7 @@ package four.group.jahadi.Service.Area;
 import four.group.jahadi.DTO.Area.AreaData;
 import four.group.jahadi.DTO.Region.RegionRunInfoData;
 import four.group.jahadi.DTO.Region.RegionSendNotifData;
+import four.group.jahadi.DTO.UpdatePresenceList;
 import four.group.jahadi.Enums.Sex;
 import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Exception.InvalidIdException;
@@ -12,6 +13,7 @@ import four.group.jahadi.Models.Area.Area;
 import four.group.jahadi.Repository.*;
 import four.group.jahadi.Repository.Area.PatientsInAreaRepository;
 import four.group.jahadi.Service.AbstractService;
+import four.group.jahadi.Service.AreaPresenceService;
 import four.group.jahadi.Service.NotifService;
 import four.group.jahadi.Utility.Utility;
 import org.bson.types.ObjectId;
@@ -45,6 +47,9 @@ public class AreaService extends AbstractService<Area, AreaData> {
     @Autowired
     private CountryRepository countryRepository;
 
+    @Autowired
+    private AreaPresenceService areaPresenceService;
+
 
     @Override
     public ResponseEntity<List<Area>> list(Object... filters) {
@@ -76,7 +81,7 @@ public class AreaService extends AbstractService<Area, AreaData> {
 
         List<Area> areaModels = new ArrayList<>();
 
-        for(AreaData dto : areas) {
+        for (AreaData dto : areas) {
 
             Area area = dto.convertToArea();
 
@@ -105,7 +110,7 @@ public class AreaService extends AbstractService<Area, AreaData> {
     public void sendTripAlarmToAllMembers(ObjectId userId, ObjectId areaId,
                                           @RequestBody @Valid RegionSendNotifData dto) {
 
-        if(!dto.getSendNotif() && !dto.getSendSMS())
+        if (!dto.getSendNotif() && !dto.getSendSMS())
             return;
 
         Trip trip = tripRepository.findNotStartedByAreaOwnerId(new Date(), areaId, userId)
@@ -115,10 +120,10 @@ public class AreaService extends AbstractService<Area, AreaData> {
                 .getAreas().stream().filter(area -> area.getId().equals(areaId))
                 .findFirst().orElseThrow(RuntimeException::new);
 
-        if(!foundArea.getFinished())
+        if (!foundArea.getFinished())
             throw new InvalidFieldsException("اطلاعات منطقه هنوز نهایی نشده است");
 
-        if(dto.getSendNotif())
+        if (dto.getSendNotif())
             notifService.sendTripNotifToAllMembers(foundArea, dto.getMsg());
 
     }
@@ -126,12 +131,12 @@ public class AreaService extends AbstractService<Area, AreaData> {
     public ResponseEntity<List<Trip>> myCartableList(ObjectId userId) {
 
         List<Trip> trips = tripRepository.findNotFinishedByAreaOwnerId(new Date(), userId);
-        if(trips != null && trips.size() > 0) {
+        if (trips != null && trips.size() > 0) {
             trips.forEach(trip -> {
                 if (trip.getAreas() != null && trip.getAreas().size() > 0)
                     trip.getAreas().removeIf(area ->
                             area.getOwnerId() == null ||
-                            !area.getOwnerId().equals(userId)
+                                    !area.getOwnerId().equals(userId)
                     );
             });
         }
@@ -172,10 +177,10 @@ public class AreaService extends AbstractService<Area, AreaData> {
         Date start = new Date(dto.getStartAt());
         Date end = new Date(dto.getEndAt());
 
-        if(trip.getStartAt().after(start))
+        if (trip.getStartAt().after(start))
             throw new InvalidFieldsException("زمان آغاز باید بعد از " + Utility.convertDateToJalali(trip.getStartAt()) + " باشد");
 
-        if(trip.getEndAt().before(end))
+        if (trip.getEndAt().before(end))
             throw new InvalidFieldsException("زمان پایان باید قبل از " + Utility.convertDateToJalali(trip.getEndAt()) + " باشد");
 
         Area foundArea = trip
@@ -208,31 +213,77 @@ public class AreaService extends AbstractService<Area, AreaData> {
                 .getAreas().stream().filter(area -> area.getId().equals(areaId))
                 .findFirst().orElseThrow(RuntimeException::new);
 
-        if(foundArea.getFinished())
+        if (foundArea.getFinished())
             return;
 
-        if(foundArea.getCity() == null || foundArea.getLat() == null ||
+        if (foundArea.getCity() == null || foundArea.getLat() == null ||
                 foundArea.getLng() == null || foundArea.getStartAt() == null ||
                 foundArea.getEndAt() == null || foundArea.getDailyStartAt() == null ||
                 foundArea.getDailyEndAt() == null
         )
             throw new InvalidFieldsException("لطفا اطلاعات مربوط به منطقه (مختصات جغرافیایی، روز و ساعت شروع و پایان، شهر محل برگزاری و ...) را وارد نمایید");
 
-        if(foundArea.getMembers().size() == 0)
+        if (foundArea.getMembers().size() == 0)
             throw new InvalidFieldsException("لطفا جهادگری به منطقه خود اضافه نمایید");
 
-        if(foundArea.getModules().size() == 0)
+        if (foundArea.getModules().size() == 0)
             throw new InvalidFieldsException("لطفا بخشی به بخش های منطقه خود اضافه نمایید");
 
-        if(foundArea.getDispatchers().size() == 0)
+        if (foundArea.getDispatchers().size() == 0)
             throw new InvalidFieldsException("لطفا جهادگری را به عنوان فرد نوبت ده انتخاب نمایید");
 
         foundArea.getModules().forEach(moduleInArea -> {
-            if(moduleInArea.getMembers().size() == 0)
+            if (moduleInArea.getMembers().size() == 0)
                 throw new InvalidFieldsException("متولی بخش " + moduleInArea.getModuleName() + " را مشخص نکرده اید");
         });
 
         foundArea.setFinished(true);
         tripRepository.save(trip);
+    }
+
+    public List<UserPresenceList> getPresenceList(ObjectId userId, ObjectId areaId) {
+
+        Trip trip = tripRepository.findByAreaIdAndOwnerId(areaId, userId).orElseThrow(InvalidIdException::new);
+
+        Area foundArea = trip
+                .getAreas().stream().filter(area -> area.getId().equals(areaId))
+                .findFirst().orElseThrow(RuntimeException::new);
+
+        return areaPresenceService.getAreaPresenceList(areaId, userRepository.findByIdsIn(foundArea.getMembers()));
+    }
+
+    private void validateSubmitEntrance(ObjectId userId, ObjectId areaId, ObjectId jahadgarId) {
+
+        Trip trip = tripRepository.findByAreaIdAndOwnerId(areaId, userId).orElseThrow(InvalidIdException::new);
+
+        Area foundArea = trip
+                .getAreas().stream().filter(area -> area.getId().equals(areaId))
+                .findFirst().orElseThrow(RuntimeException::new);
+
+        Date now = new Date();
+
+        if (foundArea.getStartAt() == null || foundArea.getStartAt().after(now))
+            throw new InvalidFieldsException("اردو در منطقه موردنظر هنوز شروع نشده است");
+
+        if (foundArea.getEndAt().before(now))
+            throw new InvalidFieldsException("اردو در منطفه موردنظر به اتمام رسیده است");
+
+        if (foundArea.getMembers().stream().noneMatch(objectId -> objectId.equals(jahadgarId)))
+            throw new InvalidFieldsException("جهادگر موردنظر در این منطقه وجود ندارد");
+    }
+
+    public void submitEntrance(ObjectId userId, ObjectId areaId, ObjectId jahadgarId) {
+        validateSubmitEntrance(userId, areaId, jahadgarId);
+        areaPresenceService.submitEntrance(areaId, jahadgarId);
+    }
+
+
+    public void updatePresenceList(
+            ObjectId userId, ObjectId areaId,
+            ObjectId jahadgarId, ObjectId presenceListId,
+            UpdatePresenceList data
+    ) {
+        validateSubmitEntrance(userId, areaId, jahadgarId);
+        areaPresenceService.updateEntrance(areaId, jahadgarId, presenceListId, data);
     }
 }

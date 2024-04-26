@@ -2,6 +2,7 @@ package four.group.jahadi.Service;
 
 import four.group.jahadi.DTO.GroupData;
 import four.group.jahadi.Enums.Access;
+import four.group.jahadi.Exception.BadRequestException;
 import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Exception.NotAccessException;
@@ -10,17 +11,24 @@ import four.group.jahadi.Models.User;
 import four.group.jahadi.Repository.GroupRepository;
 import four.group.jahadi.Repository.TripRepository;
 import four.group.jahadi.Repository.UserRepository;
+import four.group.jahadi.Utility.FileUtils;
 import four.group.jahadi.Utility.Utility;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static four.group.jahadi.Service.UserService.PICS_FOLDER;
+import static four.group.jahadi.Utility.FileUtils.removeFile;
+import static four.group.jahadi.Utility.FileUtils.uploadFile;
+import static four.group.jahadi.Utility.StaticValues.ONE_MB;
 
 
 @Service
@@ -101,6 +109,32 @@ public class GroupService extends AbstractService<Group, GroupData> {
 
         Group group = groupRepository.findById(groupId).orElseThrow(InvalidIdException::new);
         group.setCode(code);
+        groupRepository.save(group);
+    }
+
+    public void setPic(ObjectId id, MultipartFile file) {
+
+        if (file == null)
+            throw new BadRequestException();
+
+        if (file.getSize() > ONE_MB * 5)
+            throw new RuntimeException("حداکثر حجم مجاز 5MB می باشد");
+
+        String fileType = FileUtils.uploadImage(file);
+
+        if (fileType == null)
+            throw new RuntimeException("فرمت فایل موردنظر معتبر نمی باشد.");
+
+        String filename = uploadFile(file, PICS_FOLDER);
+        if (filename == null)
+            throw new RuntimeException("خطای ناشناخته هنگام بارگداری فایل");
+
+        Group group = groupRepository.findById(id).orElseThrow(InvalidIdException::new);
+
+        if (group.getPic() != null && !group.getPic().isEmpty())
+            removeFile(group.getPic(), PICS_FOLDER);
+
+        group.setPic(filename);
         groupRepository.save(group);
     }
 

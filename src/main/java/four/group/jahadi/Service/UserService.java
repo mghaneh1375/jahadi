@@ -291,6 +291,12 @@ public class UserService extends AbstractService<User, SignUpData> {
             throw new BadRequestException();
 
         User user = userRepository.findById(id).orElseThrow(InvalidIdException::new);
+
+        if(params.length > 0) {
+            if (!Objects.equals(params[0], user.getGroupId()))
+                throw new NotAccessException();
+        }
+
         user.getAccesses().stream().filter(access -> access.equals(Access.GROUP))
                 .findFirst().flatMap(access -> groupRepository.findById(user.getGroupId()))
                 .ifPresent(group -> user.setGroupCode(group.getCode()));

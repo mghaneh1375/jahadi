@@ -2,6 +2,7 @@ package four.group.jahadi.Routes.API.RegionAPIRoutes;
 
 import four.group.jahadi.DTO.Region.RegionRunInfoData;
 import four.group.jahadi.DTO.Region.RegionSendNotifData;
+import four.group.jahadi.DTO.UpdatePresenceList;
 import four.group.jahadi.Models.Trip;
 import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Service.Area.AreaService;
@@ -64,9 +65,50 @@ public class RegionManageAPIRoutes extends Router {
     @ResponseBody
     @Operation(summary = "نهایی سازی ساخت منطقه توسط مسئول منطقه", description = "بعد از آخرین مرحله در تکمیل اطلاعات منطقه (یعنی اختصاص منشی به ماژول ها) باید این api فراخوانی شود تا چک شود آیا تمامی اطلاعات لازم وارد شده است یا نه و منطقه نهایی سازی بشود")
     public void finalizeArea(HttpServletRequest request,
-                             @PathVariable @ObjectIdConstraint ObjectId areaId) {
+                             @PathVariable @ObjectIdConstraint ObjectId areaId
+    ) {
         areaService.finalizeArea(getId(request), areaId);
     }
+
+    @PutMapping(value = "submitEntrance/{userId}/{areaId}")
+    @ResponseBody
+    @Operation(summary = "ثبت ورود در منطقه توسط مسئول منطقه")
+    public void submitEntrance(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId userId,
+            @PathVariable @ObjectIdConstraint ObjectId areaId
+    ) {
+        areaService.submitEntrance(getId(request), areaId, userId);
+    }
+
+    @PutMapping(value = "updatePresenceList/{userId}/{areaId}/{presenceListId}")
+    @ResponseBody
+    @Operation(
+            summary = "ویرایش ورود یا خروج در منطقه توسط مسئول منطقه",
+            description = "در صورتی که فقط می خواهید ساعت خروج را به طور اتومات ثبت نمایید تنها مقدار بولین موجود را ست نمایید و در صورتی که می خواهید ساعت ورود یا خروج را اصلاح کنید، موارد مربوطه را ست نمایید"
+    )
+    public void updatePresenceList(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId userId,
+            @PathVariable @ObjectIdConstraint ObjectId areaId,
+            @PathVariable @ObjectIdConstraint ObjectId presenceListId,
+            @RequestBody @Valid UpdatePresenceList data
+            ) {
+        areaService.updatePresenceList(
+                getId(request), areaId, userId, presenceListId, data
+        );
+    }
+
+    @GetMapping(value = "getPresenceList/{areaId}")
+    @ResponseBody
+    @Operation(summary = "گرفتن لیست حضور و غیاب در منطقه توسط مسئول منطقه")
+    public void getPresenceList(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId
+    ) {
+        areaService.getPresenceList(getId(request), areaId);
+    }
+
     // todo start, pause, finish region time
 
     // todo finalize area defenition

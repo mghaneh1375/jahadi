@@ -31,6 +31,10 @@ public class Group extends ModelWithUser {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Integer code;
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonSerialize(using = PicSerialization.class)
+    private String pic;
+
     @Field("is_active")
     @Builder.Default
     private boolean isActive = true;

@@ -8,8 +8,6 @@ import lombok.Setter;
 @Setter
 @ValidatedNote
 public class NoteData {
-
     private String title;
     private String description;
-
 }
