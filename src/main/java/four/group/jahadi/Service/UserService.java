@@ -299,7 +299,10 @@ public class UserService extends AbstractService<User, SignUpData> {
 
         user.getAccesses().stream().filter(access -> access.equals(Access.GROUP))
                 .findFirst().flatMap(access -> groupRepository.findById(user.getGroupId()))
-                .ifPresent(group -> user.setGroupCode(group.getCode()));
+                .ifPresent(group -> {
+                    user.setGroupCode(group.getCode());
+                    user.setGroupPic(group.getPic());
+                });
 
         return new ResponseEntity<>(
                 user,
@@ -466,26 +469,17 @@ public class UserService extends AbstractService<User, SignUpData> {
             Optional<User> user = userRepository.findByNID(data.getNid());
 
             if (user.isEmpty() || user.get().getRemoveAt() != null)
-                return new ResponseEntity<>(
-                        "نام کاربری و یا رمزعبور اشتباه است.",
-                        HttpStatus.BAD_REQUEST
-                );
+                throw new InvalidFieldsException("نام کاربری و یا رمزعبور اشتباه است.");
 
             User u = user.get();
 
             if (!DEV_MODE) {
                 if (!passwordEncoder.matches(data.getPassword(), u.getPassword()))
-                    return new ResponseEntity<>(
-                            "نام کاربری و یا رمزعبور اشتباه است.",
-                            HttpStatus.BAD_REQUEST
-                    );
+                    throw new InvalidFieldsException("نام کاربری و یا رمزعبور اشتباه است.");
             }
 
             if (!u.getStatus().equals(AccountStatus.ACTIVE))
-                return new ResponseEntity<>(
-                        "اکانت شما غیرفعال می باشد.",
-                        HttpStatus.BAD_REQUEST
-                );
+                throw new InvalidFieldsException("اکانت شما غیرفعال می باشد.");
 
             String token = jwtTokenProvider.createToken(data.getNid(), u.getAccesses(), u.getGroupId(), u.getId());
 
@@ -497,10 +491,7 @@ public class UserService extends AbstractService<User, SignUpData> {
             );
 
         } catch (AuthenticationException x) {
-            return new ResponseEntity<>(
-                    "نام کاربری و یا رمزعبور اشتباه است.",
-                    HttpStatus.BAD_REQUEST
-            );
+            throw new InvalidFieldsException("نام کاربری و یا رمزعبور اشتباه است.");
         }
     }
 
@@ -519,10 +510,7 @@ public class UserService extends AbstractService<User, SignUpData> {
             );
 
         } catch (AuthenticationException x) {
-            return new ResponseEntity<>(
-                    "نام کاربری اشتباه است.",
-                    HttpStatus.BAD_REQUEST
-            );
+            throw new InvalidFieldsException("نام کاربری اشتباه است.");
         }
     }
 
@@ -538,10 +526,7 @@ public class UserService extends AbstractService<User, SignUpData> {
             );
 
         } catch (AuthenticationException x) {
-            return new ResponseEntity<>(
-                    "نام کاربری اشتباه است.",
-                    HttpStatus.BAD_REQUEST
-            );
+            throw new InvalidFieldsException("نام کاربری اشتباه است.");
         }
     }
 

@@ -24,27 +24,27 @@ public class ExceptionHandler extends ResponseEntityExceptionHandler {
 
     @org.springframework.web.bind.annotation.ExceptionHandler(value = InvalidIdException.class)
     public ResponseEntity<Object> exception(InvalidIdException exception) {
-        return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(new JSONObject().put("status", "nok").put("msg", exception.getMessage()).toString(), HttpStatus.NOT_FOUND);
     }
 
     @org.springframework.web.bind.annotation.ExceptionHandler(value = NotAccessException.class)
     public ResponseEntity<Object> exception(NotAccessException exception) {
-        return new ResponseEntity<>(exception.getMessage(), HttpStatus.FORBIDDEN);
+        return new ResponseEntity<>(new JSONObject().put("status", "nok").put("msg", exception.getMessage()).toString(), HttpStatus.FORBIDDEN);
     }
 
     @org.springframework.web.bind.annotation.ExceptionHandler(value = BadRequestException.class)
     public ResponseEntity<Object> exception(BadRequestException exception) {
-        return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(new JSONObject().put("status", "nok").put("msg", exception.getMessage()).toString(), HttpStatus.BAD_REQUEST);
     }
 
     @org.springframework.web.bind.annotation.ExceptionHandler(value = InvalidCodeException.class)
     public ResponseEntity<Object> exception(InvalidCodeException exception) {
-        return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(new JSONObject().put("status", "nok").put("msg", exception.getMessage()).toString(), HttpStatus.BAD_REQUEST);
     }
 
     @org.springframework.web.bind.annotation.ExceptionHandler(value = InvalidFieldsException.class)
     public ResponseEntity<Object> exception(InvalidFieldsException exception) {
-        return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(new JSONObject().put("status", "nok").put("msg", exception.getMessage()).toString(), HttpStatus.BAD_REQUEST);
     }
 
 
@@ -54,8 +54,6 @@ public class ExceptionHandler extends ResponseEntityExceptionHandler {
             HttpHeaders headers,
             HttpStatus status,
             WebRequest request) {
-
-        System.out.println("heyyy2");
 
         StringBuilder errors = new StringBuilder();
         for (FieldError error : ex.getBindingResult().getFieldErrors())
@@ -88,15 +86,14 @@ public class ExceptionHandler extends ResponseEntityExceptionHandler {
             MissingServletRequestParameterException ex, HttpHeaders headers,
             HttpStatus status, WebRequest request) {
 
-        System.out.println("heyyy1");
-
         String error = ex.getParameterName() + " parameter is missing";
         headers.add("Content-Type", "application/json");
 
         return new ResponseEntity<>(
                 new JSONObject().put("status", "nok").put("msg", error).toString(),
                 headers,
-                HttpStatus.BAD_REQUEST);
+                HttpStatus.NOT_ACCEPTABLE
+        );
     }
 
     @Override
@@ -104,23 +101,19 @@ public class ExceptionHandler extends ResponseEntityExceptionHandler {
             MissingPathVariableException ex, HttpHeaders headers,
             HttpStatus status, WebRequest request) {
 
-
-        System.out.println("heyyy3");
-
         String error = ex.getVariableName()+ " parameter is missing";
         headers.add("Content-Type", "application/json");
 
         return new ResponseEntity<>(
                 new JSONObject().put("status", "nok").put("msg", error).toString(),
                 headers,
-                HttpStatus.BAD_REQUEST);
+                HttpStatus.NOT_ACCEPTABLE
+        );
     }
 
     @org.springframework.web.bind.annotation.ExceptionHandler({ MethodArgumentTypeMismatchException.class })
     public ResponseEntity<Object> handleMethodArgumentTypeMismatch(
             MethodArgumentTypeMismatchException ex) {
-
-        System.out.println("heyyy4");
 
         String error =
                 ex.getName() + " should be of type " + ex.getRequiredType().getName();
@@ -129,7 +122,8 @@ public class ExceptionHandler extends ResponseEntityExceptionHandler {
         headers.add("Content-Type", "application/json");
 
         return new ResponseEntity<>(
-                new JSONObject().put("status", "nok").put("msg", error).toString(), headers, HttpStatus.BAD_REQUEST);
+                new JSONObject().put("status", "nok").put("msg", error).toString(), headers, HttpStatus.NOT_ACCEPTABLE
+        );
     }
 
     @Override
@@ -154,8 +148,6 @@ public class ExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleNoHandlerFoundException(
             NoHandlerFoundException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
 
-        System.out.println("heyyy6");
-
         String error = "No handler found for " + ex.getHttpMethod() + " " + ex.getRequestURL();
         return new ResponseEntity<>(new JSONObject().put("status", "nok").put("msg", error).toString(),
                 new HttpHeaders(), HttpStatus.NOT_FOUND);
@@ -164,8 +156,6 @@ public class ExceptionHandler extends ResponseEntityExceptionHandler {
     @org.springframework.web.bind.annotation.ExceptionHandler({ Exception.class })
     public ResponseEntity<Object> handleAll(Exception ex) {
 
-        System.out.println("heyyy7");
-
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-Type", "application/json");
 
@@ -173,7 +163,8 @@ public class ExceptionHandler extends ResponseEntityExceptionHandler {
             return new ResponseEntity<>(
                     new JSONObject().put("status", "nok").put("msg", ex.getLocalizedMessage()).toString(),
                     headers,
-                    HttpStatus.OK);
+                    HttpStatus.OK
+            );
 
         if(ex != null && ex.getMessage() != null &&
                 (

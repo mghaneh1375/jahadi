@@ -129,6 +129,11 @@ public class User extends Model {
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     private Integer groupCode;
 
+    @Transient
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    @JsonSerialize(using = PicSerialization.class)
+    private String groupPic;
+
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String trips;
 
