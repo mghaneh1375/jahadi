@@ -4,6 +4,7 @@ import four.group.jahadi.DTO.Region.RegionRunInfoData;
 import four.group.jahadi.DTO.Region.RegionSendNotifData;
 import four.group.jahadi.DTO.UpdatePresenceList;
 import four.group.jahadi.Models.Trip;
+import four.group.jahadi.Models.UserPresenceList;
 import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Service.Area.AreaService;
 import four.group.jahadi.Validator.ObjectIdConstraint;
@@ -102,11 +103,11 @@ public class RegionManageAPIRoutes extends Router {
     @GetMapping(value = "getPresenceList/{areaId}")
     @ResponseBody
     @Operation(summary = "گرفتن لیست حضور و غیاب در منطقه توسط مسئول منطقه")
-    public void getPresenceList(
+    public List<UserPresenceList> getPresenceList(
             HttpServletRequest request,
             @PathVariable @ObjectIdConstraint ObjectId areaId
     ) {
-        areaService.getPresenceList(getId(request), areaId);
+        return areaService.getPresenceList(getId(request), areaId);
     }
 
     // todo start, pause, finish region time
