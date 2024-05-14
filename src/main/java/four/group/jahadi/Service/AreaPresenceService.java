@@ -74,6 +74,7 @@ public class AreaPresenceService {
                                             .filter(presenceList -> presenceList.getUserId().equals(member.getId()))
                                             .map(presenceList -> UserPresenceList.Dates
                                                     .builder()
+                                                    .id(presenceList.getId())
                                                     .entrance(presenceList.getEntrance())
                                                     .exit(presenceList.getExit())
                                                     .build()
