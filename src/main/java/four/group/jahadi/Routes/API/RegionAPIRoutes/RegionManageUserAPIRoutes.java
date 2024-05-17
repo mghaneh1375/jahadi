@@ -70,7 +70,7 @@ public class RegionManageUserAPIRoutes extends Router {
 
     @PutMapping(value = "addDispatcher/{areaId}")
     @ResponseBody
-    @Operation(summary = "افزودن جهادگر/جهادگران به عنوان نوبت ده در منطقه توسط مسئول منطفه", description = "قبل از شروع اردو باید صدا زده شود")
+    @Operation(summary = "افزودن جهادگر/جهادگران به عنوان مسئول پذیرش در منطقه توسط مسئول منطفه", description = "قبل از شروع اردو باید صدا زده شود")
     public void addDispatcher(HttpServletRequest request,
                               @PathVariable @ObjectIdConstraint ObjectId areaId,
                               @RequestBody List<ObjectId> userIds
@@ -80,7 +80,7 @@ public class RegionManageUserAPIRoutes extends Router {
 
     @DeleteMapping(value = "removeDispatcher/{areaId}/{userId}")
     @ResponseBody
-    @Operation(summary = "حذف جهادگر از نوبت دهی در منطقه توسط مسئول منطفه", description = "قبل از شروع اردو باید صدا زده شود")
+    @Operation(summary = "حذف جهادگر از مسئول پذیرشی در منطقه توسط مسئول منطفه", description = "قبل از شروع اردو باید صدا زده شود")
     public void removeDispatcher(HttpServletRequest request,
                                  @PathVariable @ObjectIdConstraint ObjectId areaId,
                                  @PathVariable @ObjectIdConstraint ObjectId userId

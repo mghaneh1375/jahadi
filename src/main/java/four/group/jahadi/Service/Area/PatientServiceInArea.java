@@ -1,21 +1,35 @@
 package four.group.jahadi.Service.Area;
 
+import com.google.common.base.CaseFormat;
 import four.group.jahadi.DTO.Patient.InquiryPatientData;
 import four.group.jahadi.DTO.Patient.PatientData;
 import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Exception.NotAccessException;
-import four.group.jahadi.Models.Patient;
+import four.group.jahadi.Models.Area.Area;
+import four.group.jahadi.Models.Area.ModuleInArea;
+import four.group.jahadi.Models.Area.PatientJoinArea;
 import four.group.jahadi.Models.Area.PatientsInArea;
-import four.group.jahadi.Repository.PatientRepository;
+import four.group.jahadi.Models.Patient;
+import four.group.jahadi.Models.Trip;
 import four.group.jahadi.Repository.Area.PatientsInAreaRepository;
+import four.group.jahadi.Repository.PatientRepository;
 import four.group.jahadi.Repository.TripRepository;
 import four.group.jahadi.Utility.Utility;
+import org.bson.Document;
 import org.bson.types.ObjectId;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static four.group.jahadi.Utility.Utility.mapAll;
 
 @Service
 public class PatientServiceInArea {
@@ -28,6 +42,22 @@ public class PatientServiceInArea {
 
     @Autowired
     TripRepository tripRepository;
+
+    @Autowired
+    ModelMapper modelMapper;
+
+    public ResponseEntity<List<PatientJoinArea>> getPatients(ObjectId userId, ObjectId areaId) {
+
+        //todo: check finalize
+
+        tripRepository.findActiveByAreaIdAndDispatcherId(areaId, userId, Utility.getCurrDate())
+                .orElseThrow(NotAccessException::new);
+
+        return new ResponseEntity<>(
+                patientsInAreaRepository.findPatientsByAreaId(areaId),
+                HttpStatus.OK
+        );
+    }
 
     public void createPatientAndAddToRegion(ObjectId userId, ObjectId areaId, PatientData patientData) {
 
@@ -83,6 +113,8 @@ public class PatientServiceInArea {
                 .areaId(areaId)
                 .build()
         );
+
+        //todo: add to insurance list if module exist in area
     }
 
     public ResponseEntity<Patient> inquiryPatient(ObjectId userId, ObjectId areaId,
@@ -98,5 +130,40 @@ public class PatientServiceInArea {
         });
 
         return new ResponseEntity<>(patient, HttpStatus.OK);
+    }
+
+    public ResponseEntity<List<Patient>> getMyPatients(
+            ObjectId userId, ObjectId areaId, ObjectId moduleId,
+            Boolean justRecepted, Boolean justUnRecepted
+    ) {
+
+        Trip trip = tripRepository.findByAreaIdAndResponsibleIdAndModuleId(areaId, userId, moduleId)
+                .orElseThrow(NotAccessException::new);
+
+        Area foundArea = trip
+                .getAreas().stream().filter(area -> area.getId().equals(areaId))
+                .findFirst().orElseThrow(RuntimeException::new);
+
+        if(!foundArea.getOwnerId().equals(userId)) {
+            ModuleInArea moduleInArea = foundArea
+                    .getModules().stream().filter(module -> module.getModuleId().equals(moduleId))
+                    .findFirst().orElseThrow(RuntimeException::new);
+            if(!moduleInArea.getMembers().contains(userId))
+                throw new NotAccessException();
+        }
+
+        List<Patient> patients;
+
+        if((justRecepted != null && justRecepted) || (justUnRecepted != null && justUnRecepted))
+            patients = patientsInAreaRepository.findByAreaIdAndModuleIdAndRecepted(
+                    areaId, moduleId,
+                    justRecepted != null && justRecepted
+            );
+        else
+            patients = patientsInAreaRepository.findByAreaIdAndModuleId(
+                    areaId, moduleId
+            );
+
+        return new ResponseEntity<>(patients, HttpStatus.OK);
     }
 }

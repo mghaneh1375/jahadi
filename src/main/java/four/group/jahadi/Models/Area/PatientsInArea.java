@@ -9,6 +9,8 @@ import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -30,5 +32,6 @@ public class PatientsInArea extends Model {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Integer turn;
 
-
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    private List<PatientReferral> referrals;
 }

@@ -6,12 +6,17 @@ import four.group.jahadi.Kavenegar.excepctions.HttpException;
 import four.group.jahadi.Kavenegar.models.SendResult;
 import four.group.jahadi.Validator.PhoneValidator;
 import org.json.JSONObject;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.convention.MatchingStrategies;
+import org.modelmapper.convention.NameTokenizers;
+import org.modelmapper.convention.NameTransformers;
+import org.modelmapper.convention.NamingConventions;
+import org.modelmapper.spi.NamingConvention;
 
 import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-import java.util.Random;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static four.group.jahadi.Utility.StaticValues.DEV_MODE;
 
@@ -255,5 +260,28 @@ public class Utility {
         date.setMinutes(0);
         date.setSeconds(0);
         return date;
+    }
+
+    private static final ModelMapper modelMapper;
+
+    static {
+        modelMapper = new ModelMapper();
+        modelMapper.getConfiguration()
+                .setSourceNameTransformer(NameTransformers.JAVABEANS_MUTATOR)
+                .setMatchingStrategy(MatchingStrategies.STRICT);
+    }
+
+    public static <D, T> List<D> mapAll(final Collection<T> entityList, Class<D> outCLass) {
+        return entityList.stream()
+                .map(entity -> modelMapper.map(entity, outCLass))
+                .collect(Collectors.toList());
+    }
+
+    public static <S, D> D map(final S source, D destination) {
+        modelMapper.map(source, destination);
+        return destination;
+    }
+    public static <D, T> D map(final T entity, Class<D> outClass) {
+        return modelMapper.map(entity, outClass);
     }
 }

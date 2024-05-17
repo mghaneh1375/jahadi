@@ -231,7 +231,7 @@ public class AreaService extends AbstractService<Area, AreaData> {
             throw new InvalidFieldsException("لطفا بخشی به بخش های منطقه خود اضافه نمایید");
 
         if (foundArea.getDispatchers().size() == 0)
-            throw new InvalidFieldsException("لطفا جهادگری را به عنوان فرد نوبت ده انتخاب نمایید");
+            throw new InvalidFieldsException("لطفا جهادگری را به عنوان فرد مسئول پذیرش انتخاب نمایید");
 
         foundArea.getModules().forEach(moduleInArea -> {
             if (moduleInArea.getMembers().size() == 0)
