@@ -10,6 +10,7 @@ import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Exception.NotAccessException;
 import four.group.jahadi.Models.*;
 import four.group.jahadi.Models.Area.Area;
+import four.group.jahadi.Models.Area.AreaDates;
 import four.group.jahadi.Repository.*;
 import four.group.jahadi.Repository.Area.PatientsInAreaRepository;
 import four.group.jahadi.Service.AbstractService;
@@ -27,6 +28,7 @@ import javax.validation.Valid;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static four.group.jahadi.Service.Area.AreaUtils.findArea;
 import static four.group.jahadi.Service.Area.MembersServiceInArea.fetchMemberIds;
 import static four.group.jahadi.Utility.Utility.getDate;
 
@@ -243,23 +245,15 @@ public class AreaService extends AbstractService<Area, AreaData> {
     }
 
     public List<UserPresenceList> getPresenceList(ObjectId userId, ObjectId areaId) {
-
         Trip trip = tripRepository.findByAreaIdAndOwnerId(areaId, userId).orElseThrow(InvalidIdException::new);
-
-        Area foundArea = trip
-                .getAreas().stream().filter(area -> area.getId().equals(areaId))
-                .findFirst().orElseThrow(RuntimeException::new);
-
+        Area foundArea = findArea(trip, areaId, userId);
         return areaPresenceService.getAreaPresenceList(areaId, userRepository.findByIdsIn(foundArea.getMembers()));
     }
 
     private void validateSubmitEntrance(ObjectId userId, ObjectId areaId, ObjectId jahadgarId) {
 
         Trip trip = tripRepository.findByAreaIdAndOwnerId(areaId, userId).orElseThrow(InvalidIdException::new);
-
-        Area foundArea = trip
-                .getAreas().stream().filter(area -> area.getId().equals(areaId))
-                .findFirst().orElseThrow(RuntimeException::new);
+        Area foundArea = findArea(trip, areaId, userId);
 
         Date now = Utility.getCurrDate();
 
@@ -278,7 +272,6 @@ public class AreaService extends AbstractService<Area, AreaData> {
         areaPresenceService.submitEntrance(areaId, jahadgarId);
     }
 
-
     public void updatePresenceList(
             ObjectId userId, ObjectId areaId,
             ObjectId jahadgarId, ObjectId presenceListId,
@@ -286,5 +279,46 @@ public class AreaService extends AbstractService<Area, AreaData> {
     ) {
         validateSubmitEntrance(userId, areaId, jahadgarId);
         areaPresenceService.updateEntrance(areaId, jahadgarId, presenceListId, data);
+    }
+
+    public void start(ObjectId userId, ObjectId areaId) {
+
+        Trip trip = tripRepository.findByAreaIdAndOwnerId(areaId, userId).orElseThrow(InvalidIdException::new);
+        Area foundArea = findArea(trip, areaId, userId);
+
+        if(foundArea.getDates() == null)
+            foundArea.setDates(new ArrayList<>(){{add(AreaDates.builder().start(new Date()).build());}});
+        else if(foundArea.getDates().get(foundArea.getDates().size() - 1).getEnd() == null)
+            throw new RuntimeException("اردو پیش از این شروع شده است");
+        else
+            foundArea.getDates().add(AreaDates.builder().start(new Date()).build());
+
+        tripRepository.save(trip);
+    }
+
+    public void end(ObjectId userId, ObjectId areaId) {
+
+        Trip trip = tripRepository.findByAreaIdAndOwnerId(areaId, userId).orElseThrow(InvalidIdException::new);
+        Area foundArea = findArea(trip, areaId, userId);
+
+        if(foundArea.getDates() == null)
+            throw new RuntimeException("اردو هنوز شروع نشده است");
+        else if(foundArea.getDates().get(foundArea.getDates().size() - 1).getEnd() != null)
+            throw new RuntimeException("اردو پیش از این تمام شده است");
+        else
+            foundArea.getDates().get(foundArea.getDates().size() - 1).setEnd(new Date());
+
+        tripRepository.save(trip);
+    }
+
+    public ResponseEntity<List<AreaDates>> getRegionTimesHistory(ObjectId userId, ObjectId areaId) {
+
+        Trip trip = tripRepository.findByAreaIdAndOwnerId(areaId, userId).orElseThrow(InvalidIdException::new);
+        Area foundArea = findArea(trip, areaId, userId);
+
+        if(foundArea.getDates() == null)
+            return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
+
+        return new ResponseEntity<>(foundArea.getDates(), HttpStatus.OK);
     }
 }

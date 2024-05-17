@@ -68,6 +68,11 @@ public class Area {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Date startAt;
 
+    @Field("start_at")
+    @JsonSerialize(using = DateSerialization.class)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private List<AreaDates> dates;
+
     @Field("end_at")
     @JsonSerialize(using = DateSerialization.class)
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -106,5 +111,7 @@ public class Area {
     @JsonIgnore
     @Builder.Default
     private Boolean finished = false;
+
+
 
 }

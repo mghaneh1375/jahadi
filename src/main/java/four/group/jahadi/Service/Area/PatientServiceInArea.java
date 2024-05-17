@@ -1,6 +1,5 @@
 package four.group.jahadi.Service.Area;
 
-import com.google.common.base.CaseFormat;
 import four.group.jahadi.DTO.Patient.InquiryPatientData;
 import four.group.jahadi.DTO.Patient.PatientData;
 import four.group.jahadi.Exception.InvalidFieldsException;
@@ -16,20 +15,15 @@ import four.group.jahadi.Repository.Area.PatientsInAreaRepository;
 import four.group.jahadi.Repository.PatientRepository;
 import four.group.jahadi.Repository.TripRepository;
 import four.group.jahadi.Utility.Utility;
-import org.bson.Document;
 import org.bson.types.ObjectId;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import static four.group.jahadi.Utility.Utility.mapAll;
+import static four.group.jahadi.Service.Area.AreaUtils.findStartedArea;
 
 @Service
 public class PatientServiceInArea {
@@ -43,15 +37,14 @@ public class PatientServiceInArea {
     @Autowired
     TripRepository tripRepository;
 
-    @Autowired
-    ModelMapper modelMapper;
-
     public ResponseEntity<List<PatientJoinArea>> getPatients(ObjectId userId, ObjectId areaId) {
 
         //todo: check finalize
 
-        tripRepository.findActiveByAreaIdAndDispatcherId(areaId, userId, Utility.getCurrDate())
+        Trip trip = tripRepository.findActiveByAreaIdAndDispatcherId(areaId, userId, Utility.getCurrDate())
                 .orElseThrow(NotAccessException::new);
+
+        findStartedArea(trip, areaId);
 
         return new ResponseEntity<>(
                 patientsInAreaRepository.findPatientsByAreaId(areaId),
@@ -63,8 +56,10 @@ public class PatientServiceInArea {
 
         //todo: check finalize
 
-        tripRepository.findActiveByAreaIdAndDispatcherId(areaId, userId, Utility.getCurrDate())
+        Trip trip = tripRepository.findActiveByAreaIdAndDispatcherId(areaId, userId, Utility.getCurrDate())
                 .orElseThrow(NotAccessException::new);
+
+        findStartedArea(trip, areaId);
 
         if (patientRepository.countByIdentifierAndIdentifierType(
                 patientData.getIdentifier(), patientData.getIdentifierType()
@@ -99,8 +94,10 @@ public class PatientServiceInArea {
 
     public void addPatientToRegion(ObjectId userId, ObjectId areaId, ObjectId patientId) {
 
-        tripRepository.findActiveByAreaIdAndDispatcherId(areaId, userId, Utility.getCurrDate())
+        Trip trip = tripRepository.findActiveByAreaIdAndDispatcherId(areaId, userId, Utility.getCurrDate())
                 .orElseThrow(NotAccessException::new);
+
+        findStartedArea(trip, areaId);
 
         if(patientRepository.findById(patientId).isEmpty())
             throw new InvalidIdException();

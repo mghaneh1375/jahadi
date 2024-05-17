@@ -3,6 +3,7 @@ package four.group.jahadi.Routes.API.RegionAPIRoutes;
 import four.group.jahadi.DTO.Region.RegionRunInfoData;
 import four.group.jahadi.DTO.Region.RegionSendNotifData;
 import four.group.jahadi.DTO.UpdatePresenceList;
+import four.group.jahadi.Models.Area.AreaDates;
 import four.group.jahadi.Models.Trip;
 import four.group.jahadi.Models.UserPresenceList;
 import four.group.jahadi.Routes.Router;
@@ -94,7 +95,7 @@ public class RegionManageAPIRoutes extends Router {
             @PathVariable @ObjectIdConstraint ObjectId areaId,
             @PathVariable @ObjectIdConstraint ObjectId presenceListId,
             @RequestBody @Valid UpdatePresenceList data
-            ) {
+    ) {
         areaService.updatePresenceList(
                 getId(request), areaId, userId, presenceListId, data
         );
@@ -110,7 +111,37 @@ public class RegionManageAPIRoutes extends Router {
         return areaService.getPresenceList(getId(request), areaId);
     }
 
-    // todo start, pause, finish region time
+    @PutMapping(value = "setStartRegionTime/{areaId}")
+    @ResponseBody
+    @Operation(summary = "زدن دکمه استارت فعالیت های یک منطقه")
+    public void setStartRegionTime(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId
+    ) {
+        areaService.start(getId(request), areaId);
+    }
+
+    @PutMapping(value = "setEndRegionTime/{areaId}")
+    @ResponseBody
+    @Operation(summary = "زدن دکمه اتمام فعالیت های یک منطقه")
+    public void setEndRegionTime(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId
+    ) {
+        areaService.end(getId(request), areaId);
+    }
+
+    @GetMapping(value = "getRegionTimesHistory/{areaId}")
+    @ResponseBody
+    @Operation(summary = "گرفتن تاریخچه شروع و اتمام ها در یک منطقه")
+    public ResponseEntity<List<AreaDates>> getRegionTimesHistory(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId
+    ) {
+        return areaService.getRegionTimesHistory(getId(request), areaId);
+    }
+
+    // todo finish region time
 
     // todo finalize area defenition
 }

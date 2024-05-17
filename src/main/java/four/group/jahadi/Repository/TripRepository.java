@@ -64,6 +64,7 @@ public interface TripRepository extends MongoRepository<Trip, ObjectId>, Filtera
     @Query(value = "{'areas.id': ?0, 'areas.ownerId': ?1}", fields = "{'areas.members': true, 'areas.id': true}")
     Optional<Trip> getMembersByAreaIdAndOwnerId(ObjectId areaId, ObjectId areaOwnerId);
 
+    //todo : wrong query
     @Query(value = "{'areas.id': ?0, 'areas.ownerId': ?1}")
     Optional<Trip> findByAreaIdAndOwnerId(ObjectId areaId, ObjectId areaOwnerId);
 
