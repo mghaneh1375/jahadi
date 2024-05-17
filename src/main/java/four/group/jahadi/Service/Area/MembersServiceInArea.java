@@ -7,6 +7,7 @@ import four.group.jahadi.Models.Trip;
 import four.group.jahadi.Models.User;
 import four.group.jahadi.Repository.TripRepository;
 import four.group.jahadi.Repository.UserRepository;
+import four.group.jahadi.Utility.Utility;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -44,7 +45,7 @@ public class MembersServiceInArea {
     public void addMembers(ObjectId userId, ObjectId groupId,
                            ObjectId areaId, List<ObjectId> userIds) {
 
-        Trip wantedTrip = tripRepository.findNotStartedByAreaOwnerId(new Date(), areaId, userId)
+        Trip wantedTrip = tripRepository.findNotStartedByAreaOwnerId(Utility.getCurrDate(), areaId, userId)
                 .orElseThrow(NotAccessException::new);
 
         int count = userRepository.countByIdsAndGroupId(userIds, groupId);
@@ -68,7 +69,7 @@ public class MembersServiceInArea {
     public void removeMember(ObjectId userId, ObjectId areaId,
                              ObjectId wantedUserId) {
 
-        Trip wantedTrip = tripRepository.findNotStartedByAreaOwnerId(new Date(), areaId, userId)
+        Trip wantedTrip = tripRepository.findNotStartedByAreaOwnerId(Utility.getCurrDate(), areaId, userId)
                 .orElseThrow(NotAccessException::new);
 
         Area foundArea = wantedTrip
@@ -97,7 +98,7 @@ public class MembersServiceInArea {
 
     public void removeDispatcher(ObjectId userId, ObjectId areaId, ObjectId wantedUserId) {
 
-        Trip wantedTrip = tripRepository.findNotStartedByAreaOwnerId(new Date(), areaId, userId)
+        Trip wantedTrip = tripRepository.findNotStartedByAreaOwnerId(Utility.getCurrDate(), areaId, userId)
                 .orElseThrow(NotAccessException::new);
 
         Area foundArea = wantedTrip

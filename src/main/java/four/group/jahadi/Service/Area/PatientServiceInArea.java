@@ -10,13 +10,12 @@ import four.group.jahadi.Models.Area.PatientsInArea;
 import four.group.jahadi.Repository.PatientRepository;
 import four.group.jahadi.Repository.Area.PatientsInAreaRepository;
 import four.group.jahadi.Repository.TripRepository;
+import four.group.jahadi.Utility.Utility;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
-import java.util.Date;
 
 @Service
 public class PatientServiceInArea {
@@ -32,7 +31,7 @@ public class PatientServiceInArea {
 
     public void createPatientAndAddToRegion(ObjectId userId, ObjectId areaId, PatientData patientData) {
 
-        tripRepository.findActiveByAreaIdAndDispatcherId(areaId, userId, new Date())
+        tripRepository.findActiveByAreaIdAndDispatcherId(areaId, userId, Utility.getCurrDate())
                 .orElseThrow(NotAccessException::new);
 
         if (patientRepository.countByIdentifierAndIdentifierType(
@@ -55,6 +54,7 @@ public class PatientServiceInArea {
                 .identifier(patientData.getIdentifier())
                 .identifierType(patientData.getIdentifierType())
                 .insurance(patientData.getInsurance())
+                .patientNo(patientData.getPatientNo())
                 .build();
 
         patientRepository.insert(newPatient);
@@ -67,7 +67,7 @@ public class PatientServiceInArea {
 
     public void addPatientToRegion(ObjectId userId, ObjectId areaId, ObjectId patientId) {
 
-        tripRepository.findActiveByAreaIdAndDispatcherId(areaId, userId, new Date())
+        tripRepository.findActiveByAreaIdAndDispatcherId(areaId, userId, Utility.getCurrDate())
                 .orElseThrow(NotAccessException::new);
 
         if(patientRepository.findById(patientId).isEmpty())
@@ -86,7 +86,7 @@ public class PatientServiceInArea {
     public ResponseEntity<Patient> inquiryPatient(ObjectId userId, ObjectId areaId,
                                                   InquiryPatientData patientData) {
 
-        tripRepository.findActiveByAreaIdAndDispatcherId(areaId, userId, new Date())
+        tripRepository.findActiveByAreaIdAndDispatcherId(areaId, userId, Utility.getCurrDate())
                 .orElseThrow(NotAccessException::new);
 
         Patient patient = patientRepository.findByIdentifierAndIdentifierType(

@@ -8,6 +8,7 @@ import four.group.jahadi.Exception.NotAccessException;
 import four.group.jahadi.Models.*;
 import four.group.jahadi.Models.Area.Area;
 import four.group.jahadi.Repository.*;
+import four.group.jahadi.Utility.Utility;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -88,7 +89,7 @@ public class TripService extends AbstractService<Trip, TripStepData> {
 
         try {
             trips = tripRepository.findActivesOrNotStartedProjectsByGroupId(
-                    new Date(), groupId
+                    Utility.getCurrDate(), groupId
             );
         } catch (Exception x) {
             x.printStackTrace();
@@ -165,7 +166,7 @@ public class TripService extends AbstractService<Trip, TripStepData> {
 
     public ResponseEntity<List<Group>> getGroupsWhichHasActiveTrip() {
 
-        List<Trip> activeTrips = tripRepository.findActives(new Date());
+        List<Trip> activeTrips = tripRepository.findActives(Utility.getCurrDate());
 
         List<Group> groups = groupRepository.findByIdsIn(findFromTripGroupIds(activeTrips));
         groups.forEach(x -> x.setAreas(new ArrayList<>()));

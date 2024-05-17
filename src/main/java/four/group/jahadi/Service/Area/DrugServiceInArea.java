@@ -12,6 +12,7 @@ import four.group.jahadi.Repository.Area.DrugsInAreaRepository;
 import four.group.jahadi.Repository.DrugRepository;
 import four.group.jahadi.Repository.DrugLogRepository;
 import four.group.jahadi.Repository.TripRepository;
+import four.group.jahadi.Utility.Utility;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -124,7 +125,7 @@ public class DrugServiceInArea {
 
     public void removeAllFromDrugsList(ObjectId userId, ObjectId areaId, List<ObjectId> ids) {
 
-        Trip trip = tripRepository.findNotStartedByAreaOwnerId(new Date(), areaId, userId)
+        Trip trip = tripRepository.findNotStartedByAreaOwnerId(Utility.getCurrDate(), areaId, userId)
                 .orElseThrow(NotAccessException::new);
 
         Area foundArea = trip
@@ -169,7 +170,7 @@ public class DrugServiceInArea {
             ObjectId id, Integer newReminder
     ) {
 
-        Trip trip = tripRepository.findNotStartedByAreaOwnerId(new Date(), areaId, userId)
+        Trip trip = tripRepository.findNotStartedByAreaOwnerId(Utility.getCurrDate(), areaId, userId)
                 .orElseThrow(NotAccessException::new);
 
         Area foundArea = trip

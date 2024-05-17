@@ -9,6 +9,7 @@ import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Exception.NotAccessException;
 import four.group.jahadi.Models.*;
 import four.group.jahadi.Repository.*;
+import four.group.jahadi.Utility.Utility;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -51,7 +52,7 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
                 }
             });
 
-        Date today = new Date();
+        Date today = Utility.getCurrDate();
 
         if (filters[1] != null) {
 
@@ -135,7 +136,7 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
     public void remove(ObjectId id) {
 
         Project project = projectRepository.findById(id).orElseThrow(InvalidIdException::new);
-        if (new Date().after(project.getStartAt()))
+        if (Utility.getCurrDate().after(project.getStartAt()))
             throw new InvalidFieldsException("پروژه آغاز شده و امکان حدف آن وجود ندارد");
 
         tripRepository.deleteTripByProjectId(project.getId());
@@ -241,7 +242,7 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
         if (groupId != null)
             projects = projectRepository.findByOwner(Collections.singletonList(groupId));
         else {
-            List<Trip> trips = tripRepository.findActivesProjectIdsByAreaOwnerId(new Date(), userId);
+            List<Trip> trips = tripRepository.findActivesProjectIdsByAreaOwnerId(Utility.getCurrDate(), userId);
             if (trips.size() > 0)
                 projects = projectRepository.findByIds(trips.stream().map(Trip::getProjectId).collect(Collectors.toList()));
         }
@@ -258,7 +259,7 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
         projects.forEach(project -> {
 
             List<Trip> trips =
-                    tripRepository.findNeedActionByGroupId(new Date(), groupId);
+                    tripRepository.findNeedActionByGroupId(Utility.getCurrDate(), groupId);
 
             if(trips.size() == 0)
                 return;

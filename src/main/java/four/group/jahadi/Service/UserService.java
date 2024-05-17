@@ -655,7 +655,7 @@ public class UserService extends AbstractService<User, SignUpData> {
     public ResponseEntity<List<User>> findGroupMembersByRegionOwner(ObjectId userId, ObjectId groupId) {
 
         List<Trip> trips =
-                tripRepository.findActivesOrNotStartedProjectIdsByAreaOwnerId(new Date(), userId);
+                tripRepository.findActivesOrNotStartedProjectIdsByAreaOwnerId(Utility.getCurrDate(), userId);
 
         if (trips.size() == 0)
             throw new NotAccessException();
@@ -685,8 +685,9 @@ public class UserService extends AbstractService<User, SignUpData> {
         );
 
         if(Objects.equals(user.getRole(), Access.JAHADI)) {
-            user.setHasActiveRegion(tripRepository.existNotFinishedByAreaOwnerId(new Date(), userId));
-            user.setHasActiveTask(tripRepository.existNotFinishedResponsibleId(new Date(), userId));
+            Date currDate = Utility.getCurrDate();
+            user.setHasActiveRegion(tripRepository.existNotFinishedByAreaOwnerId(currDate, userId));
+            user.setHasActiveTask(tripRepository.existNotFinishedResponsibleId(currDate, userId));
         }
 
         return new ResponseEntity<>(

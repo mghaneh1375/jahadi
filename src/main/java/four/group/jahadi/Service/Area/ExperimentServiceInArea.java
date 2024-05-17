@@ -7,6 +7,7 @@ import four.group.jahadi.Models.Area.ExperimentInArea;
 import four.group.jahadi.Models.Trip;
 import four.group.jahadi.Repository.ExperimentRepository;
 import four.group.jahadi.Repository.TripRepository;
+import four.group.jahadi.Utility.Utility;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -43,7 +44,7 @@ public class ExperimentServiceInArea {
 
     public void addAllToExperimentsList(ObjectId userId, ObjectId areaId, List<ObjectId> ids) {
 
-        Trip wantedTrip = tripRepository.findNotStartedByAreaOwnerId(new Date(), areaId, userId)
+        Trip wantedTrip = tripRepository.findNotStartedByAreaOwnerId(Utility.getCurrDate(), areaId, userId)
                 .orElseThrow(NotAccessException::new);
 
         Iterable<Experiment> experimentsIter = experimentRepository.findAllById(ids);
@@ -78,7 +79,7 @@ public class ExperimentServiceInArea {
 
     public void removeAllFromExperimentsList(ObjectId userId, ObjectId areaId, List<ObjectId> ids) {
 
-        Trip wantedTrip = tripRepository.findNotStartedByAreaOwnerId(new Date(), areaId, userId)
+        Trip wantedTrip = tripRepository.findNotStartedByAreaOwnerId(Utility.getCurrDate(), areaId, userId)
                 .orElseThrow(NotAccessException::new);
 
         Area foundArea = wantedTrip

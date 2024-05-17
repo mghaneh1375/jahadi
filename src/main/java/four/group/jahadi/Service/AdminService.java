@@ -7,6 +7,7 @@ import four.group.jahadi.Models.User;
 import four.group.jahadi.Repository.ProjectRepository;
 import four.group.jahadi.Repository.TripRepository;
 import four.group.jahadi.Repository.UserRepository;
+import four.group.jahadi.Utility.Utility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,7 +36,7 @@ public class AdminService {
         List<Trip> trips;
 
         try {
-            trips = tripRepository.findActivesOrNotStartedProjects(new Date());
+            trips = tripRepository.findActivesOrNotStartedProjects(Utility.getCurrDate());
         } catch (Exception x) {
             x.printStackTrace();
             return null;

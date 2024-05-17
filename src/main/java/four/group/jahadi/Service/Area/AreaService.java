@@ -113,7 +113,7 @@ public class AreaService extends AbstractService<Area, AreaData> {
         if (!dto.getSendNotif() && !dto.getSendSMS())
             return;
 
-        Trip trip = tripRepository.findNotStartedByAreaOwnerId(new Date(), areaId, userId)
+        Trip trip = tripRepository.findNotStartedByAreaOwnerId(Utility.getCurrDate(), areaId, userId)
                 .orElseThrow(NotAccessException::new);
 
         Area foundArea = trip
@@ -130,7 +130,7 @@ public class AreaService extends AbstractService<Area, AreaData> {
 
     public ResponseEntity<List<Trip>> myCartableList(ObjectId userId) {
 
-        List<Trip> trips = tripRepository.findNotFinishedByAreaOwnerId(new Date(), userId);
+        List<Trip> trips = tripRepository.findNotFinishedByAreaOwnerId(Utility.getCurrDate(), userId);
         if (trips != null && trips.size() > 0) {
             trips.forEach(trip -> {
                 if (trip.getAreas() != null && trip.getAreas().size() > 0)
@@ -171,7 +171,7 @@ public class AreaService extends AbstractService<Area, AreaData> {
             throw new InvalidFieldsException("آی دی شهر وارد شده نامعتبر است");
         });
 
-        Trip trip = tripRepository.findNotStartedByAreaOwnerId(new Date(), areaId, userId)
+        Trip trip = tripRepository.findNotStartedByAreaOwnerId(Utility.getCurrDate(), areaId, userId)
                 .orElseThrow(NotAccessException::new);
 
         Date start = new Date(dto.getStartAt());
@@ -260,7 +260,7 @@ public class AreaService extends AbstractService<Area, AreaData> {
                 .getAreas().stream().filter(area -> area.getId().equals(areaId))
                 .findFirst().orElseThrow(RuntimeException::new);
 
-        Date now = new Date();
+        Date now = Utility.getCurrDate();
 
         if (foundArea.getStartAt() == null || foundArea.getStartAt().after(now))
             throw new InvalidFieldsException("اردو در منطقه موردنظر هنوز شروع نشده است");

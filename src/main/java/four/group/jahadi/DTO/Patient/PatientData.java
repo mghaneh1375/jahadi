@@ -43,4 +43,7 @@ public class PatientData {
 
     @Size(min = 2, max = 255, message = JOB_ERR)
     private String job;
+
+    @Size(min = 5, max = 20, message = PATIENT_NO_ERR)
+    private String patientNo;
 }

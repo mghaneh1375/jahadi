@@ -242,4 +242,12 @@ public class Utility {
         return false;
     }
 
+    public static Date getCurrDate() {
+        Date date = new Date();
+        date.setHours(0);
+        date.setMinutes(0);
+        date.setSeconds(0);
+        return date;
+    }
+
 }

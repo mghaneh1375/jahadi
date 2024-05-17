@@ -43,5 +43,6 @@ public class Patient extends Model {
 
     private String job;
 
-    private String code;
+    @Field("patient_no")
+    private String patientNo;
 }

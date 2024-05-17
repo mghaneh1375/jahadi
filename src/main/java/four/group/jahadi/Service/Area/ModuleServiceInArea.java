@@ -12,6 +12,7 @@ import four.group.jahadi.Models.Module;
 import four.group.jahadi.Repository.ModuleRepository;
 import four.group.jahadi.Repository.TripRepository;
 import four.group.jahadi.Repository.UserRepository;
+import four.group.jahadi.Utility.Utility;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -39,7 +40,7 @@ public class ModuleServiceInArea {
 
     public void addModule(ObjectId userId, ObjectId areaId, List<ObjectId> moduleIds) {
 
-        Trip wantedTrip = tripRepository.findNotStartedByAreaOwnerId(new Date(), areaId, userId)
+        Trip wantedTrip = tripRepository.findNotStartedByAreaOwnerId(Utility.getCurrDate(), areaId, userId)
                 .orElseThrow(NotAccessException::new);
 
         List<Module> foundModules = moduleRepository.findByIds(moduleIds);
@@ -72,7 +73,7 @@ public class ModuleServiceInArea {
 
     public void removeModule(ObjectId userId, ObjectId areaId, List<ObjectId> moduleIds) {
 
-        Trip wantedTrip = tripRepository.findNotStartedByAreaOwnerId(new Date(), areaId, userId)
+        Trip wantedTrip = tripRepository.findNotStartedByAreaOwnerId(Utility.getCurrDate(), areaId, userId)
                 .orElseThrow(NotAccessException::new);
 
         Area foundArea = wantedTrip
@@ -145,7 +146,7 @@ public class ModuleServiceInArea {
                                List<ObjectId> userIds, TripRepository tripRepository
     ) {
 
-        Trip wantedTrip = tripRepository.findNotStartedByAreaOwnerId(new Date(), areaId, userId)
+        Trip wantedTrip = tripRepository.findNotStartedByAreaOwnerId(Utility.getCurrDate(), areaId, userId)
                 .orElseThrow(NotAccessException::new);
 
         Area foundArea = wantedTrip
@@ -191,7 +192,7 @@ public class ModuleServiceInArea {
     public void removeMemberFromModule(ObjectId userId, ObjectId areaId,
                                        ObjectId moduleIdInArea, ObjectId wantedUserId) {
 
-        Trip wantedTrip = tripRepository.findNotStartedByAreaOwnerId(new Date(), areaId, userId)
+        Trip wantedTrip = tripRepository.findNotStartedByAreaOwnerId(Utility.getCurrDate(), areaId, userId)
                 .orElseThrow(NotAccessException::new);
 
         Area foundArea = wantedTrip
@@ -235,7 +236,7 @@ public class ModuleServiceInArea {
     public void removeMemberFromSecretaries(ObjectId userId, ObjectId areaId,
                                             ObjectId moduleIdInArea, ObjectId wantedUserId) {
 
-        Trip wantedTrip = tripRepository.findNotStartedByAreaOwnerId(new Date(), areaId, userId)
+        Trip wantedTrip = tripRepository.findNotStartedByAreaOwnerId(Utility.getCurrDate(), areaId, userId)
                 .orElseThrow(NotAccessException::new);
 
         Area foundArea = wantedTrip

@@ -28,6 +28,8 @@ public class ModuleSeeder {
         moduleRepository.insert(PostDoctor.seed());
         moduleRepository.insert(four.group.jahadi.Tests.Modules.ParaClinic.seed());
         moduleRepository.insert(RemoteDoctorSeeder.seed());
+        moduleRepository.insert(InsurancerSeeder.seed());
+        moduleRepository.insert(GharbalgariSeeder.seed());
     }
 
 }
