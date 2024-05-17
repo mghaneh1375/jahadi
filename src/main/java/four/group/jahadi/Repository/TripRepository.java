@@ -70,6 +70,6 @@ public interface TripRepository extends MongoRepository<Trip, ObjectId>, Filtera
     @Query(value = "{$and: [{'areas.id': ?0}, {$or: [{'areas.ownerId': ?1}, {'areas.members': ?1}]}]  }")
     Optional<Trip> findByAreaIdAndResponsibleId(ObjectId areaId, ObjectId userId);
 
-    @Query(value = "{$and: [{'startAt': {$lte: ?2}}, {'endAt': {$gte: ?2}}, {'areas.id': ?0}, {$or: [{'areas.ownerId': ?1}, {'areas.dispatchers': ?1}]}]  }")
+    @Query(value = "{$and: [{'areas.startAt': {$lte: ?2}}, {'areas.endAt': {$gte: ?2}}, {'areas.id': ?0}, {$or: [{'areas.ownerId': ?1}, {'areas.dispatchers': ?1}]}]  }")
     Optional<Trip> findActiveByAreaIdAndDispatcherId(ObjectId areaId, ObjectId userId, Date curr);
 }

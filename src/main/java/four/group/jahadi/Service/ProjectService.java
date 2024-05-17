@@ -20,6 +20,8 @@ import javax.transaction.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static four.group.jahadi.Utility.Utility.getDate;
+
 
 @Service
 public class ProjectService extends AbstractService<Project, ProjectData> {
@@ -223,8 +225,8 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
                         .flatMap(List::stream).distinct().collect(Collectors.toList()))
                 .name(projectData.getName())
                 .color(projectData.getColor())
-                .startAt(new Date(projectData.getStartAt()))
-                .endAt(new Date(projectData.getEndAt())).build();
+                .startAt(getDate(new Date(projectData.getStartAt())))
+                .endAt(getDate(new Date(projectData.getEndAt()))).build();
     }
 
 

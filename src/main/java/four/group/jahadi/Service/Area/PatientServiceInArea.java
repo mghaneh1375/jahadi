@@ -31,6 +31,8 @@ public class PatientServiceInArea {
 
     public void createPatientAndAddToRegion(ObjectId userId, ObjectId areaId, PatientData patientData) {
 
+        //todo: check finalize
+
         tripRepository.findActiveByAreaIdAndDispatcherId(areaId, userId, Utility.getCurrDate())
                 .orElseThrow(NotAccessException::new);
 

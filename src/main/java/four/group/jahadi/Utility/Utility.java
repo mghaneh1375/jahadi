@@ -250,4 +250,10 @@ public class Utility {
         return date;
     }
 
+    public static Date getDate(Date date) {
+        date.setHours(0);
+        date.setMinutes(0);
+        date.setSeconds(0);
+        return date;
+    }
 }
