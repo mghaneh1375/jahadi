@@ -1,6 +1,7 @@
 package four.group.jahadi.Models.Area;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import four.group.jahadi.Enums.Insurance;
 import four.group.jahadi.Models.Model;
 import four.group.jahadi.Models.ObjectIdSerialization;
 import four.group.jahadi.Models.Patient;
@@ -24,5 +25,6 @@ public class PatientJoinArea {
     @Field("created_at")
     private Date createdAt;
 
+    private Boolean trained;
     private Patient patientInfo;
 }

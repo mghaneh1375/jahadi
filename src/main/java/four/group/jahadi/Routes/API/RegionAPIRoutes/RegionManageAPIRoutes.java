@@ -141,7 +141,5 @@ public class RegionManageAPIRoutes extends Router {
         return areaService.getRegionTimesHistory(getId(request), areaId);
     }
 
-    // todo finish region time
-
     // todo finalize area defenition
 }

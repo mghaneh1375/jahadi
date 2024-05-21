@@ -2,6 +2,7 @@ package four.group.jahadi.Routes.API.RegionAPIRoutes;
 
 import four.group.jahadi.DTO.Patient.InquiryPatientData;
 import four.group.jahadi.DTO.Patient.PatientData;
+import four.group.jahadi.Enums.Insurance;
 import four.group.jahadi.Models.Area.PatientJoinArea;
 import four.group.jahadi.Models.Patient;
 import four.group.jahadi.Routes.Router;
@@ -89,6 +90,71 @@ public class RegionPatientAPIRoutes extends Router {
     ) {
         return patientServiceInArea.getPatients(
                 getId(request), areaId
+        );
+    }
+
+    @GetMapping(value = "getInsuranceList/{areaId}")
+    @ResponseBody
+    @Operation(
+            summary = "گرفتن لبستی از بیماران موجود در منطقه مدنظر توسط مسئول بیمه"
+    )
+    public ResponseEntity<List<PatientJoinArea>> getInsuranceList(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId,
+            @RequestParam(required = false, value = "justHasInsurance") Boolean justHasInsurance,
+            @RequestParam(required = false, value = "justHasNotInsurance") Boolean justHasNotInsurance
+    ) {
+        return patientServiceInArea.getInsuranceList(
+                getId(request), areaId, justHasInsurance, justHasNotInsurance
+        );
+    }
+
+    @GetMapping(value = "getTrainList/{areaId}")
+    @ResponseBody
+    @Operation(
+            summary = "گرفتن لیست آموزش از بیماران موجود در منطقه مدنظر توسط مسئول آموزش"
+    )
+    public ResponseEntity<List<PatientJoinArea>> getTrainList(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId,
+            @RequestParam(required = false, value = "justAdult") Boolean justAdult,
+            @RequestParam(required = false, value = "justChildren") Boolean justChildren,
+            @RequestParam(required = false, value = "justTrained") Boolean justTrained,
+            @RequestParam(required = false, value = "justNotTrained") Boolean justNotTrained
+    ) {
+        return patientServiceInArea.getTrainList(
+                getId(request), areaId, justAdult, justChildren,
+                justTrained, justNotTrained
+        );
+    }
+
+    @PutMapping(value = "setPatientTrainStatus/{areaId}/{patientId}")
+    @Operation(
+            summary = "ست کردن وضعیت آموزش یک بیمار در منطقه خاص توسط مسئول آموزش"
+    )
+    public void setPatientTrainStatus(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId,
+            @PathVariable @ObjectIdConstraint ObjectId patientId,
+            @RequestParam(value = "hasTrained") Boolean hasTrained
+    ) {
+        patientServiceInArea.setPatientTrainStatus(
+                getId(request), areaId, patientId, hasTrained
+        );
+    }
+
+    @PutMapping(value = "setPatientInsuranceStatus/{areaId}/{patientId}")
+    @Operation(
+            summary = "ست کردن وضعیت بیمه یک بیمار در منطقه خاص توسط مسئول بیمه گر"
+    )
+    public void setPatientInsuranceStatus(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId,
+            @PathVariable @ObjectIdConstraint ObjectId patientId,
+            @RequestParam(value = "insurance") Insurance insurance
+    ) {
+        patientServiceInArea.setPatientInsuranceStatus(
+                getId(request), areaId, patientId, insurance
         );
     }
 

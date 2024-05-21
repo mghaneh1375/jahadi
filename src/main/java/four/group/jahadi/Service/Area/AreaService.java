@@ -149,7 +149,12 @@ public class AreaService extends AbstractService<Area, AreaData> {
 
     public ResponseEntity<HashMap<String, Object>> dashboard(ObjectId userId, ObjectId areaId) {
 
-        List<User> members = userRepository.findByIdsIn(fetchMemberIds(tripRepository, userId, areaId));
+        Trip wantedTrip = tripRepository.findByAreaIdAndOwnerId(areaId, userId)
+                .orElseThrow(NotAccessException::new);
+
+        Area area = findArea(wantedTrip, areaId, userId);
+
+        List<User> members = userRepository.findByIdsIn(area.getMembers());
         AtomicInteger maleMembers = new AtomicInteger();
         AtomicInteger femaleMembers = new AtomicInteger();
 
@@ -163,6 +168,9 @@ public class AreaService extends AbstractService<Area, AreaData> {
         HashMap<String, Object> data = new HashMap<>();
         data.put("maleMembers", maleMembers);
         data.put("femaleMembers", femaleMembers);
+        data.put("finalized", area.getFinished());
+        data.put("hasTrainSection", area.getTrainers() != null && area.getTrainers().size() > 0);
+        data.put("hasInsuranceSection", area.getInsurancers() != null && area.getInsurancers().size() > 0);
         data.put("patients", patientsInAreaRepository.countByAreaId(areaId));
 
         return new ResponseEntity<>(data, HttpStatus.OK);

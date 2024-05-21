@@ -11,6 +11,7 @@ import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface PatientsInAreaRepository extends MongoRepository<PatientsInArea, ObjectId>, FilterableRepository<PatientsInArea> {
@@ -20,6 +21,9 @@ public interface PatientsInAreaRepository extends MongoRepository<PatientsInArea
 
     @Query(value = "{areaId: ?0, patientId: ?1}", exists = true)
     Boolean existByAreaIdAndPatientId(ObjectId areaId, ObjectId patientId);
+
+    @Query(value = "{areaId: ?0, patientId: ?1}")
+    Optional<PatientsInArea> findByAreaIdAndPatientId(ObjectId areaId, ObjectId patientId);
 
     @Aggregation(pipeline = {
             "{$match: {areaId: ?0}}",
@@ -36,6 +40,7 @@ public interface PatientsInAreaRepository extends MongoRepository<PatientsInArea
             "{$unset: 'patientInfo.created_at'}",
             "{$unwind: '$patientInfo'}",
             "{$unwind: '$created_at'}",
+            "{$unwind: '$trained'}",
             "{$project: {'patientInfo': '$patientInfo', 'created_at': '$created_at'}}",
     })
     List<PatientJoinArea> findPatientsByAreaId(ObjectId areaId);

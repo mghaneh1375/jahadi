@@ -5,10 +5,11 @@ import four.group.jahadi.Enums.AccessInModuleArea;
 import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Exception.NotAccessException;
-import four.group.jahadi.Models.*;
 import four.group.jahadi.Models.Area.Area;
 import four.group.jahadi.Models.Area.ModuleInArea;
 import four.group.jahadi.Models.Module;
+import four.group.jahadi.Models.Trip;
+import four.group.jahadi.Models.User;
 import four.group.jahadi.Repository.ModuleRepository;
 import four.group.jahadi.Repository.TripRepository;
 import four.group.jahadi.Repository.UserRepository;
@@ -21,10 +22,11 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
+
+import static four.group.jahadi.Service.Area.AreaUtils.findArea;
 
 @Service
 public class ModuleServiceInArea {
@@ -149,11 +151,9 @@ public class ModuleServiceInArea {
         Trip wantedTrip = tripRepository.findNotStartedByAreaOwnerId(Utility.getCurrDate(), areaId, userId)
                 .orElseThrow(NotAccessException::new);
 
-        Area foundArea = wantedTrip
-                .getAreas().stream().filter(area -> area.getId().equals(areaId))
-                .findFirst().orElseThrow(RuntimeException::new);
+        Area area = findArea(wantedTrip, areaId, userId);
 
-        List<ObjectId> membersInArea = foundArea.getMembers();
+        List<ObjectId> membersInArea = area.getMembers();
         AtomicBoolean hasIllegalUser = new AtomicBoolean(false);
 
         userIds.forEach(objectId -> {
@@ -165,7 +165,7 @@ public class ModuleServiceInArea {
         if (hasIllegalUser.get())
             throw new InvalidFieldsException("مقادیر ورودی معتبر نمی باشد");
 
-        return new Object[]{wantedTrip, foundArea};
+        return new Object[]{wantedTrip, area};
     }
 
     public void addMembersToModule(ObjectId userId, ObjectId areaId,

@@ -32,6 +32,8 @@ public class PatientsInArea extends Model {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Integer turn;
 
+    private Boolean trained = false;
+
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     private List<PatientReferral> referrals;
 }

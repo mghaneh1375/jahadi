@@ -71,6 +71,12 @@ public interface TripRepository extends MongoRepository<Trip, ObjectId>, Filtera
     @Query(value = "{$and: [{'areas.finished': true}, {'areas.id': ?0}, {'areas.modules.moduleId': ?2}, {$or: [{'areas.ownerId': ?1}, {'areas.members': ?1}]}]  }")
     Optional<Trip> findByAreaIdAndResponsibleIdAndModuleId(ObjectId areaId, ObjectId userId, ObjectId moduleId);
 
+    @Query(value = "{$and: [{'areas.finished': true}, {'areas.startAt': {$lte: ?2}}, {'areas.endAt': {$gte: ?2}}, {'areas.id': ?0}, {$or: [{'areas.ownerId': ?1}, {'areas.insurancers': ?1}]}] }")
+    Optional<Trip> findActiveByAreaIdAndInsurancerId(ObjectId areaId, ObjectId userId, Date curr);
+
+    @Query(value = "{$and: [{'areas.finished': true}, {'areas.startAt': {$lte: ?2}}, {'areas.endAt': {$gte: ?2}}, {'areas.id': ?0}, {$or: [{'areas.ownerId': ?1}, {'areas.trainers': ?1}]}] }")
+    Optional<Trip> findActiveByAreaIdAndTrainerId(ObjectId areaId, ObjectId userId, Date curr);
+
     @Query(value = "{$and: [{'areas.id': ?0}, {$or: [{'areas.ownerId': ?1}, {'areas.members': ?1}]}]  }")
     Optional<Trip> findByAreaIdAndResponsibleId(ObjectId areaId, ObjectId userId);
 

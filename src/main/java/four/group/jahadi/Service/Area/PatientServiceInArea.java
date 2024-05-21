@@ -2,6 +2,7 @@ package four.group.jahadi.Service.Area;
 
 import four.group.jahadi.DTO.Patient.InquiryPatientData;
 import four.group.jahadi.DTO.Patient.PatientData;
+import four.group.jahadi.Enums.Insurance;
 import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Exception.NotAccessException;
@@ -21,6 +22,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.Period;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static four.group.jahadi.Service.Area.AreaUtils.findStartedArea;
@@ -50,6 +55,80 @@ public class PatientServiceInArea {
                 patientsInAreaRepository.findPatientsByAreaId(areaId),
                 HttpStatus.OK
         );
+    }
+
+    public ResponseEntity<List<PatientJoinArea>> getInsuranceList(
+            ObjectId userId, ObjectId areaId,
+            Boolean justHasInsurance, Boolean justHasNotInsurance
+    ) {
+
+        Trip trip = tripRepository.findActiveByAreaIdAndInsurancerId(areaId, userId, Utility.getCurrDate())
+                .orElseThrow(NotAccessException::new);
+
+        findStartedArea(trip, areaId);
+        List<PatientJoinArea> areaPatients = patientsInAreaRepository.findPatientsByAreaId(areaId);
+        if ((justHasInsurance == null || !justHasInsurance) &&
+                (justHasNotInsurance == null || !justHasNotInsurance))
+            return new ResponseEntity<>(areaPatients, HttpStatus.OK);
+
+        List<PatientJoinArea> output = new ArrayList<>();
+        for (PatientJoinArea itr : areaPatients) {
+
+            if (justHasInsurance != null && justHasInsurance && itr.getPatientInfo().getInsurance().equals(Insurance.NONE))
+                continue;
+
+            if (justHasNotInsurance != null && justHasNotInsurance && !itr.getPatientInfo().getInsurance().equals(Insurance.NONE))
+                continue;
+
+            output.add(itr);
+        }
+
+        return new ResponseEntity<>(output, HttpStatus.OK);
+    }
+
+    public ResponseEntity<List<PatientJoinArea>> getTrainList(
+            ObjectId userId, ObjectId areaId,
+            Boolean justAdult, Boolean justChildren,
+            Boolean justTrained, Boolean justNotTrained
+    ) {
+
+        Trip trip = tripRepository.findActiveByAreaIdAndTrainerId(areaId, userId, Utility.getCurrDate())
+                .orElseThrow(NotAccessException::new);
+
+        findStartedArea(trip, areaId);
+        List<PatientJoinArea> patientsInArea = patientsInAreaRepository.findPatientsByAreaId(areaId);
+
+        if ((justAdult == null || !justAdult) &&
+                (justChildren == null || !justChildren) &&
+                (justTrained == null || !justTrained) &&
+                (justNotTrained == null || !justNotTrained)
+        )
+            return new ResponseEntity<>(patientsInArea, HttpStatus.OK);
+
+        List<PatientJoinArea> output = new ArrayList<>();
+        for (PatientJoinArea itr : patientsInArea) {
+
+            boolean isAdult = itr.getPatientInfo().getBirthDate() != null && Period.between(
+                    itr.getPatientInfo().getBirthDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate(),
+                    new Date().toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+            ).getYears() > 10;
+
+            if (justAdult != null && justAdult && !isAdult)
+                continue;
+
+            if (justChildren != null && justChildren && isAdult)
+                continue;
+
+            if (justTrained != null && justTrained && !itr.getTrained())
+                continue;
+
+            if (justNotTrained != null && justNotTrained && itr.getTrained())
+                continue;
+
+            output.add(itr);
+        }
+
+        return new ResponseEntity<>(output, HttpStatus.OK);
     }
 
     public void createPatientAndAddToRegion(ObjectId userId, ObjectId areaId, PatientData patientData) {
@@ -99,10 +178,10 @@ public class PatientServiceInArea {
 
         findStartedArea(trip, areaId);
 
-        if(patientRepository.findById(patientId).isEmpty())
+        if (patientRepository.findById(patientId).isEmpty())
             throw new InvalidIdException();
 
-        if(patientsInAreaRepository.existByAreaIdAndPatientId(areaId, patientId))
+        if (patientsInAreaRepository.existByAreaIdAndPatientId(areaId, patientId))
             throw new InvalidFieldsException("فرد مورد نظر پیش از این افزوده شده است");
 
         patientsInAreaRepository.insert(PatientsInArea.builder()
@@ -129,6 +208,53 @@ public class PatientServiceInArea {
         return new ResponseEntity<>(patient, HttpStatus.OK);
     }
 
+    public void setPatientTrainStatus(
+            ObjectId userId, ObjectId areaId,
+            ObjectId patientId, Boolean hasTrained
+    ) {
+        Trip trip = tripRepository.findActiveByAreaIdAndTrainerId(areaId, userId, Utility.getCurrDate())
+                .orElseThrow(NotAccessException::new);
+
+        Area foundArea = findStartedArea(trip, areaId);
+        if (!foundArea.getOwnerId().equals(userId) &&
+                (
+                        foundArea.getTrainers() == null ||
+                                !foundArea.getTrainers().contains(userId)
+                )
+        )
+            throw new NotAccessException();
+
+        PatientsInArea patient = patientsInAreaRepository.findByAreaIdAndPatientId(areaId, patientId)
+                .orElseThrow(InvalidIdException::new);
+        patient.setTrained(hasTrained);
+        patientsInAreaRepository.save(patient);
+    }
+
+    public void setPatientInsuranceStatus(
+            ObjectId userId, ObjectId areaId, ObjectId patientId, Insurance insuranceStatus
+    ) {
+        Trip trip = tripRepository.findActiveByAreaIdAndTrainerId(areaId, userId, Utility.getCurrDate())
+                .orElseThrow(NotAccessException::new);
+
+        Area foundArea = findStartedArea(trip, areaId);
+        if (!foundArea.getOwnerId().equals(userId) &&
+                (
+                        foundArea.getInsurancers() == null ||
+                                !foundArea.getInsurancers().contains(userId)
+                )
+        )
+            throw new NotAccessException();
+
+        if(!patientsInAreaRepository.existByAreaIdAndPatientId(areaId, patientId))
+            throw new InvalidIdException();
+
+        Patient patient = patientRepository.findById(patientId)
+                .orElseThrow(InvalidIdException::new);
+
+        patient.setInsurance(insuranceStatus);
+        patientRepository.save(patient);
+    }
+
     public ResponseEntity<List<Patient>> getMyPatients(
             ObjectId userId, ObjectId areaId, ObjectId moduleId,
             Boolean justRecepted, Boolean justUnRecepted
@@ -141,17 +267,17 @@ public class PatientServiceInArea {
                 .getAreas().stream().filter(area -> area.getId().equals(areaId))
                 .findFirst().orElseThrow(RuntimeException::new);
 
-        if(!foundArea.getOwnerId().equals(userId)) {
+        if (!foundArea.getOwnerId().equals(userId)) {
             ModuleInArea moduleInArea = foundArea
                     .getModules().stream().filter(module -> module.getModuleId().equals(moduleId))
                     .findFirst().orElseThrow(RuntimeException::new);
-            if(!moduleInArea.getMembers().contains(userId))
+            if (!moduleInArea.getMembers().contains(userId))
                 throw new NotAccessException();
         }
 
         List<Patient> patients;
 
-        if((justRecepted != null && justRecepted) || (justUnRecepted != null && justUnRecepted))
+        if ((justRecepted != null && justRecepted) || (justUnRecepted != null && justUnRecepted))
             patients = patientsInAreaRepository.findByAreaIdAndModuleIdAndRecepted(
                     areaId, moduleId,
                     justRecepted != null && justRecepted

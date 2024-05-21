@@ -87,4 +87,44 @@ public class RegionManageUserAPIRoutes extends Router {
     ) {
         membersServiceInArea.removeDispatcher(getId(request), areaId, userId);
     }
+
+    @PutMapping(value = "addInsurancer/{areaId}")
+    @ResponseBody
+    @Operation(summary = "افزودن جهادگر/جهادگران به عنوان مسئول بیمه در منطقه توسط مسئول منطفه", description = "قبل از شروع اردو باید صدا زده شود")
+    public void addInsurancer(HttpServletRequest request,
+                              @PathVariable @ObjectIdConstraint ObjectId areaId,
+                              @RequestBody List<ObjectId> userIds
+    ) {
+        membersServiceInArea.addInsurancer(getId(request), areaId, userIds);
+    }
+
+    @DeleteMapping(value = "removeInsurancer/{areaId}/{userId}")
+    @ResponseBody
+    @Operation(summary = "حذف جهادگر از مسئول بیمه در منطقه توسط مسئول منطفه", description = "قبل از شروع اردو باید صدا زده شود")
+    public void removeInsurancer(HttpServletRequest request,
+                                 @PathVariable @ObjectIdConstraint ObjectId areaId,
+                                 @PathVariable @ObjectIdConstraint ObjectId userId
+    ) {
+        membersServiceInArea.removeInsurancer(getId(request), areaId, userId);
+    }
+
+    @PutMapping(value = "addTrainer/{areaId}")
+    @ResponseBody
+    @Operation(summary = "افزودن جهادگر/جهادگران به عنوان مسئول آموزش در منطقه توسط مسئول منطفه", description = "قبل از شروع اردو باید صدا زده شود")
+    public void addTrainer(HttpServletRequest request,
+                           @PathVariable @ObjectIdConstraint ObjectId areaId,
+                           @RequestBody List<ObjectId> userIds
+    ) {
+        membersServiceInArea.addTrainer(getId(request), areaId, userIds);
+    }
+
+    @DeleteMapping(value = "removeTrainer/{areaId}/{userId}")
+    @ResponseBody
+    @Operation(summary = "حذف جهادگر از مسئول آموزش در منطقه توسط مسئول منطفه", description = "قبل از شروع اردو باید صدا زده شود")
+    public void removeTrainer(HttpServletRequest request,
+                              @PathVariable @ObjectIdConstraint ObjectId areaId,
+                              @PathVariable @ObjectIdConstraint ObjectId userId
+    ) {
+        membersServiceInArea.removeTrainer(getId(request), areaId, userId);
+    }
 }

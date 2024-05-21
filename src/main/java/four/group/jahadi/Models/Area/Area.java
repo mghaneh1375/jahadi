@@ -102,6 +102,16 @@ public class Area {
     @Builder.Default
     private List<ObjectId> dispatchers = new ArrayList<>();
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonSerialize(using = ObjectIdListSerialization.class)
+    @Builder.Default
+    private List<ObjectId> trainers = new ArrayList<>();
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonSerialize(using = ObjectIdListSerialization.class)
+    @Builder.Default
+    private List<ObjectId> insurancers = new ArrayList<>();
+
     @Transient
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     private User owner;

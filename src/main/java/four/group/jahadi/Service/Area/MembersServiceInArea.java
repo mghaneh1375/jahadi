@@ -14,9 +14,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
 
+import static four.group.jahadi.Service.Area.AreaUtils.findArea;
 import static four.group.jahadi.Service.Area.ModuleServiceInArea.checkUsers;
 
 @Service
@@ -31,7 +32,7 @@ public class MembersServiceInArea {
     static List<ObjectId> fetchMemberIds(TripRepository tripRepository, ObjectId userId, ObjectId areaId) {
         return tripRepository.getMembersByAreaIdAndOwnerId(areaId, userId)
                 .orElseThrow(InvalidIdException::new).getAreas().stream()
-                .filter(area -> area.getId().equals(areaId)).findFirst().orElseThrow(RuntimeException::new)
+                .filter(area -> area.getId().equals(areaId) && area.getOwnerId().equals(userId)).findFirst().orElseThrow(RuntimeException::new)
                 .getMembers();
     }
 
@@ -101,11 +102,9 @@ public class MembersServiceInArea {
         Trip wantedTrip = tripRepository.findNotStartedByAreaOwnerId(Utility.getCurrDate(), areaId, userId)
                 .orElseThrow(NotAccessException::new);
 
-        Area foundArea = wantedTrip
-                .getAreas().stream().filter(area -> area.getId().equals(areaId))
-                .findFirst().orElseThrow(RuntimeException::new);
+        Area area = findArea(wantedTrip, areaId, userId);
 
-        List<ObjectId> dispatchers = foundArea.getDispatchers();
+        List<ObjectId> dispatchers = area.getDispatchers();
         if(!dispatchers.contains(wantedUserId))
             throw new InvalidIdException();
 
@@ -113,4 +112,71 @@ public class MembersServiceInArea {
         tripRepository.save(wantedTrip);
     }
 
+    public void addTrainer(ObjectId userId, ObjectId areaId, List<ObjectId> userIds) {
+
+        Object[] tmp = checkUsers(userId, areaId, userIds, tripRepository);
+        Trip wantedTrip = (Trip) tmp[0];
+        Area foundArea = (Area) tmp[1];
+
+        List<ObjectId> trainers = foundArea.getTrainers();
+        if(trainers == null)
+            trainers = new ArrayList<>();
+
+        for(ObjectId uId : userIds) {
+            if (trainers.contains(uId)) continue;
+            trainers.add(uId);
+        }
+
+        foundArea.setTrainers(trainers);
+        tripRepository.save(wantedTrip);
+    }
+
+    public void removeTrainer(ObjectId userId, ObjectId areaId, ObjectId wantedUserId) {
+
+        Trip wantedTrip = tripRepository.findNotStartedByAreaOwnerId(Utility.getCurrDate(), areaId, userId)
+                .orElseThrow(NotAccessException::new);
+
+        Area area = findArea(wantedTrip, areaId, userId);
+
+        List<ObjectId> trainers = area.getTrainers();
+        if(trainers == null || !trainers.contains(wantedUserId))
+            throw new InvalidIdException();
+
+        trainers.remove(wantedUserId);
+        tripRepository.save(wantedTrip);
+    }
+
+    public void addInsurancer(ObjectId userId, ObjectId areaId, List<ObjectId> userIds) {
+
+        Object[] tmp = checkUsers(userId, areaId, userIds, tripRepository);
+        Trip wantedTrip = (Trip) tmp[0];
+        Area foundArea = (Area) tmp[1];
+
+        List<ObjectId> insurancers = foundArea.getInsurancers();
+        if(insurancers == null)
+            insurancers = new ArrayList<>();
+
+        for(ObjectId uId : userIds) {
+            if (insurancers.contains(uId)) continue;
+            insurancers.add(uId);
+        }
+
+        foundArea.setInsurancers(insurancers);
+        tripRepository.save(wantedTrip);
+    }
+
+    public void removeInsurancer(ObjectId userId, ObjectId areaId, ObjectId wantedUserId) {
+
+        Trip wantedTrip = tripRepository.findNotStartedByAreaOwnerId(Utility.getCurrDate(), areaId, userId)
+                .orElseThrow(NotAccessException::new);
+
+        Area area = findArea(wantedTrip, areaId, userId);
+
+        List<ObjectId> insurancers = area.getInsurancers();
+        if(insurancers == null || !insurancers.contains(wantedUserId))
+            throw new InvalidIdException();
+
+        insurancers.remove(wantedUserId);
+        tripRepository.save(wantedTrip);
+    }
 }
