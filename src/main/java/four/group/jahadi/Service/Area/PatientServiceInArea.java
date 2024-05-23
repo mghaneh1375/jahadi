@@ -161,6 +161,7 @@ public class PatientServiceInArea {
                 .identifierType(patientData.getIdentifierType())
                 .insurance(patientData.getInsurance())
                 .patientNo(patientData.getPatientNo())
+                .birthDate(new Date(patientData.getBirthDate()))
                 .build();
 
         patientRepository.insert(newPatient);

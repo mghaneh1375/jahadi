@@ -28,7 +28,7 @@ public class PatientData {
     private String fatherName;
 
     private Sex sex;
-    private String birthDate;
+    private long birthDate;
 
     @JustNumeric
     private String phone;
