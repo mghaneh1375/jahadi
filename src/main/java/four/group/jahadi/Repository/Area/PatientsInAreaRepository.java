@@ -41,7 +41,7 @@ public interface PatientsInAreaRepository extends MongoRepository<PatientsInArea
             "{$unwind: '$patientInfo'}",
             "{$unwind: '$created_at'}",
             "{$unwind: {'path': '$trained', 'preserveNullAndEmptyArrays': true}}",
-            "{$project: {'patientInfo': '$patientInfo', 'created_at': '$created_at'}}",
+            "{$project: {'patientInfo': '$patientInfo', 'created_at': '$created_at', 'trained': '$trained'}}",
     })
     List<PatientJoinArea> findPatientsByAreaId(ObjectId areaId);
 
