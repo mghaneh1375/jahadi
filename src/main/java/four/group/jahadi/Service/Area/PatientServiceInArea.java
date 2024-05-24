@@ -2,6 +2,7 @@ package four.group.jahadi.Service.Area;
 
 import four.group.jahadi.DTO.Patient.InquiryPatientData;
 import four.group.jahadi.DTO.Patient.PatientData;
+import four.group.jahadi.Enums.AgeType;
 import four.group.jahadi.Enums.Insurance;
 import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Exception.InvalidIdException;
@@ -108,10 +109,11 @@ public class PatientServiceInArea {
         List<PatientJoinArea> output = new ArrayList<>();
         for (PatientJoinArea itr : patientsInArea) {
 
-            boolean isAdult = itr.getPatientInfo().getBirthDate() != null && Period.between(
-                    itr.getPatientInfo().getBirthDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate(),
-                    new Date().toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
-            ).getYears() > 10;
+//            boolean isAdult = itr.getPatientInfo().getBirthDate() != null && Period.between(
+//                    itr.getPatientInfo().getBirthDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate(),
+//                    new Date().toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+//            ).getYears() > 10;
+            boolean isAdult = itr.getPatientInfo().getAgeType().equals(AgeType.ADULT);
 
             if (justAdult != null && justAdult && !isAdult)
                 continue;
