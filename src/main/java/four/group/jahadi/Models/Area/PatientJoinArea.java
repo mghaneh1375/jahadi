@@ -25,6 +25,6 @@ public class PatientJoinArea {
     @Field("created_at")
     private Date createdAt;
 
-    private Boolean trained = false;
+    private Boolean trained;
     private Patient patientInfo;
 }
