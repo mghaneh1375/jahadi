@@ -7,10 +7,7 @@ import four.group.jahadi.Enums.Insurance;
 import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Exception.NotAccessException;
-import four.group.jahadi.Models.Area.Area;
-import four.group.jahadi.Models.Area.ModuleInArea;
-import four.group.jahadi.Models.Area.PatientJoinArea;
-import four.group.jahadi.Models.Area.PatientsInArea;
+import four.group.jahadi.Models.Area.*;
 import four.group.jahadi.Models.Patient;
 import four.group.jahadi.Models.Trip;
 import four.group.jahadi.Repository.Area.PatientsInAreaRepository;
@@ -25,9 +22,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.Period;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static four.group.jahadi.Service.Area.AreaUtils.findStartedArea;
 
@@ -140,7 +136,7 @@ public class PatientServiceInArea {
         Trip trip = tripRepository.findActiveByAreaIdAndDispatcherId(areaId, userId, Utility.getCurrDate())
                 .orElseThrow(NotAccessException::new);
 
-        findStartedArea(trip, areaId);
+        Area area = findStartedArea(trip, areaId);
 
         if (patientRepository.countByIdentifierAndIdentifierType(
                 patientData.getIdentifier(), patientData.getIdentifierType()
@@ -167,11 +163,29 @@ public class PatientServiceInArea {
                 .build();
 
         patientRepository.insert(newPatient);
-        patientsInAreaRepository.insert(PatientsInArea.builder()
-                .patientId(newPatient.getId())
-                .areaId(areaId)
-                .build()
+        doAddPatientToRegion(area, newPatient.getId(), newPatient.getAgeType());
+    }
+
+    private void doAddPatientToRegion(Area area, ObjectId patientId, AgeType ageType) {
+
+        PatientsInArea patientInArea = PatientsInArea.builder()
+                .patientId(patientId)
+                .areaId(area.getId())
+                .build();
+
+        List<ModuleInArea> trainingModules = area.getModules().stream()
+                .filter(module -> module.getModuleName().contains("آموزش"))
+                .collect(Collectors.toList());
+
+        String key = Objects.equals(ageType, AgeType.ADULT) ? "بزرگسال" : "کودک";
+        Optional<ModuleInArea> wantedTrainingModule = trainingModules.stream()
+                .filter(module -> module.getModuleName().contains(key))
+                .findFirst();
+        wantedTrainingModule.ifPresent(module ->
+                patientInArea.setReferrals(doAddReferral(patientInArea.getReferrals(), module.getModuleId()))
         );
+
+        patientsInAreaRepository.insert(patientInArea);
     }
 
     public void addPatientToRegion(ObjectId userId, ObjectId areaId, ObjectId patientId) {
@@ -179,21 +193,13 @@ public class PatientServiceInArea {
         Trip trip = tripRepository.findActiveByAreaIdAndDispatcherId(areaId, userId, Utility.getCurrDate())
                 .orElseThrow(NotAccessException::new);
 
-        findStartedArea(trip, areaId);
-
-        if (patientRepository.findById(patientId).isEmpty())
-            throw new InvalidIdException();
+        Area area = findStartedArea(trip, areaId);
+        Patient patient = patientRepository.findById(patientId).orElseThrow(InvalidIdException::new);
 
         if (patientsInAreaRepository.existByAreaIdAndPatientId(areaId, patientId))
             throw new InvalidFieldsException("فرد مورد نظر پیش از این افزوده شده است");
 
-        patientsInAreaRepository.insert(PatientsInArea.builder()
-                .patientId(patientId)
-                .areaId(areaId)
-                .build()
-        );
-
-        //todo: add to insurance list if module exist in area
+        doAddPatientToRegion(area, patientId, patient.getAgeType());
     }
 
     public ResponseEntity<Patient> inquiryPatient(ObjectId userId, ObjectId areaId,
@@ -209,6 +215,40 @@ public class PatientServiceInArea {
         });
 
         return new ResponseEntity<>(patient, HttpStatus.OK);
+    }
+
+    private List<PatientReferral> doAddReferral(List<PatientReferral> referrals, ObjectId moduleId) {
+
+        if (referrals == null)
+            referrals = new ArrayList<>();
+
+        referrals.add(
+                PatientReferral
+                        .builder()
+                        .moduleId(moduleId)
+                        .build()
+        );
+
+        return referrals;
+    }
+
+    public void addReferralForPatientByOwner(
+            ObjectId ownerId, ObjectId areaId,
+            ObjectId patientId, ObjectId moduleId
+    ) {
+
+        Trip trip = tripRepository.findByAreaIdAndOwnerId(areaId, ownerId)
+                .orElseThrow(NotAccessException::new);
+
+        Area foundArea = findStartedArea(trip, areaId);
+        foundArea.getModules().stream().filter(module ->
+                module.getModuleId().equals(moduleId)).findFirst().orElseThrow(InvalidIdException::new);
+
+        PatientsInArea patientInArea = patientsInAreaRepository.findByAreaIdAndPatientId(areaId, patientId)
+                .orElseThrow(InvalidIdException::new);
+
+        patientInArea.setReferrals(doAddReferral(patientInArea.getReferrals(), moduleId));
+        patientsInAreaRepository.save(patientInArea);
     }
 
     public void setPatientTrainStatus(
@@ -248,7 +288,7 @@ public class PatientServiceInArea {
         )
             throw new NotAccessException();
 
-        if(!patientsInAreaRepository.existByAreaIdAndPatientId(areaId, patientId))
+        if (!patientsInAreaRepository.existByAreaIdAndPatientId(areaId, patientId))
             throw new InvalidIdException();
 
         Patient patient = patientRepository.findById(patientId)
@@ -258,38 +298,80 @@ public class PatientServiceInArea {
         patientRepository.save(patient);
     }
 
-    public ResponseEntity<List<Patient>> getMyPatients(
+    public ResponseEntity<List<PatientJoinArea>> getModulePatients(
             ObjectId userId, ObjectId areaId, ObjectId moduleId,
             Boolean justRecepted, Boolean justUnRecepted
     ) {
 
-        Trip trip = tripRepository.findByAreaIdAndResponsibleIdAndModuleId(areaId, userId, moduleId)
-                .orElseThrow(NotAccessException::new);
+        Trip trip = tripRepository.findByAreaIdAndResponsibleIdAndModuleId(
+                areaId, userId, moduleId
+        ).orElseThrow(NotAccessException::new);
 
-        Area foundArea = trip
-                .getAreas().stream().filter(area -> area.getId().equals(areaId))
-                .findFirst().orElseThrow(RuntimeException::new);
+        Area area = AreaUtils.findStartedArea(trip, areaId);
+        AreaUtils.findModule(
+                area, moduleId,
+                userId.equals(area.getOwnerId()) ? null : userId,
+                userId.equals(area.getOwnerId()) ? null : userId
+        );
 
-        if (!foundArea.getOwnerId().equals(userId)) {
-            ModuleInArea moduleInArea = foundArea
-                    .getModules().stream().filter(module -> module.getModuleId().equals(moduleId))
-                    .findFirst().orElseThrow(RuntimeException::new);
-            if (!moduleInArea.getMembers().contains(userId))
-                throw new NotAccessException();
+        List<PatientJoinArea> patients = patientsInAreaRepository.findPatientsListInModuleByAreaId(
+                areaId, moduleId
+        );
+
+        if (
+                (justRecepted == null || !justRecepted) &&
+                        (justUnRecepted == null || !justUnRecepted)
+        )
+            return new ResponseEntity<>(patients, HttpStatus.OK);
+
+        List<PatientJoinArea> output = new ArrayList<>();
+        for (PatientJoinArea patientJoinArea : patients) {
+            if (patientJoinArea.getReferrals().stream()
+                    .filter(patientReferral -> patientReferral.getModuleId().equals(moduleId))
+                    .reduce((first, second) -> second)
+                    .filter(patientReferral ->
+                            Boolean.TRUE.equals(justRecepted) == patientReferral.isRecepted()
+                    ).isPresent())
+                output.add(patientJoinArea);
         }
 
-        List<Patient> patients;
+        return new ResponseEntity<>(output, HttpStatus.OK);
+    }
 
-        if ((justRecepted != null && justRecepted) || (justUnRecepted != null && justUnRecepted))
-            patients = patientsInAreaRepository.findByAreaIdAndModuleIdAndRecepted(
-                    areaId, moduleId,
-                    justRecepted != null && justRecepted
-            );
-        else
-            patients = patientsInAreaRepository.findByAreaIdAndModuleId(
-                    areaId, moduleId
-            );
+    public void setReceptionStatusOfPatient(
+            ObjectId userId, ObjectId areaId,
+            ObjectId moduleId, ObjectId patientId, boolean isRecepted
+    ) {
+        Trip trip = tripRepository.findByAreaIdAndResponsibleIdAndModuleId(
+                areaId, userId, moduleId
+        ).orElseThrow(NotAccessException::new);
 
-        return new ResponseEntity<>(patients, HttpStatus.OK);
+        Area area = AreaUtils.findStartedArea(trip, areaId);
+        AreaUtils.findModule(
+                area, moduleId,
+                userId.equals(area.getOwnerId()) ? null : userId,
+                userId.equals(area.getOwnerId()) ? null : userId
+        );
+
+        PatientsInArea patientInArea =
+                patientsInAreaRepository.findByAreaIdAndPatientId(areaId, patientId).orElseThrow(InvalidIdException::new);
+
+        if (patientInArea.getReferrals() == null)
+            throw new InvalidIdException();
+
+        Optional<PatientReferral> optionalPatientReferral =
+                patientInArea.getReferrals().stream()
+                        .filter(patientReferral -> patientReferral.getModuleId().equals(moduleId))
+                        .reduce((first, second) -> second);
+
+        if(optionalPatientReferral.isEmpty())
+            throw new InvalidIdException();
+
+        PatientReferral wantedReferral = optionalPatientReferral.get();
+        wantedReferral.setRecepted(isRecepted);
+        if(isRecepted)
+            wantedReferral.setReceptedAt(new Date());
+
+        patientsInAreaRepository.save(patientInArea);
     }
 }

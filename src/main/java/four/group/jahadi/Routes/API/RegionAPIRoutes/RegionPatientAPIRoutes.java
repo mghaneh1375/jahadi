@@ -63,22 +63,40 @@ public class RegionPatientAPIRoutes extends Router {
         patientServiceInArea.addPatientToRegion(getId(request), areaId, patientId);
     }
 
+    @GetMapping(value = "getModulePatients/{areaId}/{moduleId}")
+    @ResponseBody
+    @Operation(
+            summary = "گرفتن لبستی از بیماران پذیرش شده/نشده در یک ماژول خاص در منطقه مدنظر توسط مسئول و یا منشی آن ماژول"
+    )
+    public ResponseEntity<List<PatientJoinArea>> getModulePatients(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId,
+            @PathVariable @ObjectIdConstraint ObjectId moduleId,
+            @RequestParam(required = false, value = "justRecepted") Boolean justRecepted,
+            @RequestParam(required = false, value = "justUnRecepted") Boolean justUnRecepted
+    ) {
+        return patientServiceInArea.getModulePatients(
+                getId(request), areaId, moduleId, justRecepted, justUnRecepted
+        );
+    }
 
-//    @GetMapping(value = "getMyPatients/{areaId}/{moduleId}")
-//    @ResponseBody
-//    @Operation(
-//            summary = "گرفتن لبستی از بیماران پذیرش شده/نشده در یک ماژول خاص در منطقه مدنظر توسط مسئول آن ماژول"
-//    )
-//    public ResponseEntity<List<Patient>> getMyPatients(HttpServletRequest request,
-//                                                       @PathVariable @ObjectIdConstraint ObjectId areaId,
-//                                                       @PathVariable @ObjectIdConstraint ObjectId moduleId,
-//                                                       @RequestParam(required = false, value = "justRecepted") Boolean justRecepted,
-//                                                       @RequestParam(required = false, value = "justUnRecepted") Boolean justUnRecepted
-//    ) {
-//        return patientServiceInArea.getMyPatients(
-//                getId(request), areaId, moduleId, justRecepted, justUnRecepted
-//        );
-//    }
+    @PutMapping(value = "setReceptionStatusOfPatient/{areaId}/{moduleId}/{patientId}")
+    @ResponseBody
+    @Operation(
+            summary = "ست کردن وضعیت پذیرش یک بیمار در ماژول مدنظر در منطقه"
+    )
+    public void setReceptionStatusOfPatient(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId,
+            @PathVariable @ObjectIdConstraint ObjectId moduleId,
+            @PathVariable @ObjectIdConstraint ObjectId patientId,
+            @RequestParam(value = "isRecepted") Boolean isRecepted
+    ) {
+        patientServiceInArea.setReceptionStatusOfPatient(
+                getId(request), areaId, moduleId, patientId, isRecepted
+        );
+    }
+
 
     @GetMapping(value = "getPatients/{areaId}")
     @ResponseBody
@@ -158,4 +176,18 @@ public class RegionPatientAPIRoutes extends Router {
         );
     }
 
+    @PutMapping(value = "addReferralForPatientByOwner/{areaId}/{patientId}/{moduleId}")
+    @Operation(
+            summary = "ارجاع یک بیمار توسط مسئول منطقه به یک ماژول خاص"
+    )
+    public void addReferralForPatientByOwner(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId,
+            @PathVariable @ObjectIdConstraint ObjectId patientId,
+            @PathVariable @ObjectIdConstraint ObjectId moduleId
+    ) {
+        patientServiceInArea.addReferralForPatientByOwner(
+                getId(request), areaId, patientId, moduleId
+        );
+    }
 }

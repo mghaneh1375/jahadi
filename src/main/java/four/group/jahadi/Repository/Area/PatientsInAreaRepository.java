@@ -45,6 +45,17 @@ public interface PatientsInAreaRepository extends MongoRepository<PatientsInArea
     })
     List<PatientJoinArea> findPatientsByAreaId(ObjectId areaId);
 
+    @Aggregation(pipeline = {
+            "{$match: {areaId: ?0, referrals.moduleId: ?1}}",
+            "{$lookup: {from: 'patient', localField: 'patient_id', foreignField: '_id', as: 'patientInfo'}}",
+            "{$unset: 'patientInfo.created_at'}",
+            "{$unwind: '$patientInfo'}",
+            "{$unwind: '$referrals'}",
+            "{$unset: '$referrals.forms'}",
+            "{$project: {'patientInfo': '$patientInfo', 'referrals': '$referrals'}}",
+    })
+    List<PatientJoinArea> findPatientsListInModuleByAreaId(ObjectId areaId, ObjectId moduleId);
+
     @Query(value = "{areaId: ?0, referrals.moduleId: ?1}")
     List<Patient> findByAreaIdAndModuleId(ObjectId areaId, ObjectId moduleId);
 

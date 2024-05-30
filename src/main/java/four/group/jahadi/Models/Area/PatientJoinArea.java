@@ -1,5 +1,6 @@
 package four.group.jahadi.Models.Area;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import four.group.jahadi.Models.ObjectIdSerialization;
 import four.group.jahadi.Models.Patient;
@@ -8,6 +9,7 @@ import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
@@ -25,4 +27,7 @@ public class PatientJoinArea {
 
     private Boolean trained = false;
     private Patient patientInfo;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private List<PatientReferral> referrals;
 }
