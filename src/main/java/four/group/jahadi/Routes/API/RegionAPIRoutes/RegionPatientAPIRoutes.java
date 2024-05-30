@@ -190,4 +190,19 @@ public class RegionPatientAPIRoutes extends Router {
                 getId(request), areaId, patientId, moduleId
         );
     }
+
+    @PutMapping(value = "addReferralForPatient/{areaId}/{moduleId}/{patientId}")
+    @Operation(
+            summary = "ارجاع یک بیمار توسط دکتر به یک ماژول دیگر"
+    )
+    public void addReferralForPatient(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId,
+            @PathVariable @ObjectIdConstraint ObjectId moduleId,
+            @PathVariable @ObjectIdConstraint ObjectId patientId
+    ) {
+        patientServiceInArea.addReferralForPatient(
+                getId(request), areaId, patientId, moduleId
+        );
+    }
 }

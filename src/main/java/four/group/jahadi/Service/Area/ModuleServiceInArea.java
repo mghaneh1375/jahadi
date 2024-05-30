@@ -27,6 +27,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static four.group.jahadi.Service.Area.AreaUtils.findArea;
+import static four.group.jahadi.Service.Area.AreaUtils.findModule;
 
 @Service
 public class ModuleServiceInArea {
@@ -142,6 +143,25 @@ public class ModuleServiceInArea {
         });
 
         return new ResponseEntity<>(modules, HttpStatus.OK);
+    }
+
+    public ResponseEntity<Module> getModule(ObjectId userId, ObjectId areaId, ObjectId moduleId) {
+
+        Trip trip = tripRepository.findByAreaIdAndResponsibleIdAndModuleId(
+                areaId, userId, moduleId
+        ).orElseThrow(NotAccessException::new);
+
+        Area area = AreaUtils.findStartedArea(trip, areaId);
+        AreaUtils.findModule(
+                area, moduleId,
+                userId.equals(area.getOwnerId()) ? null : userId,
+                userId.equals(area.getOwnerId()) ? null : userId
+        );
+
+        return new ResponseEntity<>(
+                moduleRepository.findById(moduleId).orElseThrow(UnknownError::new),
+                HttpStatus.OK
+        );
     }
 
     static Object[] checkUsers(ObjectId userId, ObjectId areaId,

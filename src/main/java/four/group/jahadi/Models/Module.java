@@ -39,16 +39,4 @@ public class Module extends Model {
     @JsonIgnore
     private boolean inTrip = true;
 
-    @Field("has_access_to_insurance_list")
-    @JsonIgnore
-    private boolean hasAccessToInsuranceList = false;
-
-    @Field("min_age")
-    @JsonIgnore
-    private Integer minAge;
-
-    @Field("max_age")
-    @JsonIgnore
-    private Integer maxAge;
-
 }

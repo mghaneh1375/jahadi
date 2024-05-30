@@ -45,6 +45,18 @@ public class RegionModuleAPIRoutes extends Router {
         return moduleServiceInArea.modules(getId(request), areaId);
     }
 
+
+    @GetMapping(path = "getModuleInArea/{areaId}/{moduleId}")
+    @ResponseBody
+    @Operation(summary = "گرفتن ماژول در منطقه توسط منطقه یا دکتر آن ماژول")
+    public ResponseEntity<Module> getModuleInArea(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId,
+            @PathVariable @ObjectIdConstraint ObjectId moduleId
+    ) {
+        return moduleServiceInArea.getModule(getId(request), areaId, moduleId);
+    }
+
     @PutMapping(path = "addModule/{areaId}")
     @ResponseBody
     @Operation(

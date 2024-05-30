@@ -8,9 +8,11 @@ import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Exception.NotAccessException;
 import four.group.jahadi.Models.Area.*;
+import four.group.jahadi.Models.Module;
 import four.group.jahadi.Models.Patient;
 import four.group.jahadi.Models.Trip;
 import four.group.jahadi.Repository.Area.PatientsInAreaRepository;
+import four.group.jahadi.Repository.ModuleRepository;
 import four.group.jahadi.Repository.PatientRepository;
 import four.group.jahadi.Repository.TripRepository;
 import four.group.jahadi.Utility.Utility;
@@ -20,11 +22,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.time.Period;
-import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static four.group.jahadi.Service.Area.AreaUtils.findModule;
 import static four.group.jahadi.Service.Area.AreaUtils.findStartedArea;
 
 @Service
@@ -32,6 +33,9 @@ public class PatientServiceInArea {
 
     @Autowired
     PatientsInAreaRepository patientsInAreaRepository;
+
+    @Autowired
+    ModuleRepository moduleRepository;
 
     @Autowired
     PatientRepository patientRepository;
@@ -236,13 +240,33 @@ public class PatientServiceInArea {
             ObjectId ownerId, ObjectId areaId,
             ObjectId patientId, ObjectId moduleId
     ) {
-
         Trip trip = tripRepository.findByAreaIdAndOwnerId(areaId, ownerId)
                 .orElseThrow(NotAccessException::new);
 
         Area foundArea = findStartedArea(trip, areaId);
         foundArea.getModules().stream().filter(module ->
                 module.getModuleId().equals(moduleId)).findFirst().orElseThrow(InvalidIdException::new);
+
+        PatientsInArea patientInArea = patientsInAreaRepository.findByAreaIdAndPatientId(areaId, patientId)
+                .orElseThrow(InvalidIdException::new);
+
+        patientInArea.setReferrals(doAddReferral(patientInArea.getReferrals(), moduleId));
+        patientsInAreaRepository.save(patientInArea);
+    }
+
+    public void addReferralForPatient(
+            ObjectId userId, ObjectId areaId,
+            ObjectId patientId, ObjectId moduleId
+    ) {
+        Trip trip = tripRepository.findByAreaIdAndResponsibleId(areaId, userId)
+                .orElseThrow(NotAccessException::new);
+
+        Area foundArea = findStartedArea(trip, areaId);
+        ModuleInArea moduleInArea = findModule(foundArea, moduleId, userId, null);
+        Module module = moduleRepository.findById(moduleInArea.getModuleId()).orElseThrow(UnknownError::new);
+
+        if(!module.isReferral())
+            throw new InvalidFieldsException("در این ماژول امکان ارجاع دهی وجود ندارد");
 
         PatientsInArea patientInArea = patientsInAreaRepository.findByAreaIdAndPatientId(areaId, patientId)
                 .orElseThrow(InvalidIdException::new);
