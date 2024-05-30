@@ -2,6 +2,7 @@ package four.group.jahadi.Tests.Modules.SubModules.Gharbal;
 
 import four.group.jahadi.Enums.Module.AnswerType;
 import four.group.jahadi.Enums.Module.DiseaseBackground;
+import four.group.jahadi.Enums.Module.QuestionType;
 import four.group.jahadi.Enums.Module.YesOrNo;
 import four.group.jahadi.Models.Question.CheckListGroupQuestion;
 import four.group.jahadi.Models.Question.SimpleQuestion;
@@ -19,6 +20,7 @@ public class Sight {
                         List.of(
                                 CheckListGroupQuestion
                                         .builder()
+                                        .questionType(QuestionType.CHECK_LIST)
                                         .sectionTitle("کودکان")
                                         .options(List.of(
                                                 new PairValue(
@@ -33,16 +35,19 @@ public class Sight {
                                         .questions(List.of(
                                                 SimpleQuestion
                                                         .builder()
+                                                        .questionType(QuestionType.SIMPLE)
                                                         .question("بدون سابقه معاینه چشم")
                                                         .answerType(AnswerType.TICK)
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
+                                                        .questionType(QuestionType.SIMPLE)
                                                         .question("دارای سابقه تنبلی یا انحراف چشم")
                                                         .answerType(AnswerType.TICK)
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
+                                                        .questionType(QuestionType.SIMPLE)
                                                         .question("دارای عینک")
                                                         .answerType(AnswerType.TICK)
                                                         .build()
@@ -50,6 +55,7 @@ public class Sight {
                                         .build(),
                                 CheckListGroupQuestion
                                         .builder()
+                                        .questionType(QuestionType.CHECK_LIST)
                                         .sectionTitle("بیماری زمینه ای")
                                         .options(List.of(
                                                 new PairValue(
@@ -64,16 +70,19 @@ public class Sight {
                                         .questions(List.of(
                                                 SimpleQuestion
                                                         .builder()
+                                                        .questionType(QuestionType.SIMPLE)
                                                         .question("دیابت، فشارخون")
                                                         .answerType(AnswerType.TICK)
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
+                                                        .questionType(QuestionType.SIMPLE)
                                                         .question("آب مروارید، گلوکوم")
                                                         .answerType(AnswerType.TICK)
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
+                                                        .questionType(QuestionType.SIMPLE)
                                                         .question("عینک نامناسب")
                                                         .answerType(AnswerType.TICK)
                                                         .build()
@@ -81,6 +90,7 @@ public class Sight {
                                         .build(),
                                 CheckListGroupQuestion
                                         .builder()
+                                        .questionType(QuestionType.CHECK_LIST)
                                         .sectionTitle("علائم خطرناک")
                                         .options(List.of(
                                                 new PairValue(
@@ -95,31 +105,37 @@ public class Sight {
                                         .questions(List.of(
                                                 SimpleQuestion
                                                         .builder()
+                                                        .questionType(QuestionType.SIMPLE)
                                                         .question("انحراف چشم واضح => ناتوانی در انجام تست حرکت چشمی")
                                                         .answerType(AnswerType.TICK)
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
+                                                        .questionType(QuestionType.SIMPLE)
                                                         .question("پتوز، انتروپیون، اکتروپیون، آنیزوکوری، بسته نشدن کامل پلک ها")
                                                         .answerType(AnswerType.TICK)
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
+                                                        .questionType(QuestionType.SIMPLE)
                                                         .question("تاری دید (شغل و سن مهم) => پرسیدن و شدت تاری دید")
                                                         .answerType(AnswerType.TICK)
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
+                                                        .questionType(QuestionType.SIMPLE)
                                                         .question("دوبینی، نابینایی، لکه بینی در میدان دید، لکه سیاه در میدان دید، جرقه نورانی")
                                                         .answerType(AnswerType.TICK)
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
+                                                        .questionType(QuestionType.SIMPLE)
                                                         .question("قرمزی چشم، اشک ریزش (با پزشک چک شود)")
                                                         .answerType(AnswerType.TICK)
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
+                                                        .questionType(QuestionType.SIMPLE)
                                                         .question("درد چشمی (با پزشک چک شود)")
                                                         .answerType(AnswerType.TICK)
                                                         .build()

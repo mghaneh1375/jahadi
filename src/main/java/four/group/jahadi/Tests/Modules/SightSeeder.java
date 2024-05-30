@@ -2,10 +2,11 @@ package four.group.jahadi.Tests.Modules;
 
 import four.group.jahadi.Enums.Module.AnswerType;
 import four.group.jahadi.Enums.Module.Glass;
+import four.group.jahadi.Enums.Module.QuestionType;
 import four.group.jahadi.Models.Module;
 import four.group.jahadi.Models.Question.GroupQuestion;
 import four.group.jahadi.Models.Question.SimpleQuestion;
-import four.group.jahadi.Models.Question.ModuleTableQuestion;
+import four.group.jahadi.Models.Question.TableQuestion;
 import four.group.jahadi.Models.SubModule;
 import four.group.jahadi.Utility.PairValue;
 import org.bson.types.ObjectId;
@@ -24,8 +25,9 @@ public class SightSeeder {
                 .name("غربال دوم بینایی")
                 .questions(
                         List.of(
-                                ModuleTableQuestion
+                                TableQuestion
                                         .builder()
+                                        .questionType(QuestionType.TABLE)
                                         .title("غربال بینایی")
                                         .headers(List.of("VA/CC", "D"))
                                         .cellLabel("/ 10")
@@ -33,8 +35,9 @@ public class SightSeeder {
                                         .rowsCount(2)
                                         .answerType(AnswerType.NUMBER)
                                         .build(),
-                                ModuleTableQuestion
+                                TableQuestion
                                         .builder()
+                                        .questionType(QuestionType.TABLE)
                                         .title("غربال بینایی")
                                         .headers(List.of("VA/SC", "D"))
                                         .cellLabel("/ 10")
@@ -54,6 +57,7 @@ public class SightSeeder {
                         List.of(
                                 GroupQuestion
                                         .builder()
+                                        .questionType(QuestionType.GROUP)
                                         .sectionTitle("عینک تحویلی")
                                         .questions(
                                                 List.of(
@@ -79,6 +83,7 @@ public class SightSeeder {
                                         .build(),
                                 GroupQuestion
                                         .builder()
+                                        .questionType(QuestionType.GROUP)
                                         .sectionTitle("عینک آفتابی")
                                         .questions(
                                                 List.of(
@@ -99,18 +104,21 @@ public class SightSeeder {
                                         .build(),
                                 GroupQuestion
                                         .builder()
+                                        .questionType(QuestionType.GROUP)
                                         .sectionTitle("عینک ساختنی")
                                         .questions(
                                                 List.of(
-                                                        ModuleTableQuestion
+                                                        TableQuestion
                                                                 .builder()
+                                                                .questionType(QuestionType.TABLE)
                                                                 .headers(List.of("...", "+/-", "SPH", "CYL", "VA"))
                                                                 .firstColumn(List.of("OD", "OS"))
                                                                 .rowsCount(2)
                                                                 .answerType(AnswerType.DOUBLE)
                                                                 .build(),
-                                                        ModuleTableQuestion
+                                                        TableQuestion
                                                                 .builder()
+                                                                .questionType(QuestionType.TABLE)
                                                                 .headers(List.of("PD", "NPD"))
                                                                 .rowsCount(1)
                                                                 .cellLabel("(mm)")
@@ -130,6 +138,7 @@ public class SightSeeder {
                         List.of(
                                 SimpleQuestion
                                         .builder()
+                                        .questionType(QuestionType.SIMPLE)
                                         .required(true)
                                         .question("علت ارجاع")
                                         .answerType(AnswerType.LONG_TEXT)

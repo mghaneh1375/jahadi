@@ -1,6 +1,7 @@
 package four.group.jahadi.Tests.Modules.SubModules;
 
 import four.group.jahadi.Enums.Module.AnswerType;
+import four.group.jahadi.Enums.Module.QuestionType;
 import four.group.jahadi.Models.Question.SimpleQuestion;
 import four.group.jahadi.Models.SubModule;
 
@@ -15,6 +16,7 @@ public class InternalReferral {
                         List.of(
                                 SimpleQuestion
                                         .builder()
+                                        .questionType(QuestionType.SIMPLE)
                                         .required(true)
                                         .answerType(AnswerType.SELECT)
                                         .question("ارجاع به متخصصان داخلی")
@@ -22,6 +24,7 @@ public class InternalReferral {
                                         .build(),
                                 SimpleQuestion
                                         .builder()
+                                        .questionType(QuestionType.SIMPLE)
                                         .required(true)
                                         .answerType(AnswerType.LONG_TEXT)
                                         .question("شرح حال")

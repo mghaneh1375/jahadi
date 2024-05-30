@@ -2,8 +2,10 @@ package four.group.jahadi.Models.Question;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import four.group.jahadi.Enums.Module.AnswerType;
-import four.group.jahadi.Enums.Module.QuestionType;
-import lombok.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import javax.validation.constraints.Size;
@@ -11,11 +13,8 @@ import java.util.List;
 
 @Getter
 @Setter
-@Builder
-public class ModuleTableQuestion extends Question {
-
-    @Builder.Default
-    private QuestionType questionType = QuestionType.TABLE;
+@SuperBuilder
+public class TableQuestion extends Question {
 
     private String title;
 

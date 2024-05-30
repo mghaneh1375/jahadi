@@ -22,13 +22,13 @@ public class ModuleSeeder {
         commonSubModules.put("remoteReferral", RemoteReferral.make());
         commonSubModules.put("paraClinic", ParaClinic.make());
 
+        moduleRepository.insert(ChildTutorialSeeder.seed());
         moduleRepository.insert(SightSeeder.seed());
         moduleRepository.insert(Audiologists.seed());
         moduleRepository.insert(DoctorSeeder.seed());
         moduleRepository.insert(PostDoctor.seed());
         moduleRepository.insert(four.group.jahadi.Tests.Modules.ParaClinic.seed());
         moduleRepository.insert(RemoteDoctorSeeder.seed());
-        moduleRepository.insert(InsurancerSeeder.seed());
         moduleRepository.insert(GharbalgariSeeder.seed());
     }
 

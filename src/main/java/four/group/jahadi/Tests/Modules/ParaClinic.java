@@ -2,6 +2,7 @@ package four.group.jahadi.Tests.Modules;
 
 import four.group.jahadi.Enums.Module.AllParaClinic;
 import four.group.jahadi.Enums.Module.AnswerType;
+import four.group.jahadi.Enums.Module.QuestionType;
 import four.group.jahadi.Models.Module;
 import four.group.jahadi.Models.Question.SimpleQuestion;
 import four.group.jahadi.Models.SubModule;
@@ -24,6 +25,7 @@ public class ParaClinic {
                                                 List.of(
                                                         SimpleQuestion
                                                                 .builder()
+                                                                .questionType(QuestionType.SIMPLE)
                                                                 .question("نوع خدمت")
                                                                 .answerType(AnswerType.UPLOAD_TIC)
                                                                 .options(
@@ -70,12 +72,14 @@ public class ParaClinic {
                                                 List.of(
                                                         SimpleQuestion
                                                                 .builder()
+                                                                .questionType(QuestionType.SIMPLE)
                                                                 .answerType(AnswerType.LONG_TEXT)
                                                                 .required(true)
                                                                 .question("توضیحات")
                                                                 .build(),
                                                         SimpleQuestion
                                                                 .builder()
+                                                                .questionType(QuestionType.SIMPLE)
                                                                 .answerType(AnswerType.LONG_TEXT)
                                                                 .required(true)
                                                                 .question("افرادی که حضور داشتند")

@@ -4,19 +4,15 @@ import four.group.jahadi.Enums.Module.AnswerType;
 import four.group.jahadi.Enums.Module.QuestionType;
 import four.group.jahadi.Utility.PairValue;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.util.List;
 
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@SuperBuilder
 public class SimpleQuestion extends Question {
-
-    @Builder.Default
-    private QuestionType questionType = QuestionType.SIMPLE;
 
     private Boolean required;
 

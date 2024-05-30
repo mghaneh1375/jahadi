@@ -2,6 +2,7 @@ package four.group.jahadi.Service.Area;
 
 import four.group.jahadi.DTO.Patient.InquiryPatientData;
 import four.group.jahadi.DTO.Patient.PatientData;
+import four.group.jahadi.DTO.Patient.TrainFormData;
 import four.group.jahadi.Enums.AgeType;
 import four.group.jahadi.Enums.Insurance;
 import four.group.jahadi.Exception.InvalidFieldsException;
@@ -265,7 +266,7 @@ public class PatientServiceInArea {
         ModuleInArea moduleInArea = findModule(foundArea, moduleId, userId, null);
         Module module = moduleRepository.findById(moduleInArea.getModuleId()).orElseThrow(UnknownError::new);
 
-        if(!module.isReferral())
+        if (!module.isReferral())
             throw new InvalidFieldsException("در این ماژول امکان ارجاع دهی وجود ندارد");
 
         PatientsInArea patientInArea = patientsInAreaRepository.findByAreaIdAndPatientId(areaId, patientId)
@@ -273,6 +274,94 @@ public class PatientServiceInArea {
 
         patientInArea.setReferrals(doAddReferral(patientInArea.getReferrals(), moduleId));
         patientsInAreaRepository.save(patientInArea);
+    }
+
+    public void setPatientTrainFrom(
+            ObjectId userId, ObjectId areaId,
+            ObjectId patientId, TrainFormData data
+    ) {
+
+        Trip trip = tripRepository.findActiveByAreaIdAndTrainerId(areaId, userId, Utility.getCurrDate())
+                .orElseThrow(NotAccessException::new);
+
+        Area foundArea = findStartedArea(trip, areaId);
+        if (!foundArea.getOwnerId().equals(userId) &&
+                (
+                        foundArea.getTrainers() == null ||
+                                !foundArea.getTrainers().contains(userId)
+                )
+        )
+            throw new NotAccessException();
+
+        PatientsInArea patient = patientsInAreaRepository.findByAreaIdAndPatientId(areaId, patientId)
+                .orElseThrow(InvalidIdException::new);
+
+        patient.setTrainForm(data);
+        patientsInAreaRepository.save(patient);
+    }
+
+    public ResponseEntity<TrainFormData> getPatientTrainFrom(
+            ObjectId userId, ObjectId areaId,
+            ObjectId patientId
+    ) {
+
+        Trip trip = tripRepository.findActiveByAreaIdAndTrainerId(areaId, userId, Utility.getCurrDate())
+                .orElseThrow(NotAccessException::new);
+
+        Area foundArea = findStartedArea(trip, areaId);
+//        if (!foundArea.getOwnerId().equals(userId) &&
+//                (
+//                        foundArea.getTrainers() == null ||
+//                                !foundArea.getTrainers().contains(userId)
+//                )
+//        )
+//            throw new NotAccessException();
+
+        PatientsInArea patient = patientsInAreaRepository.findByAreaIdAndPatientId(areaId, patientId)
+                .orElseThrow(InvalidIdException::new);
+
+        return new ResponseEntity<>(patient.getTrainForm(), HttpStatus.OK);
+    }
+
+
+    public ResponseEntity<List<PatientReferral>> getPatientReferrals(ObjectId userId, ObjectId areaId, ObjectId patientId) {
+
+        Trip trip = tripRepository.findActiveByAreaIdAndTrainerId(areaId, userId, Utility.getCurrDate())
+                .orElseThrow(NotAccessException::new);
+
+        Area foundArea = findStartedArea(trip, areaId);
+//        if (!foundArea.getOwnerId().equals(userId) &&
+//                (
+//                        foundArea.getTrainers() == null ||
+//                                !foundArea.getTrainers().contains(userId)
+//                )
+//        )
+//            throw new NotAccessException();
+
+        PatientsInArea patient = patientsInAreaRepository.findByAreaIdAndPatientId(areaId, patientId)
+                .orElseThrow(InvalidIdException::new);
+
+        List<PatientReferral> referrals = patient.getReferrals();
+        if(referrals == null)
+            return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
+
+        List<ModuleInArea> modules = foundArea.getModules();
+        HashMap<ObjectId, String> moduleNames = new HashMap<>();
+
+        referrals.forEach(patientReferral -> {
+            patientReferral.setForms(null);
+            if(moduleNames.containsKey(patientReferral.getModuleId()))
+                patientReferral.setModuleName(moduleNames.get(patientReferral.getModuleId()));
+            else {
+                modules.stream().filter(module -> module.getModuleId().equals(patientReferral.getModuleId()))
+                        .findFirst().ifPresent(module -> {
+                            patientReferral.setModuleName(module.getModuleName());
+                            moduleNames.put(module.getModuleId(), module.getModuleName());
+                        });
+            }
+        });
+
+        return new ResponseEntity<>(referrals, HttpStatus.OK);
     }
 
     public void setPatientTrainStatus(
@@ -388,12 +477,12 @@ public class PatientServiceInArea {
                         .filter(patientReferral -> patientReferral.getModuleId().equals(moduleId))
                         .reduce((first, second) -> second);
 
-        if(optionalPatientReferral.isEmpty())
+        if (optionalPatientReferral.isEmpty())
             throw new InvalidIdException();
 
         PatientReferral wantedReferral = optionalPatientReferral.get();
         wantedReferral.setRecepted(isRecepted);
-        if(isRecepted)
+        if (isRecepted)
             wantedReferral.setReceptedAt(new Date());
 
         patientsInAreaRepository.save(patientInArea);

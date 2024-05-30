@@ -1,6 +1,7 @@
 package four.group.jahadi.Tests.Modules.SubModules;
 
 import four.group.jahadi.Enums.Module.AnswerType;
+import four.group.jahadi.Enums.Module.QuestionType;
 import four.group.jahadi.Models.Question.SimpleQuestion;
 import four.group.jahadi.Models.SubModule;
 
@@ -15,12 +16,14 @@ public class ExternalReferral {
                         List.of(
                                 SimpleQuestion
                                         .builder()
+                                        .questionType(QuestionType.SIMPLE)
                                         .required(true)
                                         .answerType(AnswerType.TEXT)
                                         .question("ارجاع به")
                                         .build(),
                                 SimpleQuestion
                                         .builder()
+                                        .questionType(QuestionType.SIMPLE)
                                         .required(true)
                                         .answerType(AnswerType.LONG_TEXT)
                                         .question("علت ارجاع")

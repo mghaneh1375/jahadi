@@ -2,6 +2,7 @@ package four.group.jahadi.Tests.Modules.SubModules;
 
 import four.group.jahadi.Enums.Module.AnswerType;
 import four.group.jahadi.Enums.Module.LimitedParaClinic;
+import four.group.jahadi.Enums.Module.QuestionType;
 import four.group.jahadi.Models.Question.SimpleQuestion;
 import four.group.jahadi.Models.SubModule;
 import four.group.jahadi.Utility.PairValue;
@@ -18,6 +19,7 @@ public class ParaClinic {
                         List.of(
                                 SimpleQuestion
                                         .builder()
+                                        .questionType(QuestionType.SIMPLE)
                                         .required(true)
                                         .answerType(AnswerType.MULTI_SELECT)
                                         .options(
@@ -43,6 +45,7 @@ public class ParaClinic {
                                         .build(),
                                 SimpleQuestion
                                         .builder()
+                                        .questionType(QuestionType.SIMPLE)
                                         .answerType(AnswerType.LONG_TEXT)
                                         .question("توضیحات")
                                         .required(true)

@@ -1,9 +1,10 @@
 package four.group.jahadi.Tests.Modules;
 
 import four.group.jahadi.Enums.Module.AnswerType;
+import four.group.jahadi.Enums.Module.QuestionType;
 import four.group.jahadi.Models.Module;
 import four.group.jahadi.Models.Question.SimpleQuestion;
-import four.group.jahadi.Models.Question.ModuleTableQuestion;
+import four.group.jahadi.Models.Question.TableQuestion;
 import four.group.jahadi.Models.SubModule;
 import four.group.jahadi.Utility.PairValue;
 import org.bson.types.ObjectId;
@@ -26,22 +27,26 @@ public class Audiologists {
                         List.of(
                                 SimpleQuestion
                                         .builder()
+                                        .questionType(QuestionType.SIMPLE)
                                         .question("نتیجه اتوسکوپی")
                                         .answerType(AnswerType.TEXT)
                                         .build(),
                                 SimpleQuestion
                                         .builder()
+                                        .questionType(QuestionType.SIMPLE)
                                         .question("ویزیت")
                                         .answerType(AnswerType.LONG_TEXT)
                                         .build(),
-                                ModuleTableQuestion
+                                TableQuestion
                                         .builder()
+                                        .questionType(QuestionType.TABLE)
                                         .headers(List.of("R", "L"))
                                         .rowsCount(1)
                                         .answerType(AnswerType.NUMBER)
                                         .build(),
-                                ModuleTableQuestion
+                                TableQuestion
                                         .builder()
+                                        .questionType(QuestionType.TABLE)
                                         .headers(List.of("Frequency", "500", "1000", "2000", "3000", "4000", "6000", "8000"))
                                         .firstColumn(List.of("TH (right)", "TH (left)"))
                                         .rowsCount(2)
@@ -57,16 +62,18 @@ public class Audiologists {
                 .name("اتاق شنوایی 2")
                 .questions(
                         List.of(
-                                ModuleTableQuestion
+                                TableQuestion
                                         .builder()
+                                        .questionType(QuestionType.TABLE)
                                         .title("Rinne")
                                         .headers(List.of("Freq", "L", "R"))
                                         .firstColumn(List.of("250", "500", "1000"))
                                         .rowsCount(3)
                                         .answerType(AnswerType.NUMBER)
                                         .build(),
-                                ModuleTableQuestion
+                                TableQuestion
                                         .builder()
+                                        .questionType(QuestionType.TABLE)
                                         .title("Weber")
                                         .headers(List.of("Freq", ""))
                                         .firstColumn(List.of("250", "500", "1000"))
@@ -75,6 +82,7 @@ public class Audiologists {
                                         .build(),
                                 SimpleQuestion
                                         .builder()
+                                        .questionType(QuestionType.SIMPLE)
                                         .answerType(AnswerType.TICK)
                                         .options(
                                                 Arrays.stream(four.group.jahadi.Enums.Module.Audiologists.values()).map(audiologists -> new PairValue(
@@ -85,12 +93,14 @@ public class Audiologists {
                                         .build(),
                                 SimpleQuestion
                                         .builder()
+                                        .questionType(QuestionType.SIMPLE)
                                         .required(true)
                                         .question("تشحیص")
                                         .answerType(AnswerType.LONG_TEXT)
                                         .build(),
                                 SimpleQuestion
                                         .builder()
+                                        .questionType(QuestionType.SIMPLE)
                                         .required(false)
                                         .question("آپلود فایل")
                                         .answerType(AnswerType.UPLOAD)
@@ -106,6 +116,7 @@ public class Audiologists {
                         List.of(
                                 SimpleQuestion
                                         .builder()
+                                        .questionType(QuestionType.SIMPLE)
                                         .required(true)
                                         .question("علت ارجاع")
                                         .answerType(AnswerType.LONG_TEXT)

@@ -7,9 +7,9 @@ import four.group.jahadi.Models.DateSerialization;
 import four.group.jahadi.Models.Model;
 import lombok.*;
 import org.bson.types.ObjectId;
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import javax.persistence.Transient;
 import java.util.Date;
 import java.util.List;
 
@@ -32,4 +32,8 @@ public class PatientReferral extends Model {
     @JsonSerialize(using = DateSerialization.class)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Date receptedAt;
+
+    @Transient
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    private String moduleName;
 }

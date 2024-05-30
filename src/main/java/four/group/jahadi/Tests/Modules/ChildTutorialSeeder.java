@@ -2,6 +2,7 @@ package four.group.jahadi.Tests.Modules;
 
 import four.group.jahadi.Enums.Module.AnswerType;
 import four.group.jahadi.Enums.Module.DeliveryStatus;
+import four.group.jahadi.Enums.Module.QuestionType;
 import four.group.jahadi.Enums.Module.Shepesh;
 import four.group.jahadi.Models.Module;
 import four.group.jahadi.Models.Question.SimpleQuestion;
@@ -17,7 +18,6 @@ public class ChildTutorialSeeder {
         return Module
                 .builder()
                 .name("آموزش کودکان")
-                .maxAge(12)
                 .icon("")
                 .subModules(
                         List.of(
@@ -28,24 +28,28 @@ public class ChildTutorialSeeder {
                                                 List.of(
                                                         SimpleQuestion
                                                                 .builder()
+                                                                .questionType(QuestionType.SIMPLE)
                                                                 .required(true)
                                                                 .question("قد")
                                                                 .answerType(AnswerType.NUMBER)
                                                                 .build(),
                                                         SimpleQuestion
                                                                 .builder()
+                                                                .questionType(QuestionType.SIMPLE)
                                                                 .required(true)
                                                                 .question("وزن")
                                                                 .answerType(AnswerType.NUMBER)
                                                                 .build(),
                                                         SimpleQuestion
                                                                 .builder()
+                                                                .questionType(QuestionType.SIMPLE)
                                                                 .required(true)
                                                                 .question("BMI")
                                                                 .answerType(AnswerType.NUMBER)
                                                                 .build(),
                                                         SimpleQuestion
                                                                 .builder()
+                                                                .questionType(QuestionType.SIMPLE)
                                                                 .required(true)
                                                                 .question("شپش")
                                                                 .answerType(AnswerType.SELECT)
@@ -59,6 +63,7 @@ public class ChildTutorialSeeder {
                                                                 .build(),
                                                         SimpleQuestion
                                                                 .builder()
+                                                                .questionType(QuestionType.SIMPLE)
                                                                 .required(true)
                                                                 .question("بسته فرهنگی")
                                                                 .answerType(AnswerType.TICK)
@@ -77,6 +82,7 @@ public class ChildTutorialSeeder {
                                                                 .build(),
                                                         SimpleQuestion
                                                                 .builder()
+                                                                .questionType(QuestionType.SIMPLE)
                                                                 .required(true)
                                                                 .question("شامپو")
                                                                 .answerType(AnswerType.TICK)
@@ -95,6 +101,7 @@ public class ChildTutorialSeeder {
                                                                 .build(),
                                                         SimpleQuestion
                                                                 .builder()
+                                                                .questionType(QuestionType.SIMPLE)
                                                                 .required(false)
                                                                 .question("توضیحات")
                                                                 .answerType(AnswerType.LONG_TEXT)

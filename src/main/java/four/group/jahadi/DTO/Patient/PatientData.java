@@ -18,7 +18,6 @@ import static four.group.jahadi.Exception.CommonErrorMessages.*;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-
 public class PatientData {
 
     @Size(min = 2, max = 255, message = NAME_ERR)

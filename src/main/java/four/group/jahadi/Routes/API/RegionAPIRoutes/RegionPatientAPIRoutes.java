@@ -2,8 +2,10 @@ package four.group.jahadi.Routes.API.RegionAPIRoutes;
 
 import four.group.jahadi.DTO.Patient.InquiryPatientData;
 import four.group.jahadi.DTO.Patient.PatientData;
+import four.group.jahadi.DTO.Patient.TrainFormData;
 import four.group.jahadi.Enums.Insurance;
 import four.group.jahadi.Models.Area.PatientJoinArea;
+import four.group.jahadi.Models.Area.PatientReferral;
 import four.group.jahadi.Models.Patient;
 import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Service.Area.PatientServiceInArea;
@@ -158,6 +160,50 @@ public class RegionPatientAPIRoutes extends Router {
     ) {
         patientServiceInArea.setPatientTrainStatus(
                 getId(request), areaId, patientId, hasTrained
+        );
+    }
+
+    @PutMapping(value = "setPatientTrainFrom/{areaId}/{patientId}")
+    @Operation(
+            summary = "ست کردن فرم آموزش یک بیمار در منطقه خاص توسط مسئول آموزش"
+    )
+    public void setPatientTrainFrom(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId,
+            @PathVariable @ObjectIdConstraint ObjectId patientId,
+            @RequestBody @Valid TrainFormData trainFormData
+    ) {
+        patientServiceInArea.setPatientTrainFrom(
+                getId(request), areaId, patientId, trainFormData
+        );
+    }
+
+    @GetMapping(value = "getPatientTrainFrom/{areaId}/{patientId}")
+    @Operation(
+            summary = "گرفتن فرم آموزش یک بیمار در منطقه"
+    )
+    public ResponseEntity<TrainFormData> getPatientTrainFrom(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId,
+            @PathVariable @ObjectIdConstraint ObjectId patientId
+    ) {
+        return patientServiceInArea.getPatientTrainFrom(
+                getId(request), areaId, patientId
+        );
+    }
+
+
+    @GetMapping(value = "getPatientReferrals/{areaId}/{patientId}")
+    @Operation(
+            summary = "گرفتن ارجاعاتی که یک بیمار در کل منطقه داشته است"
+    )
+    public ResponseEntity<List<PatientReferral>> getPatientReferrals(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId,
+            @PathVariable @ObjectIdConstraint ObjectId patientId
+    ) {
+        return patientServiceInArea.getPatientReferrals(
+                getId(request), areaId, patientId
         );
     }
 

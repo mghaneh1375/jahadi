@@ -1,6 +1,7 @@
 package four.group.jahadi.Tests.Modules;
 
 import four.group.jahadi.Enums.Module.AnswerType;
+import four.group.jahadi.Enums.Module.QuestionType;
 import four.group.jahadi.Models.Module;
 import four.group.jahadi.Models.Question.SimpleQuestion;
 import four.group.jahadi.Models.SubModule;
@@ -32,6 +33,7 @@ public class DoctorSeeder {
                                                 List.of(
                                                         SimpleQuestion
                                                                 .builder()
+                                                                .questionType(QuestionType.SIMPLE)
                                                                 .required(true)
                                                                 .question("علت ارجاع")
                                                                 .answerType(AnswerType.LONG_TEXT)

@@ -3,6 +3,7 @@ package four.group.jahadi.Tests.Modules.SubModules.Gharbal;
 import four.group.jahadi.Enums.Module.AnswerType;
 import four.group.jahadi.Enums.Module.DiseaseBackground;
 import four.group.jahadi.Enums.Module.DrugBackground;
+import four.group.jahadi.Enums.Module.QuestionType;
 import four.group.jahadi.Models.Question.CheckListGroupQuestion;
 import four.group.jahadi.Models.Question.SimpleQuestion;
 import four.group.jahadi.Models.SubModule;
@@ -19,6 +20,7 @@ public class General {
                         List.of(
                                 CheckListGroupQuestion
                                         .builder()
+                                        .questionType(QuestionType.CHECK_LIST)
                                         .sectionTitle("سابقه بیماری")
                                         .options(List.of(
                                                 new PairValue(
@@ -41,16 +43,19 @@ public class General {
                                         .questions(List.of(
                                                 SimpleQuestion
                                                         .builder()
+                                                        .questionType(QuestionType.SIMPLE)
                                                         .question("دیابت ملیتوس (DM)")
                                                         .answerType(AnswerType.TICK)
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
+                                                        .questionType(QuestionType.SIMPLE)
                                                         .question("پرفشاری خون (HTN)")
                                                         .answerType(AnswerType.TICK)
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
+                                                        .questionType(QuestionType.SIMPLE)
                                                         .question("مشکل تیروئید")
                                                         .answerType(AnswerType.TICK)
                                                         .build()
@@ -58,54 +63,63 @@ public class General {
                                         .build(),
                                 SimpleQuestion
                                         .builder()
+                                        .questionType(QuestionType.SIMPLE)
                                         .required(true)
                                         .question("قند خون ناشتا (FBS)")
                                         .answerType(AnswerType.NUMBER)
                                         .build(),
                                 SimpleQuestion
                                         .builder()
+                                        .questionType(QuestionType.SIMPLE)
                                         .required(true)
                                         .question("قند خون غیرناشتا (BS)")
                                         .answerType(AnswerType.NUMBER)
                                         .build(),
                                 SimpleQuestion
                                         .builder()
+                                        .questionType(QuestionType.SIMPLE)
                                         .required(true)
                                         .question("فشار خون (BP)")
                                         .answerType(AnswerType.NUMBER)
                                         .build(),
                                 SimpleQuestion
                                         .builder()
+                                        .questionType(QuestionType.SIMPLE)
                                         .required(true)
                                         .question("فشار خون اول (First BP)")
                                         .answerType(AnswerType.NUMBER)
                                         .build(),
                                 SimpleQuestion
                                         .builder()
+                                        .questionType(QuestionType.SIMPLE)
                                         .required(true)
                                         .question("دارو (Medicine)")
                                         .answerType(AnswerType.TEXT)
                                         .build(),
                                 SimpleQuestion
                                         .builder()
+                                        .questionType(QuestionType.SIMPLE)
                                         .required(true)
                                         .question("فشار خون دوم (Second BP)")
                                         .answerType(AnswerType.NUMBER)
                                         .build(),
                                 SimpleQuestion
                                         .builder()
+                                        .questionType(QuestionType.SIMPLE)
                                         .required(true)
                                         .question("دارو بار دوم (Medicine 2)")
                                         .answerType(AnswerType.TEXT)
                                         .build(),
                                 SimpleQuestion
                                         .builder()
+                                        .questionType(QuestionType.SIMPLE)
                                         .required(true)
                                         .question("فشار خون سوم (Third BP)")
                                         .answerType(AnswerType.NUMBER)
                                         .build(),
                                 SimpleQuestion
                                         .builder()
+                                        .questionType(QuestionType.SIMPLE)
                                         .required(false)
                                         .question("توضیحات")
                                         .answerType(AnswerType.LONG_TEXT)
