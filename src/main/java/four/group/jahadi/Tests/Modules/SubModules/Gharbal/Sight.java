@@ -16,6 +16,7 @@ public class Sight {
     public static SubModule make() {
         return SubModule
                 .builder()
+                .id(new ObjectId())
                 .name("غربال بینایی")
                 .questions(
                         List.of(

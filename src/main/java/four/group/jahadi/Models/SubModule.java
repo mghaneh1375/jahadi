@@ -28,6 +28,7 @@ public class SubModule {
 
     private String name;
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<Question> questions;
 
     @Field("post_action")

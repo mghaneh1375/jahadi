@@ -16,6 +16,7 @@ public class Audiologists {
     public static SubModule make() {
         return SubModule
                 .builder()
+                .id(new ObjectId())
                 .name("غربال شنوایی")
                 .questions(
                         List.of(

@@ -6,6 +6,7 @@ import four.group.jahadi.Models.Area.Area;
 import four.group.jahadi.Models.Area.ModuleInArea;
 import four.group.jahadi.Repository.*;
 import four.group.jahadi.Tests.Modules.ModuleSeeder;
+import four.group.jahadi.Utility.Utility;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -115,10 +116,10 @@ public class Seeder {
 
     private Project projectSeeder() {
 
-        Date startDate = new Date();
+        Date startDate = Utility.getCurrDate();
         Calendar c = Calendar.getInstance();
         c.setTime(startDate);
-        c.add(Calendar.DATE, 5);
+        c.add(Calendar.DATE, -5);
         startDate = c.getTime();
 
         Date endDate = new Date();
@@ -137,7 +138,7 @@ public class Seeder {
 
         projectRepository.insert(project);
 
-        Trip trip = tripSeeder(project.getId());
+        tripSeeder(project.getId());
 
         return project;
     }
@@ -147,7 +148,7 @@ public class Seeder {
         Date startDate = new Date();
         Calendar c = Calendar.getInstance();
         c.setTime(startDate);
-        c.add(Calendar.DATE, 10);
+        c.add(Calendar.DATE, -2);
         startDate = c.getTime();
 
         Date endDate = new Date();
@@ -213,7 +214,7 @@ public class Seeder {
         Date startDate = new Date();
         Calendar c = Calendar.getInstance();
         c.setTime(startDate);
-        c.add(Calendar.DATE, 13);
+        c.add(Calendar.DATE, -1);
         startDate = c.getTime();
 
         Date endDate = new Date();

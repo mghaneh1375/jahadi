@@ -8,6 +8,7 @@ import four.group.jahadi.Exception.NotAccessException;
 import four.group.jahadi.Models.Area.Area;
 import four.group.jahadi.Models.Area.ModuleInArea;
 import four.group.jahadi.Models.Module;
+import four.group.jahadi.Models.SubModule;
 import four.group.jahadi.Models.Trip;
 import four.group.jahadi.Models.User;
 import four.group.jahadi.Repository.ModuleRepository;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -106,7 +108,7 @@ public class ModuleServiceInArea {
 
         List<ObjectId> userIds = new ArrayList<>();
 
-        for(ModuleInArea module : modules) {
+        for (ModuleInArea module : modules) {
             userIds.addAll(module.getMembers());
             userIds.addAll(module.getSecretaries());
         }
@@ -158,10 +160,34 @@ public class ModuleServiceInArea {
                 userId.equals(area.getOwnerId()) ? null : userId
         );
 
-        return new ResponseEntity<>(
-                moduleRepository.findById(moduleId).orElseThrow(UnknownError::new),
-                HttpStatus.OK
+        Module module = moduleRepository.findById(moduleId).orElseThrow(UnknownError::new);
+        module.getSubModules().forEach(subModule -> subModule.setQuestions(null));
+
+        return new ResponseEntity<>(module, HttpStatus.OK);
+    }
+
+    public ResponseEntity<SubModule> getSubModule(
+            ObjectId userId, ObjectId areaId,
+            ObjectId moduleId, ObjectId subModuleId
+    ) {
+
+        Trip trip = tripRepository.findByAreaIdAndResponsibleIdAndModuleId(
+                areaId, userId, moduleId
+        ).orElseThrow(NotAccessException::new);
+
+        Area area = AreaUtils.findStartedArea(trip, areaId);
+        AreaUtils.findModule(
+                area, moduleId,
+                userId.equals(area.getOwnerId()) ? null : userId,
+                userId.equals(area.getOwnerId()) ? null : userId
         );
+
+        Module module = moduleRepository.findById(moduleId).orElseThrow(UnknownError::new);
+
+        return new ResponseEntity<>(
+                module.getSubModules().stream().filter(subModule -> Objects.equals(subModule.getId(), subModuleId)).findFirst()
+                        .orElseThrow(InvalidIdException::new),
+                HttpStatus.OK);
     }
 
     static Object[] checkUsers(ObjectId userId, ObjectId areaId,

@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import four.group.jahadi.Enums.AccessInModuleArea;
+import four.group.jahadi.Models.ListOfUsersSerialization;
 import four.group.jahadi.Models.ObjectIdSerialization;
-import four.group.jahadi.Models.OwnerSerialization;
 import four.group.jahadi.Models.User;
 import lombok.*;
 import org.bson.types.ObjectId;
@@ -43,12 +43,12 @@ public class ModuleInArea {
     private List<ObjectId> members = new ArrayList<>();
 
     @Transient
-    @JsonSerialize(using = OwnerSerialization.class)
+    @JsonSerialize(using = ListOfUsersSerialization.class)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<User> users;
 
     @Transient
-    @JsonSerialize(using = OwnerSerialization.class)
+    @JsonSerialize(using = ListOfUsersSerialization.class)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<User> secretaryUsers;
 

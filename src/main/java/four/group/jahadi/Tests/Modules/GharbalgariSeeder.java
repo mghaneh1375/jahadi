@@ -23,6 +23,7 @@ public class GharbalgariSeeder {
                                 Mama.make()
                         )
                 )
+                .isReferral(true)
                 .build();
     }
 }

@@ -32,7 +32,6 @@ public class Module extends Model {
     private String icon;
 
     @Field("is_referral")
-    @JsonIgnore
     private boolean isReferral = true;
 
     @Field("inTrip")

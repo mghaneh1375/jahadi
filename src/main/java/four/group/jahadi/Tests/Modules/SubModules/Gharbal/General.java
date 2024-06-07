@@ -16,6 +16,7 @@ public class General {
     public static SubModule make() {
         return SubModule
                 .builder()
+                .id(new ObjectId())
                 .name("غربالگری کلی")
                 .questions(
                         List.of(

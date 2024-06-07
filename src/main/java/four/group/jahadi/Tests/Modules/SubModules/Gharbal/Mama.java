@@ -15,6 +15,7 @@ public class Mama {
     public static SubModule make() {
         return SubModule
                 .builder()
+                .id(new ObjectId())
                 .name("غربال مامایی")
                 .questions(List.of(
                         CheckListGroupQuestion

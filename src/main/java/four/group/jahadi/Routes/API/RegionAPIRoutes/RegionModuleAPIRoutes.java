@@ -2,6 +2,7 @@ package four.group.jahadi.Routes.API.RegionAPIRoutes;
 
 import four.group.jahadi.Models.Module;
 import four.group.jahadi.Models.Area.ModuleInArea;
+import four.group.jahadi.Models.SubModule;
 import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Service.Area.ModuleServiceInArea;
 import four.group.jahadi.Service.ModuleService;
@@ -56,6 +57,19 @@ public class RegionModuleAPIRoutes extends Router {
     ) {
         return moduleServiceInArea.getModule(getId(request), areaId, moduleId);
     }
+
+    @GetMapping(path = "getSubModule/{areaId}/{moduleId}/{subModuleId}")
+    @ResponseBody
+    @Operation(summary = "گرفتن ساب ماژول در منطقه توسط منطقه یا دکتر آن ماژول")
+    public ResponseEntity<SubModule> getSubModule(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId,
+            @PathVariable @ObjectIdConstraint ObjectId moduleId,
+            @PathVariable @ObjectIdConstraint ObjectId subModuleId
+    ) {
+        return moduleServiceInArea.getSubModule(getId(request), areaId, moduleId, subModuleId);
+    }
+
 
     @PutMapping(path = "addModule/{areaId}")
     @ResponseBody
