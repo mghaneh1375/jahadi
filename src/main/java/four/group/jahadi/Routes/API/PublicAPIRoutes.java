@@ -52,16 +52,6 @@ public class PublicAPIRoutes {
         return drugService.findById(drugId);
     }
 
-    @GetMapping(value = "setDrugReplacements/{drugId}")
-    @ResponseBody
-    @Operation(summary = "ست کردن داروهای جایگزین یک دارو خاص")
-    public void setDrugReplacements(
-            @PathVariable @ObjectIdConstraint ObjectId drugId,
-            @RequestBody List<ObjectId> drugs
-    ) {
-        drugService.setReplacements(drugId, drugs);
-    }
-
     @GetMapping(value = "getDrugReplacements/{drugId}")
     @ResponseBody
     @Operation(summary = "گرفتن داروهای جایگزین یک دارو خاص")

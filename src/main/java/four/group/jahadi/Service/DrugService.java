@@ -111,7 +111,9 @@ public class DrugService extends AbstractService<Drug, DrugData> {
 
         drug.setName(drugData.getName());
         drug.setPrice(drugData.getPrice());
-        drug.setHowToUse(drugData.getHowToUse());
+        drug.setHowToUses(drugData.getHowToUses());
+        drug.setAmountOfUses(drugData.getAmountOfUses());
+        drug.setUseTimes(drugData.getUseTimes());
         drug.setDescription(drugData.getDescription());
         drug.setAvailable(drugData.getAvailable());
         drug.setVisibility(drugData.getVisibility());

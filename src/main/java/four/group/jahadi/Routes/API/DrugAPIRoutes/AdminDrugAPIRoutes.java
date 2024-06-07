@@ -53,4 +53,14 @@ public class AdminDrugAPIRoutes {
         
         return drugService.list(true);
     }
+
+    @GetMapping(value = "setDrugReplacements/{drugId}")
+    @ResponseBody
+    @Operation(summary = "ست کردن داروهای جایگزین یک دارو خاص")
+    public void setDrugReplacements(
+            @PathVariable @ObjectIdConstraint ObjectId drugId,
+            @RequestBody List<ObjectId> drugs
+    ) {
+        drugService.setReplacements(drugId, drugs);
+    }
 }
