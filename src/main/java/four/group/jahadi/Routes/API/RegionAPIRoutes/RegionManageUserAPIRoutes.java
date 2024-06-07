@@ -70,6 +70,17 @@ public class RegionManageUserAPIRoutes extends Router {
         );
     }
 
+
+    @GetMapping(value = "getDispatchers/{areaId}")
+    @ResponseBody
+    @Operation(summary = "گرفتن مسئولین پذیرش در منطقه توسط مسئول منطفه")
+    public ResponseEntity<List<User>> getDispatchers(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId
+    ) {
+        return membersServiceInArea.getDispatchers(getId(request), areaId);
+    }
+
     @PutMapping(value = "addDispatcher/{areaId}")
     @ResponseBody
     @Operation(summary = "افزودن جهادگر/جهادگران به عنوان مسئول پذیرش در منطقه توسط مسئول منطفه", description = "قبل از شروع اردو باید صدا زده شود")
@@ -110,6 +121,15 @@ public class RegionManageUserAPIRoutes extends Router {
         membersServiceInArea.removeInsurancer(getId(request), areaId, userId);
     }
 
+    @GetMapping(value = "getInsurancers/{areaId}")
+    @ResponseBody
+    @Operation(summary = "گرفتن مسئولین بیمه در منطقه توسط مسئول منطفه")
+    public ResponseEntity<List<User>> getInsurancers(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId
+    ) {
+        return membersServiceInArea.getInsurancers(getId(request), areaId);
+    }
 
     @PutMapping(value = "addPharmacyManager/{areaId}")
     @ResponseBody
@@ -137,6 +157,15 @@ public class RegionManageUserAPIRoutes extends Router {
         membersServiceInArea.removePharmacyManager(getId(request), areaId, userId);
     }
 
+    @GetMapping(value = "getPharmacyManagers/{areaId}")
+    @ResponseBody
+    @Operation(summary = "گرفتن مسئولین داروخانه در منطقه توسط مسئول منطفه")
+    public ResponseEntity<List<User>> getPharmacyManagers(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId
+    ) {
+        return membersServiceInArea.getPharmacyManagers(getId(request), areaId);
+    }
 
     @PutMapping(value = "addLaboratoryManager/{areaId}")
     @ResponseBody
@@ -164,6 +193,16 @@ public class RegionManageUserAPIRoutes extends Router {
         membersServiceInArea.removeLaboratoryManager(getId(request), areaId, userId);
     }
 
+    @GetMapping(value = "getLaboratoryManager/{areaId}")
+    @ResponseBody
+    @Operation(summary = "گرفتن مسئولین آزمایشگاه در منطقه توسط مسئول منطفه")
+    public ResponseEntity<List<User>> getLaboratoryManager(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId
+    ) {
+        return membersServiceInArea.getLaboratoryManagers(getId(request), areaId);
+    }
+
     @PutMapping(value = "addTrainer/{areaId}")
     @ResponseBody
     @Operation(summary = "افزودن جهادگر/جهادگران به عنوان مسئول آموزش در منطقه توسط مسئول منطفه", description = "قبل از شروع اردو باید صدا زده شود")
@@ -182,5 +221,15 @@ public class RegionManageUserAPIRoutes extends Router {
                               @PathVariable @ObjectIdConstraint ObjectId userId
     ) {
         membersServiceInArea.removeTrainer(getId(request), areaId, userId);
+    }
+
+    @GetMapping(value = "getTrainers/{areaId}")
+    @ResponseBody
+    @Operation(summary = "گرفتن مسئولین آموزش در منطقه توسط مسئول منطفه")
+    public ResponseEntity<List<User>> getTrainers(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId
+    ) {
+        return membersServiceInArea.getTrainers(getId(request), areaId);
     }
 }

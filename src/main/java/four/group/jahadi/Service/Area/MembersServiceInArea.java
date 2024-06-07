@@ -81,6 +81,23 @@ public class MembersServiceInArea {
         tripRepository.save(wantedTrip);
     }
 
+    private ResponseEntity<List<User>> returnUsers(List<ObjectId> ids) {
+        if(ids == null || ids.size() == 0)
+            return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
+
+        return new ResponseEntity<>(
+                userRepository.findByIdsIn(ids),
+                HttpStatus.OK
+        );
+    }
+
+    public ResponseEntity<List<User>> getDispatchers(ObjectId userId, ObjectId areaId) {
+        Trip trip = tripRepository.findByAreaIdAndOwnerId(areaId, userId)
+                .orElseThrow(InvalidIdException::new);
+
+        return returnUsers(AreaUtils.findArea(trip, areaId, userId).getDispatchers());
+    }
+
     public void addDispatchers(ObjectId userId, ObjectId areaId, List<ObjectId> userIds) {
 
         Object[] tmp = checkUsers(userId, areaId, userIds, tripRepository);
@@ -146,6 +163,13 @@ public class MembersServiceInArea {
         tripRepository.save(wantedTrip);
     }
 
+    public ResponseEntity<List<User>> getTrainers(ObjectId userId, ObjectId areaId) {
+        Trip trip = tripRepository.findByAreaIdAndOwnerId(areaId, userId)
+                .orElseThrow(InvalidIdException::new);
+
+        return returnUsers(AreaUtils.findArea(trip, areaId, userId).getTrainers());
+    }
+
     public void addPharmacyManager(ObjectId userId, ObjectId areaId, List<ObjectId> userIds) {
 
         Object[] tmp = checkUsers(userId, areaId, userIds, tripRepository);
@@ -180,6 +204,19 @@ public class MembersServiceInArea {
         tripRepository.save(wantedTrip);
     }
 
+    public ResponseEntity<List<User>> getPharmacyManagers(ObjectId userId, ObjectId areaId) {
+        Trip trip = tripRepository.findByAreaIdAndOwnerId(areaId, userId)
+                .orElseThrow(InvalidIdException::new);
+
+        return returnUsers(AreaUtils.findArea(trip, areaId, userId).getPharmacyManagers());
+    }
+
+    public ResponseEntity<List<User>> getLaboratoryManagers(ObjectId userId, ObjectId areaId) {
+        Trip trip = tripRepository.findByAreaIdAndOwnerId(areaId, userId)
+                .orElseThrow(InvalidIdException::new);
+
+        return returnUsers(AreaUtils.findArea(trip, areaId, userId).getLaboratoryManager());
+    }
 
     public void addLaboratoryManager(ObjectId userId, ObjectId areaId, List<ObjectId> userIds) {
 
@@ -215,6 +252,12 @@ public class MembersServiceInArea {
         tripRepository.save(wantedTrip);
     }
 
+    public ResponseEntity<List<User>> getInsurancers(ObjectId userId, ObjectId areaId) {
+        Trip trip = tripRepository.findByAreaIdAndOwnerId(areaId, userId)
+                .orElseThrow(InvalidIdException::new);
+
+        return returnUsers(AreaUtils.findArea(trip, areaId, userId).getInsurancers());
+    }
     public void addInsurancer(ObjectId userId, ObjectId areaId, List<ObjectId> userIds) {
 
         Object[] tmp = checkUsers(userId, areaId, userIds, tripRepository);

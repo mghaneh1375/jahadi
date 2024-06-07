@@ -19,6 +19,7 @@ public enum UseTime {
     ONCE_EVERY_THREE_WEEK("سه هفته ای یکبار"),
     ONCE_A_MONTH("ماهی یکبار"), ONCE_A_YEAR("سالی یکبار"),
     IF_NEEDED("در صورت نیاز"), ACCORDING_TO_MANUAL("طبق دستور");
+    // todo complete
 
     String faTranslate;
 
