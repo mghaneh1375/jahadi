@@ -27,6 +27,7 @@ public class SightSeeder {
                         List.of(
                                 TableQuestion
                                         .builder()
+                                        .required(true)
                                         .questionType(QuestionType.TABLE)
                                         .title("غربال بینایی")
                                         .headers(List.of("VA/CC", "D"))
@@ -37,6 +38,7 @@ public class SightSeeder {
                                         .build(),
                                 TableQuestion
                                         .builder()
+                                        .required(true)
                                         .questionType(QuestionType.TABLE)
                                         .title("غربال بینایی")
                                         .headers(List.of("VA/SC", "D"))
@@ -110,6 +112,7 @@ public class SightSeeder {
                                                 List.of(
                                                         TableQuestion
                                                                 .builder()
+                                                                .required(true)
                                                                 .questionType(QuestionType.TABLE)
                                                                 .headers(List.of("...", "+/-", "SPH", "CYL", "VA"))
                                                                 .firstColumn(List.of("OD", "OS"))
@@ -118,6 +121,7 @@ public class SightSeeder {
                                                                 .build(),
                                                         TableQuestion
                                                                 .builder()
+                                                                .required(true)
                                                                 .questionType(QuestionType.TABLE)
                                                                 .headers(List.of("PD", "NPD"))
                                                                 .rowsCount(1)

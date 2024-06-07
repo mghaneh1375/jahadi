@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import javax.validation.constraints.Size;
@@ -13,6 +14,7 @@ import java.util.List;
 
 @Getter
 @Setter
+@Document
 @SuperBuilder
 public class TableQuestion extends Question {
 
@@ -35,4 +37,5 @@ public class TableQuestion extends Question {
     private boolean rtl = false;
 
     private AnswerType answerType;
+    private Boolean required;
 }

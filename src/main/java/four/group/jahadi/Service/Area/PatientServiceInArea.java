@@ -1,16 +1,20 @@
 package four.group.jahadi.Service.Area;
 
+import four.group.jahadi.DTO.ModuleForms.PatientFormData;
 import four.group.jahadi.DTO.Patient.InquiryPatientData;
 import four.group.jahadi.DTO.Patient.PatientData;
 import four.group.jahadi.DTO.Patient.TrainFormData;
 import four.group.jahadi.Enums.AgeType;
 import four.group.jahadi.Enums.Insurance;
+import four.group.jahadi.Enums.Module.QuestionType;
 import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Exception.NotAccessException;
 import four.group.jahadi.Models.Area.*;
 import four.group.jahadi.Models.Module;
 import four.group.jahadi.Models.Patient;
+import four.group.jahadi.Models.Question.*;
+import four.group.jahadi.Models.SubModule;
 import four.group.jahadi.Models.Trip;
 import four.group.jahadi.Repository.Area.PatientsInAreaRepository;
 import four.group.jahadi.Repository.ModuleRepository;
@@ -178,17 +182,17 @@ public class PatientServiceInArea {
                 .areaId(area.getId())
                 .build();
 
-        List<ModuleInArea> trainingModules = area.getModules().stream()
-                .filter(module -> module.getModuleName().contains("آموزش"))
-                .collect(Collectors.toList());
-
-        String key = Objects.equals(ageType, AgeType.ADULT) ? "بزرگسال" : "کودک";
-        Optional<ModuleInArea> wantedTrainingModule = trainingModules.stream()
-                .filter(module -> module.getModuleName().contains(key))
-                .findFirst();
-        wantedTrainingModule.ifPresent(module ->
-                patientInArea.setReferrals(doAddReferral(patientInArea.getReferrals(), module.getModuleId()))
-        );
+//        List<ModuleInArea> trainingModules = area.getModules().stream()
+//                .filter(module -> module.getModuleName().contains("آموزش"))
+//                .collect(Collectors.toList());
+//
+//        String key = Objects.equals(ageType, AgeType.ADULT) ? "بزرگسال" : "کودک";
+//        Optional<ModuleInArea> wantedTrainingModule = trainingModules.stream()
+//                .filter(module -> module.getModuleName().contains(key))
+//                .findFirst();
+//        wantedTrainingModule.ifPresent(module ->
+//                patientInArea.setReferrals(doAddReferral(patientInArea.getReferrals(), module.getModuleId()))
+//        );
 
         patientsInAreaRepository.insert(patientInArea);
     }
@@ -296,11 +300,22 @@ public class PatientServiceInArea {
         PatientsInArea patient = patientsInAreaRepository.findByAreaIdAndPatientId(areaId, patientId)
                 .orElseThrow(InvalidIdException::new);
 
-        patient.setTrainForm(data);
+        patient.setTrainForm(
+                TrainForm
+                        .builder()
+                        .shepesh(data.getShepesh())
+                        .weight(data.getWeight())
+                        .height(data.getHeight())
+                        .description(data.getDescription())
+                        .recvShampoo(data.getRecvShampoo())
+                        .recvCulturePackage(data.getRecvCulturePackage())
+                        .BMI(data.getWeight() / Math.pow(data.getHeight(), 2))
+                        .build()
+        );
         patientsInAreaRepository.save(patient);
     }
 
-    public ResponseEntity<TrainFormData> getPatientTrainFrom(
+    public ResponseEntity<TrainForm> getPatientTrainFrom(
             ObjectId userId, ObjectId areaId,
             ObjectId patientId
     ) {
@@ -342,7 +357,7 @@ public class PatientServiceInArea {
                 .orElseThrow(InvalidIdException::new);
 
         List<PatientReferral> referrals = patient.getReferrals();
-        if(referrals == null)
+        if (referrals == null)
             return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
 
         List<ModuleInArea> modules = foundArea.getModules();
@@ -350,7 +365,7 @@ public class PatientServiceInArea {
 
         referrals.forEach(patientReferral -> {
             patientReferral.setForms(null);
-            if(moduleNames.containsKey(patientReferral.getModuleId()))
+            if (moduleNames.containsKey(patientReferral.getModuleId()))
                 patientReferral.setModuleName(moduleNames.get(patientReferral.getModuleId()));
             else {
                 modules.stream().filter(module -> module.getModuleId().equals(patientReferral.getModuleId()))
@@ -486,5 +501,121 @@ public class PatientServiceInArea {
             wantedReferral.setReceptedAt(new Date());
 
         patientsInAreaRepository.save(patientInArea);
+    }
+
+    private List<ObjectId> getMandatoryQuestionIds(List<Question> questions) {
+
+        List<ObjectId> mandatoryQuestionIds = questions.stream()
+                .filter(question ->
+                        (question.getQuestionType().equals(QuestionType.SIMPLE) && ((SimpleQuestion) question).getRequired()) ||
+                                (question.getQuestionType().equals(QuestionType.TABLE) && ((TableQuestion) question).getRequired())
+                )
+                .map(Question::getId).collect(Collectors.toList());
+
+        mandatoryQuestionIds.addAll(
+                questions.stream()
+                        .filter(question -> question.getQuestionType().equals(QuestionType.CHECK_LIST))
+                        .map(question -> ((CheckListGroupQuestion) question).getQuestions())
+                        .flatMap(List::stream)
+                        .filter(SimpleQuestion::getRequired)
+                        .map(Question::getId)
+                        .collect(Collectors.toList())
+        );
+
+        mandatoryQuestionIds.addAll(
+                questions.stream()
+                        .filter(question -> question.getQuestionType().equals(QuestionType.GROUP))
+                        .map(question -> ((GroupQuestion) question).getQuestions())
+                        .flatMap(List::stream)
+                        .filter(question ->
+                                (question.getQuestionType().equals(QuestionType.SIMPLE) && ((SimpleQuestion) question).getRequired()) ||
+                                        (question.getQuestionType().equals(QuestionType.TABLE) && ((TableQuestion) question).getRequired())
+                        )
+                        .map(Question::getId)
+                        .collect(Collectors.toList())
+        );
+        
+        return mandatoryQuestionIds;
+    }
+    
+    private List<ObjectId> getAllQuestionIds(List<Question> questions) {
+
+        List<ObjectId> allQuestionIds = questions.stream()
+                .filter(question ->
+                        question.getQuestionType().equals(QuestionType.SIMPLE) || 
+                                question.getQuestionType().equals(QuestionType.TABLE)
+                )
+                .map(Question::getId).collect(Collectors.toList());
+
+        allQuestionIds.addAll(
+                questions.stream()
+                        .filter(question -> question.getQuestionType().equals(QuestionType.CHECK_LIST))
+                        .map(question -> ((CheckListGroupQuestion) question).getQuestions())
+                        .flatMap(List::stream)
+                        .map(Question::getId)
+                        .collect(Collectors.toList())
+        );
+
+        allQuestionIds.addAll(
+                questions.stream()
+                        .filter(question -> question.getQuestionType().equals(QuestionType.GROUP))
+                        .map(question -> ((GroupQuestion) question).getQuestions())
+                        .flatMap(List::stream)
+                        .map(Question::getId)
+                        .collect(Collectors.toList())
+        );
+
+        return allQuestionIds;
+    }
+    
+    public void setPatientForm(
+            ObjectId userId, ObjectId areaId,
+            ObjectId moduleId, ObjectId subModuleId,
+            ObjectId patientId, List<PatientFormData> formData
+    ) {
+
+        Module module = moduleRepository.findById(moduleId).orElseThrow(InvalidIdException::new);
+        SubModule wantedSubModule = module.getSubModules().stream().filter(subModule -> subModule.getId().equals(subModuleId)).findFirst().orElseThrow(InvalidIdException::new);
+        
+        List<ObjectId> mandatoryQuestionIds = getMandatoryQuestionIds(wantedSubModule.getQuestions());
+        List<ObjectId> allQuestionIds = getAllQuestionIds(wantedSubModule.getQuestions());
+
+        if(formData.stream()
+                .map(PatientFormData::getQuestionId)
+                .anyMatch(objectId -> !allQuestionIds.contains(objectId))
+        )
+            throw new InvalidIdException();
+
+        if(mandatoryQuestionIds.stream().noneMatch(questionId -> {
+            Optional<PatientFormData> tmp = formData.stream()
+                    .filter(data -> data.getAnswer() != null && data.getQuestionId().equals(questionId))
+                    .findFirst();
+            return tmp.isPresent();
+        }))
+            throw new InvalidIdException();
+
+        Trip trip = tripRepository.findByAreaIdAndResponsibleIdAndModuleId(
+                areaId, userId, moduleId
+        ).orElseThrow(NotAccessException::new);
+
+        Area area = AreaUtils.findStartedArea(trip, areaId);
+        AreaUtils.findModule(
+                area, moduleId,
+                userId.equals(area.getOwnerId()) ? null : userId,
+                userId.equals(area.getOwnerId()) ? null : userId
+        );
+
+        PatientsInArea patientInArea =
+                patientsInAreaRepository.findByAreaIdAndPatientId(areaId, patientId).orElseThrow(InvalidIdException::new);
+
+        Optional<PatientReferral> optionalPatientReferral =
+                patientInArea.getReferrals().stream()
+                        .filter(patientReferral -> patientReferral.getModuleId().equals(moduleId))
+                        .reduce((first, second) -> second);
+
+        if (optionalPatientReferral.isEmpty())
+            throw new InvalidIdException();
+
+        PatientReferral wantedReferral = optionalPatientReferral.get();
     }
 }

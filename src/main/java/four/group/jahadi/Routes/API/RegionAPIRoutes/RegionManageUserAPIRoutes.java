@@ -39,8 +39,10 @@ public class RegionManageUserAPIRoutes extends Router {
     @GetMapping(value = "members/{areaId}")
     @ResponseBody
     @Operation(summary = "گرفتن اعضای افزوده شده توسط مسئول منطقه")
-    public ResponseEntity<List<User>> members(HttpServletRequest request,
-                                              @PathVariable @ObjectIdConstraint ObjectId areaId) {
+    public ResponseEntity<List<User>> members(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId
+    ) {
         return membersServiceInArea.members(getId(request), areaId);
     }
 
@@ -106,6 +108,60 @@ public class RegionManageUserAPIRoutes extends Router {
                                  @PathVariable @ObjectIdConstraint ObjectId userId
     ) {
         membersServiceInArea.removeInsurancer(getId(request), areaId, userId);
+    }
+
+
+    @PutMapping(value = "addPharmacyManager/{areaId}")
+    @ResponseBody
+    @Operation(
+            summary = "افزودن جهادگر/جهادگران به عنوان مسئول داروخانه در منطقه توسط مسئول منطفه",
+            description = "قبل از شروع اردو باید صدا زده شود"
+    )
+    public void addPharmacyManager(HttpServletRequest request,
+                                   @PathVariable @ObjectIdConstraint ObjectId areaId,
+                                   @RequestBody List<ObjectId> userIds
+    ) {
+        membersServiceInArea.addPharmacyManager(getId(request), areaId, userIds);
+    }
+
+    @DeleteMapping(value = "removePharmacyManager/{areaId}/{userId}")
+    @ResponseBody
+    @Operation(
+            summary = "حذف جهادگر از مسئول داروخانه در منطقه توسط مسئول منطفه",
+            description = "قبل از شروع اردو باید صدا زده شود"
+    )
+    public void removePharmacyManager(HttpServletRequest request,
+                                      @PathVariable @ObjectIdConstraint ObjectId areaId,
+                                      @PathVariable @ObjectIdConstraint ObjectId userId
+    ) {
+        membersServiceInArea.removePharmacyManager(getId(request), areaId, userId);
+    }
+
+
+    @PutMapping(value = "addLaboratoryManager/{areaId}")
+    @ResponseBody
+    @Operation(
+            summary = "افزودن جهادگر/جهادگران به عنوان مسئول آزمایشگاه در منطقه توسط مسئول منطفه",
+            description = "قبل از شروع اردو باید صدا زده شود"
+    )
+    public void addLaboratoryManager(HttpServletRequest request,
+                                     @PathVariable @ObjectIdConstraint ObjectId areaId,
+                                     @RequestBody List<ObjectId> userIds
+    ) {
+        membersServiceInArea.addLaboratoryManager(getId(request), areaId, userIds);
+    }
+
+    @DeleteMapping(value = "removeLaboratoryManager/{areaId}/{userId}")
+    @ResponseBody
+    @Operation(
+            summary = "حذف جهادگر از مسئول آزمایشگاه در منطقه توسط مسئول منطفه",
+            description = "قبل از شروع اردو باید صدا زده شود"
+    )
+    public void removeLaboratoryManager(HttpServletRequest request,
+                                        @PathVariable @ObjectIdConstraint ObjectId areaId,
+                                        @PathVariable @ObjectIdConstraint ObjectId userId
+    ) {
+        membersServiceInArea.removeLaboratoryManager(getId(request), areaId, userId);
     }
 
     @PutMapping(value = "addTrainer/{areaId}")

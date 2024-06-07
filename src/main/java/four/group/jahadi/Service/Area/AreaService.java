@@ -171,6 +171,8 @@ public class AreaService extends AbstractService<Area, AreaData> {
         data.put("finalized", area.getFinished());
         data.put("hasTrainSection", area.getTrainers() != null && area.getTrainers().size() > 0);
         data.put("hasInsuranceSection", area.getInsurancers() != null && area.getInsurancers().size() > 0);
+        data.put("hasLaboratorySection", area.getLaboratoryManager() != null && area.getLaboratoryManager().size() > 0);
+        data.put("hasPharmacySection", area.getPharmacyManagers() != null && area.getPharmacyManagers().size() > 0);
         data.put("patients", patientsInAreaRepository.countByAreaId(areaId));
 
         return new ResponseEntity<>(data, HttpStatus.OK);

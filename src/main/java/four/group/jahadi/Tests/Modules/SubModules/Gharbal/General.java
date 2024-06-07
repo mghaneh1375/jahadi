@@ -8,6 +8,7 @@ import four.group.jahadi.Models.Question.CheckListGroupQuestion;
 import four.group.jahadi.Models.Question.SimpleQuestion;
 import four.group.jahadi.Models.SubModule;
 import four.group.jahadi.Utility.PairValue;
+import org.bson.types.ObjectId;
 
 import java.util.List;
 
@@ -20,6 +21,7 @@ public class General {
                         List.of(
                                 CheckListGroupQuestion
                                         .builder()
+                                        .id(new ObjectId())
                                         .questionType(QuestionType.CHECK_LIST)
                                         .sectionTitle("سابقه بیماری")
                                         .options(List.of(
@@ -43,18 +45,21 @@ public class General {
                                         .questions(List.of(
                                                 SimpleQuestion
                                                         .builder()
+                                                        .id(new ObjectId())
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("دیابت ملیتوس (DM)")
                                                         .answerType(AnswerType.TICK)
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
+                                                        .id(new ObjectId())
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("پرفشاری خون (HTN)")
                                                         .answerType(AnswerType.TICK)
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
+                                                        .id(new ObjectId())
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("مشکل تیروئید")
                                                         .answerType(AnswerType.TICK)
@@ -63,6 +68,7 @@ public class General {
                                         .build(),
                                 SimpleQuestion
                                         .builder()
+                                        .id(new ObjectId())
                                         .questionType(QuestionType.SIMPLE)
                                         .required(true)
                                         .question("قند خون ناشتا (FBS)")
@@ -70,6 +76,7 @@ public class General {
                                         .build(),
                                 SimpleQuestion
                                         .builder()
+                                        .id(new ObjectId())
                                         .questionType(QuestionType.SIMPLE)
                                         .required(true)
                                         .question("قند خون غیرناشتا (BS)")
@@ -77,6 +84,7 @@ public class General {
                                         .build(),
                                 SimpleQuestion
                                         .builder()
+                                        .id(new ObjectId())
                                         .questionType(QuestionType.SIMPLE)
                                         .required(true)
                                         .question("فشار خون (BP)")
@@ -84,6 +92,7 @@ public class General {
                                         .build(),
                                 SimpleQuestion
                                         .builder()
+                                        .id(new ObjectId())
                                         .questionType(QuestionType.SIMPLE)
                                         .required(true)
                                         .question("فشار خون اول (First BP)")
@@ -91,6 +100,7 @@ public class General {
                                         .build(),
                                 SimpleQuestion
                                         .builder()
+                                        .id(new ObjectId())
                                         .questionType(QuestionType.SIMPLE)
                                         .required(true)
                                         .question("دارو (Medicine)")
@@ -98,6 +108,7 @@ public class General {
                                         .build(),
                                 SimpleQuestion
                                         .builder()
+                                        .id(new ObjectId())
                                         .questionType(QuestionType.SIMPLE)
                                         .required(true)
                                         .question("فشار خون دوم (Second BP)")
@@ -105,6 +116,7 @@ public class General {
                                         .build(),
                                 SimpleQuestion
                                         .builder()
+                                        .id(new ObjectId())
                                         .questionType(QuestionType.SIMPLE)
                                         .required(true)
                                         .question("دارو بار دوم (Medicine 2)")
@@ -112,6 +124,7 @@ public class General {
                                         .build(),
                                 SimpleQuestion
                                         .builder()
+                                        .id(new ObjectId())
                                         .questionType(QuestionType.SIMPLE)
                                         .required(true)
                                         .question("فشار خون سوم (Third BP)")
@@ -119,6 +132,7 @@ public class General {
                                         .build(),
                                 SimpleQuestion
                                         .builder()
+                                        .id(new ObjectId())
                                         .questionType(QuestionType.SIMPLE)
                                         .required(false)
                                         .question("توضیحات")

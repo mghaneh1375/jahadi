@@ -1,14 +1,17 @@
 package four.group.jahadi.Routes.API.RegionAPIRoutes;
 
+import four.group.jahadi.DTO.ModuleForms.PatientFormData;
 import four.group.jahadi.DTO.Patient.InquiryPatientData;
 import four.group.jahadi.DTO.Patient.PatientData;
 import four.group.jahadi.DTO.Patient.TrainFormData;
 import four.group.jahadi.Enums.Insurance;
 import four.group.jahadi.Models.Area.PatientJoinArea;
 import four.group.jahadi.Models.Area.PatientReferral;
+import four.group.jahadi.Models.Area.TrainForm;
 import four.group.jahadi.Models.Patient;
 import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Service.Area.PatientServiceInArea;
+import four.group.jahadi.Utility.ValidList;
 import four.group.jahadi.Validator.ObjectIdConstraint;
 import io.swagger.v3.oas.annotations.Operation;
 import org.bson.types.ObjectId;
@@ -19,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import javax.validation.constraints.Size;
 import java.util.List;
 
 @RestController
@@ -182,7 +186,7 @@ public class RegionPatientAPIRoutes extends Router {
     @Operation(
             summary = "گرفتن فرم آموزش یک بیمار در منطقه"
     )
-    public ResponseEntity<TrainFormData> getPatientTrainFrom(
+    public ResponseEntity<TrainForm> getPatientTrainFrom(
             HttpServletRequest request,
             @PathVariable @ObjectIdConstraint ObjectId areaId,
             @PathVariable @ObjectIdConstraint ObjectId patientId
@@ -249,6 +253,24 @@ public class RegionPatientAPIRoutes extends Router {
     ) {
         patientServiceInArea.addReferralForPatient(
                 getId(request), areaId, patientId, moduleId
+        );
+    }
+
+
+    @PutMapping(value = "setPatientForm/{areaId}/{moduleId}/{subModuleId}/{patientId}")
+    @Operation(
+            summary = "ست کردن فرم بیمار توسط پزشک در یک ماژول خاص در یک منطقه"
+    )
+    public void setPatientForm(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId,
+            @PathVariable @ObjectIdConstraint ObjectId moduleId,
+            @PathVariable @ObjectIdConstraint ObjectId subModuleId,
+            @PathVariable @ObjectIdConstraint ObjectId patientId,
+            @RequestBody @Valid @Size(min = 1) ValidList<PatientFormData> forms
+    ) {
+        patientServiceInArea.setPatientForm(
+                getId(request), areaId, moduleId, subModuleId, patientId, forms
         );
     }
 }

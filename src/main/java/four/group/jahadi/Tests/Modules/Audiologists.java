@@ -39,6 +39,7 @@ public class Audiologists {
                                         .build(),
                                 TableQuestion
                                         .builder()
+                                        .required(true)
                                         .questionType(QuestionType.TABLE)
                                         .headers(List.of("R", "L"))
                                         .rowsCount(1)
@@ -46,6 +47,7 @@ public class Audiologists {
                                         .build(),
                                 TableQuestion
                                         .builder()
+                                        .required(true)
                                         .questionType(QuestionType.TABLE)
                                         .headers(List.of("Frequency", "500", "1000", "2000", "3000", "4000", "6000", "8000"))
                                         .firstColumn(List.of("TH (right)", "TH (left)"))
@@ -64,6 +66,7 @@ public class Audiologists {
                         List.of(
                                 TableQuestion
                                         .builder()
+                                        .required(true)
                                         .questionType(QuestionType.TABLE)
                                         .title("Rinne")
                                         .headers(List.of("Freq", "L", "R"))
@@ -73,6 +76,7 @@ public class Audiologists {
                                         .build(),
                                 TableQuestion
                                         .builder()
+                                        .required(true)
                                         .questionType(QuestionType.TABLE)
                                         .title("Weber")
                                         .headers(List.of("Freq", ""))

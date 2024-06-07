@@ -12,6 +12,7 @@ import four.group.jahadi.Repository.Area.DrugsInAreaRepository;
 import four.group.jahadi.Repository.DrugRepository;
 import four.group.jahadi.Repository.DrugLogRepository;
 import four.group.jahadi.Repository.TripRepository;
+import four.group.jahadi.Utility.PairValue;
 import four.group.jahadi.Utility.Utility;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,12 +53,9 @@ public class DrugServiceInArea {
 
     public void addAllToDrugsList(ObjectId userId, ObjectId areaId, List<AreaDrugsData> dtoList) {
 
-        Trip trip = tripRepository.findByAreaIdAndOwnerId(areaId, userId)
-                .orElseThrow(NotAccessException::new);
-
-        Area foundArea = trip
-                .getAreas().stream().filter(area -> area.getId().equals(areaId))
-                .findFirst().orElseThrow(RuntimeException::new);
+        PairValue p = checkAccess(userId, areaId, false);
+        Area foundArea = (Area) p.getKey();
+        String tripName = p.getValue().toString();
         
         Iterable<Drug> drugsIter = drugRepository.findAllById(
                 dtoList.stream().map(AreaDrugsData::getDrugId).distinct().collect(Collectors.toList())
@@ -70,7 +68,7 @@ public class DrugServiceInArea {
         List<Drug> wantedDrugs = new ArrayList<>();
         List<DrugLog> drugLogs = new ArrayList<>();
 
-        final String msg = "اختصاص به منطقه " + foundArea.getName() + " در اردو " + trip.getName() + " توسط مسئول منطقه ";
+        final String msg = "اختصاص به منطقه " + foundArea.getName() + " در اردو " + tripName + " توسط مسئول منطقه ";
 
         while (drugsIter.iterator().hasNext()) {
 
@@ -125,13 +123,10 @@ public class DrugServiceInArea {
 
     public void removeAllFromDrugsList(ObjectId userId, ObjectId areaId, List<ObjectId> ids) {
 
-        Trip trip = tripRepository.findNotStartedByAreaOwnerId(Utility.getCurrDate(), areaId, userId)
-                .orElseThrow(NotAccessException::new);
+        PairValue p = checkAccess(userId, areaId, true);
+        Area foundArea = (Area) p.getKey();
+        String tripName = p.getValue().toString();
 
-        Area foundArea = trip
-                .getAreas().stream().filter(area -> area.getId().equals(areaId))
-                .findFirst().orElseThrow(RuntimeException::new);
-        
         //todo: synchronized op
         
         List<AreaDrugs> areaDrugs = drugsInAreaRepository.removeAreaDrugsById(ids);
@@ -142,7 +137,7 @@ public class DrugServiceInArea {
             areaDrugs.stream().map(AreaDrugs::getDrugId).distinct().collect(Collectors.toList())
         );
 
-        final String msg = "حذف از منطقه " + foundArea.getName() + " در اردو " + trip.getName() + " توسط مسئول منطقه ";
+        final String msg = "حذف از منطقه " + foundArea.getName() + " در اردو " + tripName + " توسط مسئول منطقه ";
         
         while (drugsIter.iterator().hasNext()) {
             Drug drug = drugsIter.iterator().next();
@@ -169,14 +164,9 @@ public class DrugServiceInArea {
             ObjectId userId, ObjectId areaId,
             ObjectId id, Integer newReminder
     ) {
-
-        Trip trip = tripRepository.findNotStartedByAreaOwnerId(Utility.getCurrDate(), areaId, userId)
-                .orElseThrow(NotAccessException::new);
-
-        Area foundArea = trip
-                .getAreas().stream().filter(area -> area.getId().equals(areaId))
-                .findFirst().orElseThrow(RuntimeException::new);
-        
+        PairValue p = checkAccess(userId, areaId, false);
+        Area foundArea = (Area) p.getKey();
+        String tripName = p.getValue().toString();
         AreaDrugs areaDrug = drugsInAreaRepository.findById(id).orElseThrow(InvalidIdException::new);
         int diff = newReminder - areaDrug.getReminder();
         Drug drug = drugRepository.findById(areaDrug.getDrugId()).orElseThrow(InvalidIdException::new);
@@ -198,9 +188,33 @@ public class DrugServiceInArea {
                 .builder()
                 .drugId(drug.getId())
                 .amount(diff)
-                .desc("تغییر موجودی دارو در منطقه " + foundArea.getName() + " در اردو " + trip.getName() + " توسط مسئول منطقه ")
+                .desc("تغییر موجودی دارو در منطقه " + foundArea.getName() + " در اردو " + tripName + " توسط مسئول منطقه ")
                 .build()
         );
+    }
+
+    private PairValue checkAccess(ObjectId userId, ObjectId areaId, boolean justBeforeStart) {
+
+        Trip trip;
+        Date curr = Utility.getCurrDate();
+
+        if(justBeforeStart)
+            trip = tripRepository.findNotStartedByPharmacyManager(curr, areaId, userId)
+                    .orElseThrow(NotAccessException::new);
+        else
+            trip = tripRepository.findActiveByAreaIdAndPharmacyManager(areaId, userId, curr)
+                    .orElseThrow(NotAccessException::new);
+
+        Area foundArea = trip
+                .getAreas().stream().filter(area -> area.getId().equals(areaId))
+                .findFirst().orElseThrow(RuntimeException::new);
+
+        if (!foundArea.getOwnerId().equals(userId) &&
+                (foundArea.getPharmacyManagers() == null || !foundArea.getPharmacyManagers().contains(userId))
+        )
+            throw new NotAccessException();
+
+        return new PairValue(foundArea, trip.getName());
     }
 
     public void advice(ObjectId areaDrugId, Integer amount) {

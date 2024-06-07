@@ -146,6 +146,75 @@ public class MembersServiceInArea {
         tripRepository.save(wantedTrip);
     }
 
+    public void addPharmacyManager(ObjectId userId, ObjectId areaId, List<ObjectId> userIds) {
+
+        Object[] tmp = checkUsers(userId, areaId, userIds, tripRepository);
+        Trip wantedTrip = (Trip) tmp[0];
+        Area foundArea = (Area) tmp[1];
+
+        List<ObjectId> pharmacyManagers = foundArea.getPharmacyManagers();
+        if(pharmacyManagers == null)
+            pharmacyManagers = new ArrayList<>();
+
+        for(ObjectId uId : userIds) {
+            if (pharmacyManagers.contains(uId)) continue;
+            pharmacyManagers.add(uId);
+        }
+
+        foundArea.setPharmacyManagers(pharmacyManagers);
+        tripRepository.save(wantedTrip);
+    }
+
+    public void removePharmacyManager(ObjectId userId, ObjectId areaId, ObjectId wantedUserId) {
+
+        Trip wantedTrip = tripRepository.findNotStartedByAreaOwnerId(Utility.getCurrDate(), areaId, userId)
+                .orElseThrow(NotAccessException::new);
+
+        Area area = findArea(wantedTrip, areaId, userId);
+
+        List<ObjectId> pharmacyManagers = area.getPharmacyManagers();
+        if(pharmacyManagers == null || !pharmacyManagers.contains(wantedUserId))
+            throw new InvalidIdException();
+
+        pharmacyManagers.remove(wantedUserId);
+        tripRepository.save(wantedTrip);
+    }
+
+
+    public void addLaboratoryManager(ObjectId userId, ObjectId areaId, List<ObjectId> userIds) {
+
+        Object[] tmp = checkUsers(userId, areaId, userIds, tripRepository);
+        Trip wantedTrip = (Trip) tmp[0];
+        Area foundArea = (Area) tmp[1];
+
+        List<ObjectId> laboratoryManager = foundArea.getLaboratoryManager();
+        if(laboratoryManager == null)
+            laboratoryManager = new ArrayList<>();
+
+        for(ObjectId uId : userIds) {
+            if (laboratoryManager.contains(uId)) continue;
+            laboratoryManager.add(uId);
+        }
+
+        foundArea.setLaboratoryManager(laboratoryManager);
+        tripRepository.save(wantedTrip);
+    }
+
+    public void removeLaboratoryManager(ObjectId userId, ObjectId areaId, ObjectId wantedUserId) {
+
+        Trip wantedTrip = tripRepository.findNotStartedByAreaOwnerId(Utility.getCurrDate(), areaId, userId)
+                .orElseThrow(NotAccessException::new);
+
+        Area area = findArea(wantedTrip, areaId, userId);
+
+        List<ObjectId> laboratoryManager = area.getLaboratoryManager();
+        if(laboratoryManager == null || !laboratoryManager.contains(wantedUserId))
+            throw new InvalidIdException();
+
+        laboratoryManager.remove(wantedUserId);
+        tripRepository.save(wantedTrip);
+    }
+
     public void addInsurancer(ObjectId userId, ObjectId areaId, List<ObjectId> userIds) {
 
         Object[] tmp = checkUsers(userId, areaId, userIds, tripRepository);

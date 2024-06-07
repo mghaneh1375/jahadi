@@ -36,22 +36,32 @@ public class PublicAPIRoutes {
 
     @GetMapping(value = "getAllDrugs")
     @ResponseBody
-    @Operation(summary = "گرفتن اطلاعات مختصر داروها و یا سرچ در داروها برای عموم", description="پارامتر نام دارو که میتواند بخشی از نام دارو هم باشد اختیاری و برای سرچ کردن است که باید حداقل سه کاراکتر باشد")
-    public ResponseEntity<List<Drug>> getAllDrugs(@RequestParam(required=false, value="name") String name) {
-        
-        if(name != null && name.length() > 2)
+    @Operation(summary = "گرفتن اطلاعات مختصر داروها و یا سرچ در داروها برای عموم", description = "پارامتر نام دارو که میتواند بخشی از نام دارو هم باشد اختیاری و برای سرچ کردن است که باید حداقل سه کاراکتر باشد")
+    public ResponseEntity<List<Drug>> getAllDrugs(@RequestParam(required = false, value = "name") String name) {
+
+        if (name != null && name.length() > 2)
             return drugService.list(false, name);
-        
+
         return drugService.list(false);
     }
-    
+
     @GetMapping(value = "getDrug/{drugId}")
     @ResponseBody
     @Operation(summary = "گرفتن اطلاعات تکمیلی دارو مثل طریقه مصرف و ...")
     public ResponseEntity<Drug> getDrug(@PathVariable @ObjectIdConstraint ObjectId drugId) {
         return drugService.findById(drugId);
     }
-    
+
+    @GetMapping(value = "setDrugReplacements/{drugId}")
+    @ResponseBody
+    @Operation(summary = "ست کردن داروهای جایگزین یک دارو خاص")
+    public void setDrugReplacements(
+            @PathVariable @ObjectIdConstraint ObjectId drugId,
+            @RequestBody List<ObjectId> drugs
+    ) {
+        drugService.setReplacements(drugId, drugs);
+    }
+
     @GetMapping(value = "getDrugReplacements/{drugId}")
     @ResponseBody
     @Operation(summary = "گرفتن داروهای جایگزین یک دارو خاص")

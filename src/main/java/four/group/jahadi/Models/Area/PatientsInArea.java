@@ -2,7 +2,6 @@ package four.group.jahadi.Models.Area;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import four.group.jahadi.DTO.Patient.TrainFormData;
 import four.group.jahadi.Models.Model;
 import four.group.jahadi.Models.ObjectIdSerialization;
 import lombok.*;
@@ -40,5 +39,5 @@ public class PatientsInArea extends Model {
 
     @Field("train_form")
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private TrainFormData trainForm;
+    private TrainForm trainForm;
 }

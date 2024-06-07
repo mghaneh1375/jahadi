@@ -112,6 +112,18 @@ public class Area {
     @Builder.Default
     private List<ObjectId> insurancers = new ArrayList<>();
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonSerialize(using = ObjectIdListSerialization.class)
+    @Builder.Default
+    @Field("pharmacy_managers")
+    private List<ObjectId> pharmacyManagers = new ArrayList<>();
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonSerialize(using = ObjectIdListSerialization.class)
+    @Builder.Default
+    @Field("laboratory_managers")
+    private List<ObjectId> laboratoryManager = new ArrayList<>();
+
     @Transient
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     private User owner;

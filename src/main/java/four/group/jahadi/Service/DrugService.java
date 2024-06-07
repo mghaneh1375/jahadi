@@ -26,15 +26,16 @@ public class DrugService extends AbstractService<Drug, DrugData> {
     
     @Override
     public ResponseEntity<List<Drug>> list(Object ... filters) {
+
         List<Drug> drugs;
         boolean isAdmin = (boolean) filters[0];
+
         if(filters.length > 1) {
             String searchKey = filters[1].toString();
             drugs = isAdmin ? drugRepository.findLikeName(searchKey) : drugRepository.findLikeNameAndVisible(searchKey);
         }
-        else {
+        else
             drugs = isAdmin ? drugRepository.findAllDigests() : drugRepository.findVisibleDigests();
-        }
         
         return new ResponseEntity<>(
                 drugs,

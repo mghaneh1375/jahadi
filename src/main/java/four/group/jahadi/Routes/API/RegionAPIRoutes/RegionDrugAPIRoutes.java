@@ -4,6 +4,7 @@ import four.group.jahadi.DTO.Area.AreaDrugsData;
 import four.group.jahadi.Models.Area.AreaDrugs;
 import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Service.Area.DrugServiceInArea;
+import four.group.jahadi.Service.DrugService;
 import four.group.jahadi.Utility.ValidList;
 import four.group.jahadi.Validator.ObjectIdConstraint;
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,6 +28,9 @@ public class RegionDrugAPIRoutes extends Router {
 
     @Autowired
     private DrugServiceInArea drugServiceInArea;
+
+    @Autowired
+    private DrugService drugService;
 
     @GetMapping(value = "list/{areaId}")
     @ResponseBody

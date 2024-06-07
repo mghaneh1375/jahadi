@@ -8,6 +8,7 @@ import four.group.jahadi.Models.Question.CheckListGroupQuestion;
 import four.group.jahadi.Models.Question.SimpleQuestion;
 import four.group.jahadi.Models.SubModule;
 import four.group.jahadi.Utility.PairValue;
+import org.bson.types.ObjectId;
 
 import java.util.List;
 
@@ -20,6 +21,7 @@ public class Audiologists {
                         List.of(
                                 CheckListGroupQuestion
                                         .builder()
+                                        .id(new ObjectId())
                                         .questionType(QuestionType.CHECK_LIST)
                                         .sectionTitle("کودکان")
                                         .options(List.of(
@@ -35,18 +37,21 @@ public class Audiologists {
                                         .questions(List.of(
                                                 SimpleQuestion
                                                         .builder()
+                                                        .id(new ObjectId())
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("بدون سابقه شنوایی سنجی")
                                                         .answerType(AnswerType.TICK)
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
+                                                        .id(new ObjectId())
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("سابقه کم شنوایی یا ناشنوایی در خانواده")
                                                         .answerType(AnswerType.TICK)
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
+                                                        .id(new ObjectId())
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("سابقه بستری در بیمارستان زمان نوزادی و زردی و ازدواج فامیلی والدین")
                                                         .answerType(AnswerType.TICK)
@@ -55,6 +60,7 @@ public class Audiologists {
                                         .build(),
                                 CheckListGroupQuestion
                                         .builder()
+                                        .id(new ObjectId())
                                         .questionType(QuestionType.CHECK_LIST)
                                         .sectionTitle("افراد مشکوک")
                                         .options(List.of(
@@ -70,18 +76,21 @@ public class Audiologists {
                                         .questions(List.of(
                                                 SimpleQuestion
                                                         .builder()
+                                                        .id(new ObjectId())
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("احساس کم شنوایی (زیر 40 سال)")
                                                         .answerType(AnswerType.TICK)
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
+                                                        .id(new ObjectId())
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("دارای سمعک نامناسب")
                                                         .answerType(AnswerType.TICK)
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
+                                                        .id(new ObjectId())
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("دارای احساس گرفتگی گوش (با پزشک چک شود)")
                                                         .answerType(AnswerType.TICK)
@@ -90,6 +99,7 @@ public class Audiologists {
                                         .build(),
                                 CheckListGroupQuestion
                                         .builder()
+                                        .id(new ObjectId())
                                         .questionType(QuestionType.CHECK_LIST)
                                         .sectionTitle("علائم خطرناک")
                                         .options(List.of(
@@ -105,36 +115,42 @@ public class Audiologists {
                                         .questions(List.of(
                                                 SimpleQuestion
                                                         .builder()
+                                                        .id(new ObjectId())
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("کاهش شنوایی یک طرفه یا دو طرفه پیش رونده یا شدید ثابت")
                                                         .answerType(AnswerType.TICK)
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
+                                                        .id(new ObjectId())
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("احساس وزوز یا سکوت کشیدن در گوش")
                                                         .answerType(AnswerType.TICK)
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
+                                                        .id(new ObjectId())
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("سرگیجه دورانی (با پزشک چک شود)")
                                                         .answerType(AnswerType.TICK)
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
+                                                        .id(new ObjectId())
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("تروما یا دردگوش (با پزشک چک شود)")
                                                         .answerType(AnswerType.TICK)
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
+                                                        .id(new ObjectId())
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("ترشح از گوش (با پزشک چک شود)")
                                                         .answerType(AnswerType.TICK)
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
+                                                        .id(new ObjectId())
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("کاهش شنوایی ناگهانی، کاهش شنوایی مربوط به شغل یا تاثیرگذار در خلق و شغل")
                                                         .answerType(AnswerType.TICK)
