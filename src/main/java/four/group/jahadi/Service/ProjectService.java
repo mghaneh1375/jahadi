@@ -21,6 +21,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static four.group.jahadi.Utility.Utility.getDate;
+import static four.group.jahadi.Utility.Utility.getLastDate;
 
 
 @Service
@@ -226,7 +227,8 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
                 .name(projectData.getName())
                 .color(projectData.getColor())
                 .startAt(getDate(new Date(projectData.getStartAt())))
-                .endAt(getDate(new Date(projectData.getEndAt()))).build();
+                .endAt(getLastDate(new Date(projectData.getEndAt())))
+                .build();
     }
 
 

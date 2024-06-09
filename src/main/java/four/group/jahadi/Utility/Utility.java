@@ -262,6 +262,13 @@ public class Utility {
         return date;
     }
 
+    public static Date getLastDate(Date date) {
+        date.setHours(23);
+        date.setMinutes(59);
+        date.setSeconds(59);
+        return date;
+    }
+
     private static final ModelMapper modelMapper;
 
     static {

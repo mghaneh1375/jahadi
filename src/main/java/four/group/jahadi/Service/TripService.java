@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static four.group.jahadi.Utility.Utility.getDate;
+import static four.group.jahadi.Utility.Utility.getLastDate;
 
 @Service
 public class TripService extends AbstractService<Trip, TripStepData> {
@@ -127,7 +128,7 @@ public class TripService extends AbstractService<Trip, TripStepData> {
 
         trip.setName(dto.getName());
         trip.setStartAt(getDate(new Date(dto.getStartAt())));
-        trip.setEndAt(getDate(new Date(dto.getEndAt())));
+        trip.setEndAt(getLastDate(new Date(dto.getEndAt())));
 
         tripRepository.save(trip);
     }

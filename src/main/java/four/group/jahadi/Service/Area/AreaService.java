@@ -31,6 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static four.group.jahadi.Service.Area.AreaUtils.findArea;
 import static four.group.jahadi.Service.Area.MembersServiceInArea.fetchMemberIds;
 import static four.group.jahadi.Utility.Utility.getDate;
+import static four.group.jahadi.Utility.Utility.getLastDate;
 
 @Service
 public class AreaService extends AbstractService<Area, AreaData> {
@@ -187,8 +188,8 @@ public class AreaService extends AbstractService<Area, AreaData> {
         Trip trip = tripRepository.findNotStartedByAreaOwnerId(Utility.getCurrDate(), areaId, userId)
                 .orElseThrow(NotAccessException::new);
 
-        Date start = getDate(new Date(dto.getStartAt()));
-        Date end = getDate(new Date(dto.getEndAt()));
+        Date start = getDate(getDate(new Date(dto.getStartAt())));
+        Date end = getLastDate(new Date(dto.getEndAt()));
 
         if (trip.getStartAt().after(start))
             throw new InvalidFieldsException("زمان آغاز باید بعد از " + Utility.convertDateToJalali(trip.getStartAt()) + " باشد");
