@@ -431,16 +431,16 @@ public class PatientServiceInArea {
             Boolean justRecepted, Boolean justUnRecepted
     ) {
 
-//        Trip trip = tripRepository.findByAreaIdAndResponsibleIdAndModuleId(
-//                areaId, userId, moduleId
-//        ).orElseThrow(NotAccessException::new);
-//
-//        Area area = AreaUtils.findStartedArea(trip, areaId);
-//        AreaUtils.findModule(
-//                area, moduleId,
-//                userId.equals(area.getOwnerId()) ? null : userId,
-//                userId.equals(area.getOwnerId()) ? null : userId
-//        );
+        Trip trip = tripRepository.findByAreaIdAndResponsibleIdAndModuleId(
+                areaId, userId, moduleId
+        ).orElseThrow(NotAccessException::new);
+
+        Area area = AreaUtils.findStartedArea(trip, areaId);
+        AreaUtils.findModule(
+                area, moduleId,
+                userId.equals(area.getOwnerId()) ? null : userId,
+                userId.equals(area.getOwnerId()) ? null : userId
+        );
 
         List<PatientJoinArea> patients = patientsInAreaRepository.findPatientsListInModuleByAreaId(
                 areaId, moduleId
