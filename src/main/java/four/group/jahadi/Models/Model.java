@@ -26,4 +26,10 @@ public abstract class Model implements Serializable {
     @JsonSerialize(using = DateSerialization.class)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Date createdAt;
+
+    public Model createId() {
+        this.id = new ObjectId();
+        this.createdAt = new Date();
+        return this;
+    }
 }

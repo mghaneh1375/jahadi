@@ -2,9 +2,11 @@ package four.group.jahadi.Models.Area;
 
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import four.group.jahadi.Models.DateSerialization;
 import four.group.jahadi.Models.Model;
+import four.group.jahadi.Models.ObjectIdSerialization;
 import lombok.*;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -21,6 +23,7 @@ import java.util.List;
 public class PatientReferral extends Model {
 
     @Field("module_id")
+    @JsonSerialize(using = ObjectIdSerialization.class)
     private ObjectId moduleId;
 
     private boolean recepted = false;
