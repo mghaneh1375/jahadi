@@ -118,7 +118,7 @@ public class PatientServiceInArea {
 //                    itr.getPatientInfo().getBirthDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate(),
 //                    new Date().toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
 //            ).getYears() > 10;
-            boolean isAdult = itr.getPatientInfo().getAgeType().equals(AgeType.ADULT);
+            boolean isAdult = Objects.equals(itr.getPatientInfo().getAgeType(), AgeType.ADULT);
 
             if (justAdult != null && justAdult && !isAdult)
                 continue;
