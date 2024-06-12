@@ -6,6 +6,7 @@ import four.group.jahadi.DTO.Patient.PatientData;
 import four.group.jahadi.DTO.Patient.TrainFormData;
 import four.group.jahadi.Enums.AgeType;
 import four.group.jahadi.Enums.Insurance;
+import four.group.jahadi.Enums.Module.AnswerType;
 import four.group.jahadi.Enums.Module.QuestionType;
 import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Exception.InvalidIdException;
@@ -20,6 +21,7 @@ import four.group.jahadi.Repository.Area.PatientsInAreaRepository;
 import four.group.jahadi.Repository.ModuleRepository;
 import four.group.jahadi.Repository.PatientRepository;
 import four.group.jahadi.Repository.TripRepository;
+import four.group.jahadi.Utility.PairValue;
 import four.group.jahadi.Utility.Utility;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -535,40 +537,56 @@ public class PatientServiceInArea {
                         .map(Question::getId)
                         .collect(Collectors.toList())
         );
-        
+
         return mandatoryQuestionIds;
     }
-    
-    private List<ObjectId> getAllQuestionIds(List<Question> questions) {
 
-        List<ObjectId> allQuestionIds = questions.stream()
+    private HashMap<ObjectId, PairValue> getSubModuleAllQuestions(List<Question> questions) {
+
+        HashMap<ObjectId, PairValue> allQuestions = new HashMap<>();
+
+        questions.stream()
                 .filter(question ->
-                        question.getQuestionType().equals(QuestionType.SIMPLE) || 
-                                question.getQuestionType().equals(QuestionType.TABLE)
+                        question.getQuestionType().equals(QuestionType.SIMPLE)
                 )
-                .map(Question::getId).collect(Collectors.toList());
+                .forEach(question -> {
+                    SimpleQuestion simpleQuestion = ((SimpleQuestion) question);
+                    allQuestions.put(question.getId(), new PairValue(
+                            simpleQuestion.getAnswerType(),
+                            simpleQuestion.getOptions() == null ? null :
+                                    simpleQuestion.getOptions().stream().map(PairValue::getKey).collect(Collectors.toList())
+                    ));
+                });
 
-        allQuestionIds.addAll(
-                questions.stream()
-                        .filter(question -> question.getQuestionType().equals(QuestionType.CHECK_LIST))
-                        .map(question -> ((CheckListGroupQuestion) question).getQuestions())
-                        .flatMap(List::stream)
-                        .map(Question::getId)
-                        .collect(Collectors.toList())
-        );
+        // todo: Handle table questions
+//        questions.stream()
+//                .filter(question ->
+//                        question.getQuestionType().equals(QuestionType.TABLE)
+//                )
+//                .map(Question::getId).forEach(objectId -> allQuestions.put(objectId, QuestionType.TABLE));
 
-        allQuestionIds.addAll(
-                questions.stream()
-                        .filter(question -> question.getQuestionType().equals(QuestionType.GROUP))
-                        .map(question -> ((GroupQuestion) question).getQuestions())
-                        .flatMap(List::stream)
-                        .map(Question::getId)
-                        .collect(Collectors.toList())
-        );
+         questions.stream()
+                .filter(question -> question.getQuestionType().equals(QuestionType.CHECK_LIST)).forEach(checkListQuestion -> {
+                    CheckListGroupQuestion checkListGroupQuestion = ((CheckListGroupQuestion)checkListQuestion);
+                    List<String> options = checkListGroupQuestion.getOptions().stream().map(PairValue::getKey).map(Object::toString).collect(Collectors.toList());
+                    checkListGroupQuestion.getQuestions().stream()
+                            .map(Question::getId)
+                            .forEach(objectId -> allQuestions.put(objectId, new PairValue(AnswerType.TICK, options)));
+                 });
 
-        return allQuestionIds;
+        // todo: Handle Group Questions
+//        allQuestionIds.addAll(
+//                questions.stream()
+//                        .filter(question -> question.getQuestionType().equals(QuestionType.GROUP))
+//                        .map(question -> ((GroupQuestion) question).getQuestions())
+//                        .flatMap(List::stream)
+//                        .map(Question::getId)
+//                        .collect(Collectors.toList())
+//        );
+
+        return allQuestions;
     }
-    
+
     public void setPatientForm(
             ObjectId userId, ObjectId areaId,
             ObjectId moduleId, ObjectId subModuleId,
@@ -577,23 +595,61 @@ public class PatientServiceInArea {
 
         Module module = moduleRepository.findById(moduleId).orElseThrow(InvalidIdException::new);
         SubModule wantedSubModule = module.getSubModules().stream().filter(subModule -> subModule.getId().equals(subModuleId)).findFirst().orElseThrow(InvalidIdException::new);
-        
+
         List<ObjectId> mandatoryQuestionIds = getMandatoryQuestionIds(wantedSubModule.getQuestions());
-        List<ObjectId> allQuestionIds = getAllQuestionIds(wantedSubModule.getQuestions());
+        HashMap<ObjectId, PairValue> allQuestions = getSubModuleAllQuestions(wantedSubModule.getQuestions());
 
-        if(formData.stream()
+        if (formData.stream()
                 .map(PatientFormData::getQuestionId)
-                .anyMatch(objectId -> !allQuestionIds.contains(objectId))
+                .anyMatch(objectId -> !allQuestions.containsKey(objectId))
         )
-            throw new InvalidIdException();
+            throw new RuntimeException("آی دی سوالات حاوی مقداری است که نامعتبر می باشد");
 
-        if(mandatoryQuestionIds.stream().noneMatch(questionId -> {
+        if (mandatoryQuestionIds.stream().anyMatch(questionId -> {
             Optional<PatientFormData> tmp = formData.stream()
-                    .filter(data -> data.getAnswer() != null && data.getQuestionId().equals(questionId))
-                    .findFirst();
-            return tmp.isPresent();
+                    .filter(data -> data.getAnswer() != null &&
+                            !data.getAnswer().toString().isEmpty() &&
+                            data.getQuestionId().equals(questionId)
+                    ).findFirst();
+            return tmp.isEmpty();
         }))
-            throw new InvalidIdException();
+            throw new RuntimeException("لطفا به تمامی سوالات اجباری پاسخ دهید");
+
+        List<PatientAnswer> patientAnswers = new ArrayList<>();
+
+        formData.forEach(data -> {
+
+            if(data.getAnswer() == null || data.getAnswer().toString().isEmpty())
+                return;
+
+            switch ((AnswerType)allQuestions.get(data.getQuestionId()).getKey()) {
+                case NUMBER:
+                    if(!(data.getAnswer() instanceof Number))
+                        throw new RuntimeException("پاسخ به سوال " + data.getQuestionId().toString() + " باید عدد باشد");
+                    break;
+                case TICK:
+                    List<String> options = (List<String>) allQuestions.get(data.getQuestionId()).getValue();
+                    if(!options.contains(data.getAnswer().toString()))
+                        throw new RuntimeException("گزینه انتخاب شده برای سوال " + data.getQuestionId().toString() + " معتبر نمی باشد");
+                    break;
+                case TEXT:
+                    if(data.getAnswer().toString().length() > 100)
+                        throw new RuntimeException("پاسخ به سوال " + data.getQuestionId().toString() + " باید حداکثر 100 کاراکتر باشد");
+                    break;
+                case LONG_TEXT:
+                    if(data.getAnswer().toString().length() > 1000)
+                        throw new RuntimeException("پاسخ به سوال " + data.getQuestionId().toString() + " باید حداکثر 1000 کاراکتر باشد");
+                    break;
+            }
+
+            patientAnswers.add(
+                    PatientAnswer
+                            .builder()
+                            .questionId(data.getQuestionId())
+                            .answer(data.getAnswer())
+                            .build()
+            );
+        });
 
         Trip trip = tripRepository.findByAreaIdAndResponsibleIdAndModuleId(
                 areaId, userId, moduleId
@@ -602,7 +658,6 @@ public class PatientServiceInArea {
         Area area = AreaUtils.findStartedArea(trip, areaId);
         AreaUtils.findModule(
                 area, moduleId,
-                userId.equals(area.getOwnerId()) ? null : userId,
                 userId.equals(area.getOwnerId()) ? null : userId
         );
 
@@ -618,5 +673,26 @@ public class PatientServiceInArea {
             throw new InvalidIdException();
 
         PatientReferral wantedReferral = optionalPatientReferral.get();
+
+        PatientForm newPatientForm = PatientForm
+                .builder()
+                .subModuleId(subModuleId)
+                .answers(patientAnswers)
+                .build();
+
+        List<PatientForm> patientForms = wantedReferral.getForms();
+        if(patientForms == null)
+            patientForms = new ArrayList<>();
+
+        Optional<PatientForm> existPatientForm =
+                patientForms.stream().filter(patientForm -> patientForm.getSubModuleId().equals(subModuleId)).findFirst();
+
+        if(existPatientForm.isPresent())
+            existPatientForm.get().setAnswers(patientAnswers);
+        else
+            patientForms.add(newPatientForm);
+
+        wantedReferral.setForms(patientForms);
+        patientsInAreaRepository.save(patientInArea);
     }
 }

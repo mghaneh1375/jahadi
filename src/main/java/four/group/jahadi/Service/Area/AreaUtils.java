@@ -58,4 +58,20 @@ public class AreaUtils {
         return moduleInArea;
     }
 
+    public static ModuleInArea findModule(Area area, ObjectId moduleId, ObjectId responsibleId) {
+
+        ModuleInArea moduleInArea = area
+                .getModules().stream()
+                .filter(module -> module.getModuleId().equals(moduleId))
+                .findFirst().orElseThrow(InvalidIdException::new);
+
+        if (responsibleId == null)
+            return moduleInArea;
+
+        if(!moduleInArea.getMembers().contains(responsibleId))
+            throw new NotAccessException();
+
+        return moduleInArea;
+    }
+
 }

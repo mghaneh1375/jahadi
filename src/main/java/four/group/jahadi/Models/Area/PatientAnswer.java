@@ -1,24 +1,22 @@
 package four.group.jahadi.Models.Area;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import four.group.jahadi.Models.Model;
 import four.group.jahadi.Models.ObjectIdSerialization;
 import lombok.*;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Field;
-
-import java.util.List;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PatientForm extends Model {
+public class PatientAnswer {
 
-    @Field("sub_module_id")
+    @Field("question_id")
     @JsonSerialize(using = ObjectIdSerialization.class)
-    private ObjectId subModuleId;
+    private ObjectId questionId;
 
-    private List<PatientAnswer> answers;
+    private Object answer;
+
 }
