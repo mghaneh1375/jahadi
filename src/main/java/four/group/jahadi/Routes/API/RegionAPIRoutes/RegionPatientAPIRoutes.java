@@ -5,6 +5,7 @@ import four.group.jahadi.DTO.Patient.InquiryPatientData;
 import four.group.jahadi.DTO.Patient.PatientData;
 import four.group.jahadi.DTO.Patient.TrainFormData;
 import four.group.jahadi.Enums.Insurance;
+import four.group.jahadi.Models.Area.PatientAnswer;
 import four.group.jahadi.Models.Area.PatientJoinArea;
 import four.group.jahadi.Models.Area.PatientReferral;
 import four.group.jahadi.Models.Area.TrainForm;
@@ -273,4 +274,21 @@ public class RegionPatientAPIRoutes extends Router {
                 getId(request), areaId, moduleId, subModuleId, patientId, forms
         );
     }
+
+    @GetMapping(value = "getPatientForm/{areaId}/{moduleId}/{subModuleId}/{patientId}")
+    @Operation(
+            summary = "گرفتن فرم بیمار توسط پزشک در یک ماژول خاص در یک منطقه"
+    )
+    public ResponseEntity<List<PatientAnswer>> getPatientForm(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId,
+            @PathVariable @ObjectIdConstraint ObjectId moduleId,
+            @PathVariable @ObjectIdConstraint ObjectId subModuleId,
+            @PathVariable @ObjectIdConstraint ObjectId patientId
+    ) {
+        return patientServiceInArea.getPatientForm(
+                getId(request), areaId, moduleId, subModuleId, patientId
+        );
+    }
+
 }

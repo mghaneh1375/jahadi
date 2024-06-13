@@ -565,14 +565,14 @@ public class PatientServiceInArea {
 //                )
 //                .map(Question::getId).forEach(objectId -> allQuestions.put(objectId, QuestionType.TABLE));
 
-         questions.stream()
+        questions.stream()
                 .filter(question -> question.getQuestionType().equals(QuestionType.CHECK_LIST)).forEach(checkListQuestion -> {
-                    CheckListGroupQuestion checkListGroupQuestion = ((CheckListGroupQuestion)checkListQuestion);
+                    CheckListGroupQuestion checkListGroupQuestion = ((CheckListGroupQuestion) checkListQuestion);
                     List<String> options = checkListGroupQuestion.getOptions().stream().map(PairValue::getKey).map(Object::toString).collect(Collectors.toList());
                     checkListGroupQuestion.getQuestions().stream()
                             .map(Question::getId)
                             .forEach(objectId -> allQuestions.put(objectId, new PairValue(AnswerType.TICK, options)));
-                 });
+                });
 
         // todo: Handle Group Questions
 //        allQuestionIds.addAll(
@@ -619,25 +619,25 @@ public class PatientServiceInArea {
 
         formData.forEach(data -> {
 
-            if(data.getAnswer() == null || data.getAnswer().toString().isEmpty())
+            if (data.getAnswer() == null || data.getAnswer().toString().isEmpty())
                 return;
 
-            switch ((AnswerType)allQuestions.get(data.getQuestionId()).getKey()) {
+            switch ((AnswerType) allQuestions.get(data.getQuestionId()).getKey()) {
                 case NUMBER:
-                    if(!(data.getAnswer() instanceof Number))
+                    if (!(data.getAnswer() instanceof Number))
                         throw new RuntimeException("پاسخ به سوال " + data.getQuestionId().toString() + " باید عدد باشد");
                     break;
                 case TICK:
                     List<String> options = (List<String>) allQuestions.get(data.getQuestionId()).getValue();
-                    if(!options.contains(data.getAnswer().toString()))
+                    if (!options.contains(data.getAnswer().toString()))
                         throw new RuntimeException("گزینه انتخاب شده برای سوال " + data.getQuestionId().toString() + " معتبر نمی باشد");
                     break;
                 case TEXT:
-                    if(data.getAnswer().toString().length() > 100)
+                    if (data.getAnswer().toString().length() > 100)
                         throw new RuntimeException("پاسخ به سوال " + data.getQuestionId().toString() + " باید حداکثر 100 کاراکتر باشد");
                     break;
                 case LONG_TEXT:
-                    if(data.getAnswer().toString().length() > 1000)
+                    if (data.getAnswer().toString().length() > 1000)
                         throw new RuntimeException("پاسخ به سوال " + data.getQuestionId().toString() + " باید حداکثر 1000 کاراکتر باشد");
                     break;
             }
@@ -681,18 +681,62 @@ public class PatientServiceInArea {
                 .build();
 
         List<PatientForm> patientForms = wantedReferral.getForms();
-        if(patientForms == null)
+        if (patientForms == null)
             patientForms = new ArrayList<>();
 
         Optional<PatientForm> existPatientForm =
                 patientForms.stream().filter(patientForm -> patientForm.getSubModuleId().equals(subModuleId)).findFirst();
 
-        if(existPatientForm.isPresent())
+        if (existPatientForm.isPresent())
             existPatientForm.get().setAnswers(patientAnswers);
         else
             patientForms.add(newPatientForm);
 
         wantedReferral.setForms(patientForms);
         patientsInAreaRepository.save(patientInArea);
+    }
+
+    public ResponseEntity<List<PatientAnswer>> getPatientForm(
+            ObjectId userId, ObjectId areaId,
+            ObjectId moduleId, ObjectId subModuleId,
+            ObjectId patientId
+    ) {
+
+        Trip trip = tripRepository.findByAreaIdAndResponsibleIdAndModuleId(
+                areaId, userId, moduleId
+        ).orElseThrow(NotAccessException::new);
+
+        Area area = AreaUtils.findStartedArea(trip, areaId);
+        AreaUtils.findModule(
+                area, moduleId,
+                userId.equals(area.getOwnerId()) ? null : userId
+        );
+
+        PatientsInArea patientInArea = patientsInAreaRepository.findByAreaIdAndPatientId(
+                areaId, patientId
+        ).orElseThrow(InvalidIdException::new);
+
+        Optional<PatientReferral> optionalPatientReferral =
+                patientInArea.getReferrals().stream()
+                        .filter(patientReferral -> patientReferral.getModuleId().equals(moduleId))
+                        .reduce((first, second) -> second);
+
+        if (optionalPatientReferral.isEmpty())
+            throw new RuntimeException("فرمی برای این ماژول ثبت نشده است");
+
+        PatientForm wantedPatientForm =
+                optionalPatientReferral.get()
+                        .getForms().stream()
+                        .filter(patientForm -> patientForm.getSubModuleId().equals(subModuleId))
+                        .reduce((first, second) -> second)
+                        .stream().findFirst()
+                        .orElseThrow(() -> {
+                            throw new RuntimeException("فرمی برای این ماژول ثبت نشده است");
+                        });
+
+        return new ResponseEntity<>(
+                wantedPatientForm.getAnswers(),
+                HttpStatus.OK
+        );
     }
 }
