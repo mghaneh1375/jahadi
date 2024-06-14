@@ -184,18 +184,6 @@ public class PatientServiceInArea {
                 .areaId(area.getId())
                 .build();
 
-//        List<ModuleInArea> trainingModules = area.getModules().stream()
-//                .filter(module -> module.getModuleName().contains("آموزش"))
-//                .collect(Collectors.toList());
-//
-//        String key = Objects.equals(ageType, AgeType.ADULT) ? "بزرگسال" : "کودک";
-//        Optional<ModuleInArea> wantedTrainingModule = trainingModules.stream()
-//                .filter(module -> module.getModuleName().contains(key))
-//                .findFirst();
-//        wantedTrainingModule.ifPresent(module ->
-//                patientInArea.setReferrals(doAddReferral(patientInArea.getReferrals(), module.getModuleId()))
-//        );
-
         patientsInAreaRepository.insert(patientInArea);
     }
 
@@ -228,10 +216,18 @@ public class PatientServiceInArea {
         return new ResponseEntity<>(patient, HttpStatus.OK);
     }
 
-    private List<PatientReferral> doAddReferral(List<PatientReferral> referrals, ObjectId moduleId) {
+    private List<PatientReferral> doAddReferral(List<PatientReferral> referrals, ObjectId moduleId, boolean addDuplicate) {
 
         if (referrals == null)
             referrals = new ArrayList<>();
+
+        if (!addDuplicate) {
+            Optional<PatientReferral> wantedPatientReferral =
+                    referrals.stream().filter(patientReferral -> patientReferral.getModuleId().equals(moduleId))
+                            .findFirst();
+            if(wantedPatientReferral.isPresent())
+                return referrals;
+        }
 
         referrals.add(
                 (PatientReferral) PatientReferral
@@ -257,7 +253,7 @@ public class PatientServiceInArea {
         PatientsInArea patientInArea = patientsInAreaRepository.findByAreaIdAndPatientId(areaId, patientId)
                 .orElseThrow(InvalidIdException::new);
 
-        patientInArea.setReferrals(doAddReferral(patientInArea.getReferrals(), moduleId));
+        patientInArea.setReferrals(doAddReferral(patientInArea.getReferrals(), moduleId, true));
         patientsInAreaRepository.save(patientInArea);
     }
 
@@ -278,7 +274,7 @@ public class PatientServiceInArea {
         PatientsInArea patientInArea = patientsInAreaRepository.findByAreaIdAndPatientId(areaId, patientId)
                 .orElseThrow(InvalidIdException::new);
 
-        patientInArea.setReferrals(doAddReferral(patientInArea.getReferrals(), moduleId));
+        patientInArea.setReferrals(doAddReferral(patientInArea.getReferrals(), moduleId, true));
         patientsInAreaRepository.save(patientInArea);
     }
 
@@ -401,6 +397,16 @@ public class PatientServiceInArea {
                 .orElseThrow(InvalidIdException::new);
         patient.setTrained(hasTrained);
         patientsInAreaRepository.save(patient);
+
+        if (hasTrained) {
+            foundArea.getModules().stream()
+                    .filter(module -> module.getModuleName().contains("غربالگری"))
+                    .findFirst().ifPresent(module -> {
+                        patient.setReferrals(
+                                doAddReferral(patient.getReferrals(), module.getModuleId(), false)
+                        );
+                    });
+        }
     }
 
     public void setPatientInsuranceStatus(
