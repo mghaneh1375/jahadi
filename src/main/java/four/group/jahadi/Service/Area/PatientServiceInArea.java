@@ -396,7 +396,6 @@ public class PatientServiceInArea {
         PatientsInArea patient = patientsInAreaRepository.findByAreaIdAndPatientId(areaId, patientId)
                 .orElseThrow(InvalidIdException::new);
         patient.setTrained(hasTrained);
-        patientsInAreaRepository.save(patient);
 
         if (hasTrained) {
             foundArea.getModules().stream()
@@ -407,6 +406,8 @@ public class PatientServiceInArea {
                         );
                     });
         }
+
+        patientsInAreaRepository.save(patient);
     }
 
     public void setPatientInsuranceStatus(
