@@ -13,4 +13,5 @@ import org.bson.types.ObjectId;
 public class PatientFormData {
     private ObjectId questionId;
     private Object answer;
+    private String desc;
 }

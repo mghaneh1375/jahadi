@@ -15,6 +15,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 import java.util.List;
 
 @RestController
@@ -46,6 +48,26 @@ public class RegionModuleAPIRoutes extends Router {
         return moduleServiceInArea.modules(getId(request), areaId);
     }
 
+    @GetMapping(path = "getTabsInArea/{areaId}")
+    @ResponseBody
+    @Operation(summary = "گرفتن تب های موجود در منطقه")
+    public ResponseEntity<List<String>> getTabsInArea(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId
+    ) {
+        return moduleServiceInArea.tabs(getId(request), areaId);
+    }
+
+    @GetMapping(path = "getModulesInTab/{areaId}")
+    @ResponseBody
+    @Operation(summary = "گرفتن ماژول های داخل یک تب در منطقه")
+    public ResponseEntity<List<ModuleInArea>> getModulesInTab(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId,
+            @RequestParam(value = "tabName") @NotEmpty @Size(min = 3, max = 30) String tabName
+    ) {
+        return moduleServiceInArea.getModulesInTab(getId(request), areaId, tabName);
+    }
 
     @GetMapping(path = "getModuleInArea/{areaId}/{moduleId}")
     @ResponseBody

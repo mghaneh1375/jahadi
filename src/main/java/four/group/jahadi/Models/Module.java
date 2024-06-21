@@ -19,6 +19,9 @@ public class Module extends Model {
 
     private String name;
 
+    @Field("tab_name")
+    private String tabName;
+
     @Field("sub_modules")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<SubModule> subModules;

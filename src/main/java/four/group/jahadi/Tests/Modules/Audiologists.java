@@ -13,8 +13,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static four.group.jahadi.Tests.Modules.ModuleSeeder.commonSubModules;
-
 public class Audiologists {
 
     public static Module seed() {
@@ -29,29 +27,33 @@ public class Audiologists {
                                         .builder()
                                         .questionType(QuestionType.SIMPLE)
                                         .question("نتیجه اتوسکوپی")
+                                        .required(true)
                                         .answerType(AnswerType.TEXT)
                                         .build(),
                                 SimpleQuestion
                                         .builder()
                                         .questionType(QuestionType.SIMPLE)
                                         .question("ویزیت")
+                                        .required(true)
                                         .answerType(AnswerType.LONG_TEXT)
                                         .build(),
                                 TableQuestion
                                         .builder()
                                         .required(true)
+                                        .title("اطلاعات")
                                         .questionType(QuestionType.TABLE)
-                                        .headers(List.of("R", "L"))
-                                        .rowsCount(1)
+                                        .headers(List.of("Frequency", "500", "1000", "2000", "3000", "4000", "6000", "8000"))
+                                        .firstColumn(List.of("TH (right)", "TH (left)"))
+                                        .rowsCount(2)
                                         .answerType(AnswerType.NUMBER)
                                         .build(),
                                 TableQuestion
                                         .builder()
                                         .required(true)
                                         .questionType(QuestionType.TABLE)
-                                        .headers(List.of("Frequency", "500", "1000", "2000", "3000", "4000", "6000", "8000"))
-                                        .firstColumn(List.of("TH (right)", "TH (left)"))
-                                        .rowsCount(2)
+                                        .headers(List.of("R", "L"))
+                                        .title("اطلاعات")
+                                        .rowsCount(1)
                                         .answerType(AnswerType.NUMBER)
                                         .build()
                         )
@@ -94,45 +96,47 @@ public class Audiologists {
                                                         audiologists.getFaTranslate()
                                                 )).collect(Collectors.toList())
                                         )
-                                        .build(),
-                                SimpleQuestion
-                                        .builder()
-                                        .questionType(QuestionType.SIMPLE)
-                                        .required(true)
-                                        .question("تشحیص")
-                                        .answerType(AnswerType.LONG_TEXT)
-                                        .build(),
-                                SimpleQuestion
-                                        .builder()
-                                        .questionType(QuestionType.SIMPLE)
-                                        .required(false)
-                                        .question("آپلود فایل")
-                                        .answerType(AnswerType.UPLOAD)
                                         .build()
+//                                SimpleQuestion
+//                                        .builder()
+//                                        .questionType(QuestionType.SIMPLE)
+//                                        .required(true)
+//                                        .question("تشحیص")
+//                                        .answerType(AnswerType.LONG_TEXT)
+//                                        .build(),
+//                                SimpleQuestion
+//                                        .builder()
+//                                        .questionType(QuestionType.SIMPLE)
+//                                        .required(false)
+//                                        .question("آپلود فایل")
+//                                        .answerType(AnswerType.UPLOAD)
+//                                        .build()
                         )
                 )
                 .build();
 
-        SubModule externalRefer = SubModule
-                .builder()
-                .name("ارجاع به متخصصان گوش حلق بینی")
-                .questions(
-                        List.of(
-                                SimpleQuestion
-                                        .builder()
-                                        .questionType(QuestionType.SIMPLE)
-                                        .required(true)
-                                        .question("علت ارجاع")
-                                        .answerType(AnswerType.LONG_TEXT)
-                                        .build()
-                        )
-                )
-                .build();
+//        SubModule externalRefer = SubModule
+//                .builder()
+//                .name("ارجاع به متخصصان گوش حلق بینی")
+//                .questions(
+//                        List.of(
+//                                SimpleQuestion
+//                                        .builder()
+//                                        .questionType(QuestionType.SIMPLE)
+//                                        .required(true)
+//                                        .question("علت ارجاع")
+//                                        .answerType(AnswerType.LONG_TEXT)
+//                                        .build()
+//                        )
+//                )
+//                .build();
 
         return Module.builder()
-                .name("شنوایی سنج")
+                .name("شنوایی")
+                .icon("")
+                .tabName("توان بخشی")
                 .subModules(
-                        List.of(room1, room2, commonSubModules.get("externalReferral"), externalRefer)
+                        List.of(room1, room2)
                 )
                 .build();
     }

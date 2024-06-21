@@ -29,7 +29,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static four.group.jahadi.Service.Area.AreaUtils.findArea;
-import static four.group.jahadi.Service.Area.AreaUtils.findModule;
 
 @Service
 public class ModuleServiceInArea {
@@ -95,6 +94,47 @@ public class ModuleServiceInArea {
         }
     }
 
+    public ResponseEntity<List<ModuleInArea>> getModulesInTab(ObjectId userId, ObjectId areaId, String tabName) {
+
+        Area foundArea = tripRepository.findByAreaIdAndResponsibleId(areaId, userId)
+                .orElseThrow(InvalidIdException::new)
+                .getAreas().stream().filter(area -> area.getId().equals(areaId))
+                .findFirst().orElseThrow(RuntimeException::new);
+
+        boolean isOwner = foundArea.getOwnerId().equals(userId);
+        List<ModuleInArea> modules = foundArea.getModules();
+
+        List<Module> areaModules = moduleRepository.findTabNamesByIds(
+                foundArea.getModules().stream().map(ModuleInArea::getModuleId).collect(Collectors.toList())
+        );
+
+        if(areaModules.size() == 0)
+            return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
+
+        List<ModuleInArea> output = new ArrayList<>();
+
+        modules.forEach(moduleInArea -> {
+            if(areaModules.stream()
+                    .noneMatch(module -> module.getId().equals(moduleInArea.getModuleId()) && module.getTabName().equals(tabName)))
+                return;
+
+            List<ObjectId> members = moduleInArea.getMembers();
+            List<ObjectId> secretaries = moduleInArea.getSecretaries();
+
+            moduleInArea.setAccesses(isOwner ? Collections.singletonList(AccessInModuleArea.FULL) :
+                    !members.contains(userId) && !secretaries.contains(userId) ? Collections.singletonList(AccessInModuleArea.NONE) :
+                            members.contains(userId) && secretaries.contains(userId) ?
+                                    List.of(AccessInModuleArea.RESPONSIBLE, AccessInModuleArea.SECRETARY) :
+                                    members.contains(userId) ? Collections.singletonList(AccessInModuleArea.RESPONSIBLE) :
+                                            Collections.singletonList(AccessInModuleArea.SECRETARY)
+            );
+
+            output.add(moduleInArea);
+        });
+
+        return new ResponseEntity<>(output, HttpStatus.OK);
+    }
+
     public ResponseEntity<List<ModuleInArea>> modules(ObjectId userId, ObjectId areaId) {
 
         Area foundArea = tripRepository.findByAreaIdAndResponsibleId(areaId, userId)
@@ -105,7 +145,6 @@ public class ModuleServiceInArea {
         boolean isOwner = foundArea.getOwnerId().equals(userId);
 
         List<ModuleInArea> modules = foundArea.getModules();
-
         List<ObjectId> userIds = new ArrayList<>();
 
         for (ModuleInArea module : modules) {
@@ -145,6 +184,21 @@ public class ModuleServiceInArea {
         });
 
         return new ResponseEntity<>(modules, HttpStatus.OK);
+    }
+
+    public ResponseEntity<List<String>> tabs(ObjectId userId, ObjectId areaId) {
+
+        Area foundArea = tripRepository.findByAreaIdAndResponsibleId(areaId, userId)
+                .orElseThrow(InvalidIdException::new)
+                .getAreas().stream().filter(area -> area.getId().equals(areaId))
+                .findFirst().orElseThrow(RuntimeException::new);
+
+        return new ResponseEntity<>(
+                moduleRepository.findTabNamesByIds(
+                        foundArea.getModules().stream().map(ModuleInArea::getModuleId).collect(Collectors.toList())
+                ).stream().map(Module::getTabName).distinct().collect(Collectors.toList()),
+                HttpStatus.OK
+        );
     }
 
     public ResponseEntity<Module> getModule(ObjectId userId, ObjectId areaId, ObjectId moduleId) {

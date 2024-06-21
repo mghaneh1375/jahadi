@@ -16,7 +16,7 @@ public class PatientAnswer {
     @Field("question_id")
     @JsonSerialize(using = ObjectIdSerialization.class)
     private ObjectId questionId;
-
     private Object answer;
+    private String desc;
 
 }

@@ -12,39 +12,42 @@ import static four.group.jahadi.Tests.Modules.ModuleSeeder.commonSubModules;
 
 public class DoctorSeeder {
 
-    public static Module seed() {
+    public static List<Module> seed() {
 
-        return Module
-                .builder()
-                .name("پزشک")
-                .icon("")
-                .subModules(
-                        List.of(
-                                commonSubModules.get("visit"),
-                                commonSubModules.get("experiment"),
-                                commonSubModules.get("externalReferral"),
-                                commonSubModules.get("internalReferral"),
-                                commonSubModules.get("remoteReferral"),
-                                commonSubModules.get("paraClinic"),
-                                SubModule
-                                        .builder()
-                                        .name("آموزش پس از پزشک")
-                                        .questions(
-                                                List.of(
-                                                        SimpleQuestion
-                                                                .builder()
-                                                                .questionType(QuestionType.SIMPLE)
-                                                                .required(true)
-                                                                .question("علت ارجاع")
-                                                                .answerType(AnswerType.LONG_TEXT)
-                                                                .build()
+        return List.of(
+                Module
+                        .builder()
+                        .tabName("پزشک")
+                        .icon("")
+                        .name("پزشک عمومی")
+                        .subModules(
+                                List.of(
+                                        commonSubModules.get("visit"),
+                                        commonSubModules.get("drug"),
+                                        commonSubModules.get("externalReferral"),
+                                        commonSubModules.get("internalReferral"),
+                                        commonSubModules.get("paraClinic"),
+                                        commonSubModules.get("experiment"),
+                                        SubModule
+                                                .builder()
+                                                .name("آموزش پس از پزشک")
+                                                .questions(
+                                                        List.of(
+                                                                SimpleQuestion
+                                                                        .builder()
+                                                                        .questionType(QuestionType.SIMPLE)
+                                                                        .required(true)
+                                                                        .question("علت ارجاع")
+                                                                        .answerType(AnswerType.LONG_TEXT)
+                                                                        .build()
+                                                        )
                                                 )
-                                        )
-                                        .postAction("submit_in_post_doctor_table")
-                                        .build()
+                                                .postAction("submit_in_post_doctor_table")
+                                                .build()
+                                )
                         )
-                )
-                .build();
+                        .build()
+        );
     }
 
 }

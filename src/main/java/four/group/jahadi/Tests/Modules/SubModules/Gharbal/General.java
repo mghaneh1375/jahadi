@@ -74,6 +74,7 @@ public class General {
                                         .required(true)
                                         .question("قند خون ناشتا (FBS)")
                                         .answerType(AnswerType.NUMBER)
+                                        .canWriteDesc(true)
                                         .build(),
                                 SimpleQuestion
                                         .builder()
@@ -82,6 +83,7 @@ public class General {
                                         .required(true)
                                         .question("قند خون غیرناشتا (BS)")
                                         .answerType(AnswerType.NUMBER)
+                                        .canWriteDesc(true)
                                         .build(),
                                 SimpleQuestion
                                         .builder()
@@ -90,6 +92,7 @@ public class General {
                                         .required(true)
                                         .question("فشار خون (BP)")
                                         .answerType(AnswerType.NUMBER)
+                                        .canWriteDesc(true)
                                         .build(),
                                 SimpleQuestion
                                         .builder()
@@ -98,6 +101,7 @@ public class General {
                                         .required(true)
                                         .question("فشار خون اول (First BP)")
                                         .answerType(AnswerType.NUMBER)
+                                        .canWriteDesc(true)
                                         .build(),
                                 SimpleQuestion
                                         .builder()
@@ -106,6 +110,7 @@ public class General {
                                         .required(true)
                                         .question("دارو (Medicine)")
                                         .answerType(AnswerType.TEXT)
+                                        .canWriteDesc(true)
                                         .build(),
                                 SimpleQuestion
                                         .builder()
@@ -114,6 +119,7 @@ public class General {
                                         .required(true)
                                         .question("فشار خون دوم (Second BP)")
                                         .answerType(AnswerType.NUMBER)
+                                        .canWriteDesc(true)
                                         .build(),
                                 SimpleQuestion
                                         .builder()
@@ -122,6 +128,7 @@ public class General {
                                         .required(true)
                                         .question("دارو بار دوم (Medicine 2)")
                                         .answerType(AnswerType.TEXT)
+                                        .canWriteDesc(true)
                                         .build(),
                                 SimpleQuestion
                                         .builder()
@@ -130,6 +137,7 @@ public class General {
                                         .required(true)
                                         .question("فشار خون سوم (Third BP)")
                                         .answerType(AnswerType.NUMBER)
+                                        .canWriteDesc(true)
                                         .build(),
                                 SimpleQuestion
                                         .builder()

@@ -34,4 +34,8 @@ public class SimpleQuestion extends Question {
     @Field("dynamic_options")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String dynamicOptions;
+
+    @Builder.Default
+    @Field("can_write_desc")
+    private Boolean canWriteDesc = false;
 }

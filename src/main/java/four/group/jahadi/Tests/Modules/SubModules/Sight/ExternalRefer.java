@@ -1,0 +1,28 @@
+package four.group.jahadi.Tests.Modules.SubModules.Sight;
+
+import four.group.jahadi.Enums.Module.AnswerType;
+import four.group.jahadi.Enums.Module.QuestionType;
+import four.group.jahadi.Models.Question.SimpleQuestion;
+import four.group.jahadi.Models.SubModule;
+
+import java.util.List;
+
+public class ExternalRefer {
+    public static SubModule make() {
+        return SubModule
+                .builder()
+                .name("ارجاع به خارج متخصصان چشم")
+                .questions(
+                        List.of(
+                                SimpleQuestion
+                                        .builder()
+                                        .questionType(QuestionType.SIMPLE)
+                                        .required(true)
+                                        .question("علت ارجاع")
+                                        .answerType(AnswerType.LONG_TEXT)
+                                        .build()
+                        )
+                )
+                .build();
+    }
+}

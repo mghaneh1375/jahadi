@@ -11,12 +11,10 @@ import four.group.jahadi.Enums.Module.QuestionType;
 import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Exception.NotAccessException;
+import four.group.jahadi.Models.*;
 import four.group.jahadi.Models.Area.*;
 import four.group.jahadi.Models.Module;
-import four.group.jahadi.Models.Patient;
 import four.group.jahadi.Models.Question.*;
-import four.group.jahadi.Models.SubModule;
-import four.group.jahadi.Models.Trip;
 import four.group.jahadi.Repository.Area.PatientsInAreaRepository;
 import four.group.jahadi.Repository.ModuleRepository;
 import four.group.jahadi.Repository.PatientRepository;
@@ -30,6 +28,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static four.group.jahadi.Service.Area.AreaUtils.findModule;
@@ -225,7 +224,7 @@ public class PatientServiceInArea {
             Optional<PatientReferral> wantedPatientReferral =
                     referrals.stream().filter(patientReferral -> patientReferral.getModuleId().equals(moduleId))
                             .findFirst();
-            if(wantedPatientReferral.isPresent())
+            if (wantedPatientReferral.isPresent())
                 return referrals;
         }
 
@@ -548,9 +547,10 @@ public class PatientServiceInArea {
         return mandatoryQuestionIds;
     }
 
-    private HashMap<ObjectId, PairValue> getSubModuleAllQuestions(List<Question> questions) {
+    private PairValue getSubModuleAllQuestions(List<Question> questions) {
 
-        HashMap<ObjectId, PairValue> allQuestions = new HashMap<>();
+        HashMap<ObjectId, A> allQuestions = new HashMap<>();
+        List<MarkableQuestions> markableQuestions = new ArrayList<>();
 
         questions.stream()
                 .filter(question ->
@@ -558,11 +558,17 @@ public class PatientServiceInArea {
                 )
                 .forEach(question -> {
                     SimpleQuestion simpleQuestion = ((SimpleQuestion) question);
-                    allQuestions.put(question.getId(), new PairValue(
-                            simpleQuestion.getAnswerType(),
-                            simpleQuestion.getOptions() == null ? null :
-                                    simpleQuestion.getOptions().stream().map(PairValue::getKey).collect(Collectors.toList())
-                    ));
+                    allQuestions.put(
+                            question.getId(),
+                            A.builder()
+                                    .canWriteDesc(simpleQuestion.getCanWriteDesc())
+                                    .answerType(simpleQuestion.getAnswerType())
+                                    .options(
+                                            simpleQuestion.getOptions() == null ? null :
+                                                    simpleQuestion.getOptions().stream().map(PairValue::getKey).collect(Collectors.toList())
+                                    )
+                                    .build()
+                    );
                 });
 
         // todo: Handle table questions
@@ -575,10 +581,38 @@ public class PatientServiceInArea {
         questions.stream()
                 .filter(question -> question.getQuestionType().equals(QuestionType.CHECK_LIST)).forEach(checkListQuestion -> {
                     CheckListGroupQuestion checkListGroupQuestion = ((CheckListGroupQuestion) checkListQuestion);
-                    List<String> options = checkListGroupQuestion.getOptions().stream().map(PairValue::getKey).map(Object::toString).collect(Collectors.toList());
-                    checkListGroupQuestion.getQuestions().stream()
-                            .map(Question::getId)
-                            .forEach(objectId -> allQuestions.put(objectId, new PairValue(AnswerType.TICK, options)));
+                    List<Object> options = checkListGroupQuestion.getOptions().stream().map(PairValue::getKey).map(Object::toString).collect(Collectors.toList());
+                    if (checkListGroupQuestion.getMarkable()) {
+                        checkListGroupQuestion.getQuestions()
+                                .forEach(question -> {
+                                    allQuestions.put(question.getId(),
+                                            A
+                                                    .builder()
+                                                    .answerType(AnswerType.TICK)
+                                                    .options(options)
+                                                    .build()
+                                    );
+                                    markableQuestions.add(
+                                            MarkableQuestions
+                                                    .builder()
+                                                    .parentId(checkListGroupQuestion.getId())
+                                                    .questionId(question.getId())
+                                                    .marks(checkListGroupQuestion.getMarks())
+                                                    .build()
+                                    );
+                                });
+                    } else {
+                        checkListGroupQuestion.getQuestions()
+                                .stream().map(Question::getId)
+                                .forEach(objectId -> allQuestions.put(objectId,
+                                        allQuestions.put(objectId,
+                                                A
+                                                        .builder()
+                                                        .answerType(AnswerType.TICK)
+                                                        .options(options)
+                                                        .build()
+                                        )));
+                    }
                 });
 
         // todo: Handle Group Questions
@@ -591,7 +625,7 @@ public class PatientServiceInArea {
 //                        .collect(Collectors.toList())
 //        );
 
-        return allQuestions;
+        return new PairValue(allQuestions, markableQuestions);
     }
 
     public void setPatientForm(
@@ -604,7 +638,9 @@ public class PatientServiceInArea {
         SubModule wantedSubModule = module.getSubModules().stream().filter(subModule -> subModule.getId().equals(subModuleId)).findFirst().orElseThrow(InvalidIdException::new);
 
         List<ObjectId> mandatoryQuestionIds = getMandatoryQuestionIds(wantedSubModule.getQuestions());
-        HashMap<ObjectId, PairValue> allQuestions = getSubModuleAllQuestions(wantedSubModule.getQuestions());
+        PairValue p = getSubModuleAllQuestions(wantedSubModule.getQuestions());
+        HashMap<ObjectId, A> allQuestions = (HashMap<ObjectId, A>) p.getKey();
+        List<MarkableQuestions> markableQuestions = (List<MarkableQuestions>) p.getValue();
 
         if (formData.stream()
                 .map(PatientFormData::getQuestionId)
@@ -623,21 +659,40 @@ public class PatientServiceInArea {
             throw new RuntimeException("لطفا به تمامی سوالات اجباری پاسخ دهید");
 
         List<PatientAnswer> patientAnswers = new ArrayList<>();
+        HashMap<ObjectId, Integer> marks = null;
 
-        formData.forEach(data -> {
+        for (PatientFormData data : formData) {
 
             if (data.getAnswer() == null || data.getAnswer().toString().isEmpty())
-                return;
+                continue;
 
-            switch ((AnswerType) allQuestions.get(data.getQuestionId()).getKey()) {
+            A a = allQuestions.get(data.getQuestionId());
+
+            switch (a.getAnswerType()) {
                 case NUMBER:
                     if (!(data.getAnswer() instanceof Number))
                         throw new RuntimeException("پاسخ به سوال " + data.getQuestionId().toString() + " باید عدد باشد");
                     break;
                 case TICK:
-                    List<String> options = (List<String>) allQuestions.get(data.getQuestionId()).getValue();
+                    List<String> options = a.getOptions()
+                            .stream().map(Object::toString).collect(Collectors.toList());
                     if (!options.contains(data.getAnswer().toString()))
                         throw new RuntimeException("گزینه انتخاب شده برای سوال " + data.getQuestionId().toString() + " معتبر نمی باشد");
+                    Optional<MarkableQuestions> markableQuestions1 = markableQuestions.stream().filter(
+                            itr -> itr.getQuestionId().equals(data.getQuestionId()) &&
+                                    itr.getMarks().containsKey(data.getAnswer().toString())
+                    ).findFirst();
+                    if (markableQuestions1.isPresent()) {
+
+                        if (marks == null)
+                            marks = new HashMap<>();
+
+                        MarkableQuestions itr = markableQuestions1.get();
+                        if (marks.containsKey(itr.getParentId()))
+                            marks.put(itr.getParentId(), marks.get(itr.getParentId()) + itr.getMarks().get(data.getAnswer().toString()));
+                        else
+                            marks.put(itr.getParentId(), itr.getMarks().get(data.getAnswer().toString()));
+                    }
                     break;
                 case TEXT:
                     if (data.getAnswer().toString().length() > 100)
@@ -649,14 +704,18 @@ public class PatientServiceInArea {
                     break;
             }
 
-            patientAnswers.add(
-                    PatientAnswer
-                            .builder()
-                            .questionId(data.getQuestionId())
-                            .answer(data.getAnswer())
-                            .build()
-            );
-        });
+            PatientAnswer patientAnswer = PatientAnswer
+                    .builder()
+                    .questionId(data.getQuestionId())
+                    .answer(data.getAnswer())
+                    .build();
+
+            if(a.getCanWriteDesc() && data.getDesc() != null &&
+                    !data.getDesc().isEmpty())
+                patientAnswer.setDesc(data.getDesc());
+
+            patientAnswers.add(patientAnswer);
+        }
 
         Trip trip = tripRepository.findByAreaIdAndResponsibleIdAndModuleId(
                 areaId, userId, moduleId
@@ -687,6 +746,9 @@ public class PatientServiceInArea {
                 .answers(patientAnswers)
                 .build();
 
+        if (marks != null)
+            newPatientForm.setMark(marks);
+
         List<PatientForm> patientForms = wantedReferral.getForms();
         if (patientForms == null)
             patientForms = new ArrayList<>();
@@ -694,9 +756,11 @@ public class PatientServiceInArea {
         Optional<PatientForm> existPatientForm =
                 patientForms.stream().filter(patientForm -> patientForm.getSubModuleId().equals(subModuleId)).findFirst();
 
-        if (existPatientForm.isPresent())
+        if (existPatientForm.isPresent()) {
             existPatientForm.get().setAnswers(patientAnswers);
-        else
+            if (marks != null)
+                existPatientForm.get().setMark(marks);
+        } else
             patientForms.add(newPatientForm);
 
         wantedReferral.setForms(patientForms);
@@ -741,8 +805,20 @@ public class PatientServiceInArea {
                             throw new RuntimeException("فرمی برای این ماژول ثبت نشده است");
                         });
 
+        List<PatientAnswer> answers = wantedPatientForm.getAnswers();
+
+        if (wantedPatientForm.getMark() != null)
+            for (ObjectId key : wantedPatientForm.getMark().keySet())
+                answers.add(
+                        PatientAnswer
+                                .builder()
+                                .questionId(key)
+                                .answer("___mark___" + wantedPatientForm.getMark().get(key))
+                                .build()
+                );
+
         return new ResponseEntity<>(
-                wantedPatientForm.getAnswers(),
+                answers,
                 HttpStatus.OK
         );
     }
