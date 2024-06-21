@@ -1,7 +1,6 @@
 package four.group.jahadi.Models;
 
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -36,9 +35,5 @@ public class Module extends Model {
 
     @Field("is_referral")
     private boolean isReferral = true;
-
-    @Field("inTrip")
-    @JsonIgnore
-    private boolean inTrip = true;
 
 }

@@ -2,6 +2,7 @@ package four.group.jahadi.Tests.Modules.SubModules.Sight;
 
 import four.group.jahadi.Enums.Module.AnswerType;
 import four.group.jahadi.Enums.Module.QuestionType;
+import four.group.jahadi.Models.Module;
 import four.group.jahadi.Models.Question.TableQuestion;
 import four.group.jahadi.Models.SubModule;
 import org.bson.types.ObjectId;
@@ -10,8 +11,8 @@ import java.util.List;
 
 public class SightGharbal {
 
-    public static SubModule make() {
-        return SubModule
+    public static Module seed() {
+        SubModule subModule = SubModule
                 .builder()
                 .id(new ObjectId())
                 .name("غربال بینایی")
@@ -19,6 +20,7 @@ public class SightGharbal {
                         List.of(
                                 TableQuestion
                                         .builder()
+                                        .id(new ObjectId())
                                         .required(true)
                                         .questionType(QuestionType.TABLE)
                                         .title("غربال بینایی")
@@ -31,6 +33,7 @@ public class SightGharbal {
                                 TableQuestion
                                         .builder()
                                         .required(true)
+                                        .id(new ObjectId())
                                         .questionType(QuestionType.TABLE)
                                         .title("غربال بینایی")
                                         .headers(List.of("VA/SC", "D"))
@@ -41,6 +44,14 @@ public class SightGharbal {
                                         .build()
                         )
                 )
+                .build();
+
+        return Module
+                .builder()
+                .name("غربال دوم بینایی")
+                .icon("")
+                .tabName("توان بخشی")
+                .subModules(List.of(subModule))
                 .build();
     }
 

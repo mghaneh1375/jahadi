@@ -23,11 +23,15 @@ public class SightRoom {
                         List.of(
                                 SimpleQuestion
                                         .builder()
+                                        .id(new ObjectId())
                                         .question("ADD")
+                                        .questionType(QuestionType.SIMPLE)
                                         .answerType(AnswerType.NUMBER)
                                         .build(),
                                 SimpleQuestion
                                         .builder()
+                                        .id(new ObjectId())
+                                        .questionType(QuestionType.SIMPLE)
                                         .answerType(AnswerType.TICK)
                                         .options(
                                                 List.of(
@@ -44,12 +48,14 @@ public class SightRoom {
                                         .build(),
                                 GroupQuestion
                                         .builder()
+                                        .id(new ObjectId())
                                         .questionType(QuestionType.GROUP)
                                         .sectionTitle("عینک ساختنی")
                                         .questions(
                                                 List.of(
                                                         TableQuestion
                                                                 .builder()
+                                                                .id(new ObjectId())
                                                                 .required(true)
                                                                 .questionType(QuestionType.TABLE)
                                                                 .headers(List.of("...", "+/-", "SPH", "CYL", "VA"))
@@ -59,6 +65,7 @@ public class SightRoom {
                                                                 .build(),
                                                         TableQuestion
                                                                 .builder()
+                                                                .id(new ObjectId())
                                                                 .required(true)
                                                                 .questionType(QuestionType.TABLE)
                                                                 .headers(List.of("PD", "NPD"))

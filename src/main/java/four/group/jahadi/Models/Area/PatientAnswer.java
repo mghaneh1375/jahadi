@@ -1,5 +1,6 @@
 package four.group.jahadi.Models.Area;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import four.group.jahadi.Models.ObjectIdSerialization;
 import lombok.*;
@@ -17,6 +18,8 @@ public class PatientAnswer {
     @JsonSerialize(using = ObjectIdSerialization.class)
     private ObjectId questionId;
     private Object answer;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String desc;
 
 }

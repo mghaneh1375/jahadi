@@ -12,8 +12,8 @@ import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Exception.NotAccessException;
 import four.group.jahadi.Models.*;
-import four.group.jahadi.Models.Area.*;
 import four.group.jahadi.Models.Module;
+import four.group.jahadi.Models.Area.*;
 import four.group.jahadi.Models.Question.*;
 import four.group.jahadi.Repository.Area.PatientsInAreaRepository;
 import four.group.jahadi.Repository.ModuleRepository;
@@ -28,7 +28,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static four.group.jahadi.Service.Area.AreaUtils.findModule;
@@ -215,7 +214,12 @@ public class PatientServiceInArea {
         return new ResponseEntity<>(patient, HttpStatus.OK);
     }
 
-    private List<PatientReferral> doAddReferral(List<PatientReferral> referrals, ObjectId moduleId, boolean addDuplicate) {
+    private List<PatientReferral> doAddReferral(
+            List<PatientReferral> referrals,
+            ObjectId moduleId,
+            boolean addDuplicate,
+            String desc
+    ) {
 
         if (referrals == null)
             referrals = new ArrayList<>();
@@ -232,6 +236,7 @@ public class PatientServiceInArea {
                 (PatientReferral) PatientReferral
                         .builder()
                         .moduleId(moduleId)
+                        .desc(desc)
                         .build().createId()
         );
 
@@ -240,7 +245,8 @@ public class PatientServiceInArea {
 
     public void addReferralForPatientByOwner(
             ObjectId ownerId, ObjectId areaId,
-            ObjectId patientId, ObjectId moduleId
+            ObjectId patientId, ObjectId moduleId,
+            String desc
     ) {
         Trip trip = tripRepository.findByAreaIdAndOwnerId(areaId, ownerId)
                 .orElseThrow(NotAccessException::new);
@@ -252,13 +258,21 @@ public class PatientServiceInArea {
         PatientsInArea patientInArea = patientsInAreaRepository.findByAreaIdAndPatientId(areaId, patientId)
                 .orElseThrow(InvalidIdException::new);
 
-        patientInArea.setReferrals(doAddReferral(patientInArea.getReferrals(), moduleId, true));
+        patientInArea.setReferrals(
+                doAddReferral(
+                        patientInArea.getReferrals(),
+                        moduleId,
+                        true,
+                        desc
+                )
+        );
         patientsInAreaRepository.save(patientInArea);
     }
 
     public void addReferralForPatient(
             ObjectId userId, ObjectId areaId,
-            ObjectId patientId, ObjectId moduleId
+            ObjectId patientId, ObjectId moduleId,
+            String desc
     ) {
         Trip trip = tripRepository.findByAreaIdAndResponsibleId(areaId, userId)
                 .orElseThrow(NotAccessException::new);
@@ -273,7 +287,14 @@ public class PatientServiceInArea {
         PatientsInArea patientInArea = patientsInAreaRepository.findByAreaIdAndPatientId(areaId, patientId)
                 .orElseThrow(InvalidIdException::new);
 
-        patientInArea.setReferrals(doAddReferral(patientInArea.getReferrals(), moduleId, true));
+        patientInArea.setReferrals(
+                doAddReferral(
+                        patientInArea.getReferrals(),
+                        moduleId,
+                        true,
+                        desc
+                )
+        );
         patientsInAreaRepository.save(patientInArea);
     }
 
@@ -399,11 +420,14 @@ public class PatientServiceInArea {
         if (hasTrained) {
             foundArea.getModules().stream()
                     .filter(module -> module.getModuleName().contains("غربالگری"))
-                    .findFirst().ifPresent(module -> {
-                        patient.setReferrals(
-                                doAddReferral(patient.getReferrals(), module.getModuleId(), false)
-                        );
-                    });
+                    .findFirst().ifPresent(module -> patient.setReferrals(
+                            doAddReferral(
+                                    patient.getReferrals(),
+                                    module.getModuleId(),
+                                    false,
+                                    null
+                            )
+                    ));
         }
 
         patientsInAreaRepository.save(patient);
@@ -547,21 +571,21 @@ public class PatientServiceInArea {
         return mandatoryQuestionIds;
     }
 
-    private PairValue getSubModuleAllQuestions(List<Question> questions) {
+    private HashMap<ObjectId, A> getSubModuleAllQuestions(List<Question> questions) {
 
         HashMap<ObjectId, A> allQuestions = new HashMap<>();
-        List<MarkableQuestions> markableQuestions = new ArrayList<>();
 
         questions.stream()
                 .filter(question ->
-                        question.getQuestionType().equals(QuestionType.SIMPLE)
-                )
+                        question.getQuestionType().equals(QuestionType.SIMPLE))
                 .forEach(question -> {
                     SimpleQuestion simpleQuestion = ((SimpleQuestion) question);
                     allQuestions.put(
                             question.getId(),
                             A.builder()
+                                    .questionType(QuestionType.SIMPLE)
                                     .canWriteDesc(simpleQuestion.getCanWriteDesc())
+                                    .required(simpleQuestion.getRequired())
                                     .answerType(simpleQuestion.getAnswerType())
                                     .options(
                                             simpleQuestion.getOptions() == null ? null :
@@ -571,61 +595,62 @@ public class PatientServiceInArea {
                     );
                 });
 
-        // todo: Handle table questions
-//        questions.stream()
-//                .filter(question ->
-//                        question.getQuestionType().equals(QuestionType.TABLE)
-//                )
-//                .map(Question::getId).forEach(objectId -> allQuestions.put(objectId, QuestionType.TABLE));
-
         questions.stream()
-                .filter(question -> question.getQuestionType().equals(QuestionType.CHECK_LIST)).forEach(checkListQuestion -> {
-                    CheckListGroupQuestion checkListGroupQuestion = ((CheckListGroupQuestion) checkListQuestion);
-                    List<Object> options = checkListGroupQuestion.getOptions().stream().map(PairValue::getKey).map(Object::toString).collect(Collectors.toList());
-                    if (checkListGroupQuestion.getMarkable()) {
-                        checkListGroupQuestion.getQuestions()
-                                .forEach(question -> {
-                                    allQuestions.put(question.getId(),
-                                            A
-                                                    .builder()
-                                                    .answerType(AnswerType.TICK)
-                                                    .options(options)
-                                                    .build()
-                                    );
-                                    markableQuestions.add(
-                                            MarkableQuestions
-                                                    .builder()
-                                                    .parentId(checkListGroupQuestion.getId())
-                                                    .questionId(question.getId())
-                                                    .marks(checkListGroupQuestion.getMarks())
-                                                    .build()
-                                    );
-                                });
-                    } else {
-                        checkListGroupQuestion.getQuestions()
-                                .stream().map(Question::getId)
-                                .forEach(objectId -> allQuestions.put(objectId,
-                                        allQuestions.put(objectId,
-                                                A
-                                                        .builder()
-                                                        .answerType(AnswerType.TICK)
-                                                        .options(options)
-                                                        .build()
-                                        )));
-                    }
+                .filter(question ->
+                        question.getQuestionType().equals(QuestionType.TABLE))
+                .forEach(question -> {
+                    TableQuestion tableQuestion = (TableQuestion) question;
+                    allQuestions.put(
+                            question.getId(),
+                            A.builder()
+                                    .required(tableQuestion.getRequired())
+                                    .questionType(QuestionType.TABLE)
+                                    .rows(tableQuestion.getRowsCount())
+                                    .cols(tableQuestion.getHeaders().size())
+                                    .answerType(tableQuestion.getAnswerType())
+                                    .build()
+                    );
                 });
 
-        // todo: Handle Group Questions
-//        allQuestionIds.addAll(
-//                questions.stream()
-//                        .filter(question -> question.getQuestionType().equals(QuestionType.GROUP))
-//                        .map(question -> ((GroupQuestion) question).getQuestions())
-//                        .flatMap(List::stream)
-//                        .map(Question::getId)
-//                        .collect(Collectors.toList())
-//        );
+        questions.stream()
+                .filter(question -> question.getQuestionType().equals(QuestionType.CHECK_LIST))
+                .forEach(checkListQuestion -> {
+                    CheckListGroupQuestion checkListGroupQuestion = ((CheckListGroupQuestion) checkListQuestion);
+                    List<Object> options = checkListGroupQuestion.getOptions().stream().map(PairValue::getKey).map(Object::toString).collect(Collectors.toList());
 
-        return new PairValue(allQuestions, markableQuestions);
+                    checkListGroupQuestion.getQuestions()
+                            .forEach(question -> {
+
+                                A a = A.builder()
+                                        .required(question.getRequired())
+                                        .questionType(QuestionType.CHECK_LIST)
+                                        .answerType(AnswerType.TICK)
+                                        .options(options)
+                                        .build();
+
+                                if (checkListGroupQuestion.getMarkable()) {
+                                    a.setParentId(checkListGroupQuestion.getId());
+                                    a.setQuestionId(question.getId());
+                                    a.setMarks(checkListGroupQuestion.getMarks());
+                                }
+
+                                allQuestions.put(question.getId(), a);
+                            });
+                });
+
+        List<Question> groupQuestions = questions.stream()
+                .filter(question -> question.getQuestionType().equals(QuestionType.GROUP))
+                .map(question -> ((GroupQuestion) question).getQuestions())
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
+
+        if(groupQuestions.size() > 0) {
+            HashMap<ObjectId, A> tmp = getSubModuleAllQuestions(groupQuestions);
+            for (ObjectId id : tmp.keySet())
+                allQuestions.put(id, tmp.get(id));
+        }
+
+        return allQuestions;
     }
 
     public void setPatientForm(
@@ -638,9 +663,7 @@ public class PatientServiceInArea {
         SubModule wantedSubModule = module.getSubModules().stream().filter(subModule -> subModule.getId().equals(subModuleId)).findFirst().orElseThrow(InvalidIdException::new);
 
         List<ObjectId> mandatoryQuestionIds = getMandatoryQuestionIds(wantedSubModule.getQuestions());
-        PairValue p = getSubModuleAllQuestions(wantedSubModule.getQuestions());
-        HashMap<ObjectId, A> allQuestions = (HashMap<ObjectId, A>) p.getKey();
-        List<MarkableQuestions> markableQuestions = (List<MarkableQuestions>) p.getValue();
+        HashMap<ObjectId, A> allQuestions = getSubModuleAllQuestions(wantedSubModule.getQuestions());
 
         if (formData.stream()
                 .map(PatientFormData::getQuestionId)
@@ -667,41 +690,67 @@ public class PatientServiceInArea {
                 continue;
 
             A a = allQuestions.get(data.getQuestionId());
+            if(a.getQuestionType().equals(QuestionType.TABLE)) {
 
-            switch (a.getAnswerType()) {
-                case NUMBER:
-                    if (!(data.getAnswer() instanceof Number))
+                String[] splited = data.getAnswer().toString().split("___");
+
+                if(splited.length != a.getCols() * a.getRows())
+                    throw new RuntimeException("پاسخ به سوال " + data.getQuestionId().toString() + " معتبر نیست");
+
+                for(String split : splited) {
+
+                    if (a.getAnswerType().equals(AnswerType.NUMBER) &&
+                            !Utility.isNumeric(split)
+                    )
                         throw new RuntimeException("پاسخ به سوال " + data.getQuestionId().toString() + " باید عدد باشد");
-                    break;
-                case TICK:
-                    List<String> options = a.getOptions()
-                            .stream().map(Object::toString).collect(Collectors.toList());
-                    if (!options.contains(data.getAnswer().toString()))
-                        throw new RuntimeException("گزینه انتخاب شده برای سوال " + data.getQuestionId().toString() + " معتبر نمی باشد");
-                    Optional<MarkableQuestions> markableQuestions1 = markableQuestions.stream().filter(
-                            itr -> itr.getQuestionId().equals(data.getQuestionId()) &&
-                                    itr.getMarks().containsKey(data.getAnswer().toString())
-                    ).findFirst();
-                    if (markableQuestions1.isPresent()) {
 
-                        if (marks == null)
-                            marks = new HashMap<>();
-
-                        MarkableQuestions itr = markableQuestions1.get();
-                        if (marks.containsKey(itr.getParentId()))
-                            marks.put(itr.getParentId(), marks.get(itr.getParentId()) + itr.getMarks().get(data.getAnswer().toString()));
-                        else
-                            marks.put(itr.getParentId(), itr.getMarks().get(data.getAnswer().toString()));
+                    if (a.getAnswerType().equals(AnswerType.DOUBLE)) {
+                        try {
+                            Double.parseDouble(split);
+                        }
+                        catch (Exception x) {
+                            throw new RuntimeException("پاسخ به سوال " + data.getQuestionId().toString() + " باید عدد اعشاری باشد");
+                        }
                     }
-                    break;
-                case TEXT:
-                    if (data.getAnswer().toString().length() > 100)
-                        throw new RuntimeException("پاسخ به سوال " + data.getQuestionId().toString() + " باید حداکثر 100 کاراکتر باشد");
-                    break;
-                case LONG_TEXT:
-                    if (data.getAnswer().toString().length() > 1000)
-                        throw new RuntimeException("پاسخ به سوال " + data.getQuestionId().toString() + " باید حداکثر 1000 کاراکتر باشد");
-                    break;
+                }
+
+            }
+            else {
+                switch (a.getAnswerType()) {
+                    case NUMBER:
+                        if (!(data.getAnswer() instanceof Number))
+                            throw new RuntimeException("پاسخ به سوال " + data.getQuestionId().toString() + " باید عدد باشد");
+                        break;
+                    case TICK:
+
+                        List<String> options = a.getOptions()
+                                .stream().map(Object::toString).collect(Collectors.toList());
+
+                        if (!options.contains(data.getAnswer().toString()))
+                            throw new RuntimeException("گزینه انتخاب شده برای سوال " + data.getQuestionId().toString() + " معتبر نمی باشد");
+
+                        if (a.getQuestionType().equals(QuestionType.CHECK_LIST) &&
+                                a.getMarks() != null && a.getMarks().containsKey(data.getAnswer().toString())
+                        ) {
+
+                            if (marks == null)
+                                marks = new HashMap<>();
+
+                            if (marks.containsKey(a.getParentId()))
+                                marks.put(a.getParentId(), marks.get(a.getParentId()) + a.getMarks().get(data.getAnswer().toString()));
+                            else
+                                marks.put(a.getParentId(), a.getMarks().get(data.getAnswer().toString()));
+                        }
+                        break;
+                    case TEXT:
+                        if (data.getAnswer().toString().length() > 100)
+                            throw new RuntimeException("پاسخ به سوال " + data.getQuestionId().toString() + " باید حداکثر 100 کاراکتر باشد");
+                        break;
+                    case LONG_TEXT:
+                        if (data.getAnswer().toString().length() > 1000)
+                            throw new RuntimeException("پاسخ به سوال " + data.getQuestionId().toString() + " باید حداکثر 1000 کاراکتر باشد");
+                        break;
+                }
             }
 
             PatientAnswer patientAnswer = PatientAnswer
@@ -710,7 +759,7 @@ public class PatientServiceInArea {
                     .answer(data.getAnswer())
                     .build();
 
-            if(a.getCanWriteDesc() && data.getDesc() != null &&
+            if (a.getCanWriteDesc() && data.getDesc() != null &&
                     !data.getDesc().isEmpty())
                 patientAnswer.setDesc(data.getDesc());
 
@@ -736,7 +785,7 @@ public class PatientServiceInArea {
                         .reduce((first, second) -> second);
 
         if (optionalPatientReferral.isEmpty())
-            throw new InvalidIdException();
+            throw new RuntimeException("بیمار مدنظر در ماژول مدنظر پذیرش نشده است");
 
         PatientReferral wantedReferral = optionalPatientReferral.get();
 

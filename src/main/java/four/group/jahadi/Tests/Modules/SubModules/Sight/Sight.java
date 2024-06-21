@@ -14,7 +14,6 @@ public class Sight {
                 .tabName("توان بخشی")
                 .subModules(
                         List.of(
-                                SightGharbal.make(),
                                 SightRoom.make(),
                                 ExternalRefer.make()
                         )

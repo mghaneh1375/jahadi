@@ -25,6 +25,7 @@ public class Audiologists {
                         List.of(
                                 SimpleQuestion
                                         .builder()
+                                        .id(new ObjectId())
                                         .questionType(QuestionType.SIMPLE)
                                         .question("نتیجه اتوسکوپی")
                                         .required(true)
@@ -32,6 +33,7 @@ public class Audiologists {
                                         .build(),
                                 SimpleQuestion
                                         .builder()
+                                        .id(new ObjectId())
                                         .questionType(QuestionType.SIMPLE)
                                         .question("ویزیت")
                                         .required(true)
@@ -39,6 +41,7 @@ public class Audiologists {
                                         .build(),
                                 TableQuestion
                                         .builder()
+                                        .id(new ObjectId())
                                         .required(true)
                                         .title("اطلاعات")
                                         .questionType(QuestionType.TABLE)
@@ -49,6 +52,7 @@ public class Audiologists {
                                         .build(),
                                 TableQuestion
                                         .builder()
+                                        .id(new ObjectId())
                                         .required(true)
                                         .questionType(QuestionType.TABLE)
                                         .headers(List.of("R", "L"))
@@ -68,6 +72,7 @@ public class Audiologists {
                         List.of(
                                 TableQuestion
                                         .builder()
+                                        .id(new ObjectId())
                                         .required(true)
                                         .questionType(QuestionType.TABLE)
                                         .title("Rinne")
@@ -78,6 +83,7 @@ public class Audiologists {
                                         .build(),
                                 TableQuestion
                                         .builder()
+                                        .id(new ObjectId())
                                         .required(true)
                                         .questionType(QuestionType.TABLE)
                                         .title("Weber")
@@ -88,6 +94,7 @@ public class Audiologists {
                                         .build(),
                                 SimpleQuestion
                                         .builder()
+                                        .id(new ObjectId())
                                         .questionType(QuestionType.SIMPLE)
                                         .answerType(AnswerType.TICK)
                                         .options(

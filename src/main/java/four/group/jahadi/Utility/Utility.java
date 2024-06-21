@@ -33,6 +33,9 @@ public class Utility {
         return JalaliCalendar.gregorianToJalali(new JalaliCalendar.YearMonthDate(splited[0], splited[1], splited[2])).format("/") + " - " + dateTime[1];
     }
 
+    public static boolean isNumeric(String str) {
+        return str.matches("-?\\d+(\\.\\d+)?");
+    }
 
     public static String getToday(String delimeter) {
         Locale loc = new Locale("en_US");

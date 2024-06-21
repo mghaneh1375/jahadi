@@ -26,5 +26,6 @@ public class Question implements Serializable {
     @JsonSerialize(using = ObjectIdSerialization.class)
     private ObjectId id;
 
+    @Field("question_type")
     private QuestionType questionType;
 }

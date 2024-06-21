@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import four.group.jahadi.Enums.Module.AnswerType;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -15,6 +16,7 @@ import java.util.List;
 @Getter
 @Setter
 @Document
+@NoArgsConstructor
 @SuperBuilder
 public class TableQuestion extends Question {
 
@@ -36,6 +38,8 @@ public class TableQuestion extends Question {
     @Builder.Default
     private boolean rtl = false;
 
+    @Field("answer_type")
     private AnswerType answerType;
+
     private Boolean required;
 }

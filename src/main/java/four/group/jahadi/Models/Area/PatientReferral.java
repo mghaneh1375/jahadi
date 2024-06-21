@@ -2,7 +2,6 @@ package four.group.jahadi.Models.Area;
 
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import four.group.jahadi.Models.DateSerialization;
 import four.group.jahadi.Models.Model;
@@ -27,6 +26,7 @@ public class PatientReferral extends Model {
     private ObjectId moduleId;
 
     private boolean recepted = false;
+    private String desc;
 
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     private List<PatientForm> forms;

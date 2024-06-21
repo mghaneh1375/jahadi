@@ -3,6 +3,7 @@ package four.group.jahadi.Routes.API.RegionAPIRoutes;
 import four.group.jahadi.DTO.ModuleForms.PatientFormData;
 import four.group.jahadi.DTO.Patient.InquiryPatientData;
 import four.group.jahadi.DTO.Patient.PatientData;
+import four.group.jahadi.DTO.Patient.PatientReferralData;
 import four.group.jahadi.DTO.Patient.TrainFormData;
 import four.group.jahadi.Enums.Insurance;
 import four.group.jahadi.Models.Area.PatientAnswer;
@@ -235,10 +236,11 @@ public class RegionPatientAPIRoutes extends Router {
             HttpServletRequest request,
             @PathVariable @ObjectIdConstraint ObjectId areaId,
             @PathVariable @ObjectIdConstraint ObjectId patientId,
-            @PathVariable @ObjectIdConstraint ObjectId moduleId
+            @PathVariable @ObjectIdConstraint ObjectId moduleId,
+            @RequestBody(required = false) @Valid PatientReferralData data
     ) {
         patientServiceInArea.addReferralForPatientByOwner(
-                getId(request), areaId, patientId, moduleId
+                getId(request), areaId, patientId, moduleId, data.getDesc()
         );
     }
 
@@ -250,10 +252,11 @@ public class RegionPatientAPIRoutes extends Router {
             HttpServletRequest request,
             @PathVariable @ObjectIdConstraint ObjectId areaId,
             @PathVariable @ObjectIdConstraint ObjectId moduleId,
-            @PathVariable @ObjectIdConstraint ObjectId patientId
-    ) {
+            @PathVariable @ObjectIdConstraint ObjectId patientId,
+            @RequestBody(required = false) @Valid PatientReferralData data
+            ) {
         patientServiceInArea.addReferralForPatient(
-                getId(request), areaId, patientId, moduleId
+                getId(request), areaId, patientId, moduleId, data.getDesc()
         );
     }
 
