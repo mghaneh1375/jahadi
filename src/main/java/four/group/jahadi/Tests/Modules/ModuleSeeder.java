@@ -22,11 +22,11 @@ public class ModuleSeeder {
         commonSubModules.put("remoteReferral", RemoteReferral.make());
         commonSubModules.put("paraClinic", ParaClinic.make());
 
-//        for (Module module : DoctorSeeder.seed())
-//            moduleRepository.insert(module);
-//
-//        for (Module module : EmpowermentSeeder.seed())
-//            moduleRepository.insert(module);
+        for (Module module : DoctorSeeder.seed())
+            moduleRepository.insert(module);
+
+        for (Module module : EmpowermentSeeder.seed())
+            moduleRepository.insert(module);
 
         for (Module module : GharbalgariSeeder.seed())
             moduleRepository.insert(module);
