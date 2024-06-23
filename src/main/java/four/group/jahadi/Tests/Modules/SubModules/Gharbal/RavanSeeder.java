@@ -29,6 +29,7 @@ public class RavanSeeder {
                 .builder()
                 .id(new ObjectId())
                 .name("غربال روان")
+                .isReferral(true)
                 .questions(List.of(
                         SimpleQuestion
                                 .builder()

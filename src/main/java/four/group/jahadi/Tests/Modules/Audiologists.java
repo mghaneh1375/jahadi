@@ -21,6 +21,7 @@ public class Audiologists {
                 .builder()
                 .id(new ObjectId())
                 .name("اتاق شنوایی 1")
+                .isReferral(true)
                 .questions(
                         List.of(
                                 SimpleQuestion
@@ -68,6 +69,7 @@ public class Audiologists {
                 .builder()
                 .id(new ObjectId())
                 .name("اتاق شنوایی 2")
+                .isReferral(true)
                 .questions(
                         List.of(
                                 TableQuestion

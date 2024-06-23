@@ -17,6 +17,7 @@ public class Mama {
                 .builder()
                 .id(new ObjectId())
                 .name("غربال مامایی")
+                .isReferral(true)
                 .questions(List.of(
                         CheckListGroupQuestion
                                 .builder()

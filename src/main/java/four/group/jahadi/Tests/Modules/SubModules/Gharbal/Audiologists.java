@@ -18,6 +18,7 @@ public class Audiologists {
                 .builder()
                 .id(new ObjectId())
                 .name("غربال شنوایی")
+                .isReferral(true)
                 .questions(
                         List.of(
                                 CheckListGroupQuestion

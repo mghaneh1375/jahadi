@@ -18,6 +18,7 @@ public class Sight {
                                 ExternalRefer.make()
                         )
                 )
+                .isReferral(true)
                 .build();
     }
 

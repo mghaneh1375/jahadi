@@ -19,14 +19,25 @@ public class DoctorSeeder {
                         .builder()
                         .tabName("پزشک")
                         .icon("")
+                        .isReferral(true)
                         .name("پزشک عمومی")
                         .subModules(
                                 List.of(
                                         commonSubModules.get("visit"),
-                                        commonSubModules.get("drug"),
+//                                        commonSubModules.get("drug"),
                                         commonSubModules.get("externalReferral"),
-                                        commonSubModules.get("paraClinic"),
-                                        commonSubModules.get("experiment"),
+                                        commonSubModules.get("paraClinic")
+//                                        commonSubModules.get("experiment"),
+                                )
+                        )
+                        .build(),
+                Module
+                        .builder()
+                        .tabName("پزشک")
+                        .icon("")
+                        .name("آموزش پس از پزشک")
+                        .subModules(
+                                List.of(
                                         SubModule
                                                 .builder()
                                                 .name("آموزش پس از پزشک")

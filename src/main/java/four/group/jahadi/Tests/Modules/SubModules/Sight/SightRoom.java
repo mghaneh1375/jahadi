@@ -19,6 +19,7 @@ public class SightRoom {
                 .builder()
                 .id(new ObjectId())
                 .name("اتاق بینایی")
+                .isReferral(true)
                 .questions(
                         List.of(
                                 SimpleQuestion

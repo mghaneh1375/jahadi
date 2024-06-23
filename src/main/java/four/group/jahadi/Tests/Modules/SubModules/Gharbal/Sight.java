@@ -18,6 +18,7 @@ public class Sight {
                 .builder()
                 .id(new ObjectId())
                 .name("غربال بینایی")
+                .isReferral(true)
                 .questions(
                         List.of(
                                 CheckListGroupQuestion

@@ -18,6 +18,7 @@ public class General {
                 .builder()
                 .id(new ObjectId())
                 .name("غربالگری کلی")
+                .isReferral(true)
                 .questions(
                         List.of(
                                 CheckListGroupQuestion

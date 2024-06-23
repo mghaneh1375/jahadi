@@ -15,6 +15,7 @@ public class SightGharbal {
         SubModule subModule = SubModule
                 .builder()
                 .id(new ObjectId())
+                .isReferral(true)
                 .name("غربال بینایی")
                 .questions(
                         List.of(
