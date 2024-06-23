@@ -21,8 +21,7 @@ public class GharbalgariSeeder {
                                 List.of(
                                         General.make(),
                                         Sight.make(),
-                                        commonSubModules.get("experiment"),
-                                        commonSubModules.get("internalReferral"),
+//                                        commonSubModules.get("experiment"),
                                         Audiologists.make(),
                                         Mama.make()
                                 )

@@ -25,7 +25,6 @@ public class DoctorSeeder {
                                         commonSubModules.get("visit"),
                                         commonSubModules.get("drug"),
                                         commonSubModules.get("externalReferral"),
-                                        commonSubModules.get("internalReferral"),
                                         commonSubModules.get("paraClinic"),
                                         commonSubModules.get("experiment"),
                                         SubModule

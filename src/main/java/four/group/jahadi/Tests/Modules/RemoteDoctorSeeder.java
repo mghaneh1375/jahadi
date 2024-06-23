@@ -22,7 +22,6 @@ public class RemoteDoctorSeeder {
                                 commonSubModules.get("visit"),
                                 commonSubModules.get("experiment"),
                                 commonSubModules.get("externalReferral"),
-                                commonSubModules.get("internalReferral"),
                                 commonSubModules.get("remoteReferral"),
                                 commonSubModules.get("paraClinic"),
                                 SubModule

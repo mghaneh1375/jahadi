@@ -18,7 +18,6 @@ public class ModuleSeeder {
         commonSubModules.put("experiment", Experiment.make());
         commonSubModules.put("drug", Drug.make());
         commonSubModules.put("externalReferral", ExternalReferral.make());
-        commonSubModules.put("internalReferral", InternalReferral.make());
         commonSubModules.put("remoteReferral", RemoteReferral.make());
         commonSubModules.put("paraClinic", ParaClinic.make());
 

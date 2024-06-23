@@ -35,4 +35,6 @@ public class SubModule {
     @JsonIgnore
     private String postAction;
 
+    @Field("is_referral")
+    private boolean isReferral = true;
 }
