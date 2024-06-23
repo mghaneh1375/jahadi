@@ -17,11 +17,13 @@ public class ParaClinic {
     public static SubModule make() {
         return SubModule
                 .builder()
+                .id(new ObjectId())
                 .name("خدمات پاراکلینیک")
                 .questions(
                         List.of(
                                 SimpleQuestion
                                         .builder()
+                                        .id(new ObjectId())
                                         .required(true)
                                         .questionType(QuestionType.SIMPLE)
                                         .answerType(AnswerType.TEXT)
@@ -29,6 +31,7 @@ public class ParaClinic {
                                         .build(),
                                 SimpleQuestion
                                         .builder()
+                                        .id(new ObjectId())
                                         .required(true)
                                         .questionType(QuestionType.SIMPLE)
                                         .answerType(AnswerType.TEXT)
@@ -36,6 +39,7 @@ public class ParaClinic {
                                         .build(),
                                 CheckListGroupQuestion
                                         .builder()
+                                        .id(new ObjectId())
                                         .questionType(QuestionType.CHECK_LIST)
                                         .sectionTitle("خدمات پاراکلینیک")
                                         .options(
@@ -63,6 +67,7 @@ public class ParaClinic {
                                         .build(),
                                 SimpleQuestion
                                         .builder()
+                                        .id(new ObjectId())
                                         .questionType(QuestionType.SIMPLE)
                                         .answerType(AnswerType.LONG_TEXT)
                                         .question("توضیحات")
