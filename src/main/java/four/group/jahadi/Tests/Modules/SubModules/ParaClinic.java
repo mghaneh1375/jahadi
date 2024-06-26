@@ -2,6 +2,7 @@ package four.group.jahadi.Tests.Modules.SubModules;
 
 import four.group.jahadi.Enums.Module.AnswerType;
 import four.group.jahadi.Enums.Module.QuestionType;
+import four.group.jahadi.Models.Module;
 import four.group.jahadi.Models.Question.CheckListGroupQuestion;
 import four.group.jahadi.Models.Question.SimpleQuestion;
 import four.group.jahadi.Models.SubModule;
@@ -14,8 +15,20 @@ import java.util.stream.Collectors;
 
 public class ParaClinic {
 
-    public static SubModule make() {
-        return SubModule
+    public static Module seed(
+            ObjectId miniParaClinicModuleId,
+            ObjectId miniParaClinicSubModuleId
+    ) {
+
+        SubModule history = SubModule
+                .builder()
+                .id(new ObjectId())
+                .name("مشاهده تجویز قبلی")
+                .readOnlyModuleId(miniParaClinicModuleId)
+                .readOnlySubModuleId(miniParaClinicSubModuleId)
+                .build();
+
+        SubModule services = SubModule
                 .builder()
                 .id(new ObjectId())
                 .name("خدمات پاراکلینیک")
@@ -59,6 +72,7 @@ public class ParaClinic {
                                                                         .questionType(QuestionType.SIMPLE)
                                                                         .question(itr.getFaTranslate())
                                                                         .answerType(AnswerType.TICK)
+                                                                        .canWriteDesc(true)
                                                                         .build()
                                                         ).collect(Collectors.toList())
                                         )
@@ -75,6 +89,14 @@ public class ParaClinic {
                                         .build()
                         )
                 )
+                .build();
+
+        return Module
+                .builder()
+                .tabName("پاراکلینیک")
+                .name("پاراکلینیک")
+                .icon("")
+                .subModules(List.of(history, services))
                 .build();
     }
 

@@ -19,10 +19,12 @@ public class ModuleSeeder {
         commonSubModules.put("drug", Drug.make());
         commonSubModules.put("externalReferral", ExternalReferral.make());
         commonSubModules.put("remoteReferral", RemoteReferral.make());
-        commonSubModules.put("paraClinic", ParaClinic.make());
+        commonSubModules.put("paraClinic", MiniParaClinic.make());
 
         for (Module module : DoctorSeeder.seed())
             moduleRepository.insert(module);
+
+        moduleRepository.insert(ParaClinic.seed());
 
         for (Module module : EmpowermentSeeder.seed())
             moduleRepository.insert(module);

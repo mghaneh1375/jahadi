@@ -836,18 +836,34 @@ public class PatientServiceInArea {
                 areaId, patientId
         ).orElseThrow(InvalidIdException::new);
 
+        Module wantedModule = moduleRepository.findById(moduleId).orElseThrow(RuntimeException::new);
+        SubModule wantedSubModule = wantedModule.getSubModules().stream().filter(subModule -> subModule.getId().equals(subModuleId))
+                .findFirst().orElseThrow(RuntimeException::new);
+
+        ObjectId wantedModuleId = moduleId;
+        ObjectId wantedSubModuleId = subModuleId;
+
+        if(wantedSubModule.getReadOnlyModuleId() != null &&
+                wantedSubModule.getReadOnlySubModuleId() != null
+        ) {
+            wantedModuleId = wantedSubModule.getReadOnlyModuleId();
+            wantedSubModuleId = wantedSubModule.getReadOnlySubModuleId();
+        }
+
+        ObjectId finalWantedModuleId = wantedModuleId;
         Optional<PatientReferral> optionalPatientReferral =
                 patientInArea.getReferrals().stream()
-                        .filter(patientReferral -> patientReferral.getModuleId().equals(moduleId))
+                        .filter(patientReferral -> patientReferral.getModuleId().equals(finalWantedModuleId))
                         .reduce((first, second) -> second);
 
         if (optionalPatientReferral.isEmpty())
             throw new RuntimeException("فرمی برای این ماژول ثبت نشده است");
 
+        ObjectId finalWantedSubModuleId = wantedSubModuleId;
         PatientForm wantedPatientForm =
                 optionalPatientReferral.get()
                         .getForms().stream()
-                        .filter(patientForm -> patientForm.getSubModuleId().equals(subModuleId))
+                        .filter(patientForm -> patientForm.getSubModuleId().equals(finalWantedSubModuleId))
                         .reduce((first, second) -> second)
                         .stream().findFirst()
                         .orElseThrow(() -> {
