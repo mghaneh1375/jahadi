@@ -5,6 +5,7 @@ import four.group.jahadi.Models.SubModule;
 import four.group.jahadi.Repository.ModuleRepository;
 import four.group.jahadi.Tests.Modules.SubModules.ParaClinic;
 import four.group.jahadi.Tests.Modules.SubModules.*;
+import org.bson.types.ObjectId;
 
 import java.util.HashMap;
 
@@ -19,12 +20,19 @@ public class ModuleSeeder {
         commonSubModules.put("drug", Drug.make());
         commonSubModules.put("externalReferral", ExternalReferral.make());
         commonSubModules.put("remoteReferral", RemoteReferral.make());
-        commonSubModules.put("paraClinic", MiniParaClinic.make());
 
-        for (Module module : DoctorSeeder.seed())
+        SubModule miniParaClinic = MiniParaClinic.make();
+        commonSubModules.put("paraClinic", miniParaClinic);
+
+        ObjectId doctorModuleId = null;
+
+        for (Module module : DoctorSeeder.seed()) {
+            if(doctorModuleId == null)
+                doctorModuleId = module.getId();
             moduleRepository.insert(module);
+        }
 
-        moduleRepository.insert(ParaClinic.seed());
+        moduleRepository.insert(ParaClinic.seed(doctorModuleId, miniParaClinic.getId()));
 
         for (Module module : EmpowermentSeeder.seed())
             moduleRepository.insert(module);
