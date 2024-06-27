@@ -114,50 +114,12 @@ public class RavanSeeder {
                                                 .build()
                                 ))
                                 .build(),
-                        CheckListGroupQuestion
-                                .builder()
-                                .questionType(QuestionType.CHECK_LIST)
-                                .markable(true)
-                                .id(new ObjectId())
-                                .options(
-                                        Arrays.stream(RavanAnswers.values()).map(
-                                                itr -> new PairValue(itr.name(), itr.getFaTranslate())
-                                        ).collect(Collectors.toList())
-                                )
-                                .marks(marks)
-                                .questions(List.of(
-                                        SimpleQuestion
-                                                .builder()
-                                                .id(new ObjectId())
-                                                .questionType(QuestionType.SIMPLE)
-                                                .answerType(AnswerType.TICK)
-                                                .required(true)
-                                                .question("آیا در یک ماه گذشته در رابطه خود احساس تنهایی داشته اید و رابطه شما راضی کننده نبوده است؟")
-                                                .build(),
-                                        SimpleQuestion
-                                                .builder()
-                                                .id(new ObjectId())
-                                                .questionType(QuestionType.SIMPLE)
-                                                .answerType(AnswerType.TICK)
-                                                .required(true)
-                                                .question("در یک ماه گذشته چقدر با همسر خود به مشکل خورده اید و دعوا کرده اید؟")
-                                                .build()
-                                ))
-                                .build(),
                         SimpleQuestion
                                 .builder()
                                 .questionType(QuestionType.SIMPLE)
                                 .id(new ObjectId())
                                 .answerType(AnswerType.LONG_TEXT)
                                 .question("توضیحات تکمیلی")
-                                .build(),
-                        SimpleQuestion
-                                .builder()
-                                .questionType(QuestionType.SIMPLE)
-                                .id(new ObjectId())
-                                .answerType(AnswerType.NUMBER)
-                                .question("توضیحات تکمیلی")
-                                .canWriteDesc(true)
                                 .build(),
                         SimpleQuestion
                                 .builder()
@@ -192,6 +154,44 @@ public class RavanSeeder {
                                 )
                                 .question("نیاز به پیشگیری از اعتیاد؟")
                                 .required(true)
+                                .build(),
+                        CheckListGroupQuestion
+                                .builder()
+                                .questionType(QuestionType.CHECK_LIST)
+                                .markable(true)
+                                .id(new ObjectId())
+                                .options(
+                                        Arrays.stream(RavanAnswers.values()).map(
+                                                itr -> new PairValue(itr.name(), itr.getFaTranslate())
+                                        ).collect(Collectors.toList())
+                                )
+                                .marks(marks)
+                                .questions(List.of(
+                                        SimpleQuestion
+                                                .builder()
+                                                .id(new ObjectId())
+                                                .questionType(QuestionType.SIMPLE)
+                                                .answerType(AnswerType.TICK)
+                                                .required(true)
+                                                .question("آیا در یک ماه گذشته در رابطه خود احساس تنهایی داشته اید و رابطه شما راضی کننده نبوده است؟")
+                                                .build(),
+                                        SimpleQuestion
+                                                .builder()
+                                                .id(new ObjectId())
+                                                .questionType(QuestionType.SIMPLE)
+                                                .answerType(AnswerType.TICK)
+                                                .required(true)
+                                                .question("در یک ماه گذشته چقدر با همسر خود به مشکل خورده اید و دعوا کرده اید؟")
+                                                .build()
+                                ))
+                                .build(),
+                        SimpleQuestion
+                                .builder()
+                                .questionType(QuestionType.SIMPLE)
+                                .id(new ObjectId())
+                                .answerType(AnswerType.NUMBER)
+                                .question("توضیحات تکمیلی")
+                                .canWriteDesc(true)
                                 .build()
                 ))
                 .build();
