@@ -62,6 +62,7 @@ public class DoctorSeeder {
                                 List.of(
                                         SubModule
                                                 .builder()
+                                                .id(new ObjectId())
                                                 .name("آموزش پس از پزشک")
                                                 .questions(
                                                         List.of(

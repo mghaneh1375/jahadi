@@ -189,9 +189,8 @@ public class RavanSeeder {
                                 .builder()
                                 .questionType(QuestionType.SIMPLE)
                                 .id(new ObjectId())
-                                .answerType(AnswerType.NUMBER)
+                                .answerType(AnswerType.LONG_TEXT)
                                 .question("توضیحات تکمیلی")
-                                .canWriteDesc(true)
                                 .build()
                 ))
                 .build();

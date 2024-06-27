@@ -23,16 +23,16 @@ public class Visit {
                                 .question("توضیحات")
                                 .required(true)
                                 .answerType(AnswerType.LONG_TEXT)
-                                .build(),
-                        SimpleQuestion
-                                .builder()
-                                .id(new ObjectId())
-                                .questionType(QuestionType.SIMPLE)
-                                .question("دارو")
-                                .required(false)
-                                .answerType(AnswerType.MULTI_SELECT)
-                                .dynamicOptions("drugs")
                                 .build()
+//                        SimpleQuestion
+//                                .builder()
+//                                .id(new ObjectId())
+//                                .questionType(QuestionType.SIMPLE)
+//                                .question("دارو")
+//                                .required(false)
+//                                .answerType(AnswerType.MULTI_SELECT)
+//                                .dynamicOptions("drugs")
+//                                .build()
                 ))
                 .build();
 

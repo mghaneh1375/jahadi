@@ -39,8 +39,10 @@ public class SubModule {
     private boolean isReferral = true;
 
     @Field("readonly_module_id")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private ObjectId readOnlyModuleId;
 
     @Field("readonly_sub_module_id")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private ObjectId readOnlySubModuleId;
 }
