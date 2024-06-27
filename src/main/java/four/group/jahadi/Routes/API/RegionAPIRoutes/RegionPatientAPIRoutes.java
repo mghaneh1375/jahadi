@@ -256,7 +256,7 @@ public class RegionPatientAPIRoutes extends Router {
             @RequestBody(required = false) @Valid PatientReferralData data
             ) {
         patientServiceInArea.addReferralForPatient(
-                getId(request), areaId, patientId, moduleId, data.getDesc()
+                getId(request), areaId, patientId, moduleId, data != null ? data.getDesc() : null
         );
     }
 
