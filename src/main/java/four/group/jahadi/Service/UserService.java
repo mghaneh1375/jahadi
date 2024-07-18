@@ -687,7 +687,7 @@ public class UserService extends AbstractService<User, SignUpData> {
         if(Objects.equals(user.getRole(), Access.JAHADI)) {
             Date currDate = Utility.getCurrDate();
             user.setHasActiveRegion(tripRepository.existNotFinishedByAreaOwnerId(currDate, userId));
-            user.setHasActiveTask(tripRepository.existNotFinishedResponsibleId(currDate, userId));
+            user.setHasActiveTask(tripRepository.existNotFinishedByResponsibleId(currDate, userId));
         }
 
         return new ResponseEntity<>(

@@ -313,7 +313,7 @@ public class ModuleServiceInArea {
     }
 
 
-    public void addSecretariesToModule(ObjectId userId, ObjectId areaId,
+    public synchronized void addSecretariesToModule(ObjectId userId, ObjectId areaId,
                                        ObjectId moduleIdInArea, List<ObjectId> userIds) {
 
         Object[] tmp = checkUsers(userId, areaId, userIds, tripRepository);
