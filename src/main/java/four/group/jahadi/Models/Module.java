@@ -25,15 +25,17 @@ public class Module extends Model {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<SubModule> subModules;
 
-    @Field("has_access_to_full_docs")
-    private boolean hasAccessToFullDocs;
-
-    @Field("has_access_to_upload_doc")
-    private boolean hasAccessToUploadDoc;
-
     private String icon;
 
     @Field("is_referral")
+    @Builder.Default
     private boolean isReferral = true;
 
+    @Field("can_suggest_drug")
+    @Builder.Default
+    private boolean canSuggestDrug = false;
+
+    @Field("can_suggest_experiment")
+    @Builder.Default
+    private boolean canSuggestExperiment = false;
 }

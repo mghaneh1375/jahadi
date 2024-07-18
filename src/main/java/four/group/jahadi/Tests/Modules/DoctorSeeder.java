@@ -7,6 +7,9 @@ import four.group.jahadi.Models.Module;
 import four.group.jahadi.Models.Question.CheckListGroupQuestion;
 import four.group.jahadi.Models.Question.SimpleQuestion;
 import four.group.jahadi.Models.SubModule;
+import four.group.jahadi.Tests.Modules.SubModules.ExternalReferral;
+import four.group.jahadi.Tests.Modules.SubModules.MiniParaClinic;
+import four.group.jahadi.Tests.Modules.SubModules.Visit;
 import four.group.jahadi.Utility.PairValue;
 import org.bson.types.ObjectId;
 
@@ -14,7 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static four.group.jahadi.Tests.Modules.ModuleSeeder.commonSubModules;
+import static four.group.jahadi.Tests.Modules.ModuleSeeder.miniParaClinicId;
 
 public class DoctorSeeder {
 
@@ -29,13 +32,13 @@ public class DoctorSeeder {
                         .name("پزشک عمومی")
                         .subModules(
                                 List.of(
-                                        commonSubModules.get("visit"),
-//                                        commonSubModules.get("drug"),
-                                        commonSubModules.get("externalReferral"),
-                                        commonSubModules.get("paraClinic")
-//                                        commonSubModules.get("experiment"),
+                                        Visit.make(),
+                                        ExternalReferral.make(),
+                                        MiniParaClinic.make(miniParaClinicId)
                                 )
                         )
+                        .canSuggestDrug(true)
+                        .canSuggestExperiment(true)
                         .build(),
                 Module
                         .builder()
@@ -45,13 +48,13 @@ public class DoctorSeeder {
                         .name("دورا پزشک")
                         .subModules(
                                 List.of(
-                                        commonSubModules.get("visit"),
-//                                        commonSubModules.get("drug"),
-                                        commonSubModules.get("externalReferral"),
-                                        commonSubModules.get("paraClinic")
-//                                        commonSubModules.get("experiment"),
+                                        Visit.make(),
+                                        ExternalReferral.make(),
+                                        MiniParaClinic.make()
                                 )
                         )
+                        .canSuggestDrug(true)
+                        .canSuggestExperiment(true)
                         .build(),
                 Module
                         .builder()

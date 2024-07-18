@@ -1,4 +1,4 @@
-package four.group.jahadi.Tests.Modules.SubModules;
+package four.group.jahadi.Tests.Modules.SubModules.Expertise;
 
 import four.group.jahadi.Enums.Module.AnswerType;
 import four.group.jahadi.Enums.Module.QuestionType;
@@ -12,47 +12,26 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class MiniParaClinic {
+public class WomenServicePlusSeeder {
     public static SubModule make() {
-        return doMake(new ObjectId());
-    }
-
-    public static SubModule make(ObjectId miniParaClinicId) {
-        return doMake(miniParaClinicId);
-    }
-
-    public static SubModule doMake(ObjectId customId) {
         return SubModule
                 .builder()
-                .id(customId)
-                .name("خدمات پاراکلینیک")
+                .id(new ObjectId())
+                .name("خدمات پلاس")
                 .questions(
                         List.of(
-//                                SimpleQuestion
-//                                        .builder()
-//                                        .id(new ObjectId())
-//                                        .required(true)
-//                                        .questionType(QuestionType.SIMPLE)
-//                                        .answerType(AnswerType.TEXT)
-//                                        .question("توضیحات (مربوط به عملیات احیا)")
-//                                        .build(),
-//                                SimpleQuestion
-//                                        .builder()
-//                                        .id(new ObjectId())
-//                                        .required(true)
-//                                        .questionType(QuestionType.SIMPLE)
-//                                        .answerType(AnswerType.TEXT)
-//                                        .question("افرادی که حضور داشتند")
-//                                        .build(),
                                 CheckListGroupQuestion
                                         .builder()
                                         .id(new ObjectId())
                                         .questionType(QuestionType.CHECK_LIST)
-                                        .sectionTitle("خدمات پاراکلینیک")
+                                        .sectionTitle("خدمات پلاس")
                                         .options(
-                                                List.of(
-                                                        new PairValue("SUGGEST", "تجویز خدمت")
-                                                )
+                                                Arrays.stream(four.group.jahadi.Enums.Module.DoneOrNot.values())
+                                                        .map(itr -> new PairValue(
+                                                                itr.name(),
+                                                                itr.getFaTranslate()
+                                                        ))
+                                                        .collect(Collectors.toList())
                                         )
                                         .questions(
                                                 Arrays.stream(four.group.jahadi.Enums.Module.LimitedParaClinic.values())
@@ -67,11 +46,13 @@ public class MiniParaClinic {
                                                                         .build()
                                                         ).collect(Collectors.toList())
                                         )
-                                        .canWriteDesc(true)
+                                        .canWriteReport(true)
+                                        .canWriteReason(true)
+                                        .canWriteSampleInfoDesc(true)
+                                        .canUploadFile(true)
                                         .build()
                         )
                 )
                 .build();
     }
-
 }

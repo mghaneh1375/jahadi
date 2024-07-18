@@ -12,7 +12,8 @@ public class EmpowermentSeeder {
         return List.of(
                 Sight.seed(),
                 SightGharbal.seed(),
-                Audiologists.seed()
+                Audiologists.seed(),
+                PsychologySeeder.seed()
         );
     }
 }

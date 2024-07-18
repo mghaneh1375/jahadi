@@ -77,11 +77,6 @@ public class ModuleService {
             module = new Module();
 
         module.setName(moduleData.getName());
-//        module.setSection(moduleData.getSection());
-//
-//        module.setCanSuggestDrug(moduleData.isCanSuggestDrug());
-        module.setHasAccessToFullDocs(moduleData.isHasAccessToFullDocs());
-        module.setHasAccessToUploadDoc(moduleData.isHasAccessToUploadDoc());
 
         return module;
     }

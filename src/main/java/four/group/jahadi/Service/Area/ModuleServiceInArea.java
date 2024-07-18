@@ -66,6 +66,7 @@ public class ModuleServiceInArea {
                         .id(new ObjectId())
                         .moduleId(objectId)
                         .moduleName(foundModule.getName())
+                        .moduleTabName(foundModule.getTabName())
                         .build()
                 );
             }
@@ -108,13 +109,13 @@ public class ModuleServiceInArea {
                 foundArea.getModules().stream().map(ModuleInArea::getModuleId).collect(Collectors.toList())
         );
 
-        if(areaModules.size() == 0)
+        if (areaModules.size() == 0)
             return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
 
         List<ModuleInArea> output = new ArrayList<>();
 
         modules.forEach(moduleInArea -> {
-            if(areaModules.stream()
+            if (areaModules.stream()
                     .noneMatch(module -> module.getId().equals(moduleInArea.getModuleId()) && module.getTabName().equals(tabName)))
                 return;
 
@@ -268,7 +269,7 @@ public class ModuleServiceInArea {
         return new Object[]{wantedTrip, area};
     }
 
-    public void addMembersToModule(ObjectId userId, ObjectId areaId,
+    public synchronized void addMembersToModule(ObjectId userId, ObjectId areaId,
                                    ObjectId moduleIdInArea, List<ObjectId> userIds) {
 
         Object[] tmp = checkUsers(userId, areaId, userIds, tripRepository);

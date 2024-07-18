@@ -11,10 +11,9 @@ import java.util.List;
 public class Visit {
 
     public static SubModule make() {
-
         return SubModule.builder()
                 .id(new ObjectId())
-                .name("ویزیت")
+                .name("ویزیت و تشخیص")
                 .questions(List.of(
                         SimpleQuestion
                                 .builder()

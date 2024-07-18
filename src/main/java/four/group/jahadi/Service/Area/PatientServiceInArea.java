@@ -359,18 +359,10 @@ public class PatientServiceInArea {
 
     public ResponseEntity<List<PatientReferral>> getPatientReferrals(ObjectId userId, ObjectId areaId, ObjectId patientId) {
 
-        Trip trip = tripRepository.findActiveByAreaIdAndTrainerId(areaId, userId, Utility.getCurrDate())
+        Trip trip = tripRepository.findActiveByAreaIdAndResponsibleId(areaId, userId, Utility.getCurrDate())
                 .orElseThrow(NotAccessException::new);
 
         Area foundArea = findStartedArea(trip, areaId);
-//        if (!foundArea.getOwnerId().equals(userId) &&
-//                (
-//                        foundArea.getTrainers() == null ||
-//                                !foundArea.getTrainers().contains(userId)
-//                )
-//        )
-//            throw new NotAccessException();
-
         PatientsInArea patient = patientsInAreaRepository.findByAreaIdAndPatientId(areaId, patientId)
                 .orElseThrow(InvalidIdException::new);
 
@@ -379,17 +371,19 @@ public class PatientServiceInArea {
             return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
 
         List<ModuleInArea> modules = foundArea.getModules();
-        HashMap<ObjectId, String> moduleNames = new HashMap<>();
+        HashMap<ObjectId, PairValue> moduleNames = new HashMap<>();
 
         referrals.forEach(patientReferral -> {
             patientReferral.setForms(null);
-            if (moduleNames.containsKey(patientReferral.getModuleId()))
-                patientReferral.setModuleName(moduleNames.get(patientReferral.getModuleId()));
+            if (moduleNames.containsKey(patientReferral.getModuleId())) {
+                patientReferral.setModuleName(moduleNames.get(patientReferral.getModuleId()).getKey().toString());
+                patientReferral.setModuleTabName(moduleNames.get(patientReferral.getModuleId()).getValue().toString());
+            }
             else {
                 modules.stream().filter(module -> module.getModuleId().equals(patientReferral.getModuleId()))
                         .findFirst().ifPresent(module -> {
                             patientReferral.setModuleName(module.getModuleName());
-                            moduleNames.put(module.getModuleId(), module.getModuleName());
+                            moduleNames.put(module.getModuleId(), new PairValue(module.getModuleName(), module.getModuleTabName()));
                         });
             }
         });

@@ -6,7 +6,6 @@ import four.group.jahadi.Tests.Modules.SubModules.Gharbal.Audiologists;
 
 import java.util.List;
 
-import static four.group.jahadi.Tests.Modules.ModuleSeeder.commonSubModules;
 
 public class GharbalgariSeeder {
 

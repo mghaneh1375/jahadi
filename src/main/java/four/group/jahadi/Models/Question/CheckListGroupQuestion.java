@@ -29,6 +29,22 @@ public class CheckListGroupQuestion extends Question {
     private Boolean canWriteDesc = false;
 
     @Builder.Default
+    @Field("can_write_report")
+    private Boolean canWriteReport = false;
+
+    @Builder.Default
+    @Field("can_write_reason")
+    private Boolean canWriteReason = false;
+
+    @Builder.Default
+    @Field("can_write_sample_info_desc")
+    private Boolean canWriteSampleInfoDesc = false;
+
+    @Builder.Default
+    @Field("can_write_time")
+    private Boolean canWriteTime = false;
+
+    @Builder.Default
     @Field("can_update_file")
     private Boolean canUploadFile = false;
 

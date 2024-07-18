@@ -71,7 +71,7 @@ public interface TripRepository extends MongoRepository<Trip, ObjectId>, Filtera
     @Query(value = "{'areas.id': ?0, 'areas.ownerId': ?1}")
     Optional<Trip> findByAreaIdAndOwnerId(ObjectId areaId, ObjectId areaOwnerId);
 
-    @Query(value = "{$and: [{'areas.finished': true}, {'areas.id': ?0}, {'areas.modules.moduleId': ?2}, {$or: [{'areas.ownerId': ?1}, {'areas.members': ?1}]}]  }")
+    @Query(value = "{'areas': {$elemMatch: {'finished': true, 'id': ?0, 'modules.moduleId': ?2, $or: [{'areas.ownerId': ?1}, {'areas.members': ?1}] }} }")
     Optional<Trip> findByAreaIdAndResponsibleIdAndModuleId(ObjectId areaId, ObjectId userId, ObjectId moduleId);
 
     @Query(value = "{$and: [{'areas.finished': true}, {'areas.startAt': {$lte: ?2}}, {'areas.endAt': {$gte: ?2}}, {'areas.id': ?0}, {$or: [{'areas.ownerId': ?1}, {'areas.insurancers': ?1}]}] }")
@@ -83,10 +83,13 @@ public interface TripRepository extends MongoRepository<Trip, ObjectId>, Filtera
     @Query(value = "{$and: [{'areas.finished': true}, {'areas.endAt': {$gte: ?2}}, {'areas.id': ?0}, {$or: [{'areas.ownerId': ?1}, {'areas.pharmacyManager': ?1}]}] }")
     Optional<Trip> findActiveByAreaIdAndPharmacyManager(ObjectId areaId, ObjectId userId, Date curr);
 
-    @Query(value = "{$and: [{'areas.finished': true}, {'areas.startAt': {$lte: ?2}}, {'areas.endAt': {$gte: ?2}}, {'areas.id': ?0}, {$or: [{'areas.ownerId': ?1}, {'areas.trainers': ?1}]}] }")
+    @Query(value = "{ 'areas': {$elemMatch: { 'finished': true, 'startAt': {$lte: ?2}, 'endAt': {$gte: ?2}, 'id': ?0, $or: [{'ownerId': ?1}, {'trainers': ?1}] } } }")
     Optional<Trip> findActiveByAreaIdAndTrainerId(ObjectId areaId, ObjectId userId, Date curr);
 
-    @Query(value = "{$and: [{'areas.id': ?0}, {$or: [{'areas.ownerId': ?1}, {'areas.members': ?1}]}]  }")
+    @Query(value = "{ 'areas': {$elemMatch: { 'finished': true, 'startAt': {$lte: ?2}, 'endAt': {$gte: ?2}, 'id': ?0, $or: [{'ownerId': ?1}, {'members': ?1}] } } }")
+    Optional<Trip> findActiveByAreaIdAndResponsibleId(ObjectId areaId, ObjectId userId, Date curr);
+
+    @Query(value = "{ 'areas': {$elemMatch: { 'id': ?0, $or: [{'ownerId': ?1}, {'members': ?1}] }} }")
     Optional<Trip> findByAreaIdAndResponsibleId(ObjectId areaId, ObjectId userId);
 
     @Query(value = "{$and: [{'areas.startAt': {$lte: ?2}}, {'areas.endAt': {$gte: ?2}}, {'areas.id': ?0}, {$or: [{'areas.ownerId': ?1}, {'areas.dispatchers': ?1}]}]  }")

@@ -11,20 +11,13 @@ import java.util.HashMap;
 
 public class ModuleSeeder {
 
-    public static HashMap<String, SubModule> commonSubModules = new HashMap<>();
+    public static ObjectId doctorModuleId;
+    public static ObjectId miniParaClinicId;
+
 
     public static void seed(ModuleRepository moduleRepository) {
 
-        commonSubModules.put("visit", Visit.make());
-        commonSubModules.put("experiment", Experiment.make());
-        commonSubModules.put("drug", Drug.make());
-        commonSubModules.put("externalReferral", ExternalReferral.make());
-        commonSubModules.put("remoteReferral", RemoteReferral.make());
-
-        SubModule miniParaClinic = MiniParaClinic.make();
-        commonSubModules.put("paraClinic", miniParaClinic);
-
-        ObjectId doctorModuleId = null;
+        miniParaClinicId = new ObjectId();
 
         for (Module module : DoctorSeeder.seed()) {
             if(doctorModuleId == null)
@@ -32,13 +25,17 @@ public class ModuleSeeder {
             moduleRepository.insert(module);
         }
 
-        moduleRepository.insert(ParaClinic.seed(doctorModuleId, miniParaClinic.getId()));
+        moduleRepository.insert(ParaClinic.seed(doctorModuleId, miniParaClinicId));
 
         for (Module module : EmpowermentSeeder.seed())
             moduleRepository.insert(module);
 
         for (Module module : GharbalgariSeeder.seed())
             moduleRepository.insert(module);
+
+        for(Module module : ExpertiseSeeder.seed())
+            moduleRepository.insert(module);
+
     }
 
 }

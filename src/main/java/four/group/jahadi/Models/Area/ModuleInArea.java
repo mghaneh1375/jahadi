@@ -38,6 +38,9 @@ public class ModuleInArea {
     @Field("module_name")
     private String moduleName;
 
+    @Field("module_tab_name")
+    private String moduleTabName;
+
     @JsonIgnore
     @Builder.Default
     private List<ObjectId> members = new ArrayList<>();
