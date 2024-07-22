@@ -32,6 +32,8 @@ public class PsychologySeeder {
                                                         CheckListGroupQuestion
                                                                 .builder()
                                                                 .id(new ObjectId())
+                                                                .questionType(QuestionType.CHECK_LIST)
+                                                                .sectionTitle("خدمات روان شناس")
                                                                 .options(
                                                                         Arrays.stream(four.group.jahadi.Enums.Module.DoneOrNot.values())
                                                                                 .map(itr -> new PairValue(

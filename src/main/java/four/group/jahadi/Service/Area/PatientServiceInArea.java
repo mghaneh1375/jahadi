@@ -327,7 +327,7 @@ public class PatientServiceInArea {
                         .description(data.getDescription())
                         .recvShampoo(data.getRecvShampoo())
                         .recvCulturePackage(data.getRecvCulturePackage())
-                        .BMI(data.getWeight() / Math.pow(data.getHeight(), 2))
+                        .BMI(data.getWeight() / Math.pow(data.getHeight() / 100, 2))
                         .build()
         );
         patientsInAreaRepository.save(patient);

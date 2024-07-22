@@ -1,6 +1,7 @@
 package four.group.jahadi.Models.Question;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import four.group.jahadi.Utility.PairValue;
 import lombok.Builder;
 import lombok.Getter;
@@ -26,30 +27,37 @@ public class CheckListGroupQuestion extends Question {
 
     @Builder.Default
     @Field("can_write_desc")
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     private Boolean canWriteDesc = false;
 
     @Builder.Default
     @Field("can_write_report")
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     private Boolean canWriteReport = false;
 
     @Builder.Default
     @Field("can_write_reason")
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     private Boolean canWriteReason = false;
 
     @Builder.Default
     @Field("can_write_sample_info_desc")
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     private Boolean canWriteSampleInfoDesc = false;
 
     @Builder.Default
     @Field("can_write_time")
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     private Boolean canWriteTime = false;
 
     @Builder.Default
     @Field("can_update_file")
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     private Boolean canUploadFile = false;
 
     @Builder.Default
     @JsonIgnore
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     private Boolean markable = false;
 
     @JsonIgnore
