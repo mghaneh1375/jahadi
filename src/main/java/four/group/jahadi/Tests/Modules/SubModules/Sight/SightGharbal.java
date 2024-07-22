@@ -3,6 +3,7 @@ package four.group.jahadi.Tests.Modules.SubModules.Sight;
 import four.group.jahadi.Enums.Module.AnswerType;
 import four.group.jahadi.Enums.Module.QuestionType;
 import four.group.jahadi.Models.Module;
+import four.group.jahadi.Models.Question.SimpleQuestion;
 import four.group.jahadi.Models.Question.TableQuestion;
 import four.group.jahadi.Models.SubModule;
 import org.bson.types.ObjectId;
@@ -19,6 +20,38 @@ public class SightGharbal {
                 .name("غربال بینایی")
                 .questions(
                         List.of(
+                                SimpleQuestion
+                                        .builder()
+                                        .id(new ObjectId())
+                                        .question("شکایت اصلی بیمار")
+                                        .questionType(QuestionType.SIMPLE)
+                                        .answerType(AnswerType.TEXT)
+                                        .required(true)
+                                        .build(),
+                                SimpleQuestion
+                                        .builder()
+                                        .id(new ObjectId())
+                                        .question("مشکل دید دور یا نزدیک")
+                                        .questionType(QuestionType.SIMPLE)
+                                        .answerType(AnswerType.TEXT)
+                                        .required(true)
+                                        .build(),
+                                SimpleQuestion
+                                        .builder()
+                                        .id(new ObjectId())
+                                        .question("سابقه بیماری زمینه ای مخصوصا فشار خون و دیابت، سوزش ، خارش یا قرمزی چشم")
+                                        .questionType(QuestionType.SIMPLE)
+                                        .answerType(AnswerType.TEXT)
+                                        .required(true)
+                                        .build(),
+                                SimpleQuestion
+                                        .builder()
+                                        .id(new ObjectId())
+                                        .question("سابقه عمل های مربوط به چشم از جمله آب مروارید")
+                                        .questionType(QuestionType.SIMPLE)
+                                        .answerType(AnswerType.TEXT)
+                                        .required(true)
+                                        .build(),
                                 TableQuestion
                                         .builder()
                                         .id(new ObjectId())
