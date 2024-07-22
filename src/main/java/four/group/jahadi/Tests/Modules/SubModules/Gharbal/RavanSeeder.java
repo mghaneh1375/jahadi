@@ -31,19 +31,6 @@ public class RavanSeeder {
                 .name("غربال روان")
                 .isReferral(true)
                 .questions(List.of(
-                        SimpleQuestion
-                                .builder()
-                                .questionType(QuestionType.SIMPLE)
-                                .id(new ObjectId())
-                                .answerType(AnswerType.SELECT)
-                                .options(
-                                        Arrays.stream(MarriageStatus.values()).map(
-                                                itr -> new PairValue(itr.name(), itr.getFaTranslate())
-                                        ).collect(Collectors.toList())
-                                )
-                                .question("وضعیت تاهل")
-                                .required(true)
-                                .build(),
                         CheckListGroupQuestion
                                 .builder()
                                 .questionType(QuestionType.CHECK_LIST)
@@ -111,8 +98,88 @@ public class RavanSeeder {
                                                 .answerType(AnswerType.TICK)
                                                 .required(true)
                                                 .question("آیا در خورد و خوراک و تغذیه مشکلی دارید؟ (بی میلی به غذا / کم اشتهایی، پراشتهایی، استفراغ عمدی و ...)")
+                                                .build(),
+                                        SimpleQuestion
+                                                .builder()
+                                                .id(new ObjectId())
+                                                .questionType(QuestionType.SIMPLE)
+                                                .answerType(AnswerType.TICK)
+                                                .required(true)
+                                                .question("باتوجه به میزان مصرف مواد توسط اطرافیان، چقدر خود را در معرض آن می دانید؟")
+                                                .build(),
+                                        SimpleQuestion
+                                                .builder()
+                                                .id(new ObjectId())
+                                                .questionType(QuestionType.SIMPLE)
+                                                .answerType(AnswerType.TICK)
+                                                .required(false)
+                                                .question("آیا در یک ماه گذشته در رابطه خود احساس تنهایی داشته اید و رابطه شما راضی کننده نبوده است؟")
+                                                .build(),
+                                        SimpleQuestion
+                                                .builder()
+                                                .id(new ObjectId())
+                                                .questionType(QuestionType.SIMPLE)
+                                                .answerType(AnswerType.TICK)
+                                                .required(false)
+                                                .question("در یک ماه گذشته چقدر با همسر خود به مشکل خورده اید و دعوا کرده اید؟")
                                                 .build()
                                 ))
+                                .build(),
+                        CheckListGroupQuestion
+                                .builder()
+                                .questionType(QuestionType.CHECK_LIST)
+                                .id(new ObjectId())
+                                .options(
+                                        Arrays.stream(HaveOrNot.values()).map(
+                                                itr -> new PairValue(itr.name(), itr.getFaTranslate())
+                                        ).collect(Collectors.toList())
+                                )
+                                .questions(List.of(
+                                        SimpleQuestion
+                                                .builder()
+                                                .questionType(QuestionType.SIMPLE)
+                                                .id(new ObjectId())
+                                                .answerType(AnswerType.TICK)
+                                                .question("نیاز به مداخله بالینی")
+                                                .required(true)
+                                                .build(),
+                                        SimpleQuestion
+                                                .builder()
+                                                .questionType(QuestionType.SIMPLE)
+                                                .id(new ObjectId())
+                                                .answerType(AnswerType.TICK)
+                                                .question("نیاز به روانشناس")
+                                                .required(true)
+                                                .build(),
+                                        SimpleQuestion
+                                                .builder()
+                                                .questionType(QuestionType.SIMPLE)
+                                                .id(new ObjectId())
+                                                .answerType(AnswerType.TICK)
+                                                .question("نیاز به پیشگیری از اعتیاد؟")
+                                                .required(true)
+                                                .build()
+                                ))
+                                .build(),
+                        SimpleQuestion
+                                .builder()
+                                .questionType(QuestionType.SIMPLE)
+                                .id(new ObjectId())
+                                .answerType(AnswerType.SELECT)
+                                .options(
+                                        Arrays.stream(MarriageStatus.values()).map(
+                                                itr -> new PairValue(itr.name(), itr.getFaTranslate())
+                                        ).collect(Collectors.toList())
+                                )
+                                .question("وضعیت تاهل")
+                                .required(true)
+                                .build(),
+                        SimpleQuestion
+                                .builder()
+                                .questionType(QuestionType.SIMPLE)
+                                .id(new ObjectId())
+                                .answerType(AnswerType.DATE)
+                                .question("تاریخ")
                                 .build(),
                         SimpleQuestion
                                 .builder()
@@ -126,71 +193,7 @@ public class RavanSeeder {
                                 .questionType(QuestionType.SIMPLE)
                                 .id(new ObjectId())
                                 .answerType(AnswerType.TEXT)
-                                .required(true)
-                                .question("باتوجه به میزان مصرف مواد توسط اطرافیان، چقدر خود را در معرض آن می دانید؟")
-                                .build(),
-                        SimpleQuestion
-                                .builder()
-                                .questionType(QuestionType.SIMPLE)
-                                .id(new ObjectId())
-                                .answerType(AnswerType.TICK)
-                                .options(
-                                        Arrays.stream(HaveOrNot.values()).map(
-                                                itr -> new PairValue(itr.name(), itr.getFaTranslate())
-                                        ).collect(Collectors.toList())
-                                )
-                                .question("نیاز به روانشناس")
-                                .required(true)
-                                .build(),
-                        SimpleQuestion
-                                .builder()
-                                .questionType(QuestionType.SIMPLE)
-                                .id(new ObjectId())
-                                .answerType(AnswerType.TICK)
-                                .options(
-                                        Arrays.stream(HaveOrNot.values()).map(
-                                                itr -> new PairValue(itr.name(), itr.getFaTranslate())
-                                        ).collect(Collectors.toList())
-                                )
-                                .question("نیاز به پیشگیری از اعتیاد؟")
-                                .required(true)
-                                .build(),
-                        CheckListGroupQuestion
-                                .builder()
-                                .questionType(QuestionType.CHECK_LIST)
-                                .markable(true)
-                                .id(new ObjectId())
-                                .options(
-                                        Arrays.stream(RavanAnswers.values()).map(
-                                                itr -> new PairValue(itr.name(), itr.getFaTranslate())
-                                        ).collect(Collectors.toList())
-                                )
-                                .marks(marks)
-                                .questions(List.of(
-                                        SimpleQuestion
-                                                .builder()
-                                                .id(new ObjectId())
-                                                .questionType(QuestionType.SIMPLE)
-                                                .answerType(AnswerType.TICK)
-                                                .required(true)
-                                                .question("آیا در یک ماه گذشته در رابطه خود احساس تنهایی داشته اید و رابطه شما راضی کننده نبوده است؟")
-                                                .build(),
-                                        SimpleQuestion
-                                                .builder()
-                                                .id(new ObjectId())
-                                                .questionType(QuestionType.SIMPLE)
-                                                .answerType(AnswerType.TICK)
-                                                .required(true)
-                                                .question("در یک ماه گذشته چقدر با همسر خود به مشکل خورده اید و دعوا کرده اید؟")
-                                                .build()
-                                ))
-                                .build(),
-                        SimpleQuestion
-                                .builder()
-                                .questionType(QuestionType.SIMPLE)
-                                .id(new ObjectId())
-                                .answerType(AnswerType.LONG_TEXT)
-                                .question("توضیحات تکمیلی")
+                                .question("موارد مداخله در بحران")
                                 .build()
                 ))
                 .build();
