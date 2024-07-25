@@ -36,7 +36,12 @@ public class SubModule {
     private String postAction;
 
     @Field("is_referral")
-    private boolean isReferral = true;
+    @Builder.Default
+    @JsonIgnore
+    private boolean isReferral = false;
+
+    @Field("refer_to")
+    private ObjectId referTo;
 
     @Field("readonly_module_id")
     @JsonInclude(JsonInclude.Include.NON_NULL)

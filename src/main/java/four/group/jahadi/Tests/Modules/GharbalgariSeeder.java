@@ -3,13 +3,18 @@ package four.group.jahadi.Tests.Modules;
 import four.group.jahadi.Models.Module;
 import four.group.jahadi.Tests.Modules.SubModules.Gharbal.*;
 import four.group.jahadi.Tests.Modules.SubModules.Gharbal.Audiologists;
+import org.bson.types.ObjectId;
 
 import java.util.List;
 
 
 public class GharbalgariSeeder {
 
-    public static List<Module> seed() {
+    public static List<Module> seed(
+            ObjectId doctorOid, ObjectId sightOId,
+            ObjectId audiologistOid, ObjectId mamaOid,
+            ObjectId ravanOid
+    ) {
         return List.of(
                 Module
                         .builder()
@@ -18,11 +23,10 @@ public class GharbalgariSeeder {
                         .icon("")
                         .subModules(
                                 List.of(
-                                        General.make(),
-                                        Sight.make(),
-//                                        commonSubModules.get("experiment"),
-                                        Audiologists.make(),
-                                        Mama.make()
+                                        General.make(doctorOid),
+                                        Sight.make(sightOId),
+                                        Audiologists.make(audiologistOid),
+                                        Mama.make(mamaOid)
                                 )
                         )
                         .isReferral(true)
@@ -35,7 +39,7 @@ public class GharbalgariSeeder {
                         .icon("")
                         .subModules(
                                 List.of(
-                                        RavanSeeder.make()
+                                        RavanSeeder.make(ravanOid)
                                 )
                         )
                         .isReferral(true)

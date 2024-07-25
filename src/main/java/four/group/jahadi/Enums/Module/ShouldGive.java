@@ -1,12 +1,11 @@
 package four.group.jahadi.Enums.Module;
 
-public enum Glass {
-
-    GIVE("عینک تحویل داده شد"), SHOULD_GIVE_SUN_GLASS("تجویز عینک آفتابی");
+public enum ShouldGive {
+    SHOULD_GIVE("تعلق میگیرد"), NOT_SHOULD_GIVE("تعلق نمیگیرد");
 
     String faTranslate;
 
-    Glass(String faTranslate) {
+    ShouldGive(String faTranslate) {
         this.faTranslate = faTranslate;
     }
 

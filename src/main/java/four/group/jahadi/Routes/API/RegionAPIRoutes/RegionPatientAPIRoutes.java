@@ -260,6 +260,21 @@ public class RegionPatientAPIRoutes extends Router {
         );
     }
 
+    @PutMapping(value = "addReferralForPatientBySubModule/{areaId}/{moduleId}/{subModuleId}/{patientId}")
+    @Operation(
+            summary = "ارجاع یک بیمار توسط دکتر در یک ساب ماژول که ماژول مقصد توسط سیستم تشخیص داده می شود"
+    )
+    public void addReferralForPatientBySubModule(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId,
+            @PathVariable @ObjectIdConstraint ObjectId moduleId,
+            @PathVariable @ObjectIdConstraint ObjectId subModuleId,
+            @PathVariable @ObjectIdConstraint ObjectId patientId
+    ) {
+        patientServiceInArea.addReferralForPatientBySubModule(
+                getId(request), areaId, patientId, moduleId, subModuleId
+        );
+    }
 
     @PutMapping(value = "setPatientForm/{areaId}/{moduleId}/{subModuleId}/{patientId}")
     @Operation(

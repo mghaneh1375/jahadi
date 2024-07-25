@@ -1,8 +1,11 @@
 package four.group.jahadi.Tests.Modules;
 
 import four.group.jahadi.Enums.Module.AnswerType;
+import four.group.jahadi.Enums.Module.HaveOrNot;
 import four.group.jahadi.Enums.Module.QuestionType;
 import four.group.jahadi.Models.Module;
+import four.group.jahadi.Models.Question.CheckListGroupQuestion;
+import four.group.jahadi.Models.Question.GroupQuestion;
 import four.group.jahadi.Models.Question.SimpleQuestion;
 import four.group.jahadi.Models.Question.TableQuestion;
 import four.group.jahadi.Models.SubModule;
@@ -21,7 +24,7 @@ public class Audiologists {
                 .builder()
                 .id(new ObjectId())
                 .name("اتاق شنوایی 1")
-                .isReferral(true)
+                .isReferral(false)
                 .questions(
                         List.of(
                                 SimpleQuestion
@@ -69,7 +72,7 @@ public class Audiologists {
                 .builder()
                 .id(new ObjectId())
                 .name("اتاق شنوایی 2")
-                .isReferral(true)
+                .isReferral(false)
                 .questions(
                         List.of(
                                 TableQuestion
@@ -93,37 +96,68 @@ public class Audiologists {
                                         .firstColumn(List.of("250", "500", "1000"))
                                         .rowsCount(3)
                                         .answerType(AnswerType.NUMBER)
-                                        .build(),
-                                SimpleQuestion
-                                        .builder()
-                                        .id(new ObjectId())
-                                        .questionType(QuestionType.SIMPLE)
-                                        .answerType(AnswerType.TICK)
-                                        .options(
-                                                Arrays.stream(four.group.jahadi.Enums.Module.Audiologists.values()).map(audiologists -> new PairValue(
-                                                        audiologists.name(),
-                                                        audiologists.getFaTranslate()
-                                                )).collect(Collectors.toList())
-                                        )
                                         .build()
-//                                SimpleQuestion
-//                                        .builder()
-//                                        .questionType(QuestionType.SIMPLE)
-//                                        .required(true)
-//                                        .question("تشحیص")
-//                                        .answerType(AnswerType.LONG_TEXT)
-//                                        .build(),
-//                                SimpleQuestion
-//                                        .builder()
-//                                        .questionType(QuestionType.SIMPLE)
-//                                        .required(false)
-//                                        .question("آپلود فایل")
-//                                        .answerType(AnswerType.UPLOAD)
-//                                        .build()
                         )
                 )
                 .build();
 
+        SubModule room3 = SubModule
+                .builder()
+                .id(new ObjectId())
+                .name("اتاق شنوایی 3")
+                .isReferral(false)
+                .questions(
+                        List.of(
+                                CheckListGroupQuestion
+                                        .builder()
+                                        .id(new ObjectId())
+                                        .sectionTitle("سوالات")
+                                        .questionType(QuestionType.CHECK_LIST)
+                                        .options(
+                                                Arrays.stream(HaveOrNot.values()).map(itr -> new PairValue(
+                                                        itr.name(),
+                                                        itr.getFaTranslate()
+                                                )).collect(Collectors.toList())
+                                        )
+                                        .questions(
+                                                Arrays.stream(four.group.jahadi.Enums.Module.Audiologists.values()).map(audiologists -> SimpleQuestion
+                                                        .builder()
+                                                        .id(new ObjectId())
+                                                        .question(audiologists.getFaTranslate())
+                                                        .questionType(QuestionType.SIMPLE)
+                                                        .answerType(AnswerType.TICK)
+                                                        .required(true)
+                                                        .build()).collect(Collectors.toList())
+                                        )
+                                        .build(),
+                                GroupQuestion
+                                        .builder()
+                                        .id(new ObjectId())
+                                        .questionType(QuestionType.GROUP)
+                                        .sectionTitle("تشخیص شنوایی سنج")
+                                        .questions(
+                                                List.of(
+                                                        SimpleQuestion
+                                                                .builder()
+                                                                .id(new ObjectId())
+                                                                .questionType(QuestionType.SIMPLE)
+                                                                .required(true)
+                                                                .question("تشحیص")
+                                                                .answerType(AnswerType.LONG_TEXT)
+                                                                .build(),
+                                                        SimpleQuestion
+                                                                .builder()
+                                                                .id(new ObjectId())
+                                                                .questionType(QuestionType.SIMPLE)
+                                                                .required(false)
+                                                                .question("آپلود فایل")
+                                                                .answerType(AnswerType.UPLOAD)
+                                                                .build()
+                                                )
+                                        )
+                                        .build()
+
+                        )).build();
 //        SubModule externalRefer = SubModule
 //                .builder()
 //                .name("ارجاع به متخصصان گوش حلق بینی")
@@ -145,7 +179,7 @@ public class Audiologists {
                 .icon("")
                 .tabName("توان بخشی")
                 .subModules(
-                        List.of(room1, room2)
+                        List.of(room1, room2, room3)
                 )
                 .build();
     }

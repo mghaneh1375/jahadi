@@ -13,11 +13,12 @@ import org.bson.types.ObjectId;
 import java.util.List;
 
 public class General {
-    public static SubModule make() {
+    public static SubModule make(ObjectId referToOid) {
         return SubModule
                 .builder()
                 .id(new ObjectId())
                 .name("غربالگری کلی")
+                .referTo(referToOid)
                 .isReferral(true)
                 .questions(
                         List.of(

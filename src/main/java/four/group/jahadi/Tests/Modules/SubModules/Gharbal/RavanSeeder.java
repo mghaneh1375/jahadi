@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 
 public class RavanSeeder {
 
-    public static SubModule make() {
+    public static SubModule make(ObjectId referToOid) {
 
         HashMap<String, Integer> marks = new HashMap<>();
         Arrays.stream(
@@ -29,6 +29,7 @@ public class RavanSeeder {
                 .builder()
                 .id(new ObjectId())
                 .name("غربال روان")
+                .referTo(referToOid)
                 .isReferral(true)
                 .questions(List.of(
                         CheckListGroupQuestion

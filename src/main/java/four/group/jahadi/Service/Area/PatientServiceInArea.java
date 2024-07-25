@@ -218,7 +218,8 @@ public class PatientServiceInArea {
             List<PatientReferral> referrals,
             ObjectId moduleId,
             boolean addDuplicate,
-            String desc
+            String desc,
+            ObjectId referBy
     ) {
 
         if (referrals == null)
@@ -237,6 +238,7 @@ public class PatientServiceInArea {
                         .builder()
                         .moduleId(moduleId)
                         .desc(desc)
+                        .referBy(referBy)
                         .build().createId()
         );
 
@@ -263,7 +265,7 @@ public class PatientServiceInArea {
                         patientInArea.getReferrals(),
                         moduleId,
                         true,
-                        desc
+                        desc, null
                 )
         );
         patientsInAreaRepository.save(patientInArea);
@@ -292,7 +294,50 @@ public class PatientServiceInArea {
                         patientInArea.getReferrals(),
                         moduleId,
                         true,
-                        desc
+                        desc, userId
+                )
+        );
+        patientsInAreaRepository.save(patientInArea);
+    }
+
+
+    public void addReferralForPatientBySubModule(
+            ObjectId userId, ObjectId areaId,
+            ObjectId patientId, ObjectId srcModuleId,
+            ObjectId srcSubModuleId
+    ) {
+
+        Module module = moduleRepository.findById(srcModuleId).orElseThrow(InvalidIdException::new);
+        SubModule subModule = module.getSubModules()
+                .stream()
+                .filter(subModuleItr -> subModuleItr.getId().equals(srcSubModuleId))
+                .findFirst()
+                .orElseThrow(InvalidIdException::new);
+
+        if (!subModule.isReferral())
+            throw new InvalidFieldsException("در این بخش امکان ارجاع دهی وجود ندارد");
+
+        Trip trip = tripRepository.findByAreaIdAndResponsibleId(areaId, userId)
+                .orElseThrow(NotAccessException::new);
+
+        Area foundArea = findStartedArea(trip, areaId);
+        findModule(foundArea, srcModuleId, userId, null);
+
+        PatientsInArea patientInArea = patientsInAreaRepository.findByAreaIdAndPatientId(areaId, patientId)
+                .orElseThrow(InvalidIdException::new);
+
+        patientInArea
+                .getReferrals()
+                .stream()
+                .filter(patientReferral -> patientReferral.getModuleId().equals(srcModuleId))
+                .findFirst().orElseThrow(NotAccessException::new);
+
+        patientInArea.setReferrals(
+                doAddReferral(
+                        patientInArea.getReferrals(),
+                        subModule.getReferTo(),
+                        true,
+                        null, userId
                 )
         );
         patientsInAreaRepository.save(patientInArea);
@@ -378,8 +423,7 @@ public class PatientServiceInArea {
             if (moduleNames.containsKey(patientReferral.getModuleId())) {
                 patientReferral.setModuleName(moduleNames.get(patientReferral.getModuleId()).getKey().toString());
                 patientReferral.setModuleTabName(moduleNames.get(patientReferral.getModuleId()).getValue().toString());
-            }
-            else {
+            } else {
                 modules.stream().filter(module -> module.getModuleId().equals(patientReferral.getModuleId()))
                         .findFirst().ifPresent(module -> {
                             patientReferral.setModuleName(module.getModuleName());
@@ -419,7 +463,7 @@ public class PatientServiceInArea {
                                     patient.getReferrals(),
                                     module.getModuleId(),
                                     false,
-                                    null
+                                    null, null
                             )
                     ));
         }
@@ -638,7 +682,7 @@ public class PatientServiceInArea {
                 .flatMap(List::stream)
                 .collect(Collectors.toList());
 
-        if(groupQuestions.size() > 0) {
+        if (groupQuestions.size() > 0) {
             HashMap<ObjectId, A> tmp = getSubModuleAllQuestions(groupQuestions);
             for (ObjectId id : tmp.keySet())
                 allQuestions.put(id, tmp.get(id));
@@ -684,14 +728,14 @@ public class PatientServiceInArea {
                 continue;
 
             A a = allQuestions.get(data.getQuestionId());
-            if(a.getQuestionType().equals(QuestionType.TABLE)) {
+            if (a.getQuestionType().equals(QuestionType.TABLE)) {
 
                 String[] splited = data.getAnswer().toString().split("___");
 
-                if(splited.length != a.getCols() * a.getRows())
+                if (splited.length != a.getCols() * a.getRows())
                     throw new RuntimeException("پاسخ به سوال " + data.getQuestionId().toString() + " معتبر نیست");
 
-                for(String split : splited) {
+                for (String split : splited) {
 
                     if (a.getAnswerType().equals(AnswerType.NUMBER) &&
                             !Utility.isNumeric(split)
@@ -701,15 +745,13 @@ public class PatientServiceInArea {
                     if (a.getAnswerType().equals(AnswerType.DOUBLE)) {
                         try {
                             Double.parseDouble(split);
-                        }
-                        catch (Exception x) {
+                        } catch (Exception x) {
                             throw new RuntimeException("پاسخ به سوال " + data.getQuestionId().toString() + " باید عدد اعشاری باشد");
                         }
                     }
                 }
 
-            }
-            else {
+            } else {
                 switch (a.getAnswerType()) {
                     case NUMBER:
                         if (!(data.getAnswer() instanceof Number))
@@ -787,6 +829,7 @@ public class PatientServiceInArea {
                 .builder()
                 .subModuleId(subModuleId)
                 .answers(patientAnswers)
+                .doctorId(userId)
                 .build();
 
         if (marks != null)
@@ -837,7 +880,7 @@ public class PatientServiceInArea {
         ObjectId wantedModuleId = moduleId;
         ObjectId wantedSubModuleId = subModuleId;
 
-        if(wantedSubModule.getReadOnlyModuleId() != null &&
+        if (wantedSubModule.getReadOnlyModuleId() != null &&
                 wantedSubModule.getReadOnlySubModuleId() != null
         ) {
             wantedModuleId = wantedSubModule.getReadOnlyModuleId();

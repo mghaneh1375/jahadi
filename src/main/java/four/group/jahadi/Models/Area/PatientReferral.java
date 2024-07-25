@@ -1,6 +1,7 @@
 package four.group.jahadi.Models.Area;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import four.group.jahadi.Models.DateSerialization;
@@ -35,6 +36,10 @@ public class PatientReferral extends Model {
     @JsonSerialize(using = DateSerialization.class)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Date receptedAt;
+
+    @Field("refer_by")
+    @JsonIgnore
+    private ObjectId referBy;
 
     @Transient
     @JsonInclude(JsonInclude.Include.NON_ABSENT)

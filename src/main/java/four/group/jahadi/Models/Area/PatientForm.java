@@ -1,6 +1,5 @@
 package four.group.jahadi.Models.Area;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import four.group.jahadi.Models.Model;
@@ -22,6 +21,10 @@ public class PatientForm extends Model {
     @Field("sub_module_id")
     @JsonSerialize(using = ObjectIdSerialization.class)
     private ObjectId subModuleId;
+
+    @Field("doctor_id")
+    @JsonSerialize(using = ObjectIdSerialization.class)
+    private ObjectId doctorId;
 
     private List<PatientAnswer> answers;
 

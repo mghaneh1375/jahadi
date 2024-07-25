@@ -1,8 +1,8 @@
 package four.group.jahadi.Tests.Modules.SubModules.Sight;
 
 import four.group.jahadi.Enums.Module.AnswerType;
-import four.group.jahadi.Enums.Module.Glass;
 import four.group.jahadi.Enums.Module.QuestionType;
+import four.group.jahadi.Models.Question.CheckListGroupQuestion;
 import four.group.jahadi.Models.Question.GroupQuestion;
 import four.group.jahadi.Models.Question.SimpleQuestion;
 import four.group.jahadi.Models.Question.TableQuestion;
@@ -10,7 +10,9 @@ import four.group.jahadi.Models.SubModule;
 import four.group.jahadi.Utility.PairValue;
 import org.bson.types.ObjectId;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class SightRoom {
 
@@ -19,7 +21,6 @@ public class SightRoom {
                 .builder()
                 .id(new ObjectId())
                 .name("اتاق بینایی")
-                .isReferral(true)
                 .questions(
                         List.of(
                                 SimpleQuestion
@@ -29,21 +30,37 @@ public class SightRoom {
                                         .questionType(QuestionType.SIMPLE)
                                         .answerType(AnswerType.NUMBER)
                                         .build(),
-                                SimpleQuestion
+                                CheckListGroupQuestion
                                         .builder()
                                         .id(new ObjectId())
-                                        .questionType(QuestionType.SIMPLE)
-                                        .answerType(AnswerType.TICK)
+                                        .questionType(QuestionType.CHECK_LIST)
+                                        .sectionTitle("عینک تحویلی")
                                         .options(
+                                                Arrays.stream(four.group.jahadi.Enums.Module.ShouldGive.values())
+                                                        .map(itr -> new PairValue(
+                                                                itr.name(),
+                                                                itr.getFaTranslate()
+                                                        ))
+                                                        .collect(Collectors.toList())
+                                        )
+                                        .questions(
                                                 List.of(
-                                                        new PairValue(
-                                                                Glass.GIVE.name(),
-                                                                Glass.GIVE.getFaTranslate()
-                                                        ),
-                                                        new PairValue(
-                                                                Glass.SHOULD_GIVE_SUN_GLASS.name(),
-                                                                Glass.SHOULD_GIVE_SUN_GLASS.getFaTranslate()
-                                                        )
+                                                        SimpleQuestion
+                                                                .builder()
+                                                                .id(new ObjectId())
+                                                                .question("عینک طبی")
+                                                                .questionType(QuestionType.SIMPLE)
+                                                                .answerType(AnswerType.TICK)
+                                                                .required(true)
+                                                                .build(),
+                                                        SimpleQuestion
+                                                                .builder()
+                                                                .id(new ObjectId())
+                                                                .question("عینک آفتابی")
+                                                                .questionType(QuestionType.SIMPLE)
+                                                                .answerType(AnswerType.TICK)
+                                                                .required(true)
+                                                                .build()
                                                 )
                                         )
                                         .build(),

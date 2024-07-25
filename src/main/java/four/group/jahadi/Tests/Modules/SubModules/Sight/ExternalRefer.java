@@ -14,9 +14,16 @@ public class ExternalRefer {
                 .builder()
                 .id(new ObjectId())
                 .name("ارجاع به خارج متخصصان چشم")
-                .isReferral(true)
                 .questions(
                         List.of(
+                                SimpleQuestion
+                                        .builder()
+                                        .id(new ObjectId())
+                                        .questionType(QuestionType.SIMPLE)
+                                        .required(false)
+                                        .answerType(AnswerType.TEXT)
+                                        .question("ارجاع به")
+                                        .build(),
                                 SimpleQuestion
                                         .builder()
                                         .id(new ObjectId())

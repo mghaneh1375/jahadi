@@ -13,11 +13,12 @@ import org.bson.types.ObjectId;
 import java.util.List;
 
 public class Audiologists {
-    public static SubModule make() {
+    public static SubModule make(ObjectId referToOid) {
         return SubModule
                 .builder()
                 .id(new ObjectId())
                 .name("غربال شنوایی")
+                .referTo(referToOid)
                 .isReferral(true)
                 .questions(
                         List.of(
