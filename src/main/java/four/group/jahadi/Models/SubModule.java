@@ -37,10 +37,10 @@ public class SubModule {
 
     @Field("is_referral")
     @Builder.Default
-    @JsonIgnore
     private boolean isReferral = false;
 
     @Field("refer_to")
+    @JsonIgnore
     private ObjectId referTo;
 
     @Field("readonly_module_id")
