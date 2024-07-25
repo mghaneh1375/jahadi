@@ -321,7 +321,7 @@ public class PatientServiceInArea {
                 .orElseThrow(NotAccessException::new);
 
         Area foundArea = findStartedArea(trip, areaId);
-        findModule(foundArea, srcModuleId, userId, null);
+        findModule(foundArea, srcModuleId, foundArea.getOwnerId().equals(userId) ? null : userId, null);
 
         PatientsInArea patientInArea = patientsInAreaRepository.findByAreaIdAndPatientId(areaId, patientId)
                 .orElseThrow(InvalidIdException::new);
