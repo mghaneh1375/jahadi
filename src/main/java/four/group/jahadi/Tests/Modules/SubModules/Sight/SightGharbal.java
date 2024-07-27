@@ -10,14 +10,17 @@ import org.bson.types.ObjectId;
 
 import java.util.List;
 
+import static four.group.jahadi.Tests.Modules.ModuleSeeder.moduleIds;
+
 public class SightGharbal {
 
     public static Module seed() {
         SubModule subModule = SubModule
                 .builder()
                 .id(new ObjectId())
-                .isReferral(false)
                 .name("غربال بینایی")
+                .referTo(moduleIds.get("اتاق بینایی"))
+                .isReferral(true)
                 .questions(
                         List.of(
                                 SimpleQuestion

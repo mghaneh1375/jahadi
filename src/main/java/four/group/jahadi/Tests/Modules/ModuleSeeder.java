@@ -11,40 +11,33 @@ import java.util.HashMap;
 import java.util.List;
 
 public class ModuleSeeder {
-
-    public static ObjectId doctorModuleId;
     public static ObjectId miniParaClinicId;
+    public static HashMap<String, ObjectId> moduleIds;
 
 
     public static void seed(ModuleRepository moduleRepository) {
 
+        moduleIds = new HashMap<>();
         miniParaClinicId = new ObjectId();
         List<Module> doctorModules = DoctorSeeder.seed();
-        for (Module module : doctorModules)
+        for (Module module : doctorModules) {
             moduleRepository.insert(module);
+            moduleIds.put(module.getName(), module.getId());
+        }
 
-        doctorModuleId = doctorModules.get(0).getId();
-        moduleRepository.insert(ParaClinic.seed(doctorModuleId, miniParaClinicId));
+        moduleRepository.insert(ParaClinic.seed(miniParaClinicId));
 
-        List<Module> empowermentModules = EmpowermentSeeder.seed();
-
-        for (Module module : empowermentModules)
+        for(Module module : ExpertiseSeeder.seed()) {
             moduleRepository.insert(module);
+            moduleIds.put(module.getName(), module.getId());
+        }
 
-        ObjectId sightOId, audiologistOid, mamaOid, ravanOid;
-        sightOId = empowermentModules.get(1).getId();
-        audiologistOid = empowermentModules.get(2).getId();
-        ravanOid = empowermentModules.get(3).getId();
-
-        List<Module> expertiseModules = ExpertiseSeeder.seed();
-        for(Module module : expertiseModules)
+        for (Module module : EmpowermentSeeder.seed()) {
             moduleRepository.insert(module);
+            moduleIds.put(module.getName(), module.getId());
+        }
 
-        mamaOid = expertiseModules.get(1).getId();
-
-        for (Module module : GharbalgariSeeder.seed(
-                doctorModuleId, sightOId, audiologistOid, mamaOid, ravanOid
-        ))
+        for (Module module : GharbalgariSeeder.seed())
             moduleRepository.insert(module);
     }
 

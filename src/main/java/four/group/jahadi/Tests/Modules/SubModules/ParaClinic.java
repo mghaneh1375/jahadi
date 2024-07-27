@@ -13,10 +13,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static four.group.jahadi.Tests.Modules.ModuleSeeder.moduleIds;
+
 public class ParaClinic {
 
     public static Module seed(
-            ObjectId miniParaClinicModuleId,
             ObjectId miniParaClinicSubModuleId
     ) {
 
@@ -24,7 +25,7 @@ public class ParaClinic {
                 .builder()
                 .id(new ObjectId())
                 .name("مشاهده تجویز قبلی")
-                .readOnlyModuleId(miniParaClinicModuleId)
+                .readOnlyModuleId(moduleIds.get("پزشک عمومی"))
                 .readOnlySubModuleId(miniParaClinicSubModuleId)
                 .build();
 

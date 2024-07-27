@@ -14,6 +14,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static four.group.jahadi.Tests.Modules.ModuleSeeder.moduleIds;
+
 public class SightRoom {
 
     public static SubModule make() {
@@ -21,6 +23,8 @@ public class SightRoom {
                 .builder()
                 .id(new ObjectId())
                 .name("اتاق بینایی")
+                .isReferral(true)
+                .referTo(moduleIds.get("متخصص چشم پزشکی"))
                 .questions(
                         List.of(
                                 SimpleQuestion

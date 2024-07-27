@@ -15,7 +15,7 @@ public class ExpertiseSeeder {
         return List.of(
                 Module
                         .builder()
-                        .name("متخصص ها")
+                        .name("متخصص داخلی/عفونی")
                         .tabName("متخصص ها")
                         .icon("")
                         .subModules(
@@ -42,6 +42,227 @@ public class ExpertiseSeeder {
                                         MiniParaClinic.make(),
                                         WomenServiceSeeder.make(),
                                         WomenServicePlusSeeder.make()
+                                )
+                        )
+                        .canSuggestDrug(true)
+                        .canSuggestExperiment(true)
+                        .isReferral(true)
+                        .build(),
+                Module
+                        .builder()
+                        .name("متخصص قلب")
+                        .tabName("متخصص ها")
+                        .icon("")
+                        .subModules(
+                                List.of(
+                                        Visit.make(),
+                                        ExternalReferral.make(),
+                                        MiniParaClinic.make(),
+                                        WomenServiceSeeder.make()
+                                )
+                        )
+                        .canSuggestDrug(true)
+                        .canSuggestExperiment(true)
+                        .isReferral(true)
+                        .build(),
+                Module
+                        .builder()
+                        .name("متخصص اطفال")
+                        .tabName("متخصص ها")
+                        .icon("")
+                        .subModules(
+                                List.of(
+                                        Visit.make(),
+                                        ExternalReferral.make(),
+                                        MiniParaClinic.make(),
+                                        WomenServiceSeeder.make()
+                                )
+                        )
+                        .canSuggestDrug(true)
+                        .canSuggestExperiment(true)
+                        .isReferral(true)
+                        .build(),
+                Module
+                        .builder()
+                        .name("متخصص روان")
+                        .tabName("متخصص ها")
+                        .icon("")
+                        .subModules(
+                                List.of(
+                                        Visit.make(),
+                                        ExternalReferral.make(),
+                                        MiniParaClinic.make(),
+                                        WomenServiceSeeder.make()
+                                )
+                        )
+                        .canSuggestDrug(true)
+                        .canSuggestExperiment(true)
+                        .isReferral(true)
+                        .build(),
+                Module
+                        .builder()
+                        .name("متخصص جراحی، ارتوپدی و اورولوژی")
+                        .tabName("متخصص ها")
+                        .icon("")
+                        .subModules(
+                                List.of(
+                                        Visit.make(),
+                                        ExternalReferral.make(),
+                                        MiniParaClinic.make(),
+                                        WomenServiceSeeder.make()
+                                )
+                        )
+                        .canSuggestDrug(true)
+                        .canSuggestExperiment(true)
+                        .isReferral(true)
+                        .build(),
+                Module
+                        .builder()
+                        .name("متخصص چشم پزشکی")
+                        .tabName("متخصص ها")
+                        .icon("")
+                        .subModules(
+                                List.of(
+                                        Visit.make(),
+                                        ExternalReferral.make(),
+                                        MiniParaClinic.make(),
+                                        WomenServiceSeeder.make()
+                                )
+                        )
+                        .canSuggestDrug(true)
+                        .canSuggestExperiment(true)
+                        .isReferral(true)
+                        .build(),
+                Module
+                        .builder()
+                        .name("متخصص گوش و حلق و بینی")
+                        .tabName("متخصص ها")
+                        .icon("")
+                        .subModules(
+                                List.of(
+                                        Visit.make(),
+                                        ExternalReferral.make(),
+                                        MiniParaClinic.make(),
+                                        WomenServiceSeeder.make()
+                                )
+                        )
+                        .canSuggestDrug(true)
+                        .canSuggestExperiment(true)
+                        .isReferral(true)
+                        .build(),
+                Module
+                        .builder()
+                        .name("متخصص پوست")
+                        .tabName("متخصص ها")
+                        .icon("")
+                        .subModules(
+                                List.of(
+                                        Visit.make(),
+                                        ExternalReferral.make(),
+                                        MiniParaClinic.make(),
+                                        WomenServiceSeeder.make()
+                                )
+                        )
+                        .canSuggestDrug(true)
+                        .canSuggestExperiment(true)
+                        .isReferral(true)
+                        .build(),
+                Module
+                        .builder()
+                        .name("متخصص طب فیزیکی")
+                        .tabName("متخصص ها")
+                        .icon("")
+                        .subModules(
+                                List.of(
+                                        Visit.make(),
+                                        ExternalReferral.make(),
+                                        MiniParaClinic.make(),
+                                        WomenServiceSeeder.make()
+                                )
+                        )
+                        .canSuggestDrug(true)
+                        .canSuggestExperiment(true)
+                        .isReferral(true)
+                        .build(),
+                Module
+                        .builder()
+                        .name("فوق تخصص غدد")
+                        .tabName("متخصص ها")
+                        .icon("")
+                        .subModules(
+                                List.of(
+                                        Visit.make(),
+                                        ExternalReferral.make(),
+                                        MiniParaClinic.make(),
+                                        WomenServiceSeeder.make()
+                                )
+                        )
+                        .canSuggestDrug(true)
+                        .canSuggestExperiment(true)
+                        .isReferral(true)
+                        .build(),
+                Module
+                        .builder()
+                        .name("فوق تخصص گوارش")
+                        .tabName("متخصص ها")
+                        .icon("")
+                        .subModules(
+                                List.of(
+                                        Visit.make(),
+                                        ExternalReferral.make(),
+                                        MiniParaClinic.make(),
+                                        WomenServiceSeeder.make()
+                                )
+                        )
+                        .canSuggestDrug(true)
+                        .canSuggestExperiment(true)
+                        .isReferral(true)
+                        .build(),
+                Module
+                        .builder()
+                        .name("فوق تخصص کلیه")
+                        .tabName("متخصص ها")
+                        .icon("")
+                        .subModules(
+                                List.of(
+                                        Visit.make(),
+                                        ExternalReferral.make(),
+                                        MiniParaClinic.make(),
+                                        WomenServiceSeeder.make()
+                                )
+                        )
+                        .canSuggestDrug(true)
+                        .canSuggestExperiment(true)
+                        .isReferral(true)
+                        .build(),
+                Module
+                        .builder()
+                        .name("فوق تخصص خون")
+                        .tabName("متخصص ها")
+                        .icon("")
+                        .subModules(
+                                List.of(
+                                        Visit.make(),
+                                        ExternalReferral.make(),
+                                        MiniParaClinic.make(),
+                                        WomenServiceSeeder.make()
+                                )
+                        )
+                        .canSuggestDrug(true)
+                        .canSuggestExperiment(true)
+                        .isReferral(true)
+                        .build(),
+                Module
+                        .builder()
+                        .name("فوق تخصص روماتولوژی")
+                        .tabName("متخصص ها")
+                        .icon("")
+                        .subModules(
+                                List.of(
+                                        Visit.make(),
+                                        ExternalReferral.make(),
+                                        MiniParaClinic.make(),
+                                        WomenServiceSeeder.make()
                                 )
                         )
                         .canSuggestDrug(true)

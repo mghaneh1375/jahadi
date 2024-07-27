@@ -1,20 +1,17 @@
 package four.group.jahadi.Tests.Modules;
 
 import four.group.jahadi.Models.Module;
-import four.group.jahadi.Tests.Modules.SubModules.Gharbal.*;
 import four.group.jahadi.Tests.Modules.SubModules.Gharbal.Audiologists;
-import org.bson.types.ObjectId;
+import four.group.jahadi.Tests.Modules.SubModules.Gharbal.*;
 
 import java.util.List;
+
+import static four.group.jahadi.Tests.Modules.ModuleSeeder.moduleIds;
 
 
 public class GharbalgariSeeder {
 
-    public static List<Module> seed(
-            ObjectId doctorOid, ObjectId sightOId,
-            ObjectId audiologistOid, ObjectId mamaOid,
-            ObjectId ravanOid
-    ) {
+    public static List<Module> seed() {
         return List.of(
                 Module
                         .builder()
@@ -23,10 +20,10 @@ public class GharbalgariSeeder {
                         .icon("")
                         .subModules(
                                 List.of(
-                                        General.make(doctorOid),
-                                        Sight.make(sightOId),
-                                        Audiologists.make(audiologistOid),
-                                        Mama.make(mamaOid)
+                                        General.make(moduleIds.get("پزشک عمومی")),
+                                        Sight.make(moduleIds.get("غربال دوم بینایی")),
+                                        Audiologists.make(moduleIds.get("شنوایی")),
+                                        Mama.make(moduleIds.get("متخصص زنان"))
                                 )
                         )
                         .isReferral(true)
@@ -39,7 +36,7 @@ public class GharbalgariSeeder {
                         .icon("")
                         .subModules(
                                 List.of(
-                                        RavanSeeder.make(ravanOid)
+                                        RavanSeeder.make(moduleIds.get("روانشناس"))
                                 )
                         )
                         .isReferral(true)

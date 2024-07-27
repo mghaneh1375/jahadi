@@ -16,6 +16,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static four.group.jahadi.Tests.Modules.ModuleSeeder.moduleIds;
+
 public class Audiologists {
 
     public static Module seed() {
@@ -105,7 +107,8 @@ public class Audiologists {
                 .builder()
                 .id(new ObjectId())
                 .name("اتاق شنوایی 3")
-                .isReferral(false)
+                .isReferral(true)
+                .referTo(moduleIds.get("متخصص گوش و حلق و بینی"))
                 .questions(
                         List.of(
                                 CheckListGroupQuestion
