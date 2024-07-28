@@ -225,13 +225,14 @@ public class PatientServiceInArea {
         if (referrals == null)
             referrals = new ArrayList<>();
 
-        if (!addDuplicate) {
-            Optional<PatientReferral> wantedPatientReferral =
-                    referrals.stream().filter(patientReferral -> patientReferral.getModuleId().equals(moduleId))
-                            .findFirst();
-            if (wantedPatientReferral.isPresent())
-                return referrals;
-        }
+        List<PatientReferral> wantedPatientReferral =
+                referrals.stream().filter(patientReferral -> patientReferral.getModuleId().equals(moduleId))
+                        .collect(Collectors.toList());
+
+        if(wantedPatientReferral.stream().anyMatch(patientReferral -> !patientReferral.isRecepted()) ||
+                (!addDuplicate && wantedPatientReferral.size() > 0)
+        )
+            return referrals;
 
         referrals.add(
                 (PatientReferral) PatientReferral
@@ -331,6 +332,15 @@ public class PatientServiceInArea {
                 .stream()
                 .filter(patientReferral -> patientReferral.getModuleId().equals(srcModuleId))
                 .findFirst().orElseThrow(NotAccessException::new);
+
+        Optional<ModuleInArea> tmp = foundArea
+                .getModules()
+                .stream()
+                .filter(m -> m.getModuleId().equals(subModule.getReferTo()))
+                .findFirst();
+
+        if(tmp.isEmpty())
+            return;
 
         patientInArea.setReferrals(
                 doAddReferral(
