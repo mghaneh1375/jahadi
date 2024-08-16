@@ -175,13 +175,13 @@ public class RavanSeeder {
                                 .question("وضعیت تاهل")
                                 .required(true)
                                 .build(),
-                        SimpleQuestion
-                                .builder()
-                                .questionType(QuestionType.SIMPLE)
-                                .id(new ObjectId())
-                                .answerType(AnswerType.DATE)
-                                .question("تاریخ")
-                                .build(),
+//                        SimpleQuestion
+//                                .builder()
+//                                .questionType(QuestionType.SIMPLE)
+//                                .id(new ObjectId())
+//                                .answerType(AnswerType.DATE)
+//                                .question("تاریخ")
+//                                .build(),
                         SimpleQuestion
                                 .builder()
                                 .questionType(QuestionType.SIMPLE)

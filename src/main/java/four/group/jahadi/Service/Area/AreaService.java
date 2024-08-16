@@ -117,7 +117,7 @@ public class AreaService extends AbstractService<Area, AreaData> {
         if (!dto.getSendNotif() && !dto.getSendSMS())
             return;
 
-        Trip trip = tripRepository.findNotStartedByAreaOwnerId(Utility.getCurrDate(), areaId, userId)
+        Trip trip = tripRepository.findByAreaIdAndOwnerId(areaId, userId)
                 .orElseThrow(NotAccessException::new);
 
         Area foundArea = trip
@@ -185,7 +185,7 @@ public class AreaService extends AbstractService<Area, AreaData> {
             throw new InvalidFieldsException("آی دی شهر وارد شده نامعتبر است");
         });
 
-        Trip trip = tripRepository.findNotStartedByAreaOwnerId(Utility.getCurrDate(), areaId, userId)
+        Trip trip = tripRepository.findByAreaIdAndOwnerId(areaId, userId)
                 .orElseThrow(NotAccessException::new);
 
         Date start = getDate(getDate(new Date(dto.getStartAt())));

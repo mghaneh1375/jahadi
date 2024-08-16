@@ -1,11 +1,14 @@
 package four.group.jahadi.Routes.API.RegionAPIRoutes;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import four.group.jahadi.DTO.ModuleForms.PatientFormData;
 import four.group.jahadi.DTO.Patient.InquiryPatientData;
 import four.group.jahadi.DTO.Patient.PatientData;
 import four.group.jahadi.DTO.Patient.PatientReferralData;
 import four.group.jahadi.DTO.Patient.TrainFormData;
 import four.group.jahadi.Enums.Insurance;
+import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Models.Area.PatientAnswer;
 import four.group.jahadi.Models.Area.PatientJoinArea;
 import four.group.jahadi.Models.Area.PatientReferral;
@@ -18,9 +21,11 @@ import four.group.jahadi.Validator.ObjectIdConstraint;
 import io.swagger.v3.oas.annotations.Operation;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -276,7 +281,11 @@ public class RegionPatientAPIRoutes extends Router {
         );
     }
 
-    @PutMapping(value = "setPatientForm/{areaId}/{moduleId}/{subModuleId}/{patientId}")
+    @RequestMapping(
+            method = RequestMethod.PUT,
+            value = "setPatientForm/{areaId}/{moduleId}/{subModuleId}/{patientId}",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
     @Operation(
             summary = "ست کردن فرم بیمار توسط پزشک در یک ماژول خاص در یک منطقه"
     )
@@ -286,11 +295,24 @@ public class RegionPatientAPIRoutes extends Router {
             @PathVariable @ObjectIdConstraint ObjectId moduleId,
             @PathVariable @ObjectIdConstraint ObjectId subModuleId,
             @PathVariable @ObjectIdConstraint ObjectId patientId,
-            @RequestBody @Valid @Size(min = 1) ValidList<PatientFormData> forms
+            @RequestParam(name = "forms") String tmp,
+            @RequestPart(name = "files", required = false) MultipartFile[] files
     ) {
-        patientServiceInArea.setPatientForm(
-                getId(request), areaId, moduleId, subModuleId, patientId, forms
-        );
+//        @Valid @Size(min = 1) ValidList<PatientFormData> forms
+        try {
+            List<PatientFormData> forms = new ObjectMapper().readValue(tmp, new TypeReference<>() {
+            });
+            if(forms.size() == 0)
+                throw new InvalidFieldsException("form size is 0");
+
+            patientServiceInArea.setPatientForm(
+                    getId(request), areaId, moduleId,
+                    subModuleId, patientId, forms, files
+            );
+        }
+        catch (Exception x) {
+            throw new InvalidFieldsException(x.getMessage());
+        }
     }
 
     @GetMapping(value = "getPatientForm/{areaId}/{moduleId}/{subModuleId}/{patientId}")

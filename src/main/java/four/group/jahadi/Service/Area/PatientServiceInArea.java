@@ -19,6 +19,7 @@ import four.group.jahadi.Repository.Area.PatientsInAreaRepository;
 import four.group.jahadi.Repository.ModuleRepository;
 import four.group.jahadi.Repository.PatientRepository;
 import four.group.jahadi.Repository.TripRepository;
+import four.group.jahadi.Utility.FileUtils;
 import four.group.jahadi.Utility.PairValue;
 import four.group.jahadi.Utility.Utility;
 import org.bson.types.ObjectId;
@@ -26,15 +27,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static four.group.jahadi.Service.Area.AreaUtils.findModule;
 import static four.group.jahadi.Service.Area.AreaUtils.findStartedArea;
+import static four.group.jahadi.Service.UserService.PICS_FOLDER;
+import static four.group.jahadi.Utility.FileUtils.*;
+import static four.group.jahadi.Utility.StaticValues.ONE_MB;
 
 @Service
 public class PatientServiceInArea {
+
+    public final static String UPLOAD_FOLDER = "patients_docs";
 
     @Autowired
     PatientsInAreaRepository patientsInAreaRepository;
@@ -229,7 +236,7 @@ public class PatientServiceInArea {
                 referrals.stream().filter(patientReferral -> patientReferral.getModuleId().equals(moduleId))
                         .collect(Collectors.toList());
 
-        if(wantedPatientReferral.stream().anyMatch(patientReferral -> !patientReferral.isRecepted()) ||
+        if (wantedPatientReferral.stream().anyMatch(patientReferral -> !patientReferral.isRecepted()) ||
                 (!addDuplicate && wantedPatientReferral.size() > 0)
         )
             return referrals;
@@ -339,7 +346,7 @@ public class PatientServiceInArea {
                 .filter(m -> m.getModuleId().equals(subModule.getReferTo()))
                 .findFirst();
 
-        if(tmp.isEmpty())
+        if (tmp.isEmpty())
             return;
 
         patientInArea.setReferrals(
@@ -668,11 +675,16 @@ public class PatientServiceInArea {
 
                     checkListGroupQuestion.getQuestions()
                             .forEach(question -> {
-
                                 A a = A.builder()
                                         .required(question.getRequired())
                                         .questionType(QuestionType.CHECK_LIST)
                                         .answerType(AnswerType.TICK)
+                                        .canWriteDesc(checkListGroupQuestion.getCanWriteDesc())
+                                        .canWriteReason(checkListGroupQuestion.getCanWriteReason())
+                                        .canWriteReport(checkListGroupQuestion.getCanWriteReport())
+                                        .canWriteTime(checkListGroupQuestion.getCanWriteTime())
+                                        .canWriteSampleInfoDesc(checkListGroupQuestion.getCanWriteSampleInfoDesc())
+                                        .canUploadFile(checkListGroupQuestion.getCanUploadFile())
                                         .options(options)
                                         .build();
 
@@ -704,8 +716,26 @@ public class PatientServiceInArea {
     public void setPatientForm(
             ObjectId userId, ObjectId areaId,
             ObjectId moduleId, ObjectId subModuleId,
-            ObjectId patientId, List<PatientFormData> formData
+            ObjectId patientId, List<PatientFormData> formData,
+            MultipartFile[] files
     ) {
+
+        if(files != null) {
+            for(MultipartFile file : files) {
+                if (file.getSize() > ONE_MB * 5)
+                    throw new RuntimeException("حداکثر حجم مجاز 5MB می باشد");
+                try {
+                    String fileType = (String) FileUtils.getFileType(Objects.requireNonNull(file.getOriginalFilename())).getKey();
+                    if(!fileType.equalsIgnoreCase("pdf") &&
+                            !fileType.equalsIgnoreCase("image")
+                    )
+                        throw new RuntimeException("شما تنها مجاز به آپلود فایل های تصویری و PDF می باشد");
+                }
+                catch (Exception x) {
+                    throw new RuntimeException(x.getMessage());
+                }
+            }
+        }
 
         Module module = moduleRepository.findById(moduleId).orElseThrow(InvalidIdException::new);
         SubModule wantedSubModule = module.getSubModules().stream().filter(subModule -> subModule.getId().equals(subModuleId)).findFirst().orElseThrow(InvalidIdException::new);
@@ -720,10 +750,16 @@ public class PatientServiceInArea {
             throw new RuntimeException("آی دی سوالات حاوی مقداری است که نامعتبر می باشد");
 
         if (mandatoryQuestionIds.stream().anyMatch(questionId -> {
+            A a = allQuestions.get(questionId);
             Optional<PatientFormData> tmp = formData.stream()
-                    .filter(data -> data.getAnswer() != null &&
-                            !data.getAnswer().toString().isEmpty() &&
-                            data.getQuestionId().equals(questionId)
+                    .filter(data -> data.getQuestionId().equals(questionId) &&
+                            (
+                                    (!a.getAnswerType().equals(AnswerType.UPLOAD) &&
+                                            data.getAnswer() != null &&
+                                            !data.getAnswer().toString().isEmpty()
+                                    ) || (a.getAnswerType().equals(AnswerType.UPLOAD) &&
+                                            data.getFileIndex() != null && data.getFileIndex() >= 0)
+                            )
                     ).findFirst();
             return tmp.isEmpty();
         }))
@@ -731,13 +767,27 @@ public class PatientServiceInArea {
 
         List<PatientAnswer> patientAnswers = new ArrayList<>();
         HashMap<ObjectId, Integer> marks = null;
+        List<Integer> seenFileIndices = new ArrayList<>();
 
         for (PatientFormData data : formData) {
+            A a = allQuestions.get(data.getQuestionId());
+
+            if (data.getFileIndex() != null) {
+                if (!a.getCanUploadFile() && !a.getAnswerType().equals(AnswerType.UPLOAD))
+                    throw new RuntimeException("برای سوال " + data.getQuestionId() + " نمی توان فایلی آپلود کرد");
+
+                if (files == null || files.length <= data.getFileIndex() || data.getFileIndex() < 0)
+                    throw new RuntimeException("فایل سوال " + data.getQuestionId() + " آپلود نشده است");
+
+                if (seenFileIndices.contains(data.getFileIndex()))
+                    throw new RuntimeException("فایل شماره " + data.getFileIndex() + " دوبار استفاده شده است");
+
+                seenFileIndices.add(data.getFileIndex());
+            }
 
             if (data.getAnswer() == null || data.getAnswer().toString().isEmpty())
                 continue;
 
-            A a = allQuestions.get(data.getQuestionId());
             if (a.getQuestionType().equals(QuestionType.TABLE)) {
 
                 String[] splited = data.getAnswer().toString().split("___");
@@ -768,7 +818,6 @@ public class PatientServiceInArea {
                             throw new RuntimeException("پاسخ به سوال " + data.getQuestionId().toString() + " باید عدد باشد");
                         break;
                     case TICK:
-
                         List<String> options = a.getOptions()
                                 .stream().map(Object::toString).collect(Collectors.toList());
 
@@ -798,16 +847,71 @@ public class PatientServiceInArea {
                         break;
                 }
             }
+        }
+
+        List<String> filenames = new ArrayList<>();
+        for (PatientFormData data : formData) {
+            if (data.getFileIndex() != null) {
+                String filename = uploadFile(files[data.getFileIndex()], UPLOAD_FOLDER);
+                if (filename == null) {
+                    for(String file : filenames)
+                        removeFile(file, UPLOAD_FOLDER);
+                    throw new RuntimeException("خطای ناشناخته هنگام بارگداری فایل");
+                }
+                filenames.add(filename);
+            }
+        }
+
+        for (PatientFormData data : formData) {
+
+            A a = allQuestions.get(data.getQuestionId());
+
+            if (
+                    (
+                            !a.getAnswerType().equals(AnswerType.UPLOAD) && (
+                                    data.getAnswer() == null || data.getAnswer().toString().isEmpty()
+                            )
+                    ) ||
+                            (
+                                    a.getAnswerType().equals(AnswerType.UPLOAD) && data.getFileIndex() == null
+                            )
+            )
+                continue;
 
             PatientAnswer patientAnswer = PatientAnswer
                     .builder()
                     .questionId(data.getQuestionId())
-                    .answer(data.getAnswer())
                     .build();
+
+            if(a.getAnswerType().equals(AnswerType.UPLOAD))
+                patientAnswer.setUploadedFile(filenames.get(data.getFileIndex()));
+            else
+                patientAnswer.setAnswer(data.getAnswer());
 
             if (a.getCanWriteDesc() && data.getDesc() != null &&
                     !data.getDesc().isEmpty())
                 patientAnswer.setDesc(data.getDesc());
+
+            if (a.getCanWriteReason() && data.getReason() != null &&
+                    !data.getReason().isEmpty())
+                patientAnswer.setReason(data.getReason());
+
+            if (a.getCanWriteReport() && data.getReport() != null &&
+                    !data.getReport().isEmpty())
+                patientAnswer.setReport(data.getReport());
+
+            if (a.getCanWriteTime() && data.getTime() != null &&
+                    !data.getTime().isEmpty())
+                patientAnswer.setTime(data.getTime());
+
+            if (a.getCanWriteSampleInfoDesc() && data.getSampleInfoDesc() != null &&
+                    !data.getSampleInfoDesc().isEmpty())
+                patientAnswer.setSampleInfoDesc(data.getSampleInfoDesc());
+
+            if(a.getCanUploadFile() && data.getFileIndex() != null &&
+                    filenames.size() > data.getFileIndex()
+            )
+                patientAnswer.setAdditionalUploadedFile(filenames.get(data.getFileIndex()));
 
             patientAnswers.add(patientAnswer);
         }

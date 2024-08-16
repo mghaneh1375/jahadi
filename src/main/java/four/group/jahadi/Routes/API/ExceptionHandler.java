@@ -2,25 +2,47 @@ package four.group.jahadi.Routes.API;
 
 import four.group.jahadi.Exception.*;
 import org.json.JSONObject;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
+import org.springframework.util.CollectionUtils;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import org.springframework.web.util.ContentCachingRequestWrapper;
+
+import java.util.List;
 
 import static four.group.jahadi.Utility.Utility.printException;
 
 @ControllerAdvice
 public class ExceptionHandler extends ResponseEntityExceptionHandler {
+
+    @Override
+    protected ResponseEntity<Object> handleHttpMediaTypeNotSupported(HttpMediaTypeNotSupportedException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+        List<MediaType> mediaTypes = ex.getSupportedMediaTypes();
+
+        if (!CollectionUtils.isEmpty(mediaTypes)) {
+            headers.setAccept(mediaTypes);
+            if (request instanceof ServletWebRequest) {
+                ServletWebRequest servletWebRequest = (ServletWebRequest)request;
+                if (HttpMethod.PATCH.equals(servletWebRequest.getHttpMethod())) {
+                    headers.setAcceptPatch(mediaTypes);
+                }
+            }
+        }
+
+        return this.handleExceptionInternal(ex, (Object)null, headers, status, request);
+    }
+
 
     @org.springframework.web.bind.annotation.ExceptionHandler(value = InvalidIdException.class)
     public ResponseEntity<Object> exception(InvalidIdException exception) {

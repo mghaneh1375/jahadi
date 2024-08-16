@@ -15,8 +15,8 @@ import static four.group.jahadi.Utility.StaticValues.DEV_MODE;
 public class FileUtils {
 
     public final static String uploadDir = "/var/www/statics/";
-    public final static String uploadDir_dev = "/var/www/statics/";
-//    public final static String uploadDir_dev = "./src/main/resources/assets/";
+//    public final static String uploadDir_dev = "/var/www/statics/";
+    public final static String uploadDir_dev = "./src/main/resources/assets/";
 
     public static String uploadFile(MultipartFile file, String folder) {
 
@@ -43,20 +43,18 @@ public class FileUtils {
     public static String uploadImage(MultipartFile file) {
 
         try {
-
             String fileType = (String) FileUtils.getFileType(Objects.requireNonNull(file.getOriginalFilename())).getKey();
 
             if(!fileType.equals("image"))
                 return null;
 
             return fileType;
-
         } catch (InvalidFileTypeException e) {
             return null;
         }
     }
 
-    private static PairValue getFileType(String filename) throws InvalidFileTypeException {
+    public static PairValue getFileType(String filename) throws InvalidFileTypeException {
 
         String[] splited = filename.split("\\.");
         String ext = splited[splited.length - 1];

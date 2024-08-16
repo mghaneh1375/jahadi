@@ -27,6 +27,16 @@ public class A {
 
     @Builder.Default
     private Boolean canWriteDesc = false;
+    @Builder.Default
+    private Boolean canWriteReason = false;
+    @Builder.Default
+    private Boolean canWriteReport = false;
+    @Builder.Default
+    private Boolean canWriteTime = false;
+    @Builder.Default
+    private Boolean canWriteSampleInfoDesc = false;
+    @Builder.Default
+    private Boolean canUploadFile = false;
 
     private Boolean required;
 }

@@ -14,4 +14,9 @@ public class PatientFormData {
     private ObjectId questionId;
     private Object answer;
     private String desc;
+    private String report;
+    private String reason;
+    private String time;
+    private String sampleInfoDesc;
+    private Integer fileIndex;
 }

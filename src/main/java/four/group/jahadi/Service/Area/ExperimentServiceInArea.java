@@ -44,7 +44,7 @@ public class ExperimentServiceInArea {
 
     public void addAllToExperimentsList(ObjectId userId, ObjectId areaId, List<ObjectId> ids) {
 
-        Trip wantedTrip = tripRepository.findNotStartedByAreaOwnerId(Utility.getCurrDate(), areaId, userId)
+        Trip wantedTrip = tripRepository.findByAreaIdAndOwnerId(areaId, userId)
                 .orElseThrow(NotAccessException::new);
 
         Iterable<Experiment> experimentsIter = experimentRepository.findAllById(ids);
@@ -79,7 +79,7 @@ public class ExperimentServiceInArea {
 
     public void removeAllFromExperimentsList(ObjectId userId, ObjectId areaId, List<ObjectId> ids) {
 
-        Trip wantedTrip = tripRepository.findNotStartedByAreaOwnerId(Utility.getCurrDate(), areaId, userId)
+        Trip wantedTrip = tripRepository.findByAreaIdAndOwnerId(areaId, userId)
                 .orElseThrow(NotAccessException::new);
 
         Area foundArea = wantedTrip

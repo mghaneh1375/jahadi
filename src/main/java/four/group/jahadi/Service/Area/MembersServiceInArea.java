@@ -46,7 +46,7 @@ public class MembersServiceInArea {
     public void addMembers(ObjectId userId, ObjectId groupId,
                            ObjectId areaId, List<ObjectId> userIds) {
 
-        Trip wantedTrip = tripRepository.findNotStartedByAreaOwnerId(Utility.getCurrDate(), areaId, userId)
+        Trip wantedTrip = tripRepository.findByAreaIdAndOwnerId(areaId, userId)
                 .orElseThrow(NotAccessException::new);
 
         int count = userRepository.countByIdsAndGroupId(userIds, groupId);
@@ -70,7 +70,7 @@ public class MembersServiceInArea {
     public void removeMember(ObjectId userId, ObjectId areaId,
                              ObjectId wantedUserId) {
 
-        Trip wantedTrip = tripRepository.findNotStartedByAreaOwnerId(Utility.getCurrDate(), areaId, userId)
+        Trip wantedTrip = tripRepository.findByAreaIdAndOwnerId(areaId, userId)
                 .orElseThrow(NotAccessException::new);
 
         Area foundArea = wantedTrip
@@ -116,7 +116,7 @@ public class MembersServiceInArea {
 
     public void removeDispatcher(ObjectId userId, ObjectId areaId, ObjectId wantedUserId) {
 
-        Trip wantedTrip = tripRepository.findNotStartedByAreaOwnerId(Utility.getCurrDate(), areaId, userId)
+        Trip wantedTrip = tripRepository.findByAreaIdAndOwnerId(areaId, userId)
                 .orElseThrow(NotAccessException::new);
 
         Area area = findArea(wantedTrip, areaId, userId);
@@ -150,7 +150,7 @@ public class MembersServiceInArea {
 
     public void removeTrainer(ObjectId userId, ObjectId areaId, ObjectId wantedUserId) {
 
-        Trip wantedTrip = tripRepository.findNotStartedByAreaOwnerId(Utility.getCurrDate(), areaId, userId)
+        Trip wantedTrip = tripRepository.findByAreaIdAndOwnerId(areaId, userId)
                 .orElseThrow(NotAccessException::new);
 
         Area area = findArea(wantedTrip, areaId, userId);
@@ -191,7 +191,7 @@ public class MembersServiceInArea {
 
     public void removePharmacyManager(ObjectId userId, ObjectId areaId, ObjectId wantedUserId) {
 
-        Trip wantedTrip = tripRepository.findNotStartedByAreaOwnerId(Utility.getCurrDate(), areaId, userId)
+        Trip wantedTrip = tripRepository.findByAreaIdAndOwnerId(areaId, userId)
                 .orElseThrow(NotAccessException::new);
 
         Area area = findArea(wantedTrip, areaId, userId);
@@ -239,7 +239,7 @@ public class MembersServiceInArea {
 
     public void removeLaboratoryManager(ObjectId userId, ObjectId areaId, ObjectId wantedUserId) {
 
-        Trip wantedTrip = tripRepository.findNotStartedByAreaOwnerId(Utility.getCurrDate(), areaId, userId)
+        Trip wantedTrip = tripRepository.findByAreaIdAndOwnerId(areaId, userId)
                 .orElseThrow(NotAccessException::new);
 
         Area area = findArea(wantedTrip, areaId, userId);
@@ -279,7 +279,7 @@ public class MembersServiceInArea {
 
     public void removeInsurancer(ObjectId userId, ObjectId areaId, ObjectId wantedUserId) {
 
-        Trip wantedTrip = tripRepository.findNotStartedByAreaOwnerId(Utility.getCurrDate(), areaId, userId)
+        Trip wantedTrip = tripRepository.findByAreaIdAndOwnerId(areaId, userId)
                 .orElseThrow(NotAccessException::new);
 
         Area area = findArea(wantedTrip, areaId, userId);
