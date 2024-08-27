@@ -30,6 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.Size;
+import java.util.HashMap;
 import java.util.List;
 
 @RestController
@@ -81,7 +82,7 @@ public class RegionPatientAPIRoutes extends Router {
     @Operation(
             summary = "گرفتن لبستی از بیماران پذیرش شده/نشده در یک ماژول خاص در منطقه مدنظر توسط مسئول و یا منشی آن ماژول"
     )
-    public ResponseEntity<List<PatientJoinArea>> getModulePatients(
+    public ResponseEntity<HashMap<String, Object>> getModulePatients(
             HttpServletRequest request,
             @PathVariable @ObjectIdConstraint ObjectId areaId,
             @PathVariable @ObjectIdConstraint ObjectId moduleId,

@@ -513,7 +513,7 @@ public class PatientServiceInArea {
         patientRepository.save(patient);
     }
 
-    public ResponseEntity<List<PatientJoinArea>> getModulePatients(
+    public ResponseEntity<HashMap<String, Object>> getModulePatients(
             ObjectId userId, ObjectId areaId, ObjectId moduleId,
             Boolean justRecepted, Boolean justUnRecepted
     ) {
@@ -523,7 +523,7 @@ public class PatientServiceInArea {
         ).orElseThrow(NotAccessException::new);
 
         Area area = AreaUtils.findStartedArea(trip, areaId);
-        AreaUtils.findModule(
+        ModuleInArea moduleInArea = AreaUtils.findModule(
                 area, moduleId,
                 userId.equals(area.getOwnerId()) ? null : userId,
                 userId.equals(area.getOwnerId()) ? null : userId
@@ -551,7 +551,11 @@ public class PatientServiceInArea {
             }
         }
 
-        return new ResponseEntity<>(output, HttpStatus.OK);
+        HashMap<String, Object> hashMap = new HashMap<>();
+        hashMap.put("moduleName", moduleInArea.getModuleName());
+        hashMap.put("patients", output);
+
+        return new ResponseEntity<>(hashMap, HttpStatus.OK);
     }
 
     public void setReceptionStatusOfPatient(
