@@ -12,13 +12,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static four.group.jahadi.Tests.Modules.ModuleSeeder.moduleIds;
+
 public class MiniParaClinic {
     public static SubModule make() {
         return doMake(new ObjectId());
-    }
-
-    public static SubModule make(ObjectId miniParaClinicId) {
-        return doMake(miniParaClinicId);
     }
 
     public static SubModule doMake(ObjectId customId) {
@@ -26,6 +24,8 @@ public class MiniParaClinic {
                 .builder()
                 .id(customId)
                 .name("خدمات پاراکلینیک")
+                .isReferral(true)
+                .referTo(moduleIds.get("پاراکلینیک"))
                 .questions(
                         List.of(
 //                                SimpleQuestion

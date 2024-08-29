@@ -1,0 +1,18 @@
+package four.group.jahadi.Enums.Module;
+
+public enum WomenServicePlus {
+    SUPER_EXAMINATION("معاینه سرپرست"),
+    VAGINAL_EXAMINATION("معاینه واژینال"),
+    PUP_SMEAR("Pup smear"),
+    BIOPSY("Biopsy");
+
+    String faTranslate;
+
+    WomenServicePlus(String faTranslate) {
+        this.faTranslate = faTranslate;
+    }
+
+    public String getFaTranslate() {
+        return faTranslate;
+    }
+}

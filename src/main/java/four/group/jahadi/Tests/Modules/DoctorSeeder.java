@@ -17,8 +17,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static four.group.jahadi.Tests.Modules.ModuleSeeder.miniParaClinicId;
-
 public class DoctorSeeder {
 
     public static List<Module> seed() {
@@ -34,7 +32,8 @@ public class DoctorSeeder {
                                 List.of(
                                         Visit.make(),
                                         ExternalReferral.make(),
-                                        MiniParaClinic.make(miniParaClinicId)
+//                                        MiniParaClinic.make(miniParaClinicId)
+                                        MiniParaClinic.make()
                                 )
                         )
                         .canSuggestDrug(true)

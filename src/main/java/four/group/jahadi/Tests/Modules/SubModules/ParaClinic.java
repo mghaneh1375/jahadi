@@ -17,17 +17,15 @@ import static four.group.jahadi.Tests.Modules.ModuleSeeder.moduleIds;
 
 public class ParaClinic {
 
-    public static Module seed(
-            ObjectId miniParaClinicSubModuleId
-    ) {
+    public static Module seed() {
 
-        SubModule history = SubModule
-                .builder()
-                .id(new ObjectId())
-                .name("مشاهده تجویز قبلی")
-                .readOnlyModuleId(moduleIds.get("پزشک عمومی"))
-                .readOnlySubModuleId(miniParaClinicSubModuleId)
-                .build();
+//        SubModule history = SubModule
+//                .builder()
+//                .id(new ObjectId())
+//                .name("مشاهده تجویز قبلی")
+//                .readOnlyModuleId(moduleIds.get("پزشک عمومی"))
+//                .readOnlySubModuleId(miniParaClinicSubModuleId)
+//                .build();
 
         SubModule services = SubModule
                 .builder()
@@ -97,7 +95,8 @@ public class ParaClinic {
                 .tabName("پاراکلینیک")
                 .name("پاراکلینیک")
                 .icon("")
-                .subModules(List.of(history, services))
+//                .subModules(List.of(history, services))
+                .subModules(List.of(services))
                 .build();
     }
 

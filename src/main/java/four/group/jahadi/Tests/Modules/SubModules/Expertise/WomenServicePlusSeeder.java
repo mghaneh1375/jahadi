@@ -34,7 +34,7 @@ public class WomenServicePlusSeeder {
                                                         .collect(Collectors.toList())
                                         )
                                         .questions(
-                                                Arrays.stream(four.group.jahadi.Enums.Module.LimitedParaClinic.values())
+                                                Arrays.stream(four.group.jahadi.Enums.Module.WomenServicePlus.values())
                                                         .map(itr ->
                                                                 SimpleQuestion
                                                                         .builder()
