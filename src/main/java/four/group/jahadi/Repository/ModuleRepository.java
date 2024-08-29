@@ -22,4 +22,7 @@ public interface ModuleRepository extends MongoRepository<Module, ObjectId>, Fil
 
     @Query(value = "{id: {$in : ?0}}", fields = "{'tabName': 1, 'id': 1}")
     List<Module> findTabNamesByIds(List<ObjectId> ids);
+
+    @Query(value = "{name: ?0}", fields = "{'id': 1}")
+    Module findByName(String name);
 }

@@ -5,38 +5,48 @@ import four.group.jahadi.Repository.ModuleRepository;
 import four.group.jahadi.Tests.Modules.SubModules.ParaClinic;
 import org.bson.types.ObjectId;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 public class ModuleSeeder {
     public static HashMap<String, ObjectId> moduleIds;
+    private static ModuleRepository moduleRepository;
+    private static List<Module> newItems = new ArrayList<>();
+
+    private static void addModule(Module module) {
+        Module sameModuleItr = moduleRepository.findByName(module.getName());
+        ObjectId moduleId = module.getId();
+        if(sameModuleItr != null) {
+            moduleId = sameModuleItr.getId();
+            module.setId(moduleId);
+        }
+        newItems.add(module);
+        moduleIds.put(module.getName(), moduleId);
+    }
 
     public static void seed(ModuleRepository moduleRepository) {
 
+        ModuleSeeder.moduleRepository = moduleRepository;
+        List<Module> all = moduleRepository.findAll();
         moduleIds = new HashMap<>();
 
-        Module paraClinic = ParaClinic.seed();
-        moduleIds.put(paraClinic.getName(), paraClinic.getId());
-        moduleRepository.insert(paraClinic);
+        addModule(ParaClinic.seed());
 
-        List<Module> doctorModules = DoctorSeeder.seed();
-        for (Module module : doctorModules) {
-            moduleRepository.insert(module);
-            moduleIds.put(module.getName(), module.getId());
-        }
+        for (Module module : DoctorSeeder.seed())
+            addModule(module);
 
-        for(Module module : ExpertiseSeeder.seed()) {
-            moduleRepository.insert(module);
-            moduleIds.put(module.getName(), module.getId());
-        }
+        for(Module module : ExpertiseSeeder.seed())
+            addModule(module);
 
-        for (Module module : EmpowermentSeeder.seed()) {
-            moduleRepository.insert(module);
-            moduleIds.put(module.getName(), module.getId());
-        }
+        for (Module module : EmpowermentSeeder.seed())
+            addModule(module);
 
         for (Module module : GharbalgariSeeder.seed())
-            moduleRepository.insert(module);
+            addModule(module);
+
+        moduleRepository.deleteAll(all);
+        moduleRepository.saveAll(newItems);
     }
 
 }

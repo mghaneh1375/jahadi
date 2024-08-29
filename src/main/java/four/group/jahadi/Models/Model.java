@@ -32,4 +32,8 @@ public abstract class Model implements Serializable {
         this.createdAt = new Date();
         return this;
     }
+
+    public void setId(ObjectId oid) {
+        this.id = oid;
+    }
 }
