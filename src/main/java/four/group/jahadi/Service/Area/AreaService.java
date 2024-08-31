@@ -29,7 +29,6 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static four.group.jahadi.Service.Area.AreaUtils.findArea;
-import static four.group.jahadi.Service.Area.MembersServiceInArea.fetchMemberIds;
 import static four.group.jahadi.Utility.Utility.getDate;
 import static four.group.jahadi.Utility.Utility.getLastDate;
 
@@ -217,6 +216,31 @@ public class AreaService extends AbstractService<Area, AreaData> {
         foundArea.setLng(dto.getLng());
 
         tripRepository.save(trip);
+    }
+
+    public ResponseEntity<HashMap<String, Object>> getRunInfo(ObjectId userId, ObjectId areaId) {
+
+        Trip trip = tripRepository.findByAreaIdAndOwnerId(areaId, userId)
+                .orElseThrow(NotAccessException::new);
+
+        Area foundArea = trip
+                .getAreas().stream().filter(area -> area.getId().equals(areaId))
+                .findFirst().orElseThrow(RuntimeException::new);
+
+        HashMap<String, Object> output = new HashMap<>();
+        output.put("city", foundArea.getCity());
+        output.put("state", foundArea.getState());
+        output.put("cityId", foundArea.getCityId().toString());
+        output.put("stateId", foundArea.getStateId().toString());
+        output.put("country", foundArea.getCountry());
+        output.put("dailyStartAt", foundArea.getDailyStartAt());
+        output.put("dailyEndAt", foundArea.getDailyEndAt());
+        output.put("startAt", Utility.convertDateToJalali(foundArea.getStartAt()));
+        output.put("endAt", Utility.convertDateToJalali(foundArea.getEndAt()));
+        output.put("lat", foundArea.getLat());
+        output.put("lng", foundArea.getLng());
+
+        return new ResponseEntity<>(output, HttpStatus.OK);
     }
 
     public void finalizeArea(ObjectId userId, ObjectId areaId) {

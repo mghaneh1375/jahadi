@@ -63,6 +63,16 @@ public class RegionManageAPIRoutes extends Router {
         areaService.setRunInfo(getId(request), areaId, regionRunInfoData);
     }
 
+    @GetMapping(value = "getRunInfo/{areaId}")
+    @ResponseBody
+    @Operation(summary = "گرفتن اطلاعات منطقه", description = "گرفتن اطلاعاتی نظیر شهر محل برگزاری، مختصات جغرافیایی و روز و زمان شروع و پایان")
+    public ResponseEntity<HashMap<String, Object>> getRunInfo(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId
+    ) {
+        return areaService.getRunInfo(getId(request), areaId);
+    }
+
     @PutMapping(value = "finalize/{areaId}")
     @ResponseBody
     @Operation(summary = "نهایی سازی ساخت منطقه توسط مسئول منطقه", description = "بعد از آخرین مرحله در تکمیل اطلاعات منطقه (یعنی اختصاص منشی به ماژول ها) باید این api فراخوانی شود تا چک شود آیا تمامی اطلاعات لازم وارد شده است یا نه و منطقه نهایی سازی بشود")
