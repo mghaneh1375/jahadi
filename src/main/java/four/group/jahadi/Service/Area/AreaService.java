@@ -232,6 +232,9 @@ public class AreaService extends AbstractService<Area, AreaData> {
         output.put("state", foundArea.getState());
         output.put("cityId", foundArea.getCityId().toString());
         output.put("stateId", foundArea.getStateId().toString());
+        Optional<Country> country = countryRepository.findByName(foundArea.getCountry());
+        country.ifPresent(value -> output.put("countryId", value.getId().toString()));
+
         output.put("country", foundArea.getCountry());
         output.put("dailyStartAt", foundArea.getDailyStartAt());
         output.put("dailyEndAt", foundArea.getDailyEndAt());

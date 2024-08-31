@@ -7,7 +7,5 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Country extends Model {
-
     private String name;
-
 }
