@@ -257,13 +257,11 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
 
         List<Project> projects =
                 projectRepository.findByOwner(Collections.singletonList(groupId));
-
         List<Project> result = new ArrayList<>();
 
         projects.forEach(project -> {
-
             List<Trip> trips =
-                    tripRepository.findNeedActionByGroupId(Utility.getCurrDate(), groupId);
+                    tripRepository.findNeedActionByGroupId(Utility.getCurrDate(), groupId, project.getId());
 
             if(trips.size() == 0)
                 return;
@@ -271,7 +269,6 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
             List<ObjectId> ids = new ArrayList<>();
 
             for (Trip trip : trips) {
-
                 if (trip.getGroupsWithAccess().stream().noneMatch(groupAccess ->
                         groupAccess.getWriteAccess() && groupAccess.getGroupId().equals(groupId)
                 ))
