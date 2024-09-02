@@ -32,6 +32,9 @@ public class PatientReferral extends Model {
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     private List<PatientForm> forms;
 
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    private List<PatientExperiment> experiments;
+
     @Field("recepted_at")
     @JsonSerialize(using = DateSerialization.class)
     @JsonInclude(JsonInclude.Include.NON_NULL)
