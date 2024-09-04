@@ -45,6 +45,9 @@ public class ModuleSeeder {
         for (Module module : GharbalgariSeeder.seed())
             addModule(module);
 
+        for (Module module : ExperimentTab.seed())
+            addModule(module);
+
         moduleRepository.deleteAll(all);
         moduleRepository.saveAll(newItems);
     }
