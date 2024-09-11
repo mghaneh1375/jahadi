@@ -1,8 +1,6 @@
 package four.group.jahadi.Models;
 
-import four.group.jahadi.Enums.Drug.AmountOfUse;
-import four.group.jahadi.Enums.Drug.HowToUse;
-import four.group.jahadi.Enums.Drug.UseTime;
+import four.group.jahadi.Enums.Drug.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,18 +17,17 @@ import java.util.List;
 @AllArgsConstructor
 @Document(collection = "drug")
 public class Drug extends Model {
-
+    @Field("drug_type")
+    private DrugType drugType;
     private String name;
+    private String producer;
     private Integer price;
-    @Field("how_to_uses")
-    private List<HowToUse> howToUses;
-    @Field("amount_of_uses")
-    private List<AmountOfUse> amountOfUses;
-    @Field("use_times")
-    private List<UseTime> useTimes;
     private String description;
     private Integer available;
     private List<ObjectId> replacements;
     private Boolean visibility;
     private Integer priority;
+    private DrugLocation location;
+    @Field("box_no")
+    private String boxNo;
 }

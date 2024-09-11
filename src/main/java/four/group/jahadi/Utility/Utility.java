@@ -16,12 +16,16 @@ import org.modelmapper.spi.NamingConvention;
 import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static four.group.jahadi.Utility.StaticValues.DEV_MODE;
 
 public class Utility {
 
+    public static final Pattern datePattern = Pattern.compile(
+            "^[1-4]\\d{3}-((0[1-6]-((3[0-1])|([1-2][0-9])|(0[1-9])))|((1[0-2]|(0[7-9]))-(30|([1-2][0-9])|(0[1-9]))))$"
+    );
     private static final String AB = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
     private static SecureRandom rnd = new SecureRandom();
     private static Random random = new Random();
@@ -31,6 +35,22 @@ public class Utility {
         String[] dateTime = simpleDateFormat.format(date).split(" ");
         String[] splited = dateTime[0].split("-");
         return JalaliCalendar.gregorianToJalali(new JalaliCalendar.YearMonthDate(splited[0], splited[1], splited[2])).format("/") + " - " + dateTime[1];
+    }
+
+    public static Date convertJalaliToGregorianDate(String jaladiDate) {
+        String[] splited = jaladiDate.split("-");
+        Date date = new Date();
+        JalaliCalendar.YearMonthDate gregorian = JalaliCalendar.jalaliToGregorian(
+                new JalaliCalendar.YearMonthDate(
+                        Integer.parseInt(splited[0]),
+                        Integer.parseInt(splited[1]),
+                        Integer.parseInt(splited[2])
+                )
+        );
+        date.setYear(gregorian.getYear());
+        date.setMonth(gregorian.getMonth());
+        date.setDate(gregorian.getDate());
+        return date;
     }
 
     public static boolean isNumeric(String str) {
