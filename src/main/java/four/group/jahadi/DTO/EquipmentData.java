@@ -35,10 +35,10 @@ public class EquipmentData {
     @NotNull
     private EquipmentHealthStatus healthStatus;
     @NotNull
-    @Size(min = 2, max = 100, message = "شماره ردیف باید حداقل 2 و حداکثر 100 کاراکتر باشد")
+    @Size(min = 1, max = 100, message = "شماره ردیف باید حداقل 2 و حداکثر 100 کاراکتر باشد")
     private String rowNo;
     @NotNull
-    @Size(min = 2, max = 100, message = "شماره قفسه باید حداقل 2 و حداکثر 100 کاراکتر باشد")
+    @Size(min = 1, max = 100, message = "شماره قفسه باید حداقل 2 و حداکثر 100 کاراکتر باشد")
     private String shelfNo;
     @NotNull
     @Size(min = 2, max = 1000, message = "محل انبار باید حداقل 2 و حداکثر 1000 کاراکتر باشد")

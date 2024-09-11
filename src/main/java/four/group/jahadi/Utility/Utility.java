@@ -47,8 +47,8 @@ public class Utility {
                         Integer.parseInt(splited[2])
                 )
         );
-        date.setYear(gregorian.getYear());
-        date.setMonth(gregorian.getMonth());
+        date.setYear(gregorian.getYear() - 1900);
+        date.setMonth(gregorian.getMonth() - 1);
         date.setDate(gregorian.getDate());
         return date;
     }

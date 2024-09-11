@@ -1,6 +1,7 @@
 package four.group.jahadi.Service;
 
 import four.group.jahadi.DTO.EquipmentData;
+import four.group.jahadi.DTO.ErrorRow;
 import four.group.jahadi.Enums.EquipmentHealthStatus;
 import four.group.jahadi.Enums.EquipmentType;
 import four.group.jahadi.Exception.InvalidFieldsException;
@@ -10,9 +11,8 @@ import four.group.jahadi.Repository.EquipmentRepository;
 import four.group.jahadi.Utility.Utility;
 import lombok.Builder;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -43,7 +43,7 @@ public class EquipmentService extends AbstractService<Equipment, EquipmentData> 
         EquipmentHealthStatus healthyStatus =
                 filters[4] == null
                         ? null
-                        : EquipmentHealthStatus.valueOf(filters[4].toString().toLowerCase());
+                        : EquipmentHealthStatus.valueOf(filters[4].toString().toUpperCase());
         return new ResponseEntity<>(
                 equipmentRepository.findByFilters(userId, name, minAvailable, maxAvailable, healthyStatus),
                 HttpStatus.OK
@@ -114,36 +114,40 @@ public class EquipmentService extends AbstractService<Equipment, EquipmentData> 
 
 
     // EXCEL FORMAT
-    // A: equipmentType, B: name, C: producer, D: available,
-    // E: buyAt, F: healthStatus, G: rowNo, H: shelfNo, I: location,
-    // J: description, K: propertyId, L: guaranteeExpireAt, M: usedAt
+    // A: index, B: equipmentType, C: name, D: producer, E: available,
+    // F: buyAt, G: healthStatus, H: rowNo, I: shelfNo, J: location,
+    // K: description, L: propertyId, M: guaranteeExpireAt, N: usedAt
     private Equipment isRowValid(Row row) {
         Equipment equipment = new Equipment();
 
-        for (int i = 0; i < row.getLastCellNum(); i++) {
+        for (int i = 1; i <= row.getLastCellNum(); i++) {
             Object value;
+            if(row.getCell(i) == null || row.getCell(i).getCellType() == CellType.BLANK)
+                continue;
+
             try {
                 value = row.getCell(i).getStringCellValue();
             } catch (Exception x) {
                 value = row.getCell(i).getNumericCellValue();
+                if(i == 7 || i == 8)
+                    value = value.toString().replace(".0", "");
             }
-            if(value == null) continue;
 
             switch (i) {
-                case 0:
+                case 1:
                     equipment.setEquipmentType(
-                            EquipmentType.valueOf(value.toString().toLowerCase())
+                            EquipmentType.valueOf(value.toString().toUpperCase())
                     );
                     break;
-                case 1:
+                case 2:
                     validateString(value.toString(), "نام", 2, 100);
                     equipment.setName(value.toString());
                     break;
-                case 2:
+                case 3:
                     validateString(value.toString(), "شرکت سازنده", 2, 100);
                     equipment.setProducer(value.toString());
                     break;
-                case 3:
+                case 4:
                     if (
                             ((Number) value).intValue() < 0 ||
                                     ((Number) value).intValue() > 100000
@@ -151,46 +155,46 @@ public class EquipmentService extends AbstractService<Equipment, EquipmentData> 
                         throw new InvalidFieldsException("مقدار موجودی باید حداقل 0 و حداکثر 100000 باشد");
                     equipment.setAvailable(((Number) value).intValue());
                     break;
-                case 4:
+                case 5:
                     if(!datePattern.matcher(value.toString()).matches())
                         throw new InvalidFieldsException("فرمت تاریخ خرید نامعتبر است.");
                     equipment.setBuyAt(Utility.convertJalaliToGregorianDate(value.toString()));
                     break;
-                case 5:
+                case 6:
                     equipment.setHealthStatus(
-                            EquipmentHealthStatus.valueOf(value.toString().toLowerCase())
+                            EquipmentHealthStatus.valueOf(value.toString().toUpperCase())
                     );
                     break;
-                case 6:
-                    validateString(value.toString(), "شماره ردیف", 2, 100);
+                case 7:
+                    validateString(value.toString(), "شماره ردیف", 1, 100);
                     equipment.setRowNo(value.toString());
                     break;
-                case 7:
-                    validateString(value.toString(), "شماره قفسه", 2, 100);
+                case 8:
+                    validateString(value.toString(), "شماره قفسه", 1, 100);
                     equipment.setShelfNo(value.toString());
                     break;
-                case 8:
+                case 9:
                     validateString(value.toString(), "محل انبار", 2, 100);
                     equipment.setLocation(value.toString());
                     break;
-                case 9:
+                case 10:
                     if (value.toString().length() > 1000)
                         throw new InvalidFieldsException("توضیحات باید حداکثر 1000 کاراکتر باشد");
-                    equipment.setLocation(value.toString());
+                    equipment.setDescription(value.toString());
                     break;
-                case 10:
+                case 11:
                     if(equipment.getEquipmentType() != null &&
                             equipment.getEquipmentType().equals(EquipmentType.INFRASTRUCTURE)) {
                         validateString(value.toString(), "شماره اموال", 2, 100);
                         equipment.setPropertyId(value.toString());
                     }
                     break;
-                case 11:
+                case 12:
                     if(!datePattern.matcher(value.toString()).matches())
                         throw new InvalidFieldsException("فرمت تاریخ انقضای گارانتی نامعتبر است.");
                     equipment.setGuaranteeExpireAt(Utility.convertJalaliToGregorianDate(value.toString()));
                     break;
-                case 12:
+                case 13:
                     if(!datePattern.matcher(value.toString()).matches())
                         throw new InvalidFieldsException("فرمت تاریخ استفاده نامعتبر است.");
                     equipment.setUsedAt(Utility.convertJalaliToGregorianDate(value.toString()));
@@ -219,21 +223,15 @@ public class EquipmentService extends AbstractService<Equipment, EquipmentData> 
         return equipment;
     }
 
-    @Builder
-    public class ErrorRow {
-        private Integer rowIndex;
-        private String errorMsg;
-    }
-
     public ResponseEntity<List<ErrorRow>> batchStore(MultipartFile file, ObjectId userId, ObjectId groupId) {
         if(file == null)
             throw new InvalidFieldsException("لطفا فایل را بارگذاری نمایید");
         try {
-            Workbook workbook = new HSSFWorkbook(file.getInputStream());
+            Workbook workbook = new XSSFWorkbook(file.getInputStream());
             Sheet sheet = workbook.getSheetAt(0);
             List<Equipment> equipments = new ArrayList<>();
             List<ErrorRow> errorRows = new ArrayList<>();
-            for (int i = 0; i < sheet.getLastRowNum(); i++) {
+            for (int i = 1; i <= sheet.getLastRowNum(); i++) {
                 try {
                     Equipment equipment = isRowValid(sheet.getRow(i));
                     equipment.setUserId(userId);

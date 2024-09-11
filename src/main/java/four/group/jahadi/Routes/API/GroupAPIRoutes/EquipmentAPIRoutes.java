@@ -1,6 +1,7 @@
 package four.group.jahadi.Routes.API.GroupAPIRoutes;
 
 import four.group.jahadi.DTO.EquipmentData;
+import four.group.jahadi.DTO.ErrorRow;
 import four.group.jahadi.Exception.NotActivateAccountException;
 import four.group.jahadi.Exception.UnAuthException;
 import four.group.jahadi.Models.Equipment;
@@ -8,8 +9,10 @@ import four.group.jahadi.Models.User;
 import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Service.EquipmentService;
 import four.group.jahadi.Validator.ObjectIdConstraint;
+import io.swagger.v3.oas.annotations.Operation;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -46,9 +49,10 @@ public class EquipmentAPIRoutes extends Router {
         return equipmentService.store(dto, user.getId(), user.getGroupId());
     }
 
-    @PostMapping(value = "batchStore")
+    @PostMapping(value = "batchStore", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseBody
-    public ResponseEntity<List<EquipmentService.ErrorRow>> batchStore(
+    @Operation(summary = "افزودن دسته ای به وسیله فایل اکسل")
+    public ResponseEntity<List<ErrorRow>> batchStore(
             HttpServletRequest request,
             @RequestBody MultipartFile file
     ) throws UnAuthException, NotActivateAccountException {
