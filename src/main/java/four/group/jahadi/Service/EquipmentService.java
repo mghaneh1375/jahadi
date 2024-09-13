@@ -9,9 +9,10 @@ import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Models.Equipment;
 import four.group.jahadi.Repository.EquipmentRepository;
 import four.group.jahadi.Utility.Utility;
-import lombok.Builder;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +23,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import static four.group.jahadi.Utility.Utility.datePattern;
 
@@ -37,17 +38,34 @@ public class EquipmentService extends AbstractService<Equipment, EquipmentData> 
     @Override
     public ResponseEntity<List<Equipment>> list(Object... filters) {
         ObjectId userId = (ObjectId) filters[0];
-        String name = (String) filters[1];
-        Integer minAvailable = (Integer) filters[2];
-        Integer maxAvailable = (Integer) filters[3];
-        EquipmentHealthStatus healthyStatus =
-                filters[4] == null
-                        ? null
-                        : EquipmentHealthStatus.valueOf(filters[4].toString().toUpperCase());
-        return new ResponseEntity<>(
-                equipmentRepository.findByFilters(userId, name, minAvailable, maxAvailable, healthyStatus),
-                HttpStatus.OK
-        );
+        try {
+            String name = filters.length > 1 ? (String) filters[1] : null;
+            Integer minAvailable = filters.length > 2 ? (Integer) filters[2] : null;
+            Integer maxAvailable = filters.length > 3 ? (Integer) filters[3] : null;
+            EquipmentHealthStatus healthyStatus = filters.length > 4 && filters[4] != null
+                    ? EquipmentHealthStatus.valueOf(filters[4].toString().toUpperCase())
+                    : null;
+            String propertyId = filters.length > 5 ? (String) filters[5] : null;
+            String location = filters.length > 6 ? (String) filters[6] : null;
+            EquipmentType equipmentType = filters.length > 7 && filters[7] != null ? EquipmentType.valueOf(filters[7].toString().toUpperCase()) : null;
+            String rowNo = filters.length > 8 ? (String) filters[8] : null;
+            String shelfNo = filters.length > 9 ? (String) filters[9] : null;
+            Date fromBuyAt = filters.length > 10 ? (Date) filters[10] : null;
+            Date toBuyAt = filters.length > 11 ? (Date) filters[11] : null;
+            Date fromGuaranteeExpireAt = filters.length > 12 ? (Date) filters[12] : null;
+            Date toGuaranteeExpireAt = filters.length > 13 ? (Date) filters[13] : null;
+            return new ResponseEntity<>(
+                    equipmentRepository.findByFilters(
+                            userId, name, minAvailable, maxAvailable, healthyStatus,
+                            propertyId, location, equipmentType, rowNo, shelfNo,
+                            fromBuyAt, toBuyAt, fromGuaranteeExpireAt, toGuaranteeExpireAt
+                    ),
+                    HttpStatus.OK
+            );
+        }
+        catch (Exception x) {
+            throw new InvalidFieldsException(x.getMessage());
+        }
     }
 
     @Override
@@ -105,11 +123,6 @@ public class EquipmentService extends AbstractService<Equipment, EquipmentData> 
         }
         equipmentRepository.insert(equipment);
         return new ResponseEntity<>(equipment, HttpStatus.OK);
-    }
-
-    private void validateString(String val, String key, int min, int max) {
-        if (val == null || val.length() < min || val.length() > max)
-            throw new InvalidFieldsException(key + " باید حداقل 2 کاراکتر و حداکثر 100 کاراکتر باشد");
     }
 
 

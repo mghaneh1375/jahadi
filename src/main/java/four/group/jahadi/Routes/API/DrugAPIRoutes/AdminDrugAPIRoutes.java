@@ -22,20 +22,20 @@ public class AdminDrugAPIRoutes {
     @Autowired
     DrugService drugService;
 
-    @PostMapping(value = "store")
-    @ResponseBody
-    public ResponseEntity<Drug> store(final @RequestBody @Valid DrugData drugData) {
-        return drugService.store(drugData);
-    }
+//    @PostMapping(value = "store")
+//    @ResponseBody
+//    public ResponseEntity<Drug> store(final @RequestBody @Valid DrugData drugData) {
+//        return drugService.store(drugData);
+//    }
 
-    @PutMapping(value = "update/{id}")
-    @ResponseBody
-    public void update(
-        final @PathVariable @ObjectIdConstraint ObjectId id, 
-        final @RequestBody @Valid DrugData drugData
-    ) {
-        drugService.update(id, drugData);
-    }
+//    @PutMapping(value = "update/{id}")
+//    @ResponseBody
+//    public void update(
+//        final @PathVariable @ObjectIdConstraint ObjectId id,
+//        final @RequestBody @Valid DrugData drugData
+//    ) {
+//        drugService.update(id, drugData);
+//    }
     
     @GetMapping(value = "get/{id}")
     @ResponseBody

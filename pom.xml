@@ -123,7 +123,6 @@
             <version>5.2.5</version>
         </dependency>
 
-
         <dependency>
             <groupId>jaxb-api</groupId>
             <artifactId>sample</artifactId>

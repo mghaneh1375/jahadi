@@ -19,7 +19,8 @@ public class DrugLog extends Model {
 
     @Field("drug_id")
     private ObjectId drugId;
-
+    @Field("user_id")
+    private ObjectId userId;
     private Integer amount;
     private String desc;
 }

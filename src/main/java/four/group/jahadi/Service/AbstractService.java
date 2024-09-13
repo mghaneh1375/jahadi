@@ -3,6 +3,7 @@ package four.group.jahadi.Service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import four.group.jahadi.DTO.Digest.DTO;
 import four.group.jahadi.DTO.UserData;
+import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Models.Model;
 import four.group.jahadi.Models.ModelWithUser;
 import four.group.jahadi.Models.User;
@@ -96,4 +97,8 @@ public abstract class AbstractService <T, D> {
         return (T) modelMapper.map(d, t.getClass());
     }
 
+    void validateString(String val, String key, int min, int max) {
+        if (val == null || val.length() < min || val.length() > max)
+            throw new InvalidFieldsException(key + " باید حداقل 2 کاراکتر و حداکثر 100 کاراکتر باشد");
+    }
 }

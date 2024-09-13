@@ -1,6 +1,7 @@
 package four.group.jahadi.Models;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import four.group.jahadi.Enums.EquipmentHealthStatus;
 import four.group.jahadi.Enums.EquipmentType;
@@ -40,7 +41,13 @@ public class Equipment extends Model {
     private String shelfNo;
     private String location;
     private String description;
+    @Field("user_id")
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    @JsonSerialize(using = ObjectIdSerialization.class)
     private ObjectId userId;
+    @Field("group_id")
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    @JsonSerialize(using = ObjectIdSerialization.class)
     private ObjectId groupId;
     @Field("property_id")
     private String propertyId;

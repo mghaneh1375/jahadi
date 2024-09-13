@@ -42,13 +42,11 @@ public class Utility {
         Date date = new Date();
         JalaliCalendar.YearMonthDate gregorian = JalaliCalendar.jalaliToGregorian(
                 new JalaliCalendar.YearMonthDate(
-                        Integer.parseInt(splited[0]),
-                        Integer.parseInt(splited[1]),
-                        Integer.parseInt(splited[2])
+                        splited[0], splited[1], splited[2]
                 )
         );
         date.setYear(gregorian.getYear() - 1900);
-        date.setMonth(gregorian.getMonth() - 1);
+        date.setMonth(gregorian.getMonth());
         date.setDate(gregorian.getDate());
         return date;
     }

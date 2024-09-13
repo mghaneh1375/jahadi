@@ -818,7 +818,7 @@ public class JalaliCalendar extends Calendar {
             this.date = date;
         }
 
-        public YearMonthDate(String year, String  month, String  date) {
+        public YearMonthDate(String year, String month, String date) {
             this.year = Integer.parseInt(year);
             this.month = Integer.parseInt(month) - 1;
             this.date = Integer.parseInt(date);
