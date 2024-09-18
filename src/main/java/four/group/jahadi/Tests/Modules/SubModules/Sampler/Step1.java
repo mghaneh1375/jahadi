@@ -19,7 +19,7 @@ public class Step1 {
         return SubModule
                 .builder()
                 .id(new ObjectId())
-                .name("فرم نسخه آزمایشگاه")
+                .name("جدول آزمایش")
                 .isReferral(false)
                 .questions(List.of(
                         CheckListGroupQuestion

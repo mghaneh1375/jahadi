@@ -208,6 +208,7 @@ public class Mama {
                                 .builder()
                                 .id(new ObjectId())
                                 .question("اختلال در رابطه جنسی")
+                                .questionType(QuestionType.SIMPLE)
                                 .answerType(AnswerType.TICK)
                                 .options(List.of(
                                         new PairValue(

@@ -36,6 +36,48 @@ public class ExperimentAnswer {
                                                 .questionType(QuestionType.SIMPLE)
                                                 .answerType(AnswerType.UPLOAD)
                                                 .question("فایل مدنظر")
+                                                .build(),
+                                        SimpleQuestion
+                                                .builder()
+                                                .id(new ObjectId())
+                                                .questionType(QuestionType.SIMPLE)
+                                                .answerType(AnswerType.LONG_TEXT)
+                                                .question("توضیحات")
+                                                .build(),
+                                        SimpleQuestion
+                                                .builder()
+                                                .id(new ObjectId())
+                                                .questionType(QuestionType.SIMPLE)
+                                                .answerType(AnswerType.UPLOAD)
+                                                .question("فایل مدنظر")
+                                                .build(),
+                                        SimpleQuestion
+                                                .builder()
+                                                .id(new ObjectId())
+                                                .questionType(QuestionType.SIMPLE)
+                                                .answerType(AnswerType.LONG_TEXT)
+                                                .question("توضیحات")
+                                                .build(),
+                                        SimpleQuestion
+                                                .builder()
+                                                .id(new ObjectId())
+                                                .questionType(QuestionType.SIMPLE)
+                                                .answerType(AnswerType.UPLOAD)
+                                                .question("فایل مدنظر")
+                                                .build(),
+                                        SimpleQuestion
+                                                .builder()
+                                                .id(new ObjectId())
+                                                .questionType(QuestionType.SIMPLE)
+                                                .answerType(AnswerType.LONG_TEXT)
+                                                .question("توضیحات")
+                                                .build(),
+                                        SimpleQuestion
+                                                .builder()
+                                                .id(new ObjectId())
+                                                .questionType(QuestionType.SIMPLE)
+                                                .answerType(AnswerType.UPLOAD)
+                                                .question("فایل مدنظر")
                                                 .build()
                                 ))
                                 .build()
