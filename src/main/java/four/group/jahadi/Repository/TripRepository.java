@@ -31,14 +31,14 @@ public interface TripRepository extends MongoRepository<Trip, ObjectId>, Filtera
     @Query(value = "{$and: [{'endAt': {$gte: ?0}}, {'areas.ownerId': ?1}]  }", fields = "{projectId: true}")
     List<Trip> findActivesOrNotStartedProjectIdsByAreaOwnerId(Date curr, ObjectId areaOwnerId);
 
-    @Query(value = "{$and: [{$or: [{$and: [{'startAt': {$lte: ?0}}, {'endAt': {$gte: ?0}}]}, {'startAt': {$exists: false}}]}, {'groupsWithAccess.groupId': ?1}]  }", fields = "{'projectId': false, 'areas.members': false, 'createdAt': false}")
-    List<Trip> findActivesByGroupId(Date curr, ObjectId groupId);
-
     @Query(value = "{$and: [{'startAt': {$exists: false}, 'projectId': ?2}, {'groupsWithAccess.groupId': ?1}]  }", fields = "{'projectId': false, 'areas.members': false, 'createdAt': false}")
     List<Trip> findNeedActionByGroupId(Date curr, ObjectId groupId, ObjectId projectId);
 
     @Query(value = "{$and: [{'endAt': {$exists: true}}, {'endAt': {$gte: ?0}}, {'groupsWithAccess.groupId': ?1}]  }", fields = "{'projectId': false, 'areas.members': false, 'createdAt': false}")
     List<Trip> findActivesOrNotStartedProjectsByGroupId(Date curr, ObjectId groupId);
+
+    @Query(value = "{$and: [{$or: [{'endAt': {$exists: false}}, {'endAt': {$gte: ?0}}]}, {'groupsWithAccess': { $elemMatch: {'groupId': ?1, 'writeAccess': true} }} ] }", exists = true)
+    boolean hasExistActiveAreaByGroupIdAndAreaIdAndWriteAccess(Date curr, ObjectId groupId, ObjectId areaId);
 
     @Query(value = "{$and: [{'endAt': {$exists: true}}, {'endAt': {$gte: ?0}}]  }", fields = "{'projectId': false, 'areas.members': false, 'createdAt': false}")
     List<Trip> findActivesOrNotStartedProjects(Date curr);

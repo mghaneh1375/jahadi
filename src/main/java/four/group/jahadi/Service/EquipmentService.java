@@ -6,9 +6,14 @@ import four.group.jahadi.Enums.EquipmentHealthStatus;
 import four.group.jahadi.Enums.EquipmentType;
 import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Exception.InvalidIdException;
+import four.group.jahadi.Exception.NotAccessException;
+import four.group.jahadi.Models.Area.AreaEquipments;
 import four.group.jahadi.Models.Equipment;
+import four.group.jahadi.Repository.Area.EquipmentsInAreaRepository;
 import four.group.jahadi.Repository.EquipmentRepository;
+import four.group.jahadi.Repository.TripRepository;
 import four.group.jahadi.Utility.Utility;
+import lombok.Synchronized;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -25,6 +30,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import static four.group.jahadi.Utility.Utility.datePattern;
 
@@ -33,6 +39,11 @@ public class EquipmentService extends AbstractService<Equipment, EquipmentData> 
 
     @Autowired
     private EquipmentRepository equipmentRepository;
+
+    @Autowired
+    private EquipmentsInAreaRepository equipmentsInAreaRepository;
+    @Autowired
+    private TripRepository tripRepository;
 
 
     @Override
@@ -62,8 +73,7 @@ public class EquipmentService extends AbstractService<Equipment, EquipmentData> 
                     ),
                     HttpStatus.OK
             );
-        }
-        catch (Exception x) {
+        } catch (Exception x) {
             throw new InvalidFieldsException(x.getMessage());
         }
     }
@@ -125,6 +135,45 @@ public class EquipmentService extends AbstractService<Equipment, EquipmentData> 
         return new ResponseEntity<>(equipment, HttpStatus.OK);
     }
 
+    @Synchronized
+    public void addToArea(
+            ObjectId userId, ObjectId groupId,
+            ObjectId areaId, ObjectId equipmentId,
+            int amount
+    ) {
+        if(!tripRepository.hasExistActiveAreaByGroupIdAndAreaIdAndWriteAccess(Utility.getCurrDate(), groupId, areaId))
+            throw new NotAccessException();
+
+        Equipment equipment = equipmentRepository.findByIdAndUserId(equipmentId, userId)
+                .orElseThrow(NotAccessException::new);
+        if(equipment.getAvailable() < amount)
+            throw new InvalidFieldsException("تعداد موجودی این تجهیز از تعداد خواسته شده کمتر است");
+
+        Optional<AreaEquipments> areaEquipmentsOptional = equipmentsInAreaRepository.findByAreaIdAndEquipmentId(areaId, equipmentId);
+        if(areaEquipmentsOptional.isPresent()) {
+            areaEquipmentsOptional.get().setTotalCount(areaEquipmentsOptional.get().getTotalCount() + amount);
+            areaEquipmentsOptional.get().setReminder(areaEquipmentsOptional.get().getReminder() + amount);
+            areaEquipmentsOptional.get().setUpdatedAt(new Date());
+            equipmentsInAreaRepository.save(areaEquipmentsOptional.get());
+        }
+        else {
+            equipmentsInAreaRepository.insert(
+                    AreaEquipments
+                            .builder()
+                            .equipmentName(equipment.getName())
+                            .equipmentId(equipmentId)
+                            .reminder(amount)
+                            .totalCount(amount)
+                            .updatedAt(new Date())
+                            .areaId(areaId)
+                            .build()
+            );
+        }
+
+        equipment.setAvailable(equipment.getAvailable() - amount);
+        equipmentRepository.save(equipment);
+    }
+
 
     // EXCEL FORMAT
     // A: index, B: equipmentType, C: name, D: producer, E: available,
@@ -135,14 +184,14 @@ public class EquipmentService extends AbstractService<Equipment, EquipmentData> 
 
         for (int i = 1; i <= row.getLastCellNum(); i++) {
             Object value;
-            if(row.getCell(i) == null || row.getCell(i).getCellType() == CellType.BLANK)
+            if (row.getCell(i) == null || row.getCell(i).getCellType() == CellType.BLANK)
                 continue;
 
             try {
                 value = row.getCell(i).getStringCellValue();
             } catch (Exception x) {
                 value = row.getCell(i).getNumericCellValue();
-                if(i == 7 || i == 8)
+                if (i == 7 || i == 8)
                     value = value.toString().replace(".0", "");
             }
 
@@ -169,7 +218,7 @@ public class EquipmentService extends AbstractService<Equipment, EquipmentData> 
                     equipment.setAvailable(((Number) value).intValue());
                     break;
                 case 5:
-                    if(!datePattern.matcher(value.toString()).matches())
+                    if (!datePattern.matcher(value.toString()).matches())
                         throw new InvalidFieldsException("فرمت تاریخ خرید نامعتبر است.");
                     equipment.setBuyAt(Utility.convertJalaliToGregorianDate(value.toString()));
                     break;
@@ -196,19 +245,19 @@ public class EquipmentService extends AbstractService<Equipment, EquipmentData> 
                     equipment.setDescription(value.toString());
                     break;
                 case 11:
-                    if(equipment.getEquipmentType() != null &&
+                    if (equipment.getEquipmentType() != null &&
                             equipment.getEquipmentType().equals(EquipmentType.INFRASTRUCTURE)) {
                         validateString(value.toString(), "شماره اموال", 2, 100);
                         equipment.setPropertyId(value.toString());
                     }
                     break;
                 case 12:
-                    if(!datePattern.matcher(value.toString()).matches())
+                    if (!datePattern.matcher(value.toString()).matches())
                         throw new InvalidFieldsException("فرمت تاریخ انقضای گارانتی نامعتبر است.");
                     equipment.setGuaranteeExpireAt(Utility.convertJalaliToGregorianDate(value.toString()));
                     break;
                 case 13:
-                    if(!datePattern.matcher(value.toString()).matches())
+                    if (!datePattern.matcher(value.toString()).matches())
                         throw new InvalidFieldsException("فرمت تاریخ استفاده نامعتبر است.");
                     equipment.setUsedAt(Utility.convertJalaliToGregorianDate(value.toString()));
                     break;
@@ -237,7 +286,7 @@ public class EquipmentService extends AbstractService<Equipment, EquipmentData> 
     }
 
     public ResponseEntity<List<ErrorRow>> batchStore(MultipartFile file, ObjectId userId, ObjectId groupId) {
-        if(file == null)
+        if (file == null)
             throw new InvalidFieldsException("لطفا فایل را بارگذاری نمایید");
         try {
             Workbook workbook = new XSSFWorkbook(file.getInputStream());
@@ -261,7 +310,7 @@ public class EquipmentService extends AbstractService<Equipment, EquipmentData> 
                 }
             }
 
-            if(equipments.size() > 0)
+            if (equipments.size() > 0)
                 equipmentRepository.saveAll(equipments);
 
             return new ResponseEntity<>(errorRows, HttpStatus.OK);

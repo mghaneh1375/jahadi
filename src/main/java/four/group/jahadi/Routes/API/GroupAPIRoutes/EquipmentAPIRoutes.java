@@ -20,6 +20,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import java.util.Date;
 import java.util.List;
 
@@ -56,6 +58,18 @@ public class EquipmentAPIRoutes extends Router {
                 rowNo, shelfNo, fromBuyAt, toBuyAt,
                 fromGuaranteeExpireAt, toGuaranteeExpireAt
         );
+    }
+
+    @PutMapping(value = "addToArea/{areaId}/{equipmentId}")
+    @Operation(summary = "افزودن تجهیز به منطقه توسط مسئول گروه")
+    public void addToArea(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId,
+            @PathVariable @ObjectIdConstraint ObjectId equipmentId,
+            @RequestParam(value = "amount") @Min(0) @Max(100000) Integer amount
+    ) throws UnAuthException, NotActivateAccountException {
+        User user = getUser(request);
+        equipmentService.addToArea(user.getId(), user.getGroupId(), areaId, equipmentId, amount);
     }
 
     @PostMapping(value = "store")
