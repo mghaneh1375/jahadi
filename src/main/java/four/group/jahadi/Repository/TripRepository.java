@@ -40,14 +40,14 @@ public interface TripRepository extends MongoRepository<Trip, ObjectId>, Filtera
     @Query(value = "{$and: [{$or: [{'endAt': {$exists: false}}, {'endAt': {$gte: ?0}}]}, {'groupsWithAccess': { $elemMatch: {'groupId': ?1, 'writeAccess': true} }} ] }", exists = true)
     boolean hasExistActiveAreaByGroupIdAndAreaIdAndWriteAccess(Date curr, ObjectId groupId, ObjectId areaId);
 
+    @Query(value = "{$and: [{$or: [{'endAt': {$exists: false}}, {'endAt': {$gte: ?0}}]}, {'groupsWithAccess': { $elemMatch: {'groupId': ?1, 'writeAccess': true} }} ] }", fields = "{'name': 1, 'areas.name': 1, 'areas.id': 1}")
+    Optional<Trip> findActiveAreaByGroupIdAndAreaIdAndWriteAccess(Date curr, ObjectId groupId, ObjectId areaId);
+
     @Query(value = "{$and: [{'endAt': {$exists: true}}, {'endAt': {$gte: ?0}}]  }", fields = "{'projectId': false, 'areas.members': false, 'createdAt': false}")
     List<Trip> findActivesOrNotStartedProjects(Date curr);
 
     @Query(value = "{ 'areas': {$elemMatch: { 'startAt': {$gte: ?0}, 'id': ?1, 'ownerId': ?2 } } }")
     Optional<Trip> findNotStartedByAreaOwnerId(Date curr, ObjectId areaId, ObjectId areaOwnerId);
-
-    @Query(value = "{ 'areas': {$elemMatch: { 'startAt': {$gte: ?0}, 'id': ?1, $or: [{'ownerId': ?2}, {'pharmacyManager': ?2}] } } }")
-    Optional<Trip> findNotStartedByPharmacyManager(Date curr, ObjectId areaId, ObjectId areaOwnerId);
 
     @Query(value = "{$and: [{'endAt': {$gte: ?0}}, {'areas.ownerId': ?1}]  }",
             fields = "{'groupsWithAccess': false, 'projectId':  false, " +

@@ -302,4 +302,8 @@ public class DrugService extends AbstractService<Drug, DrugData> {
             throw new RuntimeException(e);
         }
     }
+
+    public ResponseEntity<DrugType[]> getDrugTypes() {
+        return new ResponseEntity<>(DrugType.values(), HttpStatus.OK);
+    }
 }

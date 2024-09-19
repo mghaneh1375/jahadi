@@ -4,21 +4,17 @@ import lombok.*;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
-import org.springframework.data.mongodb.core.mapping.MongoId;
-
-import javax.persistence.Id;
-import java.util.List;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Document(collection = "drug_logs")
+@Document(collection = "equipment_logs")
 @Builder
-public class DrugLog extends Model {
+public class EquipmentLog extends Model {
 
-    @Field("drug_id")
-    private ObjectId drugId;
+    @Field("equipment_id")
+    private ObjectId equipmentId;
     @Field("user_id")
     private ObjectId userId;
     @Field("area_id")
