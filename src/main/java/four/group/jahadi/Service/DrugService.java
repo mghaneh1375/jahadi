@@ -131,7 +131,7 @@ public class DrugService extends AbstractService<Drug, DrugData> {
                     .drugId(drug.getId())
                     .userId(userId)
                     .amount(drug.getAvailable() - oldAvailable)
-                    .desc("ویرایش موجودی دارو توسط ادمین")
+                    .desc("ویرایش موجودی دارو توسط مسئول گروه")
                     .build();
         }
         drugRepository.save(drug);

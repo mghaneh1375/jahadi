@@ -2,6 +2,7 @@ package four.group.jahadi.Repository;
 
 import four.group.jahadi.Enums.EquipmentHealthStatus;
 import four.group.jahadi.Enums.EquipmentType;
+import four.group.jahadi.Models.Drug;
 import four.group.jahadi.Models.Equipment;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -16,6 +17,9 @@ import java.util.Optional;
 public interface EquipmentRepository extends MongoRepository<Equipment, ObjectId>, FilterableRepository<Equipment> {
     @Query(value = "{_id: ?0, userId: ?1}")
     Optional<Equipment> findByIdAndUserId(ObjectId id, ObjectId userId);
+
+    @Query(value = "{_id: {$in: ?0}, userId: ?1}")
+    List<Equipment> findAllByIdsAndUserId(List<ObjectId> ids, ObjectId userId);
 
     @Query(value = "{$and :["
             + "{$or: [{'deletedAt': null}, {'deletedAt': {$exists: false}}]},"

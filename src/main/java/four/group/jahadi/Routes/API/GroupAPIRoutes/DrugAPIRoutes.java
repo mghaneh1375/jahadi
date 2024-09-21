@@ -119,6 +119,16 @@ public class DrugAPIRoutes extends Router {
         return drugService.store(dto, user.getId(), user.getGroupId());
     }
 
+    @PutMapping(value = "update/{drugId}")
+    @Operation(summary = "ویرایش دارو توسط مسئول گروه")
+    public void update(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId drugId,
+            @RequestBody @Valid DrugData dto
+    ) {
+        drugService.update(drugId, dto, getId(request));
+    }
+
     @PostMapping(value = "batchStore", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseBody
     @Operation(summary = "افزودن دسته ای به وسیله فایل اکسل")

@@ -1,5 +1,6 @@
 package four.group.jahadi.Routes.API.GroupAPIRoutes;
 
+import four.group.jahadi.DTO.Area.AreaEquipmentsData;
 import four.group.jahadi.DTO.EquipmentData;
 import four.group.jahadi.DTO.ErrorRow;
 import four.group.jahadi.Exception.NotActivateAccountException;
@@ -8,6 +9,7 @@ import four.group.jahadi.Models.Equipment;
 import four.group.jahadi.Models.User;
 import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Service.EquipmentService;
+import four.group.jahadi.Utility.ValidList;
 import four.group.jahadi.Validator.ObjectIdConstraint;
 import io.swagger.v3.oas.annotations.Operation;
 import org.bson.types.ObjectId;
@@ -20,8 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
+import javax.validation.constraints.Size;
 import java.util.Date;
 import java.util.List;
 
@@ -60,16 +61,32 @@ public class EquipmentAPIRoutes extends Router {
         );
     }
 
-    @PutMapping(value = "addToArea/{areaId}/{equipmentId}")
-    @Operation(summary = "افزودن تجهیز به منطقه توسط مسئول گروه")
-    public void addToArea(
+    @PutMapping(value = "addAllEquipmentsToArea/{areaId}")
+    @Operation(summary = "افزودن یک یا چند تجهیز به منطقه توسط مسئول گروه")
+    public void addAllEquipmentsToArea(
             HttpServletRequest request,
             @PathVariable @ObjectIdConstraint ObjectId areaId,
-            @PathVariable @ObjectIdConstraint ObjectId equipmentId,
-            @RequestParam(value = "amount") @Min(0) @Max(100000) Integer amount
+            @RequestBody @Valid ValidList<AreaEquipmentsData> dataValidList
     ) throws UnAuthException, NotActivateAccountException {
         User user = getUser(request);
-        equipmentService.addToArea(user.getId(), user.getGroupId(), areaId, equipmentId, amount);
+        equipmentService.addAllEquipmentsToArea(
+                user.getId(), user.getGroupId(),
+                user.getPhone(), areaId, dataValidList,
+                true
+        );
+    }
+
+    @DeleteMapping(value = "removeAllFromEquipmentsList/{areaId}")
+    @Operation(summary = "حذف یک یا چند تجهیز از منطقه توسط مسئول گروه")
+    public void removeAllFromEquipmentsList(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId,
+            @RequestBody @Valid @Size(min = 1) ValidList<ObjectId> drugs
+    ) throws UnAuthException, NotActivateAccountException {
+        User user = getUser(request);
+        equipmentService.removeAllFromEquipmentsList(
+                user.getId(), user.getGroupId(), user.getPhone(), areaId, drugs, true
+        );
     }
 
     @PostMapping(value = "store")
