@@ -1,12 +1,15 @@
 package four.group.jahadi.Routes.API.GroupAPIRoutes;
 
 import four.group.jahadi.DTO.AdminSignInData;
+import four.group.jahadi.DTO.WareHouseAccessForGroupData;
 import four.group.jahadi.Enums.Sex;
 import four.group.jahadi.Exception.NotActivateAccountException;
 import four.group.jahadi.Exception.UnAuthException;
 import four.group.jahadi.Models.User;
+import four.group.jahadi.Models.WareHouseAccessForGroupJoinWithUser;
 import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Service.UserService;
+import four.group.jahadi.Service.WareHouseAccessService;
 import four.group.jahadi.Validator.ObjectIdConstraint;
 import io.swagger.v3.oas.annotations.Operation;
 import org.bson.types.ObjectId;
@@ -26,6 +29,9 @@ public class GroupUserAPIRoutes extends Router {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private WareHouseAccessService wareHouseAccessService;
 
     @GetMapping(value = "list")
     @ResponseBody
@@ -67,4 +73,36 @@ public class GroupUserAPIRoutes extends Router {
         return userService.findById(userId, getGroup(request));
     }
 
+    @GetMapping(value = "getWareHouseAccesses")
+    @ResponseBody
+    @Operation(summary = "گرفتن لیستی از کاربرانی که در گروه دسترسی انبارداری دارند")
+    public ResponseEntity<List<WareHouseAccessForGroupJoinWithUser>> getWareHouseAccesses(
+            HttpServletRequest request
+    ) {
+        return wareHouseAccessService.list(getGroup(request));
+    }
+
+    @PostMapping(value = "addWareHouseAccesses")
+    @ResponseBody
+    @Operation(summary = "افزودن یا ویرایش کاربری از گروه برای دسترسی انبارداری")
+    public ResponseEntity<WareHouseAccessForGroupJoinWithUser> addWareHouseAccesses(
+            HttpServletRequest request,
+            @RequestBody @Valid WareHouseAccessForGroupData dto
+            ) {
+        return wareHouseAccessService.store(
+                dto, getGroup(request)
+        );
+    }
+
+    @DeleteMapping(value = "removeWareHouseAccesses/{userId}")
+    @ResponseBody
+    @Operation(summary = "حذف کاربر از دسترسی کاربران انبارداری در یک گروه")
+    public void removeWareHouseAccesses(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId userId
+    ) {
+        wareHouseAccessService.removeFromWareHouseAccesses(
+                userId, getGroup(request)
+        );
+    }
 }
