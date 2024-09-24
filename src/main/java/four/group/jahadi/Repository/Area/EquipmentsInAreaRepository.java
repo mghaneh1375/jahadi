@@ -22,7 +22,7 @@ public interface EquipmentsInAreaRepository extends MongoRepository<AreaEquipmen
     @Query(value = "{areaId: ?0}", fields = "{equipmentName: 1, equipmentId: 1, reminder: 1}")
     List<AreaEquipments> findDigestByAreaId(ObjectId areaId);
 
-    @Query(value = "{areaId: ?0, reminder: {$gt: 0}}", fields = "{equipmentName: 1, equipmentId: 1, reminder: 1}")
+    @Query(value = "{areaId: ?0, reminder: {$gt: 0}}")
     List<AreaEquipments> findAvailableEquipmentsByAreaId(ObjectId areaId);
 
     @Query(value = "{_id: {$in: ?0}, areaId: ?1}", delete = true)

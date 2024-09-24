@@ -1,25 +1,14 @@
 package four.group.jahadi.Service;
 
-import four.group.jahadi.DTO.Area.AreaEquipmentsData;
 import four.group.jahadi.DTO.EquipmentData;
 import four.group.jahadi.DTO.ErrorRow;
 import four.group.jahadi.Enums.EquipmentHealthStatus;
 import four.group.jahadi.Enums.EquipmentType;
 import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Exception.InvalidIdException;
-import four.group.jahadi.Exception.NotAccessException;
-import four.group.jahadi.Models.Area.Area;
-import four.group.jahadi.Models.Area.AreaEquipments;
 import four.group.jahadi.Models.Equipment;
-import four.group.jahadi.Models.EquipmentLog;
-import four.group.jahadi.Models.Trip;
-import four.group.jahadi.Repository.Area.EquipmentsInAreaRepository;
-import four.group.jahadi.Repository.EquipmentLogRepository;
 import four.group.jahadi.Repository.EquipmentRepository;
-import four.group.jahadi.Repository.TripRepository;
-import four.group.jahadi.Repository.WareHouseAccessForGroupRepository;
 import four.group.jahadi.Utility.Utility;
-import lombok.Synchronized;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -35,9 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static four.group.jahadi.Utility.Utility.datePattern;
 
@@ -45,16 +32,7 @@ import static four.group.jahadi.Utility.Utility.datePattern;
 public class EquipmentService extends AbstractService<Equipment, EquipmentData> {
 
     @Autowired
-    private WareHouseAccessForGroupRepository wareHouseAccessForGroupRepository;
-    @Autowired
     private EquipmentRepository equipmentRepository;
-    @Autowired
-    private EquipmentLogRepository equipmentLogRepository;
-    @Autowired
-    private EquipmentsInAreaRepository equipmentsInAreaRepository;
-    @Autowired
-    private TripRepository tripRepository;
-
 
     @Override
     public ResponseEntity<List<Equipment>> list(Object... filters) {
@@ -145,142 +123,6 @@ public class EquipmentService extends AbstractService<Equipment, EquipmentData> 
         return new ResponseEntity<>(equipment, HttpStatus.OK);
     }
 
-    @Synchronized
-    public void addAllEquipmentsToArea(
-            ObjectId userId, ObjectId groupId,
-            String username, ObjectId areaId,
-            List<AreaEquipmentsData> dtoList,
-            boolean isGroupOwner
-    ) {
-        if(!isGroupOwner &&
-                !wareHouseAccessForGroupRepository.existsEquipmentAccessByGroupIdAndUserId(
-                groupId, userId)
-        )
-            throw new NotAccessException();
-
-        Trip trip = tripRepository.findActiveAreaByGroupIdAndAreaIdAndWriteAccess(Utility.getCurrDate(), groupId, areaId)
-                .orElseThrow(NotAccessException::new);
-        Area foundArea = trip.getAreas().stream()
-                .filter(area -> area.getId().equals(areaId))
-                .findFirst().get();
-
-        List<ObjectId> ids = dtoList.stream().map(AreaEquipmentsData::getEquipmentId).distinct()
-                .collect(Collectors.toList());
-        List<Equipment> equipmentsIter = equipmentRepository.findAllByIdsAndUserId(ids, userId);
-
-        List<AreaEquipments> equipments = new ArrayList<>();
-        List<ObjectId> existEquipments = equipmentsInAreaRepository.findIdsByAreaIdAndIds(areaId, ids);
-        HashMap<ObjectId, Integer> updates = new HashMap<>();
-        existEquipments.forEach(objectId -> updates.put(objectId, 0));
-
-        List<EquipmentLog> equipmentLogs = new ArrayList<>();
-        final String msg = "اختصاص به منطقه " + foundArea.getName() + " در اردو " + trip.getName() + " توسط " + username;
-
-        for (Equipment equipment : equipmentsIter) {
-            dtoList.stream()
-                    .filter(areaEquipmentsData -> areaEquipmentsData.getEquipmentId().equals(equipment.getId()))
-                    .findFirst().ifPresent(dto -> {
-
-                        if (equipment.getAvailable() < dto.getTotalCount())
-                            throw new RuntimeException("تجهیز " + equipment.getName() + "ظرفیت این تجهیز کمتر از مقدار درخواستی شما می باشد");
-
-                        if (existEquipments.contains(equipment.getId()))
-                            updates.put(equipment.getId(), updates.get(equipment.getId()) + dto.getTotalCount());
-                        else
-                            equipments.add(
-                                    AreaEquipments
-                                            .builder()
-                                            .equipmentName(equipment.getName())
-                                            .equipmentId(equipment.getId())
-                                            .areaId(areaId)
-                                            .totalCount(dto.getTotalCount())
-                                            .reminder(dto.getTotalCount())
-                                            .updatedAt(new Date())
-                                            .build()
-                            );
-
-                        equipment.setAvailable(equipment.getAvailable() - dto.getTotalCount());
-                        equipmentLogs.add(
-                                EquipmentLog
-                                        .builder()
-                                        .equipmentId(equipment.getId())
-                                        .userId(userId)
-                                        .areaId(areaId)
-                                        .amount(-dto.getTotalCount())
-                                        .desc(msg)
-                                        .build()
-                        );
-                    });
-        }
-
-        if (equipments.size() != dtoList.size())
-            throw new RuntimeException("ids are incorrect");
-
-        Iterable<AreaEquipments> equipmentsInAreaList = equipmentsInAreaRepository.findAllById(updates.keySet());
-        List<AreaEquipments> tmp = new ArrayList<>();
-        while (equipmentsInAreaList.iterator().hasNext()) {
-            AreaEquipments next = equipmentsInAreaList.iterator().next();
-            next.setReminder(updates.get(next.getEquipmentId()) + next.getReminder());
-            next.setTotalCount(updates.get(next.getEquipmentId()) + next.getTotalCount());
-            next.setUpdatedAt(new Date());
-            tmp.add(next);
-        }
-
-        //todo: synchronized op
-        equipmentRepository.saveAll(equipmentsIter);
-        equipmentLogRepository.saveAll(equipmentLogs);
-        equipmentsInAreaRepository.insert(equipments);
-        equipmentsInAreaRepository.saveAll(tmp);
-    }
-
-    @Synchronized
-    public void removeAllFromEquipmentsList(
-            ObjectId userId, ObjectId groupId,
-            String username, ObjectId areaId,
-            List<ObjectId> ids, boolean isGroupOwner
-    ) {
-        if(!isGroupOwner &&
-                !wareHouseAccessForGroupRepository.existsEquipmentAccessByGroupIdAndUserId(
-                        groupId, userId)
-        )
-            throw new NotAccessException();
-
-        Trip trip = tripRepository.findActiveAreaByGroupIdAndAreaIdAndWriteAccess(
-                Utility.getCurrDate(), groupId, areaId
-        ).orElseThrow(NotAccessException::new);
-        Area foundArea = trip.getAreas().stream()
-                .filter(area -> area.getId().equals(areaId))
-                .findFirst().get();
-
-        //todo: synchronized op
-        List<AreaEquipments> areaEquipments = equipmentsInAreaRepository.removeAreaEquipmentsByIdAndAreaId(ids, areaId);
-        List<EquipmentLog> equipmentLogs = new ArrayList<>();
-        List<Equipment> equipmentsIter = equipmentRepository.findAllByIdsAndUserId(
-                areaEquipments.stream().map(AreaEquipments::getEquipmentId).collect(Collectors.toList()),
-                userId
-        );
-        final String msg = "حذف از منطقه " + foundArea.getName() + " در اردو " + trip.getName() + " توسط " + username;
-
-        for (Equipment equipment : equipmentsIter) {
-            areaEquipments.stream().filter(areaEquipment -> areaEquipment.getEquipmentId().equals(equipment.getId())).findFirst()
-                    .ifPresent(areaEquipment -> {
-                        equipment.setAvailable(equipment.getAvailable() + areaEquipment.getReminder());
-                        equipmentLogs.add(
-                                EquipmentLog
-                                        .builder()
-                                        .equipmentId(equipment.getId())
-                                        .userId(userId)
-                                        .areaId(areaId)
-                                        .amount(areaEquipment.getReminder())
-                                        .desc(msg)
-                                        .build()
-                        );
-                    });
-        }
-
-        equipmentRepository.saveAll(equipmentsIter);
-        equipmentLogRepository.saveAll(equipmentLogs);
-    }
 
     // EXCEL FORMAT
     // A: index, B: equipmentType, C: name, D: producer, E: available,

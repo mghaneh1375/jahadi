@@ -5,25 +5,25 @@ import four.group.jahadi.Exception.NotActivateAccountException;
 import four.group.jahadi.Exception.UnAuthException;
 import four.group.jahadi.Models.User;
 import four.group.jahadi.Routes.Router;
-import four.group.jahadi.Service.EquipmentService;
+import four.group.jahadi.Service.EquipmentServiceInArea;
 import four.group.jahadi.Utility.ValidList;
 import four.group.jahadi.Validator.ObjectIdConstraint;
 import io.swagger.v3.oas.annotations.Operation;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.Size;
 
+@RestController
+@RequestMapping(path = "/api/jahadgar/equipment")
+@Validated
 public class JahadgarEquipmentAPIRoutes extends Router {
-
     @Autowired
-    private EquipmentService equipmentService;
+    private EquipmentServiceInArea equipmentServiceInArea;
 
     @PutMapping(value = "addAllEquipmentsToArea/{areaId}")
     @Operation(summary = "افزودن یک یا چند تجهیز به منطقه توسط مسئول گروه")
@@ -33,7 +33,7 @@ public class JahadgarEquipmentAPIRoutes extends Router {
             @RequestBody @Valid ValidList<AreaEquipmentsData> dataValidList
     ) throws UnAuthException, NotActivateAccountException {
         User user = getUser(request);
-        equipmentService.addAllEquipmentsToArea(
+        equipmentServiceInArea.addAllEquipmentsToArea(
                 user.getId(), user.getGroupId(),
                 user.getPhone(), areaId, dataValidList,
                 false
@@ -48,7 +48,7 @@ public class JahadgarEquipmentAPIRoutes extends Router {
             @RequestBody @Valid @Size(min = 1) ValidList<ObjectId> drugs
     ) throws UnAuthException, NotActivateAccountException {
         User user = getUser(request);
-        equipmentService.removeAllFromEquipmentsList(
+        equipmentServiceInArea.removeAllFromEquipmentsList(
                 user.getId(), user.getGroupId(), user.getPhone(),
                 areaId, drugs, false
         );

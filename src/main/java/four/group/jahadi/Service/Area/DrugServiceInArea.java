@@ -12,6 +12,7 @@ import four.group.jahadi.Repository.Area.DrugsInAreaRepository;
 import four.group.jahadi.Repository.DrugLogRepository;
 import four.group.jahadi.Repository.DrugRepository;
 import four.group.jahadi.Repository.TripRepository;
+import four.group.jahadi.Repository.WareHouseAccessForGroupRepository;
 import four.group.jahadi.Utility.PairValue;
 import four.group.jahadi.Utility.Utility;
 import lombok.Synchronized;
@@ -31,14 +32,13 @@ import java.util.stream.Collectors;
 public class DrugServiceInArea {
 
     @Autowired
+    private WareHouseAccessForGroupRepository wareHouseAccessForGroupRepository;
+    @Autowired
     private DrugRepository drugRepository;
-
     @Autowired
     private DrugLogRepository drugLogRepository;
-
     @Autowired
     private TripRepository tripRepository;
-
     @Autowired
     private DrugsInAreaRepository drugsInAreaRepository;
 
@@ -47,8 +47,15 @@ public class DrugServiceInArea {
     @Synchronized
     public void addAllToDrugsList(
             ObjectId userId, ObjectId groupId,
-            String username, ObjectId areaId, List<AreaDrugsData> dtoList
+            String username, ObjectId areaId, List<AreaDrugsData> dtoList,
+            boolean isGroupOwner
     ) {
+        if(!isGroupOwner &&
+                !wareHouseAccessForGroupRepository.existsDrugAccessByGroupIdAndUserId(
+                        groupId, userId
+                )
+        )
+            throw new NotAccessException();
 
         Trip trip = tripRepository.findActiveAreaByGroupIdAndAreaIdAndWriteAccess(Utility.getCurrDate(), groupId, areaId)
                 .orElseThrow(NotAccessException::new);
@@ -129,8 +136,14 @@ public class DrugServiceInArea {
     public void removeAllFromDrugsList(
             ObjectId userId, ObjectId groupId,
             String username, ObjectId areaId,
-            List<ObjectId> ids
+            List<ObjectId> ids, boolean isGroupOwner
     ) {
+        if(!isGroupOwner &&
+                !wareHouseAccessForGroupRepository.existsDrugAccessByGroupIdAndUserId(
+                        groupId, userId
+                )
+        )
+            throw new NotAccessException();
 
         Trip trip = tripRepository.findActiveAreaByGroupIdAndAreaIdAndWriteAccess(
                 Utility.getCurrDate(), groupId, areaId
@@ -250,7 +263,12 @@ public class DrugServiceInArea {
         Area foundArea = (Area) p.getKey();
         String tripName = p.getValue().toString();
         List<AreaDrugs> areaDrugs = drugsInAreaRepository.findAvailableDrugsByAreaId(areaId);
-        List<Drug> drugs = drugRepository.findByIds(areaDrugs.stream().map(AreaDrugs::getDrugId).collect(Collectors.toList()));
+        List<Drug> drugs = new ArrayList<>();
+        drugRepository.findAllById(areaDrugs.stream()
+                .map(AreaDrugs::getDrugId)
+                .collect(Collectors.toList())
+        ).forEach(drugs::add);
+
         Date curr = new Date();
         final String msg = "عودت از منطقه " + foundArea.getName() + " در اردو " + tripName + " توسط " + username;
         List<DrugLog> drugLogs = new ArrayList<>();

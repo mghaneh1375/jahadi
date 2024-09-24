@@ -9,6 +9,7 @@ import four.group.jahadi.Models.Equipment;
 import four.group.jahadi.Models.User;
 import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Service.EquipmentService;
+import four.group.jahadi.Service.EquipmentServiceInArea;
 import four.group.jahadi.Utility.ValidList;
 import four.group.jahadi.Validator.ObjectIdConstraint;
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,6 +34,8 @@ public class EquipmentAPIRoutes extends Router {
 
     @Autowired
     private EquipmentService equipmentService;
+    @Autowired
+    private EquipmentServiceInArea equipmentServiceInArea;
 
     @GetMapping(value = "list")
     @ResponseBody
@@ -69,7 +72,7 @@ public class EquipmentAPIRoutes extends Router {
             @RequestBody @Valid ValidList<AreaEquipmentsData> dataValidList
     ) throws UnAuthException, NotActivateAccountException {
         User user = getUser(request);
-        equipmentService.addAllEquipmentsToArea(
+        equipmentServiceInArea.addAllEquipmentsToArea(
                 user.getId(), user.getGroupId(),
                 user.getPhone(), areaId, dataValidList,
                 true
@@ -84,7 +87,7 @@ public class EquipmentAPIRoutes extends Router {
             @RequestBody @Valid @Size(min = 1) ValidList<ObjectId> drugs
     ) throws UnAuthException, NotActivateAccountException {
         User user = getUser(request);
-        equipmentService.removeAllFromEquipmentsList(
+        equipmentServiceInArea.removeAllFromEquipmentsList(
                 user.getId(), user.getGroupId(), user.getPhone(), areaId, drugs, true
         );
     }

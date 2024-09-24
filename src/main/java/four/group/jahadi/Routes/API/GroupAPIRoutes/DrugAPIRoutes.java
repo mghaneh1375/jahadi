@@ -72,7 +72,7 @@ public class DrugAPIRoutes extends Router {
         User user = getUser(request);
         drugServiceInArea.addAllToDrugsList(
                 user.getId(), user.getGroupId(), user.getPhone(),
-                areaId, drugsData
+                areaId, drugsData, true
         );
     }
 
@@ -85,7 +85,8 @@ public class DrugAPIRoutes extends Router {
     ) throws UnAuthException, NotActivateAccountException {
         User user = getUser(request);
         drugServiceInArea.removeAllFromDrugsList(
-                user.getId(), user.getGroupId(), user.getPhone(), areaId, drugs
+                user.getId(), user.getGroupId(),
+                user.getPhone(), areaId, drugs, true
         );
     }
 

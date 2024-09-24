@@ -121,6 +121,12 @@ public class Area {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonSerialize(using = ObjectIdListSerialization.class)
     @Builder.Default
+    @Field("equipment_managers")
+    private List<ObjectId> equipmentManagers = new ArrayList<>();
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonSerialize(using = ObjectIdListSerialization.class)
+    @Builder.Default
     @Field("laboratory_managers")
     private List<ObjectId> laboratoryManager = new ArrayList<>();
 
