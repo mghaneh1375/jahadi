@@ -1,8 +1,6 @@
 package four.group.jahadi.Routes.API.UserRoutes;
 
 import four.group.jahadi.DTO.NoteData;
-import four.group.jahadi.Exception.NotActivateAccountException;
-import four.group.jahadi.Exception.UnAuthException;
 import four.group.jahadi.Models.Note;
 import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Service.NoteService;
@@ -27,41 +25,43 @@ public class NoteAPIRoutes extends Router {
 
     @PostMapping(value = "store")
     @ResponseBody
-    public ResponseEntity<Note> store(HttpServletRequest request,
-                                      @RequestBody @Valid NoteData noteData
-    ) throws UnAuthException, NotActivateAccountException {
-        return noteService.store(noteData, getUser(request).getId());
+    public ResponseEntity<Note> store(
+            HttpServletRequest request,
+            @RequestBody @Valid NoteData noteData
+    ) {
+        return noteService.store(noteData, getId(request));
     }
 
     @PutMapping(value = "update/{id}")
     public void update(HttpServletRequest request,
-                         @PathVariable @ObjectIdConstraint ObjectId id,
-                         @RequestBody @Valid NoteData noteData
-    ) throws UnAuthException, NotActivateAccountException {
-        noteService.update(id, noteData, getUser(request).getId());
+                       @PathVariable @ObjectIdConstraint ObjectId id,
+                       @RequestBody @Valid NoteData noteData
+    ) {
+        noteService.update(id, noteData, getId(request));
     }
 
     @GetMapping(value = "list")
     @ResponseBody
-    public ResponseEntity<List<Note>> list(HttpServletRequest request
-    ) throws UnAuthException, NotActivateAccountException {
-        return noteService.list(getUser(request).getId());
+    public ResponseEntity<List<Note>> list(HttpServletRequest request) {
+        return noteService.list(getId(request));
     }
 
     @GetMapping(value = "get/{id}")
     @ResponseBody
-    public ResponseEntity<Note> get(HttpServletRequest request,
-                                    @PathVariable @ObjectIdConstraint ObjectId id
-    ) throws UnAuthException, NotActivateAccountException {
-        return noteService.findById(id, getUser(request).getId());
+    public ResponseEntity<Note> get(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId id
+    ) {
+        return noteService.findById(id, getId(request));
     }
 
     @DeleteMapping(value = "remove/{id}")
     @ResponseBody
-    public String remove(HttpServletRequest request,
-                         @PathVariable @ObjectIdConstraint ObjectId id
-    ) throws UnAuthException, NotActivateAccountException {
-        return noteService.remove(id, getUser(request).getId());
+    public String remove(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId id
+    ) {
+        return noteService.remove(id, getId(request));
     }
 
 }

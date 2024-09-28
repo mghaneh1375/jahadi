@@ -244,4 +244,11 @@ public class EquipmentServiceInArea {
         );
     }
 
+    public ResponseEntity<Boolean> checkAccessToWareHouse(ObjectId groupId, ObjectId userId) {
+        return new ResponseEntity<>(
+                wareHouseAccessForGroupRepository.existsEquipmentAccessByGroupIdAndUserId(
+                        groupId, userId
+                ), HttpStatus.OK
+        );
+    }
 }

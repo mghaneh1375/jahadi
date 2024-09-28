@@ -447,11 +447,8 @@ public class UserService extends AbstractService<User, SignUpData> {
     }
 
     public ResponseEntity<String> signIn(SignInData data) {
-
         try {
-
             if (!DEV_MODE) {
-
                 for (int i = 0; i < cachedToken.size(); i++) {
                     if (cachedToken.get(i).equals(data)) {
                         if (cachedToken.get(i).checkExpiration())
@@ -467,7 +464,6 @@ public class UserService extends AbstractService<User, SignUpData> {
             }
 
             Optional<User> user = userRepository.findByNID(data.getNid());
-
             if (user.isEmpty() || user.get().getRemoveAt() != null)
                 throw new InvalidFieldsException("نام کاربری و یا رمزعبور اشتباه است.");
 

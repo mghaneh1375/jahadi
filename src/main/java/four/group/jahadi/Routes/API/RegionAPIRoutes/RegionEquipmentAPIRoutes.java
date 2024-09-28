@@ -1,9 +1,7 @@
 package four.group.jahadi.Routes.API.RegionAPIRoutes;
 
-import four.group.jahadi.Exception.NotActivateAccountException;
-import four.group.jahadi.Exception.UnAuthException;
 import four.group.jahadi.Models.Area.AreaEquipments;
-import four.group.jahadi.Models.User;
+import four.group.jahadi.Models.TokenInfo;
 import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Service.EquipmentServiceInArea;
 import four.group.jahadi.Validator.ObjectIdConstraint;
@@ -41,9 +39,9 @@ public class RegionEquipmentAPIRoutes extends Router {
     public void returnAllEquipments(
             HttpServletRequest request,
             @PathVariable @ObjectIdConstraint ObjectId areaId
-    ) throws UnAuthException, NotActivateAccountException {
-        User user = getUser(request);
-        equipmentServiceInArea.returnAllEquipments(user.getId(), user.getPhone(), areaId);
+    ) {
+        TokenInfo tokenInfo = getTokenInfo(request);
+        equipmentServiceInArea.returnAllEquipments(tokenInfo.getUserId(), tokenInfo.getUsername(), areaId);
     }
 
 }

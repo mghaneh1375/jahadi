@@ -3,6 +3,7 @@ package four.group.jahadi.Routes;
 import four.group.jahadi.Enums.AccountStatus;
 import four.group.jahadi.Exception.NotActivateAccountException;
 import four.group.jahadi.Exception.UnAuthException;
+import four.group.jahadi.Models.TokenInfo;
 import four.group.jahadi.Models.User;
 import four.group.jahadi.Security.JwtTokenFilter;
 import four.group.jahadi.Security.JwtTokenProvider;
@@ -26,7 +27,6 @@ public class Router {
     private JwtTokenProvider jwtTokenProvider;
 
     protected ObjectId getGroup(HttpServletRequest request) {
-
         String bearerToken = request.getHeader("Authorization");
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
 
@@ -34,22 +34,19 @@ public class Router {
 
             Claims claims;
             try {
-
                 claims = Jwts.parser()
                         .setSigningKey(jwtTokenProvider.getSharedKeyBytes())
                         .parseClaimsJws(token)
                         .getBody();
 
                 return new ObjectId(claims.get("groupId").toString());
-
             } catch (Exception ignore) {}
         }
 
         return null;
     }
 
-    protected ObjectId getId(HttpServletRequest request) {
-
+    protected TokenInfo getTokenInfo(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
 
@@ -57,14 +54,35 @@ public class Router {
 
             Claims claims;
             try {
+                claims = Jwts.parser()
+                        .setSigningKey(jwtTokenProvider.getSharedKeyBytes())
+                        .parseClaimsJws(token)
+                        .getBody();
 
+                return TokenInfo
+                        .builder()
+                        .userId(new ObjectId(claims.get("id").toString()))
+                        .groupId(new ObjectId(claims.get("groupId").toString()))
+                        .username(claims.getSubject())
+                        .build();
+            } catch (Exception ignore) {}
+        }
+        return null;
+    }
+
+    protected ObjectId getId(HttpServletRequest request) {
+        String bearerToken = request.getHeader("Authorization");
+        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+            String token = bearerToken.substring(7);
+            Claims claims;
+
+            try {
                 claims = Jwts.parser()
                         .setSigningKey(jwtTokenProvider.getSharedKeyBytes())
                         .parseClaimsJws(token)
                         .getBody();
 
                 return new ObjectId(claims.get("id").toString());
-
             } catch (Exception ignore) {
                 ignore.printStackTrace();
             }
@@ -75,11 +93,9 @@ public class Router {
 
     protected User getUser(HttpServletRequest request)
             throws NotActivateAccountException, UnAuthException {
-
         boolean auth = jwtTokenFilter.isAuth(request);
 
         if (auth) {
-
             User u = userService.whoAmI(request);
 
             if (u != null) {
@@ -87,7 +103,6 @@ public class Router {
                     JwtTokenFilter.removeTokenFromCache(request.getHeader("Authorization").replace("Bearer ", ""));
                     throw new NotActivateAccountException("Account not activated");
                 }
-
                 return u;
             }
         }

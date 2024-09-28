@@ -2,10 +2,8 @@ package four.group.jahadi.Routes.API.JahadgarAPIRoutes;
 
 import four.group.jahadi.DTO.Area.AreaDrugsData;
 import four.group.jahadi.DTO.DrugBookmarkData;
-import four.group.jahadi.Exception.NotActivateAccountException;
-import four.group.jahadi.Exception.UnAuthException;
 import four.group.jahadi.Models.DrugBookmark;
-import four.group.jahadi.Models.User;
+import four.group.jahadi.Models.TokenInfo;
 import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Service.Area.DrugServiceInArea;
 import four.group.jahadi.Service.JahadgarDrugService;
@@ -70,10 +68,10 @@ public class JahadgarDrugAPIRoutes extends Router {
             HttpServletRequest request,
             @PathVariable @ObjectIdConstraint ObjectId areaId,
             @RequestBody @Valid @Size(min = 1) ValidList<AreaDrugsData> drugsData
-    ) throws UnAuthException, NotActivateAccountException {
-        User user = getUser(request);
+    ) {
+        TokenInfo tokenInfo = getTokenInfo(request);
         drugServiceInArea.addAllToDrugsList(
-                user.getId(), user.getGroupId(), user.getPhone(),
+                tokenInfo.getUserId(), tokenInfo.getGroupId(), tokenInfo.getUsername(),
                 areaId, drugsData, false
         );
     }
@@ -84,11 +82,23 @@ public class JahadgarDrugAPIRoutes extends Router {
             HttpServletRequest request,
             @PathVariable @ObjectIdConstraint ObjectId areaId,
             @RequestBody @Valid @Size(min = 1) ValidList<ObjectId> drugs
-    ) throws UnAuthException, NotActivateAccountException {
-        User user = getUser(request);
+    ) {
+        TokenInfo tokenInfo = getTokenInfo(request);
         drugServiceInArea.removeAllFromDrugsList(
-                user.getId(), user.getGroupId(),
-                user.getPhone(), areaId, drugs, false
+                tokenInfo.getUserId(), tokenInfo.getGroupId(),
+                tokenInfo.getUsername(), areaId, drugs, false
+        );
+    }
+
+    @GetMapping(value = "checkAccessToWareHouse")
+    @ResponseBody
+    public ResponseEntity<Boolean> checkAccessToWareHouse(
+            HttpServletRequest request
+    ) {
+        TokenInfo groupAndId = getTokenInfo(request);
+        return drugService.checkAccessToWareHouse(
+                groupAndId.getGroupId(),
+                groupAndId.getUserId()
         );
     }
 

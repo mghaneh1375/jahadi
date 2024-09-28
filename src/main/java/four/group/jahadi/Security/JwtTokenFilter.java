@@ -61,7 +61,6 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     }
 
     public boolean isAuth(HttpServletRequest request) {
-
         String token = jwtTokenProvider.resolveToken(request);
 
         if(token != null) {

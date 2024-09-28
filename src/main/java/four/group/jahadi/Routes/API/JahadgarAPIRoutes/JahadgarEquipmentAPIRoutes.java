@@ -1,9 +1,7 @@
 package four.group.jahadi.Routes.API.JahadgarAPIRoutes;
 
 import four.group.jahadi.DTO.Area.AreaEquipmentsData;
-import four.group.jahadi.Exception.NotActivateAccountException;
-import four.group.jahadi.Exception.UnAuthException;
-import four.group.jahadi.Models.User;
+import four.group.jahadi.Models.TokenInfo;
 import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Service.EquipmentServiceInArea;
 import four.group.jahadi.Utility.ValidList;
@@ -11,6 +9,7 @@ import four.group.jahadi.Validator.ObjectIdConstraint;
 import io.swagger.v3.oas.annotations.Operation;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,11 +30,11 @@ public class JahadgarEquipmentAPIRoutes extends Router {
             HttpServletRequest request,
             @PathVariable @ObjectIdConstraint ObjectId areaId,
             @RequestBody @Valid ValidList<AreaEquipmentsData> dataValidList
-    ) throws UnAuthException, NotActivateAccountException {
-        User user = getUser(request);
+    ) {
+        TokenInfo tokenInfo = getTokenInfo(request);
         equipmentServiceInArea.addAllEquipmentsToArea(
-                user.getId(), user.getGroupId(),
-                user.getPhone(), areaId, dataValidList,
+                tokenInfo.getUserId(), tokenInfo.getGroupId(),
+                tokenInfo.getUsername(), areaId, dataValidList,
                 false
         );
     }
@@ -46,11 +45,22 @@ public class JahadgarEquipmentAPIRoutes extends Router {
             HttpServletRequest request,
             @PathVariable @ObjectIdConstraint ObjectId areaId,
             @RequestBody @Valid @Size(min = 1) ValidList<ObjectId> drugs
-    ) throws UnAuthException, NotActivateAccountException {
-        User user = getUser(request);
+    ) {
+        TokenInfo tokenInfo = getTokenInfo(request);
         equipmentServiceInArea.removeAllFromEquipmentsList(
-                user.getId(), user.getGroupId(), user.getPhone(),
+                tokenInfo.getUserId(), tokenInfo.getGroupId(), tokenInfo.getUsername(),
                 areaId, drugs, false
+        );
+    }
+    @GetMapping(value = "checkAccessToWareHouse")
+    @ResponseBody
+    public ResponseEntity<Boolean> checkAccessToWareHouse(
+            HttpServletRequest request
+    ) {
+        TokenInfo groupAndId = getTokenInfo(request);
+        return equipmentServiceInArea.checkAccessToWareHouse(
+                groupAndId.getGroupId(),
+                groupAndId.getUserId()
         );
     }
 }

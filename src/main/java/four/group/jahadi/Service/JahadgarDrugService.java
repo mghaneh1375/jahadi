@@ -6,6 +6,7 @@ import four.group.jahadi.Models.Drug;
 import four.group.jahadi.Models.DrugBookmark;
 import four.group.jahadi.Repository.DrugBookmarkRepository;
 import four.group.jahadi.Repository.DrugRepository;
+import four.group.jahadi.Repository.WareHouseAccessForGroupRepository;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,7 +19,8 @@ import java.util.List;
 public class JahadgarDrugService extends AbstractService<DrugBookmark, DrugBookmarkData> {
     @Autowired
     private DrugBookmarkRepository drugBookmarkRepository;
-
+    @Autowired
+    private WareHouseAccessForGroupRepository wareHouseAccessForGroupRepository;
     @Autowired
     private DrugRepository drugRepository;
 
@@ -60,5 +62,13 @@ public class JahadgarDrugService extends AbstractService<DrugBookmark, DrugBookm
 
     public void remove(ObjectId userId, ObjectId drugId) {
         drugBookmarkRepository.removeByUserIdAndDrugId(userId, drugId);
+    }
+
+    public ResponseEntity<Boolean> checkAccessToWareHouse(ObjectId groupId, ObjectId userId) {
+        return new ResponseEntity<>(
+                wareHouseAccessForGroupRepository.existsDrugAccessByGroupIdAndUserId(
+                        groupId, userId
+                ), HttpStatus.OK
+        );
     }
 }
