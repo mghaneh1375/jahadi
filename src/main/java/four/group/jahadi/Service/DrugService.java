@@ -2,8 +2,7 @@ package four.group.jahadi.Service;
 
 import four.group.jahadi.DTO.DrugData;
 import four.group.jahadi.DTO.ErrorRow;
-import four.group.jahadi.Enums.Drug.DrugLocation;
-import four.group.jahadi.Enums.Drug.DrugType;
+import four.group.jahadi.Enums.Drug.*;
 import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Models.Drug;
@@ -305,5 +304,17 @@ public class DrugService extends AbstractService<Drug, DrugData> {
 
     public ResponseEntity<DrugType[]> getDrugTypes() {
         return new ResponseEntity<>(DrugType.values(), HttpStatus.OK);
+    }
+
+    public ResponseEntity<AmountOfUse[]> getDrugAmountOfUseOptions() {
+        return new ResponseEntity<>(AmountOfUse.values(), HttpStatus.OK);
+    }
+
+    public ResponseEntity<HowToUse[]> getDrugHowToUseOptions() {
+        return new ResponseEntity<>(HowToUse.values(), HttpStatus.OK);
+    }
+
+    public ResponseEntity<UseTime[]> getDrugUseTimeOptions() {
+        return new ResponseEntity<>(UseTime.values(), HttpStatus.OK);
     }
 }

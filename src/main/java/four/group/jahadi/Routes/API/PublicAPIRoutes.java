@@ -1,5 +1,8 @@
 package four.group.jahadi.Routes.API;
 
+import four.group.jahadi.Enums.Drug.AmountOfUse;
+import four.group.jahadi.Enums.Drug.HowToUse;
+import four.group.jahadi.Enums.Drug.UseTime;
 import four.group.jahadi.Models.*;
 import four.group.jahadi.Service.CityService;
 import four.group.jahadi.Service.DrugService;
@@ -32,6 +35,24 @@ public class PublicAPIRoutes {
     @ResponseBody
     public ResponseEntity<List<Experiment>> getAllAvailableExperiments() {
         return experimentService.list(true);
+    }
+
+    @GetMapping(value = "getDrugAmountOfUseOptions")
+    @ResponseBody
+    public ResponseEntity<AmountOfUse[]> getDrugAmountOfUseOptions() {
+        return drugService.getDrugAmountOfUseOptions();
+    }
+
+    @GetMapping(value = "getDrugHowToUseOptions")
+    @ResponseBody
+    public ResponseEntity<HowToUse[]> getDrugHowToUseOptions() {
+        return drugService.getDrugHowToUseOptions();
+    }
+
+    @GetMapping(value = "getDrugUseTimeOptions")
+    @ResponseBody
+    public ResponseEntity<UseTime[]> getDrugUseTimeOptions() {
+        return drugService.getDrugUseTimeOptions();
     }
 
     @GetMapping(value = "getAllDrugs")
