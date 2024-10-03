@@ -7,7 +7,7 @@ import four.group.jahadi.Exception.NotAccessException;
 import four.group.jahadi.Models.PresenceList;
 import four.group.jahadi.Models.User;
 import four.group.jahadi.Models.UserPresenceList;
-import four.group.jahadi.Repository.PresenceListRepository;
+import four.group.jahadi.Repository.Area.PresenceListRepository;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

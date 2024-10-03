@@ -21,6 +21,9 @@ public interface PatientRepository extends MongoRepository<Patient, ObjectId>, F
     @Query(value = "{identifier: ?0, identifierType: ?1}")
     Optional<Patient> findByIdentifierAndIdentifierType(String identifier, IdentifierType identifierType);
 
+    @Query(value = "{_id: {$in: ?0}}", fields = "{job: 0, phone: 0, fatherName: 0, ageType: 0, createdAt: 0}")
+    List<Patient> findPublicInfoByIdIn(List<ObjectId> ids);
+
 //    @Aggregation(pipeline = {
 //            "{$lookup: {from: 'patients_in_area', let: {id: 'patient._id'}, pipeline: [{$match: {$expr: {$and: [{$eq: ['$area_id', ?0]}, {$eq: ['$patient_id', '$$id']}]}}}], as: 'areaInfo'}}",
 ////            "{$lookup: {from: 'patients_in_area', let: {id: 'patient._id'}, pipeline: [{$match: {$expr: {$and: [{$eq: ['$area_id', ?0]}]}}}], as: 'areaInfo'}}",

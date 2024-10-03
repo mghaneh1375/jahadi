@@ -9,6 +9,7 @@ import four.group.jahadi.Models.Drug;
 import four.group.jahadi.Models.DrugLog;
 import four.group.jahadi.Repository.DrugLogRepository;
 import four.group.jahadi.Repository.DrugRepository;
+import four.group.jahadi.Utility.PairValue;
 import four.group.jahadi.Utility.Utility;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
@@ -24,8 +25,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static four.group.jahadi.Utility.Utility.datePattern;
 
@@ -306,15 +309,30 @@ public class DrugService extends AbstractService<Drug, DrugData> {
         return new ResponseEntity<>(DrugType.values(), HttpStatus.OK);
     }
 
-    public ResponseEntity<AmountOfUse[]> getDrugAmountOfUseOptions() {
-        return new ResponseEntity<>(AmountOfUse.values(), HttpStatus.OK);
+    public ResponseEntity<List<PairValue>> getDrugAmountOfUseOptions() {
+        return new ResponseEntity<>(
+                Arrays.stream(AmountOfUse.values())
+                        .map(amountOfUse -> new PairValue(amountOfUse.name(), amountOfUse.getFaTranslate()))
+                        .collect(Collectors.toList()),
+                HttpStatus.OK
+        );
     }
 
-    public ResponseEntity<HowToUse[]> getDrugHowToUseOptions() {
-        return new ResponseEntity<>(HowToUse.values(), HttpStatus.OK);
+    public ResponseEntity<List<PairValue>> getDrugHowToUseOptions() {
+        return new ResponseEntity<>(
+                Arrays.stream(HowToUse.values())
+                        .map(howToUse -> new PairValue(howToUse.name(), howToUse.getFaTranslate()))
+                        .collect(Collectors.toList()),
+                HttpStatus.OK
+        );
     }
 
-    public ResponseEntity<UseTime[]> getDrugUseTimeOptions() {
-        return new ResponseEntity<>(UseTime.values(), HttpStatus.OK);
+    public ResponseEntity<List<PairValue>> getDrugUseTimeOptions() {
+        return new ResponseEntity<>(
+                Arrays.stream(UseTime.values())
+                        .map(useTime -> new PairValue(useTime.name(), useTime.getFaTranslate()))
+                        .collect(Collectors.toList()),
+                HttpStatus.OK
+        );
     }
 }

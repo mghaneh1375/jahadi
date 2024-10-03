@@ -19,7 +19,6 @@ public class AreaUtils {
     }
 
     public static Area findStartedArea(Trip trip, ObjectId areaId) {
-
         Area foundArea = trip
                 .getAreas().stream()
                 .filter(area -> area.getId().equals(areaId))

@@ -1,5 +1,6 @@
 package four.group.jahadi.Models;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import four.group.jahadi.Enums.AgeType;
 import four.group.jahadi.Enums.IdentifierType;
@@ -22,6 +23,7 @@ public class Patient extends Model {
     private String name;
 
     @Field("father_name")
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
     private String fatherName;
 
     private Sex sex;
@@ -30,6 +32,7 @@ public class Patient extends Model {
     @JsonSerialize(using = DateSerialization.class)
     private Date birthDate;
 
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
     private String phone;
     private String identifier;
 
@@ -39,8 +42,10 @@ public class Patient extends Model {
     private Insurance insurance;
 
     @Field("age_type")
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
     private AgeType ageType;
 
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
     private String job;
 
     @Field("patient_no")

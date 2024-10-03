@@ -1,18 +1,18 @@
 package four.group.jahadi.Service.Area;
 
+import four.group.jahadi.DTO.Area.AdviceDrugData;
 import four.group.jahadi.DTO.Area.AreaDrugsData;
+import four.group.jahadi.Enums.Module.DeliveryStatus;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Exception.NotAccessException;
+import four.group.jahadi.Models.*;
 import four.group.jahadi.Models.Area.Area;
 import four.group.jahadi.Models.Area.AreaDrugs;
-import four.group.jahadi.Models.Drug;
-import four.group.jahadi.Models.DrugLog;
-import four.group.jahadi.Models.Trip;
+import four.group.jahadi.Models.Area.ModuleInArea;
+import four.group.jahadi.Repository.*;
 import four.group.jahadi.Repository.Area.DrugsInAreaRepository;
-import four.group.jahadi.Repository.DrugLogRepository;
-import four.group.jahadi.Repository.DrugRepository;
-import four.group.jahadi.Repository.TripRepository;
-import four.group.jahadi.Repository.WareHouseAccessForGroupRepository;
+import four.group.jahadi.Repository.Area.PatientsDrugRepository;
+import four.group.jahadi.Repository.Area.PatientsInAreaRepository;
 import four.group.jahadi.Utility.PairValue;
 import four.group.jahadi.Utility.Utility;
 import lombok.Synchronized;
@@ -22,15 +22,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class DrugServiceInArea {
 
+    private final static Integer PAGE_SIZE = 20;
     @Autowired
     private WareHouseAccessForGroupRepository wareHouseAccessForGroupRepository;
     @Autowired
@@ -41,6 +39,12 @@ public class DrugServiceInArea {
     private TripRepository tripRepository;
     @Autowired
     private DrugsInAreaRepository drugsInAreaRepository;
+    @Autowired
+    private PatientsDrugRepository patientsDrugRepository;
+    @Autowired
+    private PatientsInAreaRepository patientsInAreaRepository;
+    @Autowired
+    private PatientRepository patientRepository;
 
     // ###################### GROUP ACCESS #######################
 
@@ -50,7 +54,7 @@ public class DrugServiceInArea {
             String username, ObjectId areaId, List<AreaDrugsData> dtoList,
             boolean isGroupOwner
     ) {
-        if(!isGroupOwner &&
+        if (!isGroupOwner &&
                 !wareHouseAccessForGroupRepository.existsDrugAccessByGroupIdAndUserId(
                         groupId, userId
                 )
@@ -65,7 +69,7 @@ public class DrugServiceInArea {
 
         List<ObjectId> ids = dtoList.stream().map(AreaDrugsData::getDrugId).distinct()
                 .collect(Collectors.toList());
-        List<Drug> drugsIter = drugRepository.findAllByIdsAndUserId(ids, userId);
+        List<Drug> drugsIter = drugRepository.findAllByIdsAndUserId(ids, isGroupOwner ? userId : null);
 
         List<AreaDrugs> drugs = new ArrayList<>();
         List<ObjectId> existDrugs = drugsInAreaRepository.findIdsByAreaIdAndIds(areaId, ids);
@@ -138,7 +142,7 @@ public class DrugServiceInArea {
             String username, ObjectId areaId,
             List<ObjectId> ids, boolean isGroupOwner
     ) {
-        if(!isGroupOwner &&
+        if (!isGroupOwner &&
                 !wareHouseAccessForGroupRepository.existsDrugAccessByGroupIdAndUserId(
                         groupId, userId
                 )
@@ -196,38 +200,38 @@ public class DrugServiceInArea {
         );
     }
 
-    public void updateDrugReminder(
-            ObjectId userId, ObjectId areaId,
-            ObjectId id, Integer newReminder
-    ) {
-        PairValue p = checkAccess(userId, areaId);
-        Area foundArea = (Area) p.getKey();
-        String tripName = p.getValue().toString();
-        AreaDrugs areaDrug = drugsInAreaRepository.findById(id).orElseThrow(InvalidIdException::new);
-        int diff = newReminder - areaDrug.getReminder();
-        Drug drug = drugRepository.findById(areaDrug.getDrugId()).orElseThrow(InvalidIdException::new);
-
-        if (diff > 0) { // check availability
-            if (drug.getAvailable() < diff)
-                throw new RuntimeException("ظرفیت این دارو کمتر از مقدار درخواستی شما می باشد");
-        }
-
-        // todo: synchronize action
-        areaDrug.setReminder(newReminder);
-        drugsInAreaRepository.save(areaDrug);
-
-        drug.setAvailable(drug.getAvailable() + diff);
-        drugRepository.save(drug);
-
-        drugLogRepository.save(
-                DrugLog
-                        .builder()
-                        .drugId(drug.getId())
-                        .amount(diff)
-                        .desc("تغییر موجودی دارو در منطقه " + foundArea.getName() + " در اردو " + tripName + " توسط مسئول منطقه ")
-                        .build()
-        );
-    }
+//    public void updateDrugReminder(
+//            ObjectId userId, ObjectId areaId,
+//            ObjectId id, Integer newReminder
+//    ) {
+//        PairValue p = checkAccess(userId, areaId);
+//        Area foundArea = (Area) p.getKey();
+//        String tripName = p.getValue().toString();
+//        AreaDrugs areaDrug = drugsInAreaRepository.findById(id).orElseThrow(InvalidIdException::new);
+//        int diff = newReminder - areaDrug.getReminder();
+//        Drug drug = drugRepository.findById(areaDrug.getDrugId()).orElseThrow(InvalidIdException::new);
+//
+//        if (diff > 0) { // check availability
+//            if (drug.getAvailable() < diff)
+//                throw new RuntimeException("ظرفیت این دارو کمتر از مقدار درخواستی شما می باشد");
+//        }
+//
+//        // todo: synchronize action
+//        areaDrug.setReminder(newReminder);
+//        drugsInAreaRepository.save(areaDrug);
+//
+//        drug.setAvailable(drug.getAvailable() + diff);
+//        drugRepository.save(drug);
+//
+//        drugLogRepository.save(
+//                DrugLog
+//                        .builder()
+//                        .drugId(drug.getId())
+//                        .amount(diff)
+//                        .desc("تغییر موجودی دارو در منطقه " + foundArea.getName() + " در اردو " + tripName + " توسط مسئول منطقه ")
+//                        .build()
+//        );
+//    }
 
     private PairValue checkAccess(ObjectId userId, ObjectId areaId) {
         Trip trip = tripRepository.findActiveByAreaIdAndPharmacyManager(areaId, userId, Utility.getCurrDate())
@@ -245,17 +249,99 @@ public class DrugServiceInArea {
         return new PairValue(foundArea, trip.getName());
     }
 
-    public void advice(ObjectId areaDrugId, Integer amount) {
+    public void advice(
+            ObjectId userId, ObjectId patientId,
+            ObjectId moduleId, ObjectId areaDrugId,
+            AdviceDrugData data
+    ) {
 
         AreaDrugs areaDrug = drugsInAreaRepository
                 .findById(areaDrugId)
                 .orElseThrow(InvalidIdException::new);
 
-        if (areaDrug.getReminder() < amount)
-            throw new RuntimeException("تعداد داروهای باقی مانده کمتر از تعداد درخواستی شما می باشد");
+//        if (areaDrug.getReminder() < data.getAmount())
+//            throw new RuntimeException("تعداد داروهای باقی مانده کمتر از تعداد درخواستی شما می باشد");
+        if (!patientsInAreaRepository.existByAreaIdAndPatientId(areaDrug.getAreaId(), patientId))
+            throw new RuntimeException("بیمار موردنظر در منطقه مدنظر یافت نشد");
 
-        areaDrug.setReminder(areaDrug.getReminder() - amount);
-        drugsInAreaRepository.save(areaDrug);
+        Trip trip = tripRepository.findByAreaIdAndResponsibleIdAndModuleId(
+                areaDrug.getAreaId(), userId, moduleId
+        ).orElseThrow(NotAccessException::new);
+        ModuleInArea moduleInArea = AreaUtils.findModule(
+                AreaUtils.findStartedArea(trip, areaDrug.getAreaId()),
+                moduleId, userId
+        );
+
+        patientsDrugRepository.insert(
+                PatientDrug
+                        .builder()
+                        .areaId(areaDrug.getAreaId())
+                        .drugId(areaDrug.getDrugId())
+                        .drugName(areaDrug.getDrugName())
+                        .doctorId(userId)
+                        .patientId(patientId)
+                        .moduleId(moduleId)
+                        .moduleName(moduleInArea.getModuleName())
+                        .suggestCount(data.getAmount())
+                        .amountOfUses(data.getAmountOfUse())
+                        .howToUses(data.getHowToUse())
+                        .useTime(data.getUseTime())
+                        .description(data.getDescription())
+                        .build()
+        );
+    }
+
+    //todo: impl remove drug advice
+
+    public ResponseEntity<List<PatientDrug>> listOfAdvices(
+            ObjectId userId, ObjectId areaId,
+            ObjectId patientId, ObjectId moduleId,
+            ObjectId doctorId, DeliveryStatus deliveryStatus,
+            ObjectId drugId, Date startAdviceAt, Date endAdviceAt,
+            Date startGiveAt, Date endGiveAt,
+            Integer startSuggestCount, Integer endSuggestCount,
+            ObjectId giverId, Integer pageNo
+    ) {
+        Trip trip;
+
+        if (patientId == null) {
+            trip = tripRepository.findActiveByAreaIdAndPharmacyManager(
+                    areaId, userId, Utility.getCurrDate()
+            ).orElseThrow(NotAccessException::new);
+        } else {
+            trip = tripRepository.findActiveByAreaIdAndResponsibleId(
+                    areaId, userId, Utility.getCurrDate()
+            ).orElseThrow(NotAccessException::new);
+        }
+        AreaUtils.findStartedArea(trip, areaId);
+
+        List<PatientDrug> patientsDrugs = patientsDrugRepository.findByFilters(
+                areaId, patientId, moduleId,
+                doctorId,
+                deliveryStatus == null ? null : Objects.equals(DeliveryStatus.DELIVERED, deliveryStatus),
+                drugId, startAdviceAt, endAdviceAt,
+                startGiveAt, endGiveAt,
+                startSuggestCount, endSuggestCount,
+                giverId,
+                patientId == null
+                        ? (pageNo - 1) * PAGE_SIZE
+                        : 0,
+                patientId == null
+                        ? PAGE_SIZE
+                        : 100
+        );
+        if (patientId != null) {
+            List<Patient> patients = patientRepository.findPublicInfoByIdIn(
+                    patientsDrugs.stream().map(PatientDrug::getPatientId)
+                            .distinct().collect(Collectors.toList())
+            );
+            patientsDrugs.forEach(patientDrug -> patients.stream()
+                    .filter(patient -> patient.getId().equals(patientDrug.getPatientId()))
+                    .findFirst()
+                    .ifPresent(patientDrug::setPatient));
+        }
+
+        return new ResponseEntity<>(patientsDrugs, HttpStatus.OK);
     }
 
     public void returnAllDrugs(ObjectId userId, String username, ObjectId areaId) {

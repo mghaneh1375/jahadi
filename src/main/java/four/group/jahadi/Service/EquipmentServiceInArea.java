@@ -3,7 +3,6 @@ package four.group.jahadi.Service;
 import four.group.jahadi.DTO.Area.AreaEquipmentsData;
 import four.group.jahadi.Exception.NotAccessException;
 import four.group.jahadi.Models.Area.Area;
-import four.group.jahadi.Models.Area.AreaDrugs;
 import four.group.jahadi.Models.Area.AreaEquipments;
 import four.group.jahadi.Models.Equipment;
 import four.group.jahadi.Models.EquipmentLog;

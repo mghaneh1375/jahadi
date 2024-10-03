@@ -5,9 +5,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import four.group.jahadi.Models.DateSerialization;
 import four.group.jahadi.Models.Model;
+import four.group.jahadi.Models.ObjectIdSerialization;
 import lombok.*;
 import org.bson.types.ObjectId;
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
@@ -25,6 +25,7 @@ public class AreaDrugs extends Model {
     private String drugName;
 
     @Field("drug_id")
+    @JsonSerialize(using = ObjectIdSerialization.class)
     private ObjectId drugId;
 
     @Field("area_id")

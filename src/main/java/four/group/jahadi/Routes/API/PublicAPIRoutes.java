@@ -1,12 +1,10 @@
 package four.group.jahadi.Routes.API;
 
-import four.group.jahadi.Enums.Drug.AmountOfUse;
-import four.group.jahadi.Enums.Drug.HowToUse;
-import four.group.jahadi.Enums.Drug.UseTime;
 import four.group.jahadi.Models.*;
 import four.group.jahadi.Service.CityService;
 import four.group.jahadi.Service.DrugService;
 import four.group.jahadi.Service.ExperimentService;
+import four.group.jahadi.Utility.PairValue;
 import four.group.jahadi.Validator.ObjectIdConstraint;
 import io.swagger.v3.oas.annotations.Operation;
 import org.bson.types.ObjectId;
@@ -39,19 +37,19 @@ public class PublicAPIRoutes {
 
     @GetMapping(value = "getDrugAmountOfUseOptions")
     @ResponseBody
-    public ResponseEntity<AmountOfUse[]> getDrugAmountOfUseOptions() {
+    public ResponseEntity<List<PairValue>> getDrugAmountOfUseOptions() {
         return drugService.getDrugAmountOfUseOptions();
     }
 
     @GetMapping(value = "getDrugHowToUseOptions")
     @ResponseBody
-    public ResponseEntity<HowToUse[]> getDrugHowToUseOptions() {
+    public ResponseEntity<List<PairValue>> getDrugHowToUseOptions() {
         return drugService.getDrugHowToUseOptions();
     }
 
     @GetMapping(value = "getDrugUseTimeOptions")
     @ResponseBody
-    public ResponseEntity<UseTime[]> getDrugUseTimeOptions() {
+    public ResponseEntity<List<PairValue>> getDrugUseTimeOptions() {
         return drugService.getDrugUseTimeOptions();
     }
 

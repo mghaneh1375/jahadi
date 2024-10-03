@@ -1,8 +1,11 @@
 package four.group.jahadi.Routes.API.JahadgarAPIRoutes;
 
+import four.group.jahadi.DTO.Area.AdviceDrugData;
 import four.group.jahadi.DTO.Area.AreaDrugsData;
 import four.group.jahadi.DTO.DrugBookmarkData;
+import four.group.jahadi.Enums.Module.DeliveryStatus;
 import four.group.jahadi.Models.DrugBookmark;
+import four.group.jahadi.Models.PatientDrug;
 import four.group.jahadi.Models.TokenInfo;
 import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Service.Area.DrugServiceInArea;
@@ -73,6 +76,41 @@ public class JahadgarDrugAPIRoutes extends Router {
         drugServiceInArea.addAllToDrugsList(
                 tokenInfo.getUserId(), tokenInfo.getGroupId(), tokenInfo.getUsername(),
                 areaId, drugsData, false
+        );
+    }
+
+    @PostMapping(value = "advice/{patientId}/{moduleId}/{areaDrugId}")
+    @ResponseBody
+    @Operation(summary = "تجویز دارو توسط دکتر در منطقه")
+    public void advice(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId patientId,
+            @PathVariable @ObjectIdConstraint ObjectId moduleId,
+            @PathVariable @ObjectIdConstraint ObjectId areaDrugId,
+            @RequestBody @Valid AdviceDrugData data
+    ) {
+        drugServiceInArea.advice(
+                getId(request), patientId,
+                moduleId, areaDrugId, data
+        );
+    }
+
+    @GetMapping(value = "listOfAdvices/{areaId}/{patientId}")
+    @ResponseBody
+    @Operation(summary = "گرفتن لیست داروهای تجویز شده توسط دکتر")
+    public ResponseEntity<List<PatientDrug>> listOfAdvices(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId,
+            @PathVariable @ObjectIdConstraint ObjectId patientId,
+            @RequestParam(value = "moduleId", required = false) ObjectId moduleId,
+            @RequestParam(value = "deliveryStatus", required = false) DeliveryStatus deliveryStatus
+    ) {
+        return drugServiceInArea.listOfAdvices(
+                getId(request), areaId, patientId,
+                moduleId, null, deliveryStatus,
+                null, null, null, null,
+                null, null, null, null,
+                null
         );
     }
 
