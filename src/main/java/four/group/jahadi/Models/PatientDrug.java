@@ -1,5 +1,6 @@
 package four.group.jahadi.Models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import four.group.jahadi.Enums.Drug.AmountOfUse;
@@ -21,8 +22,7 @@ import java.util.Date;
 @Builder
 public class PatientDrug extends Model {
     @Field("area_id")
-    @JsonSerialize(using = ObjectIdSerialization.class)
-    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    @JsonIgnore
     private ObjectId areaId;
     @Field("patient_id")
     @JsonSerialize(using = ObjectIdSerialization.class)
@@ -64,7 +64,22 @@ public class PatientDrug extends Model {
     private Date giveAt;
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     private String description;
-
+    @Field("give_description")
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    private String giveDescription;
+    @Field("given_drug_id")
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    private ObjectId givenDrugId;
+    @Field("given_drug_name")
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    private String givenDrugName;
     @Transient
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
     private Patient patient;
+    @Transient
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    private String doctor;
+    @Transient
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    private String giver;
 }

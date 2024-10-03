@@ -2,12 +2,14 @@ package four.group.jahadi.Service.Area;
 
 import four.group.jahadi.DTO.Area.AdviceDrugData;
 import four.group.jahadi.DTO.Area.AreaDrugsData;
+import four.group.jahadi.DTO.Area.GiveDrugData;
 import four.group.jahadi.Enums.Module.DeliveryStatus;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Exception.NotAccessException;
 import four.group.jahadi.Models.*;
 import four.group.jahadi.Models.Area.Area;
 import four.group.jahadi.Models.Area.AreaDrugs;
+import four.group.jahadi.Models.Area.JoinedAreaDrugs;
 import four.group.jahadi.Models.Area.ModuleInArea;
 import four.group.jahadi.Repository.*;
 import four.group.jahadi.Repository.Area.DrugsInAreaRepository;
@@ -45,6 +47,8 @@ public class DrugServiceInArea {
     private PatientsInAreaRepository patientsInAreaRepository;
     @Autowired
     private PatientRepository patientRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     // ###################### GROUP ACCESS #######################
 
@@ -189,8 +193,7 @@ public class DrugServiceInArea {
 
     // ###################### JAHADGAR ACCESS #######################
 
-    public ResponseEntity<List<AreaDrugs>> list(ObjectId userId, ObjectId areaId) {
-
+    public ResponseEntity<List<JoinedAreaDrugs>> list(ObjectId userId, ObjectId areaId) {
         tripRepository.findByAreaIdAndResponsibleId(areaId, userId)
                 .orElseThrow(NotAccessException::new);
 
@@ -291,7 +294,68 @@ public class DrugServiceInArea {
         );
     }
 
-    //todo: impl remove drug advice
+    public void removeAdvice(ObjectId userId, ObjectId adviceId) {
+        patientsDrugRepository.deleteUnDedicatedPatientDrugByIdAAndDoctorId(
+                adviceId, userId
+        ).orElseThrow(() -> {
+            throw new RuntimeException("این تجویز تحویل شده است و امکان حذف آن وجود ندارد");
+        });
+    }
+
+    synchronized
+    public void giveDrug(
+            ObjectId userId, ObjectId areaId,
+            ObjectId adviceId, GiveDrugData data
+    ) {
+        Trip trip = tripRepository.findActiveByAreaIdAndPharmacyManager(
+                areaId, userId, Utility.getCurrDate()
+        ).orElseThrow(InvalidIdException::new);
+        AreaUtils.findStartedArea(trip, areaId);
+        PatientDrug patientDrug = patientsDrugRepository.findById(adviceId)
+                .orElseThrow(InvalidIdException::new);
+
+        if(!patientDrug.getAreaId().equals(areaId))
+            throw new InvalidIdException();
+        if(patientDrug.getSuggestCount() < data.getAmount())
+            throw new RuntimeException("تعداد تحویل می تواند حداکثر " + patientDrug.getSuggestCount() + " باشد");
+        if(patientDrug.isDedicated() && !patientDrug.getGiverId().equals(userId))
+            throw new RuntimeException("این تجویز قبلا توسط مسئول داروخانه دیگری تحویل شده است");
+
+        int diff;
+        if(!patientDrug.isDedicated()) {
+            patientDrug.setDedicated(true);
+            patientDrug.setGiveAt(new Date());
+            diff = data.getAmount() - (
+                    patientDrug.getGiveCount() == null
+                            ? 0
+                            : patientDrug.getGiveCount()
+            );
+        }
+        else
+            diff = data.getAmount();
+
+        patientDrug.setGiveCount(data.getAmount());
+        patientDrug.setGiverId(userId);
+        patientDrug.setGiveDescription(data.getDescription());
+        ObjectId drugId = data.getDrugId() != null && !data.getDrugId().equals(patientDrug.getDrugId()) ?
+                data.getDrugId() : patientDrug.getDrugId();
+
+        AreaDrugs areaDrugs = drugsInAreaRepository.findByAreaIdAndDrugId(areaId, drugId)
+                .orElseThrow(() -> {
+                    throw new RuntimeException("unknown exception");
+                });
+        if(areaDrugs.getReminder() < data.getAmount())
+            throw new RuntimeException("مقدار موجودی در انبار " + areaDrugs.getReminder() + " می باشد");
+
+        if(!drugId.equals(patientDrug.getDrugId())) {
+            patientDrug.setGivenDrugId(drugId);
+            patientDrug.setGivenDrugName(areaDrugs.getDrugName());
+        }
+
+        areaDrugs.setReminder(areaDrugs.getReminder() - diff);
+        drugsInAreaRepository.save(areaDrugs);
+        patientsDrugRepository.save(patientDrug);
+    }
 
     public ResponseEntity<List<PatientDrug>> listOfAdvices(
             ObjectId userId, ObjectId areaId,
@@ -330,7 +394,7 @@ public class DrugServiceInArea {
                         ? PAGE_SIZE
                         : 100
         );
-        if (patientId != null) {
+        if (patientId == null) {
             List<Patient> patients = patientRepository.findPublicInfoByIdIn(
                     patientsDrugs.stream().map(PatientDrug::getPatientId)
                             .distinct().collect(Collectors.toList())
@@ -342,6 +406,24 @@ public class DrugServiceInArea {
         }
 
         return new ResponseEntity<>(patientsDrugs, HttpStatus.OK);
+    }
+
+    public ResponseEntity<PatientDrug> getAdviceDetail(
+            ObjectId userId, ObjectId adviceId
+    ) {
+        PatientDrug patientDrug = patientsDrugRepository.findById(adviceId)
+                .orElseThrow(InvalidIdException::new);
+        Trip trip = tripRepository.findByAreaIdAndResponsibleId(
+                patientDrug.getAreaId(), userId
+        ).orElseThrow(NotAccessException::new);
+        AreaUtils.findStartedArea(trip, patientDrug.getAreaId());
+        userRepository.findById(patientDrug.getDoctorId())
+                .ifPresent(user -> patientDrug.setDoctor(user.getName()));
+        if(patientDrug.getGiverId() != null) {
+            userRepository.findById(patientDrug.getGiverId())
+                    .ifPresent(user -> patientDrug.setGiver(user.getName()));
+        }
+        return new ResponseEntity<>(patientDrug, HttpStatus.OK);
     }
 
     public void returnAllDrugs(ObjectId userId, String username, ObjectId areaId) {

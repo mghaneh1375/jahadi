@@ -137,7 +137,4 @@ public class Area {
     @JsonIgnore
     @Builder.Default
     private Boolean finished = false;
-
-
-
 }

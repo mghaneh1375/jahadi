@@ -2,6 +2,7 @@ package four.group.jahadi.Routes.API.JahadgarAPIRoutes;
 
 import four.group.jahadi.DTO.Area.AdviceDrugData;
 import four.group.jahadi.DTO.Area.AreaDrugsData;
+import four.group.jahadi.DTO.Area.GiveDrugData;
 import four.group.jahadi.DTO.DrugBookmarkData;
 import four.group.jahadi.Enums.Module.DeliveryStatus;
 import four.group.jahadi.Models.DrugBookmark;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.Size;
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -95,6 +97,14 @@ public class JahadgarDrugAPIRoutes extends Router {
         );
     }
 
+    @DeleteMapping(value = "removeAdvice/{adviceId}")
+    public void removeAdvice(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId adviceId
+    ) {
+        drugServiceInArea.removeAdvice(getId(request), adviceId);
+    }
+
     @GetMapping(value = "listOfAdvices/{areaId}/{patientId}")
     @ResponseBody
     @Operation(summary = "گرفتن لیست داروهای تجویز شده توسط دکتر")
@@ -113,6 +123,45 @@ public class JahadgarDrugAPIRoutes extends Router {
                 null
         );
     }
+
+    @GetMapping(value = "listOfAdvices/{areaId}")
+    @ResponseBody
+    @Operation(summary = "گرفتن لیست داروهای تجویز شده توسط مسئول داروخانه")
+    public ResponseEntity<List<PatientDrug>> listOfAdvices(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId,
+            @RequestParam(value = "patientId", required = false) ObjectId patientId,
+            @RequestParam(value = "moduleId", required = false) ObjectId moduleId,
+            @RequestParam(value = "deliveryStatus", required = false) DeliveryStatus deliveryStatus,
+            @RequestParam(value = "doctorId", required = false) ObjectId doctorId,
+            @RequestParam(value = "drugId", required = false) ObjectId drugId,
+            @RequestParam(value = "startAdviceAt", required = false) Date startAdviceAt,
+            @RequestParam(value = "endAdviceAt", required = false) Date endAdviceAt,
+            @RequestParam(value = "startGiveAt", required = false) Date startGiveAt,
+            @RequestParam(value = "endGiveAt", required = false) Date endGiveAt,
+            @RequestParam(value = "startSuggestCount", required = false) Integer startSuggestCount,
+            @RequestParam(value = "endSuggestCount", required = false) Integer endSuggestCount,
+            @RequestParam(value = "giverId", required = false) ObjectId giverId,
+            @RequestParam(value = "pageNo") Integer pageNo
+    ) {
+        return drugServiceInArea.listOfAdvices(
+                getId(request), areaId, patientId,
+                moduleId, doctorId, deliveryStatus,
+                drugId, startAdviceAt, endAdviceAt, startGiveAt,
+                endGiveAt, startSuggestCount, endSuggestCount, giverId,
+                pageNo
+        );
+    }
+    @PutMapping(value = "giveDrugToPatient/{areaId}/{adviceId}")
+    public void giveDrugToPatient(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId,
+            @PathVariable @ObjectIdConstraint ObjectId adviceId,
+            @RequestBody @Valid GiveDrugData data
+    ) {
+        drugServiceInArea.giveDrug(getId(request), areaId, adviceId, data);
+    }
+
 
     @DeleteMapping(value = "removeAllFromDrugsList/{areaId}")
     @Operation(summary = "حذف یک یا چند دارو از منطقه توسط مسئول گروه")
@@ -140,4 +189,12 @@ public class JahadgarDrugAPIRoutes extends Router {
         );
     }
 
+    @GetMapping(value = "getAdviceDetail/{adviceId}")
+    @ResponseBody
+    public ResponseEntity<PatientDrug> getAdviceDetail(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId adviceId
+    ) {
+        return drugServiceInArea.getAdviceDetail(getId(request), adviceId);
+    }
 }

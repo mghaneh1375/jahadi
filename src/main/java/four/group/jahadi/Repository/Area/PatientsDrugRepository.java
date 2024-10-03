@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface PatientsDrugRepository extends MongoRepository<PatientDrug, ObjectId>, FilterableRepository<PatientsInArea> {
@@ -30,7 +31,7 @@ public interface PatientsDrugRepository extends MongoRepository<PatientDrug, Obj
                     "?#{ [11] == null ? { '_id': {$exists: true}} : { 'suggest_count' : {$lte: [11]} } }," +
                     "?#{ [12] == null ? { '_id': {$exists: true}} : { 'giver_id': [12] } }," +
                     "]}}",
-            "{ $project: {areaId: 0, doctorId: 0, giverId: 0, moduleId: 0, drugId: 0, description: 0} }",
+            "{ $project: {areaId: 0, doctorId: 0, giverId: 0, moduleId: 0, drugId: 0, description: 0, giveDescription: 0, givenDrugId: 0} }",
             "{ $skip: ?13 }",
             "{ $limit: ?14 }",
     })
@@ -43,5 +44,8 @@ public interface PatientsDrugRepository extends MongoRepository<PatientDrug, Obj
             Integer startSuggestCount, Integer endSuggestCount,
             ObjectId giverId, Integer skip, Integer limit
     );
+
+    @Query(value = "{_id: ?0, doctorId: ?1, dedicated: false}", delete = true)
+    Optional<PatientDrug> deleteUnDedicatedPatientDrugByIdAAndDoctorId(ObjectId id, ObjectId doctorId);
 
 }
