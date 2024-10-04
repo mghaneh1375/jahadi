@@ -7,10 +7,12 @@ import four.group.jahadi.Models.Area.*;
 import four.group.jahadi.Models.Experiment;
 import four.group.jahadi.Models.Module;
 import four.group.jahadi.Models.Trip;
+import four.group.jahadi.Models.User;
 import four.group.jahadi.Repository.Area.PatientsInAreaRepository;
 import four.group.jahadi.Repository.ExperimentRepository;
 import four.group.jahadi.Repository.ModuleRepository;
 import four.group.jahadi.Repository.TripRepository;
+import four.group.jahadi.Repository.UserRepository;
 import four.group.jahadi.Utility.PairValue;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,9 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static four.group.jahadi.Service.Area.AreaUtils.findModule;
@@ -37,6 +37,8 @@ public class ExperimentServiceInArea {
     private ModuleRepository moduleRepository;
     @Autowired
     private TripRepository tripRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     public ResponseEntity<List<PairValue>> list() {
         return new ResponseEntity<>(
@@ -119,18 +121,78 @@ public class ExperimentServiceInArea {
             ObjectId moduleId, ObjectId patientId
     ) {
         PatientsInArea wantedPatient = hasAccess(userId, areaId, moduleId, patientId);
-        PatientReferral wantedPatientReferral = wantedPatient.getReferrals().stream()
+        PatientReferral wantedPatientReferral = wantedPatient.getReferrals()
+                .stream()
                 .filter(patientReferral ->
                         patientReferral.getModuleId().equals(moduleId)
                 )
                 .reduce((first, second) -> second)
                 .orElseThrow(InvalidIdException::new);
 
+        if(wantedPatientReferral.getExperiments() != null) {
+            List<User> doctors = userRepository.findByIdsIn(
+                    wantedPatientReferral.getExperiments()
+                            .stream().map(PatientExperiment::getDoctorId)
+                            .collect(Collectors.toList())
+            );
+            wantedPatientReferral
+                    .getExperiments()
+                    .forEach(experiment -> doctors
+                            .stream()
+                            .filter(doctor -> doctor.getId().equals(experiment.getDoctorId()))
+                            .findFirst()
+                            .ifPresent(user -> experiment.setDoctor(user.getName())));
+        }
+
         return new ResponseEntity<>(
                 wantedPatientReferral.getExperiments() == null ?
-                new ArrayList<>() : wantedPatientReferral.getExperiments(),
+                        new ArrayList<>() : wantedPatientReferral.getExperiments(),
                 HttpStatus.OK
         );
+    }
+
+    public ResponseEntity<List<PatientExperiment>> getAllExperimentsOfPatient(
+            ObjectId userId, ObjectId areaId, ObjectId patientId
+    ) {
+        Trip trip = tripRepository.findByAreaIdAndResponsibleId(areaId, userId)
+                .orElseThrow(NotAccessException::new);
+        Area area = findStartedArea(trip, areaId);
+
+        List<PatientExperiment> experiments = new ArrayList<>();
+        patientsInAreaRepository.findByAreaIdAndPatientId(areaId, patientId)
+                .ifPresent(wantedPatient -> {
+                    if(wantedPatient.getReferrals() == null)
+                        return;
+
+                    List<User> doctors = userRepository.findByIdsIn(
+                            wantedPatient.getReferrals()
+                                    .stream()
+                                    .map(PatientReferral::getExperiments)
+                                    .filter(Objects::nonNull)
+                                    .flatMap(Collection::stream)
+                                    .map(PatientExperiment::getDoctorId)
+                                    .collect(Collectors.toList())
+                    );
+
+                    wantedPatient.getReferrals().forEach(patientReferral -> {
+                        if(patientReferral.getExperiments() == null)
+                            return;
+
+                        area.getModules()
+                                .stream()
+                                .filter(module -> module.getModuleId().equals(patientReferral.getModuleId()))
+                                .findFirst()
+                                .ifPresent(module -> patientReferral.getExperiments().forEach(experiment -> experiment.setModuleName(module.getModuleName())));
+                        patientReferral.getExperiments().forEach(experiment -> doctors
+                                .stream()
+                                .filter(user -> user.getId().equals(experiment.getDoctorId()))
+                                .findFirst()
+                                .ifPresent(user -> experiment.setDoctor(user.getName())));
+                        experiments.addAll(patientReferral.getExperiments());
+                    });
+                });
+
+        return new ResponseEntity<>(experiments, HttpStatus.OK);
     }
 
     public ResponseEntity<List<ExperimentInArea>> list(ObjectId userId, ObjectId areaId) {

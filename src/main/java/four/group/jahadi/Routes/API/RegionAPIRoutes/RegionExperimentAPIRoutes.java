@@ -64,7 +64,7 @@ public class RegionExperimentAPIRoutes extends Router {
 
     @GetMapping(value = "getExperiments/{areaId}/{moduleId}/{patientId}")
     @ResponseBody
-    @Operation(summary = "گرفتن تجویز آزمایشهای یک بیمار مشخص در منطقه توسط دکتر و یا مسئول منطقه")
+    @Operation(summary = "گرفتن تجویز آزمایشهای یک بیمار مشخص در یک ماژول خاص در منطقه توسط دکتر و یا مسئول منطقه")
     public ResponseEntity<List<PatientExperiment>> getExperiments(
             HttpServletRequest request,
             @PathVariable @ObjectIdConstraint ObjectId areaId,
@@ -73,6 +73,19 @@ public class RegionExperimentAPIRoutes extends Router {
     ) {
         return experimentServiceInArea.getExperiments(
                 getId(request), areaId, moduleId, patientId
+        );
+    }
+
+    @GetMapping(value = "getAllExperimentsOfPatient/{areaId}/{patientId}")
+    @ResponseBody
+    @Operation(summary = "گرفتن آزمایشهای یک بیمار مشخص در منطقه توسط دکتر و یا مسئول منطقه")
+    public ResponseEntity<List<PatientExperiment>> getAllExperimentsOfPatient(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId,
+            @PathVariable @ObjectIdConstraint ObjectId patientId
+    ) {
+        return experimentServiceInArea.getAllExperimentsOfPatient(
+                getId(request), areaId, patientId
         );
     }
 

@@ -98,6 +98,7 @@ public class JahadgarDrugAPIRoutes extends Router {
     }
 
     @DeleteMapping(value = "removeAdvice/{adviceId}")
+    @Operation(summary = "حذف تجویز انجام شده فقط توسط خود همان دکتری که تجویز را انجام داده است")
     public void removeAdvice(
             HttpServletRequest request,
             @PathVariable @ObjectIdConstraint ObjectId adviceId
@@ -153,6 +154,7 @@ public class JahadgarDrugAPIRoutes extends Router {
         );
     }
     @PutMapping(value = "giveDrugToPatient/{areaId}/{adviceId}")
+    @Operation(summary = "تحویل دارو تجویز شده به کاربر", description = "فیلد drugId اختیاری است و درصورتی که مسئول تحویل بخواهد دارویی به غیر از دارو تجویز شده به بیمار تحویل دهد آن را پر می کند. توضیح هم اختیاری است")
     public void giveDrugToPatient(
             HttpServletRequest request,
             @PathVariable @ObjectIdConstraint ObjectId areaId,
@@ -179,6 +181,7 @@ public class JahadgarDrugAPIRoutes extends Router {
 
     @GetMapping(value = "checkAccessToWareHouse")
     @ResponseBody
+    @Operation(summary = "چک کردن داشتن دسترسی به انبار گروه برای یک کاربر خاص")
     public ResponseEntity<Boolean> checkAccessToWareHouse(
             HttpServletRequest request
     ) {
@@ -191,6 +194,7 @@ public class JahadgarDrugAPIRoutes extends Router {
 
     @GetMapping(value = "getAdviceDetail/{adviceId}")
     @ResponseBody
+    @Operation(summary = "گرفتن جزئیات یک تجویز", description = "فیلدهایی نظیر توضیح تجویز و یا توضیح تحویل دارو و همچنین نام دکتر تجویز کننده و شخص تحویل دهنده در این سرویس برمیگردد")
     public ResponseEntity<PatientDrug> getAdviceDetail(
             HttpServletRequest request,
             @PathVariable @ObjectIdConstraint ObjectId adviceId
