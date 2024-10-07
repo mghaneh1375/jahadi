@@ -1,7 +1,5 @@
 package four.group.jahadi.Exception;
 
-import java.util.function.Supplier;
-
 public class InvalidIdException extends RuntimeException {
 
     private static final long serialVersionUID = 1321321321L;

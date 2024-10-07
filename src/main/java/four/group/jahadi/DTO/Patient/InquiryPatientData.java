@@ -22,5 +22,4 @@ public class InquiryPatientData {
     private String identifier;
 
     private IdentifierType identifierType;
-
 }

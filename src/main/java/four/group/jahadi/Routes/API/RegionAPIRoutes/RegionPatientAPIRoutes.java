@@ -58,9 +58,10 @@ public class RegionPatientAPIRoutes extends Router {
     @Operation(
             summary = "استعلام بیمار توسط مسئول پذیرش در یک منطقه"
     )
-    public ResponseEntity<Patient> inquiryPatient(HttpServletRequest request,
-                                                  @PathVariable @ObjectIdConstraint ObjectId areaId,
-                                                  @RequestBody @Valid InquiryPatientData inquiryPatientData
+    public ResponseEntity<Patient> inquiryPatient(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId,
+            @RequestBody @Valid InquiryPatientData inquiryPatientData
     ) {
         return patientServiceInArea.inquiryPatient(getId(request), areaId, inquiryPatientData);
     }
@@ -260,7 +261,7 @@ public class RegionPatientAPIRoutes extends Router {
             @PathVariable @ObjectIdConstraint ObjectId moduleId,
             @PathVariable @ObjectIdConstraint ObjectId patientId,
             @RequestBody(required = false) @Valid PatientReferralData data
-            ) {
+    ) {
         patientServiceInArea.addReferralForPatient(
                 getId(request), areaId, patientId, moduleId, data != null ? data.getDesc() : null
         );
@@ -303,15 +304,14 @@ public class RegionPatientAPIRoutes extends Router {
         try {
             List<PatientFormData> forms = new ObjectMapper().readValue(tmp, new TypeReference<>() {
             });
-            if(forms.size() == 0)
+            if (forms.size() == 0)
                 throw new InvalidFieldsException("form size is 0");
 
             patientServiceInArea.setPatientForm(
                     getId(request), areaId, moduleId,
                     subModuleId, patientId, forms, files
             );
-        }
-        catch (Exception x) {
+        } catch (Exception x) {
             throw new InvalidFieldsException(x.getMessage());
         }
     }

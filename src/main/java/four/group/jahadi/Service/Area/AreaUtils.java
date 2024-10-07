@@ -43,12 +43,13 @@ public class AreaUtils {
         if (responsibleId == null && secretaryId == null)
             return moduleInArea;
 
-        if(responsibleId != null && secretaryId != null &&
+        if(responsibleId != null && secretaryId != null && !responsibleId.equals(area.getOwnerId()) &&
                 !moduleInArea.getMembers().contains(responsibleId) && !moduleInArea.getSecretaries().contains(secretaryId)
         )
             throw new NotAccessException();
 
-        if(responsibleId != null && !moduleInArea.getMembers().contains(responsibleId))
+        if(responsibleId != null && !responsibleId.equals(area.getOwnerId()) &&
+                !moduleInArea.getMembers().contains(responsibleId))
             throw new NotAccessException();
 
         if(secretaryId != null && !moduleInArea.getSecretaries().contains(secretaryId))
@@ -64,7 +65,7 @@ public class AreaUtils {
                 .filter(module -> module.getModuleId().equals(moduleId))
                 .findFirst().orElseThrow(InvalidIdException::new);
 
-        if (responsibleId == null)
+        if (responsibleId == null || area.getOwnerId().equals(responsibleId))
             return moduleInArea;
 
         if(!moduleInArea.getMembers().contains(responsibleId))
