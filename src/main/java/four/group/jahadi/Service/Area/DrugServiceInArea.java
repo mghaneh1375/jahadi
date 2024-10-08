@@ -127,7 +127,7 @@ public class DrugServiceInArea {
         if (drugs.size() + updates.size() != dtoList.size())
             throw new RuntimeException("ids are incorrect");
 
-        List<AreaDrugs> drugsInAreaList = drugsInAreaRepository.findByAreaIdAndDrugIds(areaId, updates.keySet().stream().toList());
+        List<AreaDrugs> drugsInAreaList = drugsInAreaRepository.findByAreaIdAndDrugIds(areaId, new ArrayList<>(updates.keySet()));
         drugsInAreaList.forEach(next -> {
             next.setReminder(updates.get(next.getDrugId()) + next.getReminder());
             next.setTotalCount(updates.get(next.getDrugId()) + next.getTotalCount());
