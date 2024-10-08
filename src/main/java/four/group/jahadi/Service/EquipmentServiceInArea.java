@@ -14,12 +14,12 @@ import four.group.jahadi.Repository.TripRepository;
 import four.group.jahadi.Repository.WareHouseAccessForGroupRepository;
 import four.group.jahadi.Utility.PairValue;
 import four.group.jahadi.Utility.Utility;
-import lombok.Synchronized;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class EquipmentServiceInArea {
-
     @Autowired
     private WareHouseAccessForGroupRepository wareHouseAccessForGroupRepository;
     @Autowired
@@ -57,7 +56,8 @@ public class EquipmentServiceInArea {
         return new PairValue(foundArea, trip.getName());
     }
 
-    @Synchronized
+    @Transactional
+    synchronized
     public void addAllEquipmentsToArea(
             ObjectId userId, ObjectId groupId,
             String username, ObjectId areaId,
@@ -138,14 +138,14 @@ public class EquipmentServiceInArea {
             tmp.add(next);
         }
 
-        //todo: synchronized op
         equipmentRepository.saveAll(equipmentsIter);
         equipmentLogRepository.saveAll(equipmentLogs);
         equipmentsInAreaRepository.insert(equipments);
         equipmentsInAreaRepository.saveAll(tmp);
     }
 
-    @Synchronized
+    @Transactional
+    synchronized
     public void removeAllFromEquipmentsList(
             ObjectId userId, ObjectId groupId,
             String username, ObjectId areaId,
@@ -164,7 +164,6 @@ public class EquipmentServiceInArea {
                 .filter(area -> area.getId().equals(areaId))
                 .findFirst().get();
 
-        //todo: synchronized op
         List<AreaEquipments> areaEquipments = equipmentsInAreaRepository.removeAreaEquipmentsByIdAndAreaId(ids, areaId);
         List<EquipmentLog> equipmentLogs = new ArrayList<>();
         List<Equipment> equipmentsIter = equipmentRepository.findAllByIdsAndUserId(
@@ -194,11 +193,16 @@ public class EquipmentServiceInArea {
         equipmentLogRepository.saveAll(equipmentLogs);
     }
 
+    @Transactional
+    synchronized
     public void returnAllEquipments(ObjectId userId, String username, ObjectId areaId) {
         PairValue p = checkAccess(userId, areaId);
         Area foundArea = (Area) p.getKey();
         String tripName = p.getValue().toString();
         List<AreaEquipments> areaEquipments = equipmentsInAreaRepository.findAvailableEquipmentsByAreaId(areaId);
+        if(areaEquipments.size() == 0)
+            return;
+
         List<Equipment> equipments = new ArrayList<>();
         equipmentRepository.findAllById(areaEquipments.stream()
                 .map(AreaEquipments::getEquipmentId)
@@ -226,7 +230,6 @@ public class EquipmentServiceInArea {
                     areaEquipments1.setUpdatedAt(curr);
                 }));
 
-        // todo: transaction
         equipmentLogRepository.saveAll(equipmentLogs);
         equipmentRepository.saveAll(equipments);
         equipmentsInAreaRepository.saveAll(areaEquipments);

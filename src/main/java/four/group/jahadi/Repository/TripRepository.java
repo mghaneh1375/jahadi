@@ -40,7 +40,7 @@ public interface TripRepository extends MongoRepository<Trip, ObjectId>, Filtera
     @Query(value = "{$and: [{$or: [{'endAt': {$exists: false}}, {'endAt': {$gte: ?0}}]}, {'groupsWithAccess': { $elemMatch: {'groupId': ?1, 'writeAccess': true} }} ] }", exists = true)
     boolean hasExistActiveAreaByGroupIdAndAreaIdAndWriteAccess(Date curr, ObjectId groupId, ObjectId areaId);
 
-    @Query(value = "{$and: [{$or: [{'endAt': {$exists: false}}, {'endAt': {$gte: ?0}}]}, {'groupsWithAccess': { $elemMatch: {'groupId': ?1, 'writeAccess': true} }} ] }", fields = "{'name': 1, 'areas.name': 1, 'areas.id': 1}")
+    @Query(value = "{$and: [{'areas': {$elemMatch: { 'id': ?2, $or: [{'endAt': {$exists: false}}, {'endAt': {$gte: ?0}}] } } }, {'groupsWithAccess': { $elemMatch: {'groupId': ?1, 'writeAccess': true} }} ] }", fields = "{'name': 1, 'areas.name': 1, 'areas.id': 1}")
     Optional<Trip> findActiveAreaByGroupIdAndAreaIdAndWriteAccess(Date curr, ObjectId groupId, ObjectId areaId);
 
     @Query(value = "{$and: [{'endAt': {$exists: true}}, {'endAt': {$gte: ?0}}]  }", fields = "{'projectId': false, 'areas.members': false, 'createdAt': false}")

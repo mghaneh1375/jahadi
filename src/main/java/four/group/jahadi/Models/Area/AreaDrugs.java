@@ -4,11 +4,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import four.group.jahadi.Models.DateSerialization;
-import four.group.jahadi.Models.Drug;
 import four.group.jahadi.Models.Model;
 import four.group.jahadi.Models.ObjectIdSerialization;
 import lombok.*;
+import org.bson.codecs.pojo.annotations.BsonProperty;
 import org.bson.types.ObjectId;
+import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
@@ -43,4 +44,7 @@ public class AreaDrugs extends Model {
     private Integer totalCount;
 
     private Integer reminder;
+
+    @Version
+    private Long version;
 }

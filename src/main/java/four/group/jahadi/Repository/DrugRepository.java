@@ -58,4 +58,5 @@ public interface DrugRepository extends MongoRepository<Drug, ObjectId>, Filtera
 
     @Query(value = "{ visibility: true }", fields = "{ 'name': 1, '_id': 1 }", sort = "{'priority': 1}")
     List<Drug> findVisibleDigests();
+
 }

@@ -48,8 +48,11 @@ public interface DrugsInAreaRepository extends MongoRepository<AreaDrugs, Object
     })
     List<JoinedAreaDrugs> findDigestByAreaId(ObjectId areaId);
 
-    @Query(value = "{areaId: ?0, drugId: {$in: ?1}}", fields = "{_id: 1}")
-    List<ObjectId> findIdsByAreaIdAndIds(ObjectId areaId, List<ObjectId> ids);
+    @Query(value = "{areaId: ?0, drugId: {$in: ?1}}", fields = "{drugId: 1}")
+    List<AreaDrugs> findDrugIdsByAreaIdAndDrugIds(ObjectId areaId, List<ObjectId> ids);
+
+    @Query(value = "{areaId: ?0, drugId: {$in: ?1}}")
+    List<AreaDrugs> findByAreaIdAndDrugIds(ObjectId areaId, List<ObjectId> ids);
 
     @Query(value = "{areaId: ?0, reminder: {$gt: 0}}")
     List<AreaDrugs> findAvailableDrugsByAreaId(ObjectId areaId);
