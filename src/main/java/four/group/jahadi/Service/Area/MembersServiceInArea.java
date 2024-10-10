@@ -211,6 +211,46 @@ public class MembersServiceInArea {
         return returnUsers(AreaUtils.findArea(trip, areaId, userId).getPharmacyManagers());
     }
 
+    public void addEquipmentManager(ObjectId userId, ObjectId areaId, List<ObjectId> userIds) {
+
+        Object[] tmp = checkUsers(userId, areaId, userIds, tripRepository);
+        Trip wantedTrip = (Trip) tmp[0];
+        Area foundArea = (Area) tmp[1];
+
+        List<ObjectId> equipmentManagers = foundArea.getEquipmentManagers();
+        if(equipmentManagers == null)
+            equipmentManagers = new ArrayList<>();
+
+        for(ObjectId uId : userIds) {
+            if (equipmentManagers.contains(uId)) continue;
+            equipmentManagers.add(uId);
+        }
+
+        foundArea.setEquipmentManagers(equipmentManagers);
+        tripRepository.save(wantedTrip);
+    }
+
+    public void removeEquipmentManager(ObjectId userId, ObjectId areaId, ObjectId wantedUserId) {
+
+        Trip wantedTrip = tripRepository.findByAreaIdAndOwnerId(areaId, userId)
+                .orElseThrow(NotAccessException::new);
+        Area area = findArea(wantedTrip, areaId, userId);
+
+        List<ObjectId> equipmentManagers = area.getEquipmentManagers();
+        if(equipmentManagers == null || !equipmentManagers.contains(wantedUserId))
+            throw new InvalidIdException();
+
+        equipmentManagers.remove(wantedUserId);
+        tripRepository.save(wantedTrip);
+    }
+
+    public ResponseEntity<List<User>> getEquipmentManagers(ObjectId userId, ObjectId areaId) {
+        Trip trip = tripRepository.findByAreaIdAndOwnerId(areaId, userId)
+                .orElseThrow(InvalidIdException::new);
+
+        return returnUsers(AreaUtils.findArea(trip, areaId, userId).getEquipmentManagers());
+    }
+
     public ResponseEntity<List<User>> getLaboratoryManagers(ObjectId userId, ObjectId areaId) {
         Trip trip = tripRepository.findByAreaIdAndOwnerId(areaId, userId)
                 .orElseThrow(InvalidIdException::new);

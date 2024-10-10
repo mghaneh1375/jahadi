@@ -167,6 +167,42 @@ public class RegionManageUserAPIRoutes extends Router {
         return membersServiceInArea.getPharmacyManagers(getId(request), areaId);
     }
 
+    @PutMapping(value = "addEquipmentManager/{areaId}")
+    @ResponseBody
+    @Operation(
+            summary = "افزودن جهادگر/جهادگران به عنوان مسئول انبار در منطقه توسط مسئول منطفه",
+            description = "قبل از شروع اردو باید صدا زده شود"
+    )
+    public void addEquipmentManager(HttpServletRequest request,
+                                   @PathVariable @ObjectIdConstraint ObjectId areaId,
+                                   @RequestBody List<ObjectId> userIds
+    ) {
+        membersServiceInArea.addEquipmentManager(getId(request), areaId, userIds);
+    }
+
+    @DeleteMapping(value = "removeEquipmentManager/{areaId}/{userId}")
+    @ResponseBody
+    @Operation(
+            summary = "حذف جهادگر از مسئول انبار در منطقه توسط مسئول منطفه",
+            description = "قبل از شروع اردو باید صدا زده شود"
+    )
+    public void removeEquipmentManager(HttpServletRequest request,
+                                      @PathVariable @ObjectIdConstraint ObjectId areaId,
+                                      @PathVariable @ObjectIdConstraint ObjectId userId
+    ) {
+        membersServiceInArea.removeEquipmentManager(getId(request), areaId, userId);
+    }
+
+    @GetMapping(value = "getEquipmentManagers/{areaId}")
+    @ResponseBody
+    @Operation(summary = "گرفتن مسئولین انبار در منطقه توسط مسئول منطفه")
+    public ResponseEntity<List<User>> getEquipmentManagers(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId
+    ) {
+        return membersServiceInArea.getEquipmentManagers(getId(request), areaId);
+    }
+
     @PutMapping(value = "addLaboratoryManager/{areaId}")
     @ResponseBody
     @Operation(
