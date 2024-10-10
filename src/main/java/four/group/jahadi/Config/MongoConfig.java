@@ -33,8 +33,4 @@ public class MongoConfig extends AbstractMongoClientConfiguration {
     protected String getDatabaseName() {
         return databaseName;
     }
-
-    public MongoClient getMongoClient() {
-        return mongoClient();
-    }
 }

@@ -54,8 +54,8 @@ public class DrugServiceInArea {
 
     // ###################### GROUP ACCESS #######################
 
-//    @Transactional
-//    synchronized
+    @Transactional
+    synchronized
     public void addAllToDrugsList(
             ObjectId userId, ObjectId groupId,
             String username, ObjectId areaId, List<AreaDrugsData> dtoList,

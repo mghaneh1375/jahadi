@@ -15,7 +15,7 @@ public class Jobs {
     @Autowired
     ActivationRepository activationRepository;
 
-    @Scheduled(fixedRate = 600000)
+    @Scheduled(fixedRate = 600000, initialDelay = 5000)
     public void scheduleFixedRateTask() {
         activationRepository.deleteExpired(System.currentTimeMillis() - SMS_RESEND_MSEC);
     }

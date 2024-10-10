@@ -1,6 +1,7 @@
 package four.group.jahadi.Service;
 
 import four.group.jahadi.DTO.Area.AreaEquipmentsData;
+import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Exception.NotAccessException;
 import four.group.jahadi.Models.Area.Area;
 import four.group.jahadi.Models.Area.AreaEquipments;
@@ -8,10 +9,12 @@ import four.group.jahadi.Models.Equipment;
 import four.group.jahadi.Models.EquipmentLog;
 import four.group.jahadi.Models.Trip;
 import four.group.jahadi.Repository.Area.EquipmentsInAreaRepository;
+import four.group.jahadi.Repository.Area.impl.EquipmentsInAreaRepositoryImp;
 import four.group.jahadi.Repository.EquipmentLogRepository;
 import four.group.jahadi.Repository.EquipmentRepository;
 import four.group.jahadi.Repository.TripRepository;
 import four.group.jahadi.Repository.WareHouseAccessForGroupRepository;
+import four.group.jahadi.Service.Area.AreaUtils;
 import four.group.jahadi.Utility.PairValue;
 import four.group.jahadi.Utility.Utility;
 import org.bson.types.ObjectId;
@@ -39,6 +42,8 @@ public class EquipmentServiceInArea {
     private EquipmentRepository equipmentRepository;
     @Autowired
     private EquipmentLogRepository equipmentLogRepository;
+    @Autowired
+    private EquipmentsInAreaRepositoryImp equipmentsInAreaRepositoryImp;
 
     private PairValue checkAccess(ObjectId userId, ObjectId areaId) {
         Trip trip = tripRepository.findActiveByAreaIdAndEquipmentManager(areaId, userId, Utility.getCurrDate())
@@ -252,5 +257,20 @@ public class EquipmentServiceInArea {
                         groupId, userId
                 ), HttpStatus.OK
         );
+    }
+
+    synchronized
+    public void countDownEquipment(
+            ObjectId userId, ObjectId areaId,
+            ObjectId equipmentId, int count
+    ) {
+        Trip trip = tripRepository.findActiveByAreaIdAndEquipmentManager(
+                areaId, userId, Utility.getCurrDate()
+        ).orElseThrow(InvalidIdException::new);
+        AreaUtils.findStartedArea(trip, areaId);
+
+        AreaEquipments areaEquipments = equipmentsInAreaRepositoryImp.countDown(areaId, equipmentId, count);
+        if(areaEquipments == null)
+            throw new NotAccessException();
     }
 }
