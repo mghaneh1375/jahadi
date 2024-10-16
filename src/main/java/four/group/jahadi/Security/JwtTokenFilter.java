@@ -14,7 +14,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import static four.group.jahadi.Utility.StaticValues.TOKEN_EXPIRATION;
 
@@ -24,33 +23,10 @@ import static four.group.jahadi.Utility.StaticValues.TOKEN_EXPIRATION;
 public class JwtTokenFilter extends OncePerRequestFilter {
     public static final ArrayList<PairValue> blackListTokens = new ArrayList<>();
 
-    public class ValidateToken {
-
-        String token;
-        long issue;
-
-        ValidateToken(String token) {
-            this.token = token;
-            this.issue = System.currentTimeMillis();
-        }
-
-        public boolean isValidateYet() {
-            return System.currentTimeMillis() - issue <= TOKEN_EXPIRATION; // 1 week
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (o instanceof String)
-                return o.equals(token);
-            return false;
-        }
-    }
-
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
     public static void removeTokenFromCache(String token) {
-
         blackListTokens.add(new PairValue(token, TOKEN_EXPIRATION + System.currentTimeMillis()));
     }
 
@@ -71,7 +47,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         }
 
         try {
-            if (token != null && jwtTokenProvider.validateAuthToken(token)) {
+            if (token != null) {
                 Authentication auth = jwtTokenProvider.getAuthentication(token);
                 SecurityContextHolder.getContext().setAuthentication(auth);
                 return true;

@@ -3,6 +3,7 @@ package four.group.jahadi.Service.Area;
 import four.group.jahadi.DTO.Area.AdviceDrugData;
 import four.group.jahadi.DTO.Area.AreaDrugsData;
 import four.group.jahadi.DTO.Area.GiveDrugData;
+import four.group.jahadi.DTO.Patient.PatientAdvices;
 import four.group.jahadi.Enums.Module.DeliveryStatus;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Exception.NotAccessException;
@@ -54,7 +55,7 @@ public class DrugServiceInArea {
 
     // ###################### GROUP ACCESS #######################
 
-    @Transactional
+//    @Transactional
     synchronized
     public void addAllToDrugsList(
             ObjectId userId, ObjectId groupId,
@@ -140,7 +141,7 @@ public class DrugServiceInArea {
         drugsInAreaRepository.saveAll(drugsInAreaList);
     }
 
-    @Transactional
+//    @Transactional
     synchronized
     public void removeAllFromDrugsList(
             ObjectId userId, ObjectId groupId,
@@ -331,7 +332,7 @@ public class DrugServiceInArea {
         });
     }
 
-    @Transactional
+//    @Transactional
     synchronized
     public void giveDrug(
             ObjectId userId, ObjectId areaId,
@@ -397,7 +398,7 @@ public class DrugServiceInArea {
         }
     }
 
-    public ResponseEntity<List<PatientDrug>> listOfAdvices(
+    public ResponseEntity<List<PatientAdvices>> listOfAdvices(
             ObjectId userId, ObjectId areaId,
             ObjectId patientId, ObjectId moduleId,
             ObjectId doctorId, DeliveryStatus deliveryStatus,
@@ -407,6 +408,7 @@ public class DrugServiceInArea {
             ObjectId giverId, Integer pageNo
     ) {
         Trip trip;
+        List<PatientAdvices> output = new ArrayList<>();
 
         if (patientId == null) {
             trip = tripRepository.findActiveByAreaIdAndPharmacyManager(
@@ -439,13 +441,14 @@ public class DrugServiceInArea {
                     patientsDrugs.stream().map(PatientDrug::getPatientId)
                             .distinct().collect(Collectors.toList())
             );
-            patientsDrugs.forEach(patientDrug -> patients.stream()
-                    .filter(patient -> patient.getId().equals(patientDrug.getPatientId()))
+            patients.forEach(patient -> output.add(PatientAdvices.builder().patient(patient).drugs(new ArrayList<>()).build()));
+            patientsDrugs.forEach(patientDrug -> output.stream()
+                    .filter(patientAdvices -> patientAdvices.getPatient().getId().equals(patientDrug.getPatientId()))
                     .findFirst()
-                    .ifPresent(patientDrug::setPatient));
+                    .ifPresent(patientAdvices -> patientAdvices.addToDrugList(patientDrug)));
         }
 
-        return new ResponseEntity<>(patientsDrugs, HttpStatus.OK);
+        return new ResponseEntity<>(output, HttpStatus.OK);
     }
 
     public ResponseEntity<PatientDrug> getAdviceDetail(
@@ -466,7 +469,7 @@ public class DrugServiceInArea {
         return new ResponseEntity<>(patientDrug, HttpStatus.OK);
     }
 
-    @Transactional
+//    @Transactional
     public void returnAllDrugs(ObjectId userId, String username, ObjectId areaId) {
         PairValue p = checkAccess(userId, areaId);
         Area foundArea = (Area) p.getKey();

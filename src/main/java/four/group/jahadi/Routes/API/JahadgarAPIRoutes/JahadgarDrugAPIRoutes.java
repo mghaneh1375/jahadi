@@ -4,6 +4,7 @@ import four.group.jahadi.DTO.Area.AdviceDrugData;
 import four.group.jahadi.DTO.Area.AreaDrugsData;
 import four.group.jahadi.DTO.Area.GiveDrugData;
 import four.group.jahadi.DTO.DrugBookmarkData;
+import four.group.jahadi.DTO.Patient.PatientAdvices;
 import four.group.jahadi.Enums.Module.DeliveryStatus;
 import four.group.jahadi.Models.DrugBookmark;
 import four.group.jahadi.Models.PatientDrug;
@@ -109,7 +110,7 @@ public class JahadgarDrugAPIRoutes extends Router {
     @GetMapping(value = "listOfAdvices/{areaId}/{patientId}")
     @ResponseBody
     @Operation(summary = "گرفتن لیست داروهای تجویز شده توسط دکتر")
-    public ResponseEntity<List<PatientDrug>> listOfAdvices(
+    public ResponseEntity<List<PatientAdvices>> listOfAdvices(
             HttpServletRequest request,
             @PathVariable @ObjectIdConstraint ObjectId areaId,
             @PathVariable @ObjectIdConstraint ObjectId patientId,
@@ -128,7 +129,7 @@ public class JahadgarDrugAPIRoutes extends Router {
     @GetMapping(value = "listOfAdvices/{areaId}")
     @ResponseBody
     @Operation(summary = "گرفتن لیست داروهای تجویز شده توسط مسئول داروخانه")
-    public ResponseEntity<List<PatientDrug>> listOfAdvices(
+    public ResponseEntity<List<PatientAdvices>> listOfAdvices(
             HttpServletRequest request,
             @PathVariable @ObjectIdConstraint ObjectId areaId,
             @RequestParam(value = "patientId", required = false) ObjectId patientId,

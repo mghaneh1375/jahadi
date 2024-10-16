@@ -7,6 +7,7 @@ import four.group.jahadi.Models.TokenInfo;
 import four.group.jahadi.Models.User;
 import four.group.jahadi.Security.JwtTokenFilter;
 import four.group.jahadi.Security.JwtTokenProvider;
+import four.group.jahadi.Security.MyUserDetails;
 import four.group.jahadi.Service.UserService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -24,7 +25,7 @@ public class Router {
     private JwtTokenFilter jwtTokenFilter;
 
     @Autowired
-    private JwtTokenProvider jwtTokenProvider;
+    private MyUserDetails myUserDetails;
 
     protected ObjectId getGroup(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
@@ -35,7 +36,7 @@ public class Router {
             Claims claims;
             try {
                 claims = Jwts.parser()
-                        .setSigningKey(jwtTokenProvider.getSharedKeyBytes())
+                        .setSigningKey(myUserDetails.getSharedKeyBytes())
                         .parseClaimsJws(token)
                         .getBody();
 
@@ -55,7 +56,7 @@ public class Router {
             Claims claims;
             try {
                 claims = Jwts.parser()
-                        .setSigningKey(jwtTokenProvider.getSharedKeyBytes())
+                        .setSigningKey(myUserDetails.getSharedKeyBytes())
                         .parseClaimsJws(token)
                         .getBody();
 
@@ -78,7 +79,7 @@ public class Router {
 
             try {
                 claims = Jwts.parser()
-                        .setSigningKey(jwtTokenProvider.getSharedKeyBytes())
+                        .setSigningKey(myUserDetails.getSharedKeyBytes())
                         .parseClaimsJws(token)
                         .getBody();
 

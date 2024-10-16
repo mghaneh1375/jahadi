@@ -5,6 +5,7 @@ spring:
       port: 27017
       database: 'jahadi'
       auto-index-creation: true
+#      uri: 'mongodb://localhost:27017,localhost:27020/jahadi?ReadPreference=primary&w=majority'
   jackson:
     deserialization:
       fail-on-unknown-properties: false
@@ -29,3 +30,7 @@ logging:
           mongodb:
             core:
               MongoTemplate: 'DEBUG'
+token:
+  secret:
+    key:
+      custom: 'D/RG6sq9~=payYb8df:@h'

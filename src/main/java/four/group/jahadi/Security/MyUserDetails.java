@@ -1,53 +1,55 @@
 package four.group.jahadi.Security;
 
-import four.group.jahadi.Models.User;
-import four.group.jahadi.Repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import four.group.jahadi.Enums.Access;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.Base64;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.Optional;
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
 public class MyUserDetails implements UserDetailsService {
 
-    private static HashMap<String, User> cached = new HashMap<>();
+    @Value("${token.secret.key.custom}")
+    private String secretKey;
 
-    @Autowired
-    private UserRepository userRepository;
+    private static String sharedKeyBytes = null;
+
+    public String getSharedKeyBytes() {
+        if(sharedKeyBytes == null)
+            sharedKeyBytes = Base64.getEncoder().encodeToString(secretKey.getBytes());
+
+        return sharedKeyBytes;
+    }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-
-        User user;
-
-//        user = cached.get(username);
-//        if(user == null) {
-
-            Optional<User> u = userRepository.findByNID(username);
-
-            if (u.isEmpty())
-                throw new UsernameNotFoundException("User '" + username + "' not found");
-//            else
-//                cached.put(username, u.get());
-
-            user = u.get();
-//        }
-
-        return org.springframework.security.core.userdetails.User
-                .withUsername(username)
-                .authorities(user.getAccesses())
-                .password(user.getPassword())
-                .accountExpired(false)
-                .accountLocked(false)
-                .credentialsExpired(false)
-                .disabled(false)
-                .build();
-
+    public UserDetails loadUserByUsername(String token) throws UsernameNotFoundException {
+        try {
+            Claims claims = Jwts.parser().setSigningKey(getSharedKeyBytes()).parseClaimsJws(token).getBody();
+            String username = claims.getSubject();
+            return org.springframework.security.core.userdetails.User
+                    .withUsername(username)
+                    .authorities((Collection<? extends GrantedAuthority>) claims.get("roles", List.class).stream().map(o -> Access.valueOf(((HashMap<?, ?>) o).get("authority").toString())).collect(Collectors.toList()))
+                    .password("")
+                    .accountExpired(false)
+                    .accountLocked(false)
+                    .credentialsExpired(false)
+                    .disabled(false)
+                    .build();
+        }
+        catch (Exception x) {
+            throw new UsernameNotFoundException("token is not valid");
+        }
     }
 
 }

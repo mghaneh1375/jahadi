@@ -34,6 +34,7 @@ public interface PatientsDrugRepository extends MongoRepository<PatientDrug, Obj
             "{ $project: {areaId: 0, doctorId: 0, giverId: 0, moduleId: 0, drugId: 0, description: 0, giveDescription: 0, givenDrugId: 0} }",
             "{ $skip: ?13 }",
             "{ $limit: ?14 }",
+//            "{ $: ?14 }",
     })
     List<PatientDrug> findByFilters(
             ObjectId areaId, ObjectId patientId,

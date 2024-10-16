@@ -135,7 +135,7 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
         projectRepository.save(project);
     }
 
-    @Transactional
+//    @Transactional
     public void remove(ObjectId id) {
 
         Project project = projectRepository.findById(id).orElseThrow(InvalidIdException::new);

@@ -11,6 +11,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.util.Date;
+import java.util.Objects;
 
 @Getter
 @Setter
@@ -50,4 +51,34 @@ public class Patient extends Model {
 
     @Field("patient_no")
     private String patientNo;
+
+    @Override
+    public String toString() {
+        return "Patient{" +
+                "name='" + name + '\'' +
+                ", fatherName='" + fatherName + '\'' +
+                ", sex=" + sex +
+                ", birthDate=" + birthDate +
+                ", phone='" + phone + '\'' +
+                ", identifier='" + identifier + '\'' +
+                ", identifierType=" + identifierType +
+                ", insurance=" + insurance +
+                ", ageType=" + ageType +
+                ", job='" + job + '\'' +
+                ", patientNo='" + patientNo + '\'' +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Patient patient = (Patient) o;
+        return Objects.equals(name, patient.name) && Objects.equals(fatherName, patient.fatherName) && sex == patient.sex && Objects.equals(birthDate, patient.birthDate) && Objects.equals(phone, patient.phone) && Objects.equals(identifier, patient.identifier) && identifierType == patient.identifierType && insurance == patient.insurance && ageType == patient.ageType && Objects.equals(job, patient.job) && Objects.equals(patientNo, patient.patientNo);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, fatherName, sex, birthDate, phone, identifier, identifierType, insurance, ageType, job, patientNo);
+    }
 }

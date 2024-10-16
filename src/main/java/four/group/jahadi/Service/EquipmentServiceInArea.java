@@ -61,7 +61,7 @@ public class EquipmentServiceInArea {
         return new PairValue(foundArea, trip.getName());
     }
 
-    @Transactional
+//    @Transactional
     synchronized
     public void addAllEquipmentsToArea(
             ObjectId userId, ObjectId groupId,
@@ -149,7 +149,7 @@ public class EquipmentServiceInArea {
         equipmentsInAreaRepository.saveAll(tmp);
     }
 
-    @Transactional
+//    @Transactional
     synchronized
     public void removeAllFromEquipmentsList(
             ObjectId userId, ObjectId groupId,
@@ -198,7 +198,7 @@ public class EquipmentServiceInArea {
         equipmentLogRepository.saveAll(equipmentLogs);
     }
 
-    @Transactional
+//    @Transactional
     synchronized
     public void returnAllEquipments(ObjectId userId, String username, ObjectId areaId) {
         PairValue p = checkAccess(userId, areaId);
