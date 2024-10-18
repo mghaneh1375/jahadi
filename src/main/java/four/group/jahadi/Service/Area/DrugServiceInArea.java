@@ -420,7 +420,6 @@ public class DrugServiceInArea {
             ).orElseThrow(NotAccessException::new);
         }
         AreaUtils.findStartedArea(trip, areaId);
-
         List<PatientDrug> patientsDrugs = patientsDrugRepository.findByFilters(
                 areaId, patientId, moduleId,
                 doctorId,
@@ -436,17 +435,15 @@ public class DrugServiceInArea {
                         ? PAGE_SIZE
                         : 100
         );
-        if (patientId == null) {
-            List<Patient> patients = patientRepository.findPublicInfoByIdIn(
-                    patientsDrugs.stream().map(PatientDrug::getPatientId)
-                            .distinct().collect(Collectors.toList())
-            );
-            patients.forEach(patient -> output.add(PatientAdvices.builder().patient(patient).drugs(new ArrayList<>()).build()));
-            patientsDrugs.forEach(patientDrug -> output.stream()
-                    .filter(patientAdvices -> patientAdvices.getPatient().getId().equals(patientDrug.getPatientId()))
-                    .findFirst()
-                    .ifPresent(patientAdvices -> patientAdvices.addToDrugList(patientDrug)));
-        }
+        List<Patient> patients = patientRepository.findPublicInfoByIdIn(
+                patientsDrugs.stream().map(PatientDrug::getPatientId)
+                        .distinct().collect(Collectors.toList())
+        );
+        patients.forEach(patient -> output.add(PatientAdvices.builder().patient(patient).drugs(new ArrayList<>()).build()));
+        patientsDrugs.forEach(patientDrug -> output.stream()
+                .filter(patientAdvices -> patientAdvices.getPatient().getId().equals(patientDrug.getPatientId()))
+                .findFirst()
+                .ifPresent(patientAdvices -> patientAdvices.addToDrugList(patientDrug)));
 
         return new ResponseEntity<>(output, HttpStatus.OK);
     }
