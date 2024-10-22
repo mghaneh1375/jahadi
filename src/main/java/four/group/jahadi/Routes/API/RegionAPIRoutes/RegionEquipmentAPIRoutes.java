@@ -1,6 +1,7 @@
 package four.group.jahadi.Routes.API.RegionAPIRoutes;
 
 import four.group.jahadi.Models.Area.AreaEquipments;
+import four.group.jahadi.Models.Area.JoinedAreaEquipments;
 import four.group.jahadi.Models.TokenInfo;
 import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Service.EquipmentServiceInArea;
@@ -27,7 +28,7 @@ public class RegionEquipmentAPIRoutes extends Router {
     @GetMapping(value = "list/{areaId}")
     @ResponseBody
     @Operation(summary = "تجهیزات موجود در منطقه")
-    public ResponseEntity<List<AreaEquipments>> list(
+    public ResponseEntity<List<JoinedAreaEquipments>> list(
             HttpServletRequest request,
             @PathVariable @ObjectIdConstraint ObjectId areaId
     ) {

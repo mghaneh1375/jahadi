@@ -5,6 +5,7 @@ import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Exception.NotAccessException;
 import four.group.jahadi.Models.Area.Area;
 import four.group.jahadi.Models.Area.AreaEquipments;
+import four.group.jahadi.Models.Area.JoinedAreaEquipments;
 import four.group.jahadi.Models.Equipment;
 import four.group.jahadi.Models.EquipmentLog;
 import four.group.jahadi.Models.Trip;
@@ -240,7 +241,7 @@ public class EquipmentServiceInArea {
         equipmentsInAreaRepository.saveAll(areaEquipments);
     }
 
-    public ResponseEntity<List<AreaEquipments>> list(ObjectId userId, ObjectId areaId) {
+    public ResponseEntity<List<JoinedAreaEquipments>> list(ObjectId userId, ObjectId areaId) {
 
         tripRepository.findActiveByAreaIdAndEquipmentManager(areaId, userId, Utility.getCurrDate())
                 .orElseThrow(NotAccessException::new);

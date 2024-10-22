@@ -256,7 +256,7 @@ public class DrugServiceInArea {
     private boolean lock(ObjectId areaDrugId) {
         if(locks.contains(areaDrugId)) {
             int retry = 0;
-            while (retry < 10) {
+            while (retry < 10 && locks.contains(areaDrugId)) {
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
@@ -267,6 +267,7 @@ public class DrugServiceInArea {
             if(locks.contains(areaDrugId))
                 throw new RuntimeException("Lock exception");
 
+            // unlocked by wait a few seconds, so reFetch from db
             return true;
         }
         return false;
@@ -366,34 +367,34 @@ public class DrugServiceInArea {
 
         ObjectId drugId = data.getDrugId() != null && !data.getDrugId().equals(patientDrug.getDrugId()) ?
                 data.getDrugId() : patientDrug.getDrugId();
-        AreaDrugs areaDrugs = drugsInAreaRepository.findByAreaIdAndDrugId(areaId, drugId)
+        AreaDrugs areaDrug = drugsInAreaRepository.findByAreaIdAndDrugId(areaId, drugId)
                 .orElseThrow(() -> {
                     throw new RuntimeException("unknown exception");
                 });
-        if(lock(areaDrugs.getId()))
-            areaDrugs = drugsInAreaRepository.findById(areaDrugs.getId()).get();
+        if(lock(areaDrug.getId()))
+            areaDrug = drugsInAreaRepository.findById(areaDrug.getId()).get();
 
         try {
-            if (areaDrugs.getReminder() - diff < 0)
-                throw new RuntimeException("مقدار موجودی در انبار " + areaDrugs.getReminder() + " می باشد");
+            if (areaDrug.getReminder() - diff < 0)
+                throw new RuntimeException("مقدار موجودی در انبار " + areaDrug.getReminder() + " می باشد");
 
+            locks.add(areaDrug.getId());
             patientDrug.setGiveCount(data.getAmount());
             patientDrug.setGiverId(userId);
             patientDrug.setGiveDescription(data.getDescription());
 
-
             if (!drugId.equals(patientDrug.getDrugId())) {
                 patientDrug.setGivenDrugId(drugId);
-                patientDrug.setGivenDrugName(areaDrugs.getDrugName());
+                patientDrug.setGivenDrugName(areaDrug.getDrugName());
             }
 
-            areaDrugs.setReminder(areaDrugs.getReminder() - diff);
-            drugsInAreaRepository.save(areaDrugs);
+            areaDrug.setReminder(areaDrug.getReminder() - diff);
+            drugsInAreaRepository.save(areaDrug);
             patientsDrugRepository.save(patientDrug);
-            locks.remove(areaDrugs.getId());
+            locks.remove(areaDrug.getId());
         }
         catch (Exception x) {
-            locks.remove(areaDrugs.getId());
+            locks.remove(areaDrug.getId());
             throw x;
         }
     }

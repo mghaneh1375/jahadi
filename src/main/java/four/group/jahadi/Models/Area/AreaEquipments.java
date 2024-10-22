@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import four.group.jahadi.Models.DateSerialization;
 import four.group.jahadi.Models.Model;
+import four.group.jahadi.Models.ObjectIdSerialization;
 import lombok.*;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.CreatedDate;
@@ -25,6 +26,7 @@ public class AreaEquipments extends Model {
     private String equipmentName;
 
     @Field("equipment_id")
+    @JsonSerialize(using = ObjectIdSerialization.class)
     private ObjectId equipmentId;
 
     @Field("area_id")
