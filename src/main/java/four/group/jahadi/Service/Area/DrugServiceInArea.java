@@ -4,6 +4,7 @@ import four.group.jahadi.DTO.Area.AdviceDrugData;
 import four.group.jahadi.DTO.Area.AreaDrugsData;
 import four.group.jahadi.DTO.Area.GiveDrugData;
 import four.group.jahadi.DTO.Patient.PatientAdvices;
+import four.group.jahadi.Enums.Drug.UseTime;
 import four.group.jahadi.Enums.Module.DeliveryStatus;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Exception.NotAccessException;
@@ -311,8 +312,8 @@ public class DrugServiceInArea {
                             .moduleId(moduleId)
                             .moduleName(moduleInArea.getModuleName())
                             .suggestCount(data.getAmount())
-                            .amountOfUses(data.getAmountOfUse())
-                            .howToUses(data.getHowToUse())
+                            .amountOfUse(data.getAmountOfUse())
+                            .howToUse(data.getHowToUse())
                             .useTime(data.getUseTime())
                             .description(data.getDescription())
                             .build()
@@ -464,6 +465,9 @@ public class DrugServiceInArea {
             userRepository.findById(patientDrug.getGiverId())
                     .ifPresent(user -> patientDrug.setGiver(user.getName()));
         }
+        patientDrug.setUseTimeFa(patientDrug.getUseTime().getFaTranslate());
+        patientDrug.setAmountOfUseFa(patientDrug.getAmountOfUse().getFaTranslate());
+        patientDrug.setHowToUseFa(patientDrug.getHowToUse().getFaTranslate());
         return new ResponseEntity<>(patientDrug, HttpStatus.OK);
     }
 

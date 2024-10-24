@@ -53,9 +53,9 @@ public class PatientDrug extends Model {
     private Integer giveCount;
     private boolean dedicated = false;
     @Field("how_to_use")
-    private HowToUse howToUses;
+    private HowToUse howToUse;
     @Field("amount_of_use")
-    private AmountOfUse amountOfUses;
+    private AmountOfUse amountOfUse;
     @Field("use_time")
     private UseTime useTime;
     @Field("give_at")
@@ -82,4 +82,13 @@ public class PatientDrug extends Model {
     @Transient
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     private String giver;
+    @Transient
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    private String howToUseFa;
+    @Transient
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    private String amountOfUseFa;
+    @Transient
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    private String useTimeFa;
 }

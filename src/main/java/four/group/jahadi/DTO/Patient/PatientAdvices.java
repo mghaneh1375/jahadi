@@ -12,7 +12,10 @@ import java.util.List;
 public class PatientAdvices {
     private Patient patient;
     private List<PatientDrug> drugs;
-    public void addToDrugList(PatientDrug drug) {
-        drugs.add(drug);
+    public void addToDrugList(PatientDrug patientDrug) {
+        patientDrug.setUseTimeFa(patientDrug.getUseTime().getFaTranslate());
+        patientDrug.setAmountOfUseFa(patientDrug.getAmountOfUse().getFaTranslate());
+        patientDrug.setHowToUseFa(patientDrug.getHowToUse().getFaTranslate());
+        drugs.add(patientDrug);
     }
 }
