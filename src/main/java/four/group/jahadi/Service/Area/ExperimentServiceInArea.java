@@ -76,8 +76,24 @@ public class ExperimentServiceInArea {
             ObjectId moduleId, ObjectId patientId,
             ExperimentalFormDTO dto
     ) {
-        PatientsInArea wantedPatient = hasAccess(userId, areaId, moduleId, patientId);
-        PatientReferral wantedPatientReferral = wantedPatient.getReferrals().stream()
+        Trip trip = tripRepository.findByAreaIdAndResponsibleId(areaId, userId)
+                .orElseThrow(NotAccessException::new);
+
+        Area startedArea = findStartedArea(trip, areaId);
+        findModule(
+                startedArea, moduleId,
+                startedArea.getOwnerId().equals(userId) ? null : userId,
+                null
+        );
+        Module module = moduleRepository.findById(moduleId).get();
+        if (!module.isCanSuggestExperiment())
+            throw new NotAccessException();
+
+        PatientsInArea wantedPatient = patientsInAreaRepository.findByAreaIdAndPatientId(areaId, patientId)
+                .orElseThrow(InvalidIdException::new);
+
+        List<PatientReferral> referrals = wantedPatient.getReferrals();
+        PatientReferral wantedPatientReferral = referrals.stream()
                 .filter(patientReferral -> patientReferral.getModuleId().equals(moduleId))
                 .reduce((first, second) -> second)
                 .orElseThrow(InvalidIdException::new);
@@ -94,6 +110,20 @@ public class ExperimentServiceInArea {
                 .build().createId()
         );
         wantedPatientReferral.setExperiments(experiments);
+
+        startedArea
+                .getModules()
+                .stream()
+                .filter(module1 -> module1.getModuleTabName().equals("آزمایشگاه"))
+                .forEach(module1 -> referrals.add(
+                        (PatientReferral) PatientReferral
+                                .builder()
+                                .moduleId(module1.getId())
+                                .desc(dto.getDescription())
+                                .referBy(userId)
+                                .build().createId()
+                ));
+
         patientsInAreaRepository.save(wantedPatient);
     }
 
@@ -129,7 +159,7 @@ public class ExperimentServiceInArea {
                 .reduce((first, second) -> second)
                 .orElseThrow(InvalidIdException::new);
 
-        if(wantedPatientReferral.getExperiments() != null) {
+        if (wantedPatientReferral.getExperiments() != null) {
             List<User> doctors = userRepository.findByIdsIn(
                     wantedPatientReferral.getExperiments()
                             .stream().map(PatientExperiment::getDoctorId)
@@ -161,7 +191,7 @@ public class ExperimentServiceInArea {
         List<PatientExperiment> experiments = new ArrayList<>();
         patientsInAreaRepository.findByAreaIdAndPatientId(areaId, patientId)
                 .ifPresent(wantedPatient -> {
-                    if(wantedPatient.getReferrals() == null)
+                    if (wantedPatient.getReferrals() == null)
                         return;
 
                     List<User> doctors = userRepository.findByIdsIn(
@@ -175,7 +205,7 @@ public class ExperimentServiceInArea {
                     );
 
                     wantedPatient.getReferrals().forEach(patientReferral -> {
-                        if(patientReferral.getExperiments() == null)
+                        if (patientReferral.getExperiments() == null)
                             return;
 
                         area.getModules()

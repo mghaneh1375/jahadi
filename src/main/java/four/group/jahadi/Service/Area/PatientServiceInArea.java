@@ -34,7 +34,6 @@ import java.util.stream.Collectors;
 
 import static four.group.jahadi.Service.Area.AreaUtils.findModule;
 import static four.group.jahadi.Service.Area.AreaUtils.findStartedArea;
-import static four.group.jahadi.Service.UserService.PICS_FOLDER;
 import static four.group.jahadi.Utility.FileUtils.*;
 import static four.group.jahadi.Utility.StaticValues.ONE_MB;
 
@@ -221,7 +220,7 @@ public class PatientServiceInArea {
         return new ResponseEntity<>(patient, HttpStatus.OK);
     }
 
-    private List<PatientReferral> doAddReferral(
+    public List<PatientReferral> doAddReferral(
             List<PatientReferral> referrals,
             ObjectId moduleId,
             boolean addDuplicate,

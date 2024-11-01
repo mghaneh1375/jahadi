@@ -41,7 +41,7 @@ public class RegionExperimentAPIRoutes extends Router {
             @PathVariable @ObjectIdConstraint ObjectId moduleId,
             @PathVariable @ObjectIdConstraint ObjectId patientId,
             @RequestBody @Valid ExperimentalFormDTO dto
-            ) {
+    ) {
         experimentServiceInArea.suggest(
                 getId(request), areaId, moduleId, patientId, dto
         );
