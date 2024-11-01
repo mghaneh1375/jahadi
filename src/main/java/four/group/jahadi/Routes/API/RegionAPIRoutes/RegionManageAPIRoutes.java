@@ -33,7 +33,7 @@ public class RegionManageAPIRoutes extends Router {
     @ResponseBody
     @Operation(summary = "گرفتن لیستی از مناطقی که من مسئول منطفه آنها هستم که هنوز تموم نشده اند")
     public ResponseEntity<List<Trip>> myCartableAreas(HttpServletRequest request) {
-        return areaService.myCartableList(getId(request));
+        return areaService.myCartableList(getId(request), true);
     }
 
     @GetMapping(value = "dashboard/{areaId}")

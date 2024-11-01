@@ -118,8 +118,8 @@ public class Area {
     @Field("pharmacy_managers")
     private List<ObjectId> pharmacyManagers = new ArrayList<>();
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonSerialize(using = ObjectIdListSerialization.class)
+    @JsonInclude(value = JsonInclude.Include.NON_NULL)
     @Builder.Default
     @Field("equipment_managers")
     private List<ObjectId> equipmentManagers = new ArrayList<>();

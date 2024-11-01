@@ -52,6 +52,7 @@ public class General {
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("دیابت ملیتوس (DM)")
                                                         .answerType(AnswerType.TICK)
+                                                        .required(false)
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
@@ -59,6 +60,7 @@ public class General {
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("پرفشاری خون (HTN)")
                                                         .answerType(AnswerType.TICK)
+                                                        .required(false)
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
@@ -66,6 +68,7 @@ public class General {
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("مشکل تیروئید")
                                                         .answerType(AnswerType.TICK)
+                                                        .required(false)
                                                         .build()
                                         ))
                                         .build(),
@@ -73,73 +76,73 @@ public class General {
                                         .builder()
                                         .id(new ObjectId())
                                         .questionType(QuestionType.SIMPLE)
-                                        .required(true)
+                                        .required(false)
                                         .question("قند خون ناشتا (FBS)")
                                         .answerType(AnswerType.NUMBER)
-                                        .canWriteDesc(true)
+//                                        .canWriteDesc(true)
                                         .build(),
                                 SimpleQuestion
                                         .builder()
                                         .id(new ObjectId())
                                         .questionType(QuestionType.SIMPLE)
-                                        .required(true)
+                                        .required(false)
                                         .question("قند خون غیرناشتا (BS)")
                                         .answerType(AnswerType.NUMBER)
-                                        .canWriteDesc(true)
+//                                        .canWriteDesc(true)
                                         .build(),
                                 SimpleQuestion
                                         .builder()
                                         .id(new ObjectId())
                                         .questionType(QuestionType.SIMPLE)
-                                        .required(true)
+                                        .required(false)
                                         .question("فشار خون (BP)")
                                         .answerType(AnswerType.NUMBER)
-                                        .canWriteDesc(true)
+//                                        .canWriteDesc(true)
                                         .build(),
                                 SimpleQuestion
                                         .builder()
                                         .id(new ObjectId())
                                         .questionType(QuestionType.SIMPLE)
-                                        .required(true)
+                                        .required(false)
                                         .question("فشار خون اول (First BP)")
                                         .answerType(AnswerType.NUMBER)
-                                        .canWriteDesc(true)
+//                                        .canWriteDesc(true)
                                         .build(),
                                 SimpleQuestion
                                         .builder()
                                         .id(new ObjectId())
                                         .questionType(QuestionType.SIMPLE)
-                                        .required(true)
+                                        .required(false)
                                         .question("دارو (Medicine)")
                                         .answerType(AnswerType.TEXT)
-                                        .canWriteDesc(true)
+//                                        .canWriteDesc(true)
                                         .build(),
                                 SimpleQuestion
                                         .builder()
                                         .id(new ObjectId())
                                         .questionType(QuestionType.SIMPLE)
-                                        .required(true)
+                                        .required(false)
                                         .question("فشار خون دوم (Second BP)")
                                         .answerType(AnswerType.NUMBER)
-                                        .canWriteDesc(true)
+//                                        .canWriteDesc(true)
                                         .build(),
                                 SimpleQuestion
                                         .builder()
                                         .id(new ObjectId())
                                         .questionType(QuestionType.SIMPLE)
-                                        .required(true)
+                                        .required(false)
                                         .question("دارو بار دوم (Medicine 2)")
                                         .answerType(AnswerType.TEXT)
-                                        .canWriteDesc(true)
+//                                        .canWriteDesc(true)
                                         .build(),
                                 SimpleQuestion
                                         .builder()
                                         .id(new ObjectId())
                                         .questionType(QuestionType.SIMPLE)
-                                        .required(true)
+                                        .required(false)
                                         .question("فشار خون سوم (Third BP)")
                                         .answerType(AnswerType.NUMBER)
-                                        .canWriteDesc(true)
+//                                        .canWriteDesc(true)
                                         .build(),
                                 SimpleQuestion
                                         .builder()

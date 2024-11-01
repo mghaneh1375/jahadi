@@ -13,6 +13,9 @@ import java.util.Optional;
 @Repository
 public interface TripRepository extends MongoRepository<Trip, ObjectId>, FilterableRepository<Trip> {
 
+    @Query(value = "{ $and: [{'groupsWithAccess.groupId': ?0}, {'startAt': {$lte: ?1}}, {'endAt': {$gte: ?1}}] }", fields = "{'name': 1, 'areas.name': 1, 'areas._id': 1}")
+    List<Trip> findActivesByGroupId(ObjectId groupId, Date curr);
+
     @Query(value = "{ 'groupsWithAccess.groupId': ?0 }", count = true)
     Integer countByGroupId(ObjectId groupId);
 
@@ -49,14 +52,27 @@ public interface TripRepository extends MongoRepository<Trip, ObjectId>, Filtera
     @Query(value = "{ 'areas': {$elemMatch: { 'startAt': {$gte: ?0}, 'id': ?1, 'ownerId': ?2 } } }")
     Optional<Trip> findNotStartedByAreaOwnerId(Date curr, ObjectId areaId, ObjectId areaOwnerId);
 
-    @Query(value = "{$and: [{'endAt': {$gte: ?0}}, {'areas.ownerId': ?1}]  }",
+    @Query(value = "{$and: [{'endAt': {$gte: ?0}}, {'areas.ownerId': ?1}] }",
             fields = "{'groupsWithAccess': false, 'projectId':  false, " +
                     "'createdAt':  false, 'areas.members': false, " +
                     "'areas.country': false, 'areas.city': false, " +
-                    "'areas.state': false, 'areas.lat': false, " +
-                    "'areas.lng': false, 'areas.dispatchers': false, 'areas.modules': false}"
+                    "'areas.state': false, 'areas.lat': false, 'areas.dates': false, " +
+                    "'areas.lng': false, 'areas.dispatchers': false, 'areas.modules': false, 'areas.experiments': false, " +
+                    "'areas.trainers': false, 'areas.insurancers': false, 'areas.pharmacyManagers': false, " +
+                    "'areas.equipmentManagers': false, 'areas.laboratoryManager': false } "
     )
     List<Trip> findNotFinishedByAreaOwnerId(Date curr, ObjectId areaOwnerId);
+
+    @Query(value = "{$and: [{'endAt': {$gte: ?0}}, {'areas.members': ?1}] }",
+            fields = "{'groupsWithAccess': false, 'projectId':  false, " +
+                    "'createdAt':  false, " +
+                    "'areas.cityId': false, 'areas.dates': false, " +
+                    "'areas.stateId': false, 'areas.experiments': false, " +
+                    "'areas.dispatchers': false, 'areas.modules': false, " +
+                    "'areas.trainers': false, 'areas.insurancers': false, 'areas.pharmacyManagers': false, " +
+                    "'areas.equipmentManagers': false, 'areas.laboratoryManager': false } "
+    )
+    List<Trip> findNotFinishedByMemberId(Date curr, ObjectId memberId);
 
     @Query(value = "{$and: [{'endAt': {$gte: ?0}}, {'areas.ownerId': ?1}]  }", exists = true)
     Boolean existNotFinishedByAreaOwnerId(Date curr, ObjectId areaOwnerId);

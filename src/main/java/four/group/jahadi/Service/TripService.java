@@ -20,8 +20,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static four.group.jahadi.Utility.Utility.getDate;
-import static four.group.jahadi.Utility.Utility.getLastDate;
+import static four.group.jahadi.Utility.Utility.*;
 
 @Service
 public class TripService extends AbstractService<Trip, TripStepData> {
@@ -84,6 +83,12 @@ public class TripService extends AbstractService<Trip, TripStepData> {
                 .findFirst().ifPresent(area::setOwner)));
 
         return new ResponseEntity<>(trips, HttpStatus.OK);
+    }
+
+    public ResponseEntity<List<Trip>> myActiveTrips(ObjectId groupId) {
+        return new ResponseEntity<>(tripRepository.findActivesByGroupId(
+                groupId, getCurrDate()
+        ), HttpStatus.OK);
     }
 
     public ResponseEntity<List<Trip>> inProgressTripsForGroupAccess(ObjectId groupId) {

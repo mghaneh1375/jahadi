@@ -42,6 +42,7 @@ public class Mama {
                                                 .questionType(QuestionType.SIMPLE)
                                                 .question("سابقه ابتلا به سرطان در فرد، سابقه ابتلا به سرطان پستان، رحم یا تخمدان در خانواده")
                                                 .answerType(AnswerType.TICK)
+                                                .required(false)
                                                 .build(),
                                         SimpleQuestion
                                                 .builder()
@@ -49,6 +50,7 @@ public class Mama {
                                                 .questionType(QuestionType.SIMPLE)
                                                 .question("داشتن علائم خطرناک ترشحات خونی، چرکی، شیر، وجود زخم و ...")
                                                 .answerType(AnswerType.TICK)
+                                                .required(false)
                                                 .build(),
                                         SimpleQuestion
                                                 .builder()
@@ -56,6 +58,7 @@ public class Mama {
                                                 .questionType(QuestionType.SIMPLE)
                                                 .question("احساس توده توسط فرد")
                                                 .answerType(AnswerType.TICK)
+                                                .required(false)
                                                 .build()
                                 ))
                                 .build(),
@@ -81,6 +84,7 @@ public class Mama {
                                                 .questionType(QuestionType.SIMPLE)
                                                 .question("منارک و اختلالات بلوغ زودرس و دیررس - سن یائسگی")
                                                 .answerType(AnswerType.TICK)
+                                                .required(false)
                                                 .build(),
                                         SimpleQuestion
                                                 .builder()
@@ -88,6 +92,7 @@ public class Mama {
                                                 .questionType(QuestionType.SIMPLE)
                                                 .question("نظم قاعدگی و بررسی الیگومنوره یا پلی منوره")
                                                 .answerType(AnswerType.TICK)
+                                                .required(false)
                                                 .build(),
                                         SimpleQuestion
                                                 .builder()
@@ -95,6 +100,7 @@ public class Mama {
                                                 .questionType(QuestionType.SIMPLE)
                                                 .question("منوراژی، منومتروراژی، لکه بینی بعد از رابطه جنسی، لکه بینی پس از یائسگی")
                                                 .answerType(AnswerType.TICK)
+                                                .required(false)
                                                 .build(),
                                         SimpleQuestion
                                                 .builder()
@@ -102,6 +108,7 @@ public class Mama {
                                                 .questionType(QuestionType.SIMPLE)
                                                 .question("PMS با علائم شدید یا دیس منوره")
                                                 .answerType(AnswerType.TICK)
+                                                .required(false)
                                                 .build()
                                 ))
                                 .build(),
@@ -127,6 +134,7 @@ public class Mama {
                                                 .questionType(QuestionType.SIMPLE)
                                                 .question("مطمئن بودن از حاملگی (اگر مشکلی ندارد و تحت نظر است نیاز به ارجاع ندارد)")
                                                 .answerType(AnswerType.TICK)
+                                                .required(false)
                                                 .build(),
                                         SimpleQuestion
                                                 .builder()
@@ -134,6 +142,7 @@ public class Mama {
                                                 .questionType(QuestionType.SIMPLE)
                                                 .question("مطمئن نبودن از حاملگی")
                                                 .answerType(AnswerType.TICK)
+                                                .required(false)
                                                 .build(),
                                         SimpleQuestion
                                                 .builder()
@@ -141,6 +150,7 @@ public class Mama {
                                                 .questionType(QuestionType.SIMPLE)
                                                 .question("ناباروری یا نیاز به آموزش")
                                                 .answerType(AnswerType.TICK)
+                                                .required(false)
                                                 .build()
                                 ))
                                 .build(),
@@ -166,6 +176,7 @@ public class Mama {
                                                 .questionType(QuestionType.SIMPLE)
                                                 .question("درد لگن")
                                                 .answerType(AnswerType.TICK)
+                                                .required(false)
                                                 .build(),
                                         SimpleQuestion
                                                 .builder()
@@ -173,6 +184,7 @@ public class Mama {
                                                 .questionType(QuestionType.SIMPLE)
                                                 .question("ترشحات غیرعادی(رنگ، بو، حجم)")
                                                 .answerType(AnswerType.TICK)
+                                                .required(false)
                                                 .build(),
                                         SimpleQuestion
                                                 .builder()
@@ -180,6 +192,7 @@ public class Mama {
                                                 .questionType(QuestionType.SIMPLE)
                                                 .question("علائم STD در شریک جنسی")
                                                 .answerType(AnswerType.TICK)
+                                                .required(false)
                                                 .build(),
                                         SimpleQuestion
                                                 .builder()
@@ -187,6 +200,7 @@ public class Mama {
                                                 .questionType(QuestionType.SIMPLE)
                                                 .question("لکه بینی")
                                                 .answerType(AnswerType.TICK)
+                                                .required(false)
                                                 .build(),
                                         SimpleQuestion
                                                 .builder()
@@ -194,6 +208,7 @@ public class Mama {
                                                 .questionType(QuestionType.SIMPLE)
                                                 .question("خارش، تورم، قرمزی دستگاه تناسلی")
                                                 .answerType(AnswerType.TICK)
+                                                .required(false)
                                                 .build(),
                                         SimpleQuestion
                                                 .builder()
@@ -201,6 +216,7 @@ public class Mama {
                                                 .questionType(QuestionType.SIMPLE)
                                                 .question("آزمایش یا سنوگرافی دارای مشکل خاص (با پزشک چک شود)")
                                                 .answerType(AnswerType.TICK)
+                                                .required(false)
                                                 .build()
                                 ))
                                 .build(),
@@ -210,6 +226,7 @@ public class Mama {
                                 .question("اختلال در رابطه جنسی")
                                 .questionType(QuestionType.SIMPLE)
                                 .answerType(AnswerType.TICK)
+                                .required(false)
                                 .options(List.of(
                                         new PairValue(
                                                 YesOrNo.YES.name(),

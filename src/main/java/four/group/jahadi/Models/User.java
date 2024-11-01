@@ -50,6 +50,7 @@ public class User extends Model {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String nid;
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String phone;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)

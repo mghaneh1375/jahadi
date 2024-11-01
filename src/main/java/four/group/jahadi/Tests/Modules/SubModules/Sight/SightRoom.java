@@ -33,6 +33,7 @@ public class SightRoom {
                                         .question("ADD")
                                         .questionType(QuestionType.SIMPLE)
                                         .answerType(AnswerType.NUMBER)
+                                        .required(false)
                                         .build(),
                                 CheckListGroupQuestion
                                         .builder()
@@ -55,7 +56,7 @@ public class SightRoom {
                                                                 .question("عینک طبی")
                                                                 .questionType(QuestionType.SIMPLE)
                                                                 .answerType(AnswerType.TICK)
-                                                                .required(true)
+                                                                .required(false)
                                                                 .build(),
                                                         SimpleQuestion
                                                                 .builder()
@@ -63,7 +64,7 @@ public class SightRoom {
                                                                 .question("عینک آفتابی")
                                                                 .questionType(QuestionType.SIMPLE)
                                                                 .answerType(AnswerType.TICK)
-                                                                .required(true)
+                                                                .required(false)
                                                                 .build()
                                                 )
                                         )
@@ -78,7 +79,7 @@ public class SightRoom {
                                                         TableQuestion
                                                                 .builder()
                                                                 .id(new ObjectId())
-                                                                .required(true)
+                                                                .required(false)
                                                                 .questionType(QuestionType.TABLE)
                                                                 .headers(List.of("...", "+/-", "SPH", "CYL", "VA"))
                                                                 .firstColumn(List.of("OD", "OS"))
@@ -88,7 +89,7 @@ public class SightRoom {
                                                         TableQuestion
                                                                 .builder()
                                                                 .id(new ObjectId())
-                                                                .required(true)
+                                                                .required(false)
                                                                 .questionType(QuestionType.TABLE)
                                                                 .headers(List.of("PD", "NPD"))
                                                                 .rowsCount(1)

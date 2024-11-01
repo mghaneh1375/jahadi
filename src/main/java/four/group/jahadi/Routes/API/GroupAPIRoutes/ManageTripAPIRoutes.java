@@ -58,4 +58,10 @@ public class ManageTripAPIRoutes extends Router {
         return tripService.list(getGroup(request), status);
     }
 
+    @GetMapping(value = "myActiveTrips")
+    public ResponseEntity<List<Trip>> myActiveTrips(
+            HttpServletRequest request
+    ) {
+        return tripService.myActiveTrips(getGroup(request));
+    }
 }

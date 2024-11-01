@@ -43,6 +43,7 @@ public class WomenServicePlusSeeder {
                                                                         .question(itr.getFaTranslate())
                                                                         .canWriteDesc(true)
                                                                         .answerType(AnswerType.TICK)
+                                                                        .required(false)
                                                                         .build()
                                                         ).collect(Collectors.toList())
                                         )

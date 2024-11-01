@@ -21,10 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -146,16 +143,14 @@ public class ModuleServiceInArea {
         boolean isOwner = foundArea.getOwnerId().equals(userId);
 
         List<ModuleInArea> modules = foundArea.getModules();
-        List<ObjectId> userIds = new ArrayList<>();
+        Set<ObjectId> userIds = new HashSet<>();
 
         for (ModuleInArea module : modules) {
             userIds.addAll(module.getMembers());
             userIds.addAll(module.getSecretaries());
         }
 
-        userIds = userIds.stream().distinct().collect(Collectors.toList());
-
-        List<User> users = userRepository.findByIdsIn(userIds);
+        List<User> users = userRepository.findByIdsIn(new ArrayList<>(userIds));
         modules.forEach(moduleInArea -> {
 
             List<ObjectId> members = moduleInArea.getMembers();
@@ -187,6 +182,24 @@ public class ModuleServiceInArea {
         return new ResponseEntity<>(modules, HttpStatus.OK);
     }
 
+    public ResponseEntity<List<ModuleInArea>> modulesForJahadgar(ObjectId userId, ObjectId areaId, String tabName) {
+
+        Area foundArea = tripRepository.findByAreaIdAndResponsibleId(areaId, userId)
+                .orElseThrow(InvalidIdException::new)
+                .getAreas().stream().filter(area -> area.getId().equals(areaId))
+                .findFirst().orElseThrow(RuntimeException::new);
+
+        List<ModuleInArea> modules = tabName == null
+                ? foundArea.getModules()
+                : foundArea.getModules().stream().filter(module -> Objects.equals(module.getModuleTabName(), tabName)).collect(Collectors.toList());
+        modules.forEach(moduleInArea -> {
+            moduleInArea.setHasSecretaryAccess(moduleInArea.getSecretaries().contains(userId));
+            moduleInArea.setHasDoctorAccess(moduleInArea.getMembers().contains(userId));
+        });
+
+        return new ResponseEntity<>(modules, HttpStatus.OK);
+    }
+
     public ResponseEntity<List<String>> tabs(ObjectId userId, ObjectId areaId) {
 
         Area foundArea = tripRepository.findByAreaIdAndResponsibleId(areaId, userId)
@@ -195,9 +208,7 @@ public class ModuleServiceInArea {
                 .findFirst().orElseThrow(RuntimeException::new);
 
         return new ResponseEntity<>(
-                moduleRepository.findTabNamesByIds(
-                        foundArea.getModules().stream().map(ModuleInArea::getModuleId).collect(Collectors.toList())
-                ).stream().map(Module::getTabName).distinct().collect(Collectors.toList()),
+                foundArea.getModules().stream().map(ModuleInArea::getModuleTabName).distinct().collect(Collectors.toList()),
                 HttpStatus.OK
         );
     }

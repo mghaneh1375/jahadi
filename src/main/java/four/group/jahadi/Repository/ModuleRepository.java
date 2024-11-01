@@ -17,7 +17,7 @@ public interface ModuleRepository extends MongoRepository<Module, ObjectId>, Fil
     @Query(value = "{id: {$in : ?0}}", count = true)
     Integer countByIds(List<ObjectId> ids);
 
-    @Query(value = "{id: {$in : ?0}}", fields = "{'name': 1, 'id': 1}")
+    @Query(value = "{id: {$in : ?0}}", fields = "{'name': 1, 'id': 1, 'tabName': 1}")
     List<Module> findByIds(List<ObjectId> ids);
 
     @Query(value = "{id: {$in : ?0}}", fields = "{'tabName': 1, 'id': 1}")

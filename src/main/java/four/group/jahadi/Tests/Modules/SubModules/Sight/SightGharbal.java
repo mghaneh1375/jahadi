@@ -29,7 +29,7 @@ public class SightGharbal {
                                         .question("شکایت اصلی بیمار")
                                         .questionType(QuestionType.SIMPLE)
                                         .answerType(AnswerType.TEXT)
-                                        .required(true)
+                                        .required(false)
                                         .build(),
                                 SimpleQuestion
                                         .builder()
@@ -37,7 +37,7 @@ public class SightGharbal {
                                         .question("مشکل دید دور یا نزدیک")
                                         .questionType(QuestionType.SIMPLE)
                                         .answerType(AnswerType.TEXT)
-                                        .required(true)
+                                        .required(false)
                                         .build(),
                                 SimpleQuestion
                                         .builder()
@@ -45,7 +45,7 @@ public class SightGharbal {
                                         .question("سابقه بیماری زمینه ای مخصوصا فشار خون و دیابت، سوزش ، خارش یا قرمزی چشم")
                                         .questionType(QuestionType.SIMPLE)
                                         .answerType(AnswerType.TEXT)
-                                        .required(true)
+                                        .required(false)
                                         .build(),
                                 SimpleQuestion
                                         .builder()
@@ -53,12 +53,12 @@ public class SightGharbal {
                                         .question("سابقه عمل های مربوط به چشم از جمله آب مروارید")
                                         .questionType(QuestionType.SIMPLE)
                                         .answerType(AnswerType.TEXT)
-                                        .required(true)
+                                        .required(false)
                                         .build(),
                                 TableQuestion
                                         .builder()
                                         .id(new ObjectId())
-                                        .required(true)
+                                        .required(false)
                                         .questionType(QuestionType.TABLE)
                                         .title("غربال بینایی")
                                         .headers(List.of("VA/CC", "D"))
@@ -69,7 +69,7 @@ public class SightGharbal {
                                         .build(),
                                 TableQuestion
                                         .builder()
-                                        .required(true)
+                                        .required(false)
                                         .id(new ObjectId())
                                         .questionType(QuestionType.TABLE)
                                         .title("غربال بینایی")

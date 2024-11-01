@@ -44,6 +44,7 @@ public class Step1 {
                                                 .questionType(QuestionType.SIMPLE)
                                                 .question("لوله تخت")
                                                 .answerType(AnswerType.TICK)
+                                                .required(false)
                                                 .build(),
                                         SimpleQuestion
                                                 .builder()
@@ -51,6 +52,7 @@ public class Step1 {
                                                 .questionType(QuestionType.SIMPLE)
                                                 .question("لوله EDTA")
                                                 .answerType(AnswerType.TICK)
+                                                .required(false)
                                                 .build(),
                                         SimpleQuestion
                                                 .builder()
@@ -58,6 +60,7 @@ public class Step1 {
                                                 .questionType(QuestionType.SIMPLE)
                                                 .question("نمونه ادرار")
                                                 .answerType(AnswerType.TICK)
+                                                .required(false)
                                                 .build(),
                                         SimpleQuestion
                                                 .builder()
@@ -65,6 +68,7 @@ public class Step1 {
                                                 .questionType(QuestionType.SIMPLE)
                                                 .question("ناشتا")
                                                 .answerType(AnswerType.TICK)
+                                                .required(false)
                                                 .build()
                                 ))
                                 .build(),
@@ -79,7 +83,7 @@ public class Step1 {
                                                 .id(new ObjectId())
                                                 .questionType(QuestionType.SIMPLE)
                                                 .answerType(AnswerType.RADIO)
-                                                .required(true)
+                                                .required(false)
                                                 .options(List.of(
                                                         new PairValue(
                                                                 IsOrNot.IS.name(),

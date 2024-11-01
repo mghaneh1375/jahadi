@@ -31,6 +31,7 @@ public class Step2 {
                                                         .id(new ObjectId())
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("تست Blood (60 ثانیه)")
+                                                        .required(false)
                                                         .answerType(AnswerType.SELECT)
                                                         .options(
                                                                 List.of(
@@ -47,6 +48,7 @@ public class Step2 {
                                                 SimpleQuestion
                                                         .builder()
                                                         .id(new ObjectId())
+                                                        .required(false)
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("تست Nitrite (60 ثانیه)")
                                                         .answerType(AnswerType.SELECT)
@@ -60,6 +62,7 @@ public class Step2 {
                                                 SimpleQuestion
                                                         .builder()
                                                         .id(new ObjectId())
+                                                        .required(false)
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("تست Leukocytes (120 ثانیه)")
                                                         .answerType(AnswerType.SELECT)
@@ -75,6 +78,7 @@ public class Step2 {
                                                 SimpleQuestion
                                                         .builder()
                                                         .id(new ObjectId())
+                                                        .required(false)
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("تست Protein (30 ثانیه)")
                                                         .answerType(AnswerType.SELECT)
@@ -90,6 +94,7 @@ public class Step2 {
                                                 SimpleQuestion
                                                         .builder()
                                                         .id(new ObjectId())
+                                                        .required(false)
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("تست Ketone (90 ثانیه)")
                                                         .answerType(AnswerType.SELECT)
@@ -106,6 +111,7 @@ public class Step2 {
                                                 SimpleQuestion
                                                         .builder()
                                                         .id(new ObjectId())
+                                                        .required(false)
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("تست Glucose (90 ثانیه)")
                                                         .answerType(AnswerType.SELECT)
@@ -122,6 +128,7 @@ public class Step2 {
                                                 SimpleQuestion
                                                         .builder()
                                                         .id(new ObjectId())
+                                                        .required(false)
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("تست Uroblilinogen (90 ثانیه)")
                                                         .answerType(AnswerType.SELECT)
@@ -138,6 +145,7 @@ public class Step2 {
                                                 SimpleQuestion
                                                         .builder()
                                                         .id(new ObjectId())
+                                                        .required(false)
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("تست Bilirubin (60 ثانیه)")
                                                         .answerType(AnswerType.SELECT)
@@ -153,6 +161,7 @@ public class Step2 {
                                                 SimpleQuestion
                                                         .builder()
                                                         .id(new ObjectId())
+                                                        .required(false)
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("تست Ascorbic Acid (30 ثانیه)")
                                                         .answerType(AnswerType.SELECT)
@@ -167,6 +176,7 @@ public class Step2 {
                                                 SimpleQuestion
                                                         .builder()
                                                         .id(new ObjectId())
+                                                        .required(false)
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("تست PH (30 ثانیه)")
                                                         .answerType(AnswerType.SELECT)
@@ -184,6 +194,7 @@ public class Step2 {
                                                 SimpleQuestion
                                                         .builder()
                                                         .id(new ObjectId())
+                                                        .required(false)
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("تست Specific Gravity (60 ثانیه)")
                                                         .answerType(AnswerType.SELECT)
@@ -202,6 +213,7 @@ public class Step2 {
                                                 SimpleQuestion
                                                         .builder()
                                                         .id(new ObjectId())
+                                                        .required(false)
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("تست موارد شفافیت")
                                                         .answerType(AnswerType.SELECT)
@@ -215,6 +227,7 @@ public class Step2 {
                                                 SimpleQuestion
                                                         .builder()
                                                         .id(new ObjectId())
+                                                        .required(false)
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("بوی نامطبوع")
                                                         .answerType(AnswerType.SELECT)
@@ -228,6 +241,7 @@ public class Step2 {
                                                 SimpleQuestion
                                                         .builder()
                                                         .id(new ObjectId())
+                                                        .required(false)
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("رنگ")
                                                         .answerType(AnswerType.TEXT)
@@ -237,7 +251,7 @@ public class Step2 {
                                 TableQuestion
                                         .builder()
                                         .id(new ObjectId())
-                                        .required(true)
+                                        .required(false)
                                         .title("جدول")
                                         .questionType(QuestionType.TABLE)
                                         .headers(List.of("Beta HCG", "Result"))

@@ -63,6 +63,7 @@ public class MiniParaClinic {
                                                                         .questionType(QuestionType.SIMPLE)
                                                                         .question(itr.getFaTranslate())
                                                                         .canWriteDesc(true)
+                                                                        .required(false)
                                                                         .answerType(AnswerType.TICK)
                                                                         .build()
                                                         ).collect(Collectors.toList())

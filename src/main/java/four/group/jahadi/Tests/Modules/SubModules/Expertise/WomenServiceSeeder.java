@@ -21,7 +21,7 @@ public class WomenServiceSeeder {
                                         .id(new ObjectId())
                                         .question("نوع خدمت")
                                         .questionType(QuestionType.SIMPLE)
-                                        .required(true)
+                                        .required(false)
                                         .options(List.of())
                                         .answerType(AnswerType.SELECT)
                                         .build(),

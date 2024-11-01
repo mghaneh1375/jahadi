@@ -85,12 +85,14 @@ public class DoctorSeeder {
                                                                                         .questionType(QuestionType.SIMPLE)
                                                                                         .question("آموزش")
                                                                                         .answerType(AnswerType.TICK)
+                                                                                        .required(false)
                                                                                         .build(),
                                                                                 SimpleQuestion
                                                                                         .builder()
                                                                                         .id(new ObjectId())
                                                                                         .questionType(QuestionType.SIMPLE)
                                                                                         .question("بروشور")
+                                                                                        .required(false)
                                                                                         .answerType(AnswerType.TICK)
                                                                                         .build()
                                                                         ))

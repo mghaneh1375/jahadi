@@ -49,7 +49,7 @@ public class RavanSeeder {
                                                 .id(new ObjectId())
                                                 .questionType(QuestionType.SIMPLE)
                                                 .answerType(AnswerType.TICK)
-                                                .required(true)
+                                                .required(false)
                                                 .question("در یک ماه گذشته چقدر در خوابیدن مشکل داشته اید؟ یا اینکه در یک ماه گذشته اتفاق افتاده است که از خواب بیدار شوید و نتوانید بخوابید؟")
                                                 .build(),
                                         SimpleQuestion
@@ -57,7 +57,7 @@ public class RavanSeeder {
                                                 .id(new ObjectId())
                                                 .questionType(QuestionType.SIMPLE)
                                                 .answerType(AnswerType.TICK)
-                                                .required(true)
+                                                .required(false)
                                                 .question("در یک ماه گذشته چقدر احساس دلشوره، اضطراب و استرس داشته اید؟")
                                                 .build(),
                                         SimpleQuestion
@@ -65,7 +65,7 @@ public class RavanSeeder {
                                                 .id(new ObjectId())
                                                 .questionType(QuestionType.SIMPLE)
                                                 .answerType(AnswerType.TICK)
-                                                .required(true)
+                                                .required(false)
                                                 .question("در یک ماه گذشته چقدر احساس غم، ناامیدی و ناکارآمدی کرده اید؟")
                                                 .build(),
                                         SimpleQuestion
@@ -73,7 +73,7 @@ public class RavanSeeder {
                                                 .id(new ObjectId())
                                                 .questionType(QuestionType.SIMPLE)
                                                 .answerType(AnswerType.TICK)
-                                                .required(true)
+                                                .required(false)
                                                 .question("در یک ماه گذشته چقدر رفتاری (مانند پرخاشگری) را انجام داده اید که دچار پشیمانی شوید؟")
                                                 .build(),
                                         SimpleQuestion
@@ -81,7 +81,7 @@ public class RavanSeeder {
                                                 .id(new ObjectId())
                                                 .questionType(QuestionType.SIMPLE)
                                                 .answerType(AnswerType.TICK)
-                                                .required(true)
+                                                .required(false)
                                                 .question("در یک ماه گذشته چقدر مسائل شخصی و خانوادگی، شغل (یا حوزه های مهم دیگر زندگیتان) شما را دچار مشکل کرده است؟")
                                                 .build(),
                                         SimpleQuestion
@@ -89,7 +89,7 @@ public class RavanSeeder {
                                                 .id(new ObjectId())
                                                 .questionType(QuestionType.SIMPLE)
                                                 .answerType(AnswerType.TICK)
-                                                .required(true)
+                                                .required(false)
                                                 .question("در یک ماه گذشته چقدر در انجام دادن کارهای روزمره شک کرده اید و مجبور به تکرار آنها شده اید؟ (مثلا شیرگاز را چندبار چک کنید، دستتان را بشویید، قفل بودن در را چندین بار بررسی کنید و ...)")
                                                 .build(),
                                         SimpleQuestion
@@ -97,7 +97,7 @@ public class RavanSeeder {
                                                 .id(new ObjectId())
                                                 .questionType(QuestionType.SIMPLE)
                                                 .answerType(AnswerType.TICK)
-                                                .required(true)
+                                                .required(false)
                                                 .question("آیا در خورد و خوراک و تغذیه مشکلی دارید؟ (بی میلی به غذا / کم اشتهایی، پراشتهایی، استفراغ عمدی و ...)")
                                                 .build(),
                                         SimpleQuestion
@@ -105,7 +105,7 @@ public class RavanSeeder {
                                                 .id(new ObjectId())
                                                 .questionType(QuestionType.SIMPLE)
                                                 .answerType(AnswerType.TICK)
-                                                .required(true)
+                                                .required(false)
                                                 .question("باتوجه به میزان مصرف مواد توسط اطرافیان، چقدر خود را در معرض آن می دانید؟")
                                                 .build(),
                                         SimpleQuestion
@@ -142,7 +142,7 @@ public class RavanSeeder {
                                                 .id(new ObjectId())
                                                 .answerType(AnswerType.TICK)
                                                 .question("نیاز به مداخله بالینی")
-                                                .required(true)
+                                                .required(false)
                                                 .build(),
                                         SimpleQuestion
                                                 .builder()
@@ -150,7 +150,7 @@ public class RavanSeeder {
                                                 .id(new ObjectId())
                                                 .answerType(AnswerType.TICK)
                                                 .question("نیاز به روانشناس")
-                                                .required(true)
+                                                .required(false)
                                                 .build(),
                                         SimpleQuestion
                                                 .builder()
@@ -158,7 +158,7 @@ public class RavanSeeder {
                                                 .id(new ObjectId())
                                                 .answerType(AnswerType.TICK)
                                                 .question("نیاز به پیشگیری از اعتیاد؟")
-                                                .required(true)
+                                                .required(false)
                                                 .build()
                                 ))
                                 .build(),
@@ -173,7 +173,7 @@ public class RavanSeeder {
                                         ).collect(Collectors.toList())
                                 )
                                 .question("وضعیت تاهل")
-                                .required(true)
+                                .required(false)
                                 .build(),
 //                        SimpleQuestion
 //                                .builder()
@@ -188,12 +188,14 @@ public class RavanSeeder {
                                 .id(new ObjectId())
                                 .answerType(AnswerType.LONG_TEXT)
                                 .question("توضیحات تکمیلی")
+                                .required(false)
                                 .build(),
                         SimpleQuestion
                                 .builder()
                                 .questionType(QuestionType.SIMPLE)
                                 .id(new ObjectId())
                                 .answerType(AnswerType.TEXT)
+                                .required(false)
                                 .question("موارد مداخله در بحران")
                                 .build()
                 ))

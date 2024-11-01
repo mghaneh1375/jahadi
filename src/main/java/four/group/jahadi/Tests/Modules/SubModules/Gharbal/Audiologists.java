@@ -44,6 +44,7 @@ public class Audiologists {
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("بدون سابقه شنوایی سنجی")
                                                         .answerType(AnswerType.TICK)
+                                                        .required(false)
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
@@ -51,6 +52,7 @@ public class Audiologists {
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("سابقه کم شنوایی یا ناشنوایی در خانواده")
                                                         .answerType(AnswerType.TICK)
+                                                        .required(false)
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
@@ -58,6 +60,7 @@ public class Audiologists {
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("سابقه بستری در بیمارستان زمان نوزادی و زردی و ازدواج فامیلی والدین")
                                                         .answerType(AnswerType.TICK)
+                                                        .required(false)
                                                         .build()
                                         ))
                                         .build(),
@@ -83,6 +86,7 @@ public class Audiologists {
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("احساس کم شنوایی (زیر 40 سال)")
                                                         .answerType(AnswerType.TICK)
+                                                        .required(false)
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
@@ -90,6 +94,7 @@ public class Audiologists {
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("دارای سمعک نامناسب")
                                                         .answerType(AnswerType.TICK)
+                                                        .required(false)
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
@@ -97,6 +102,7 @@ public class Audiologists {
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("دارای احساس گرفتگی گوش (با پزشک چک شود)")
                                                         .answerType(AnswerType.TICK)
+                                                        .required(false)
                                                         .build()
                                         ))
                                         .build(),
@@ -122,6 +128,7 @@ public class Audiologists {
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("کاهش شنوایی یک طرفه یا دو طرفه پیش رونده یا شدید ثابت")
                                                         .answerType(AnswerType.TICK)
+                                                        .required(false)
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
@@ -129,6 +136,7 @@ public class Audiologists {
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("احساس وزوز یا سکوت کشیدن در گوش")
                                                         .answerType(AnswerType.TICK)
+                                                        .required(false)
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
@@ -136,6 +144,7 @@ public class Audiologists {
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("سرگیجه دورانی (با پزشک چک شود)")
                                                         .answerType(AnswerType.TICK)
+                                                        .required(false)
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
@@ -143,6 +152,7 @@ public class Audiologists {
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("تروما یا دردگوش (با پزشک چک شود)")
                                                         .answerType(AnswerType.TICK)
+                                                        .required(false)
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
@@ -150,6 +160,7 @@ public class Audiologists {
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("ترشح از گوش (با پزشک چک شود)")
                                                         .answerType(AnswerType.TICK)
+                                                        .required(false)
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
@@ -157,6 +168,7 @@ public class Audiologists {
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("کاهش شنوایی ناگهانی، کاهش شنوایی مربوط به شغل یا تاثیرگذار در خلق و شغل")
                                                         .answerType(AnswerType.TICK)
+                                                        .required(false)
                                                         .build()
                                         ))
                                         .build()

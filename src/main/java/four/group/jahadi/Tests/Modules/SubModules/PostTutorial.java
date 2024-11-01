@@ -38,6 +38,7 @@ public class PostTutorial {
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("آموزش")
                                                         .answerType(AnswerType.TICK)
+                                                        .required(false)
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
@@ -45,6 +46,7 @@ public class PostTutorial {
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("بروشور")
                                                         .answerType(AnswerType.TICK)
+                                                        .required(false)
                                                         .build()
                                         ))
                                         .build()

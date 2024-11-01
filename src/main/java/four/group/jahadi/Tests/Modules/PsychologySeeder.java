@@ -50,6 +50,7 @@ public class PsychologySeeder {
                                                                                         .questionType(QuestionType.SIMPLE)
                                                                                         .question("مشاوره")
                                                                                         .answerType(AnswerType.TICK)
+                                                                                        .required(false)
                                                                                         .canWriteDesc(true)
                                                                                         .build()
                                                                         )

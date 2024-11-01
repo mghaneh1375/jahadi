@@ -28,7 +28,7 @@ public class ExternalRefer {
                                         .builder()
                                         .id(new ObjectId())
                                         .questionType(QuestionType.SIMPLE)
-                                        .required(true)
+                                        .required(false)
                                         .question("علت ارجاع")
                                         .answerType(AnswerType.LONG_TEXT)
                                         .build()

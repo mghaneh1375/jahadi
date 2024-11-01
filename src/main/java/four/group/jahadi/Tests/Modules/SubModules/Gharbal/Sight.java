@@ -44,6 +44,7 @@ public class Sight {
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("بدون سابقه معاینه چشم")
                                                         .answerType(AnswerType.TICK)
+                                                        .required(false)
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
@@ -51,6 +52,7 @@ public class Sight {
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("دارای سابقه تنبلی یا انحراف چشم")
                                                         .answerType(AnswerType.TICK)
+                                                        .required(false)
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
@@ -58,6 +60,7 @@ public class Sight {
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("دارای عینک")
                                                         .answerType(AnswerType.TICK)
+                                                        .required(false)
                                                         .build()
                                         ))
                                         .build(),
@@ -83,6 +86,7 @@ public class Sight {
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("دیابت، فشارخون")
                                                         .answerType(AnswerType.TICK)
+                                                        .required(false)
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
@@ -90,6 +94,7 @@ public class Sight {
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("آب مروارید، گلوکوم")
                                                         .answerType(AnswerType.TICK)
+                                                        .required(false)
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
@@ -97,6 +102,7 @@ public class Sight {
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("عینک نامناسب")
                                                         .answerType(AnswerType.TICK)
+                                                        .required(false)
                                                         .build()
                                         ))
                                         .build(),
@@ -122,6 +128,7 @@ public class Sight {
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("انحراف چشم واضح => ناتوانی در انجام تست حرکت چشمی")
                                                         .answerType(AnswerType.TICK)
+                                                        .required(false)
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
@@ -129,6 +136,7 @@ public class Sight {
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("پتوز، انتروپیون، اکتروپیون، آنیزوکوری، بسته نشدن کامل پلک ها")
                                                         .answerType(AnswerType.TICK)
+                                                        .required(false)
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
@@ -136,6 +144,7 @@ public class Sight {
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("تاری دید (شغل و سن مهم) => پرسیدن و شدت تاری دید")
                                                         .answerType(AnswerType.TICK)
+                                                        .required(false)
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
@@ -143,6 +152,7 @@ public class Sight {
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("دوبینی، نابینایی، لکه بینی در میدان دید، لکه سیاه در میدان دید، جرقه نورانی")
                                                         .answerType(AnswerType.TICK)
+                                                        .required(false)
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
@@ -150,6 +160,7 @@ public class Sight {
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("قرمزی چشم، اشک ریزش (با پزشک چک شود)")
                                                         .answerType(AnswerType.TICK)
+                                                        .required(false)
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
@@ -157,6 +168,7 @@ public class Sight {
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("درد چشمی (با پزشک چک شود)")
                                                         .answerType(AnswerType.TICK)
+                                                        .required(false)
                                                         .build()
                                         ))
                                         .build()

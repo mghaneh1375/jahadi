@@ -59,6 +59,14 @@ public class ModuleInArea {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<AccessInModuleArea> accesses;
 
+    @Transient
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Boolean hasDoctorAccess;
+
+    @Transient
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Boolean hasSecretaryAccess;
+
     @JsonIgnore
     @Builder.Default
     private List<ObjectId> secretaries = new ArrayList<>();

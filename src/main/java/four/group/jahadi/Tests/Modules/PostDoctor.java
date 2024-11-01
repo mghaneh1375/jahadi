@@ -26,6 +26,7 @@ public class PostDoctor {
                                                                 .builder()
                                                                 .answerType(AnswerType.TICK)
                                                                 .question("")
+                                                                .required(false)
                                                                 .options(
                                                                         List.of(
                                                                                 new PairValue(

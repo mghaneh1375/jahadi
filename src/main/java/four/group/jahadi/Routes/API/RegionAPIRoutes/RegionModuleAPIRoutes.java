@@ -71,7 +71,7 @@ public class RegionModuleAPIRoutes extends Router {
 
     @GetMapping(path = "getModuleInArea/{areaId}/{moduleId}")
     @ResponseBody
-    @Operation(summary = "گرفتن ماژول در منطقه توسط منطقه یا دکتر آن ماژول")
+    @Operation(summary = "گرفتن ماژول در منطقه توسط منطقه")
     public ResponseEntity<Module> getModuleInArea(
             HttpServletRequest request,
             @PathVariable @ObjectIdConstraint ObjectId areaId,

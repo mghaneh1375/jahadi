@@ -131,17 +131,47 @@ public class AreaService extends AbstractService<Area, AreaData> {
 
     }
 
-    public ResponseEntity<List<Trip>> myCartableList(ObjectId userId) {
+    public ResponseEntity<List<Trip>> myCartableList(ObjectId userId, boolean isForOwner) {
 
-        List<Trip> trips = tripRepository.findNotFinishedByAreaOwnerId(Utility.getCurrDate(), userId);
+        List<Trip> trips = isForOwner
+                ? tripRepository.findNotFinishedByAreaOwnerId(Utility.getCurrDate(), userId)
+                : tripRepository.findNotFinishedByMemberId(Utility.getCurrDate(), userId);
+
         if (trips != null && trips.size() > 0) {
             trips.forEach(trip -> {
-                if (trip.getAreas() != null && trip.getAreas().size() > 0)
-                    trip.getAreas().removeIf(area ->
-                            area.getOwnerId() == null ||
-                                    !area.getOwnerId().equals(userId)
-                    );
+                if (trip.getAreas() != null && trip.getAreas().size() > 0) {
+                    if (isForOwner) {
+                        trip.getAreas().removeIf(area ->
+                                area.getOwnerId() == null ||
+                                        !area.getOwnerId().equals(userId)
+                        );
+                    } else {
+                        trip.getAreas().removeIf(area ->
+                                area.getMembers() == null ||
+                                        !area.getMembers().contains(userId)
+                        );
+                    }
+                }
             });
+            if (!isForOwner) {
+                Set<ObjectId> ownerIds = new HashSet<>();
+                trips
+                        .stream()
+                        .filter(trip -> trip.getAreas() != null && trip.getAreas().size() > 0)
+                        .forEach(trip -> trip.getAreas().forEach(area -> ownerIds.add(area.getOwnerId())));
+                List<User> owners = userRepository.findDigestByIdsIn(new ArrayList<>(ownerIds));
+                trips
+                        .stream()
+                        .filter(trip -> trip.getAreas() != null && trip.getAreas().size() > 0)
+                        .forEach(trip -> trip.getAreas().forEach(area -> {
+                            area.setOwner(
+                                    owners.stream().filter(user -> user.getId().equals(area.getOwnerId()))
+                                            .findFirst().get()
+                            );
+                            area.setOwnerId(null);
+                            area.setMembers(null);
+                        }));
+            }
         }
 
         return new ResponseEntity<>(trips, HttpStatus.OK);
@@ -326,9 +356,11 @@ public class AreaService extends AbstractService<Area, AreaData> {
         Trip trip = tripRepository.findByAreaIdAndOwnerId(areaId, userId).orElseThrow(InvalidIdException::new);
         Area foundArea = findArea(trip, areaId, userId);
 
-        if(foundArea.getDates() == null)
-            foundArea.setDates(new ArrayList<>(){{add(AreaDates.builder().start(new Date()).build());}});
-        else if(foundArea.getDates().get(foundArea.getDates().size() - 1).getEnd() == null)
+        if (foundArea.getDates() == null)
+            foundArea.setDates(new ArrayList<>() {{
+                add(AreaDates.builder().start(new Date()).build());
+            }});
+        else if (foundArea.getDates().get(foundArea.getDates().size() - 1).getEnd() == null)
             throw new RuntimeException("اردو پیش از این شروع شده است");
         else
             foundArea.getDates().add(AreaDates.builder().start(new Date()).build());
@@ -341,9 +373,9 @@ public class AreaService extends AbstractService<Area, AreaData> {
         Trip trip = tripRepository.findByAreaIdAndOwnerId(areaId, userId).orElseThrow(InvalidIdException::new);
         Area foundArea = findArea(trip, areaId, userId);
 
-        if(foundArea.getDates() == null)
+        if (foundArea.getDates() == null)
             throw new RuntimeException("اردو هنوز شروع نشده است");
-        else if(foundArea.getDates().get(foundArea.getDates().size() - 1).getEnd() != null)
+        else if (foundArea.getDates().get(foundArea.getDates().size() - 1).getEnd() != null)
             throw new RuntimeException("اردو پیش از این تمام شده است");
         else
             foundArea.getDates().get(foundArea.getDates().size() - 1).setEnd(new Date());
@@ -356,7 +388,7 @@ public class AreaService extends AbstractService<Area, AreaData> {
         Trip trip = tripRepository.findByAreaIdAndOwnerId(areaId, userId).orElseThrow(InvalidIdException::new);
         Area foundArea = findArea(trip, areaId, userId);
 
-        if(foundArea.getDates() == null)
+        if (foundArea.getDates() == null)
             return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
 
         return new ResponseEntity<>(foundArea.getDates(), HttpStatus.OK);

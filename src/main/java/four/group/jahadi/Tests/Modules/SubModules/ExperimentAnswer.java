@@ -26,6 +26,7 @@ public class ExperimentAnswer {
                                         SimpleQuestion
                                                 .builder()
                                                 .id(new ObjectId())
+                                                .required(false)
                                                 .questionType(QuestionType.SIMPLE)
                                                 .answerType(AnswerType.LONG_TEXT)
                                                 .question("توضیحات")
@@ -33,6 +34,7 @@ public class ExperimentAnswer {
                                         SimpleQuestion
                                                 .builder()
                                                 .id(new ObjectId())
+                                                .required(false)
                                                 .questionType(QuestionType.SIMPLE)
                                                 .answerType(AnswerType.UPLOAD)
                                                 .question("فایل مدنظر")
@@ -40,6 +42,7 @@ public class ExperimentAnswer {
                                         SimpleQuestion
                                                 .builder()
                                                 .id(new ObjectId())
+                                                .required(false)
                                                 .questionType(QuestionType.SIMPLE)
                                                 .answerType(AnswerType.LONG_TEXT)
                                                 .question("توضیحات")
@@ -47,6 +50,7 @@ public class ExperimentAnswer {
                                         SimpleQuestion
                                                 .builder()
                                                 .id(new ObjectId())
+                                                .required(false)
                                                 .questionType(QuestionType.SIMPLE)
                                                 .answerType(AnswerType.UPLOAD)
                                                 .question("فایل مدنظر")
@@ -54,6 +58,7 @@ public class ExperimentAnswer {
                                         SimpleQuestion
                                                 .builder()
                                                 .id(new ObjectId())
+                                                .required(false)
                                                 .questionType(QuestionType.SIMPLE)
                                                 .answerType(AnswerType.LONG_TEXT)
                                                 .question("توضیحات")
@@ -61,6 +66,7 @@ public class ExperimentAnswer {
                                         SimpleQuestion
                                                 .builder()
                                                 .id(new ObjectId())
+                                                .required(false)
                                                 .questionType(QuestionType.SIMPLE)
                                                 .answerType(AnswerType.UPLOAD)
                                                 .question("فایل مدنظر")
@@ -68,6 +74,7 @@ public class ExperimentAnswer {
                                         SimpleQuestion
                                                 .builder()
                                                 .id(new ObjectId())
+                                                .required(false)
                                                 .questionType(QuestionType.SIMPLE)
                                                 .answerType(AnswerType.LONG_TEXT)
                                                 .question("توضیحات")
@@ -75,6 +82,7 @@ public class ExperimentAnswer {
                                         SimpleQuestion
                                                 .builder()
                                                 .id(new ObjectId())
+                                                .required(false)
                                                 .questionType(QuestionType.SIMPLE)
                                                 .answerType(AnswerType.UPLOAD)
                                                 .question("فایل مدنظر")

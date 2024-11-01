@@ -474,8 +474,11 @@ public class PatientServiceInArea {
 
         if (hasTrained) {
             foundArea.getModules().stream()
-                    .filter(module -> module.getModuleName().contains("غربالگری"))
-                    .findFirst().ifPresent(module -> patient.setReferrals(
+                    .filter(module ->
+                            module.getModuleName().equals("غربالگری پایه") ||
+                            module.getModuleName().equals("غربالگری روان")
+                    )
+                    .forEach(module -> patient.setReferrals(
                             doAddReferral(
                                     patient.getReferrals(),
                                     module.getModuleId(),

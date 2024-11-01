@@ -58,5 +58,4 @@ public class Trip extends Model {
     @Transient
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     private String project;
-
 }
