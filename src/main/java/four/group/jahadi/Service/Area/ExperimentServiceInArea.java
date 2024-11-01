@@ -118,7 +118,7 @@ public class ExperimentServiceInArea {
                 .forEach(module1 -> referrals.add(
                         (PatientReferral) PatientReferral
                                 .builder()
-                                .moduleId(module1.getId())
+                                .moduleId(module1.getModuleId())
                                 .desc(dto.getDescription())
                                 .referBy(userId)
                                 .build().createId()

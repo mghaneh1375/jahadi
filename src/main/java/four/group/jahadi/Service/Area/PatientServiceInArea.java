@@ -1013,7 +1013,9 @@ public class PatientServiceInArea {
                         .filter(patientReferral -> patientReferral.getModuleId().equals(finalWantedModuleId))
                         .reduce((first, second) -> second);
 
-        if (optionalPatientReferral.isEmpty())
+        if (optionalPatientReferral.isEmpty() ||
+                optionalPatientReferral.get().getForms() == null
+        )
             throw new RuntimeException("فرمی برای این ماژول ثبت نشده است");
 
         ObjectId finalWantedSubModuleId = wantedSubModuleId;
