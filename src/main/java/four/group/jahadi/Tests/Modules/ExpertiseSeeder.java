@@ -17,7 +17,7 @@ public class ExpertiseSeeder {
                         .builder()
                         .name("متخصص داخلی/عفونی")
                         .tabName("متخصص ها")
-                        .icon("")
+                        .icon("icon-doctor-1")
                         .subModules(
                                 List.of(
                                         Visit.make(),
@@ -34,7 +34,7 @@ public class ExpertiseSeeder {
                         .builder()
                         .name("متخصص زنان")
                         .tabName("متخصص ها")
-                        .icon("")
+                        .icon("icon-doctor-1")
                         .subModules(
                                 List.of(
                                         Visit.make(),
@@ -52,7 +52,7 @@ public class ExpertiseSeeder {
                         .builder()
                         .name("متخصص قلب")
                         .tabName("متخصص ها")
-                        .icon("")
+                        .icon("icon-doctor-1")
                         .subModules(
                                 List.of(
                                         Visit.make(),
@@ -69,7 +69,7 @@ public class ExpertiseSeeder {
                         .builder()
                         .name("متخصص اطفال")
                         .tabName("متخصص ها")
-                        .icon("")
+                        .icon("icon-doctor-1")
                         .subModules(
                                 List.of(
                                         Visit.make(),
@@ -86,7 +86,7 @@ public class ExpertiseSeeder {
                         .builder()
                         .name("متخصص روان")
                         .tabName("متخصص ها")
-                        .icon("")
+                        .icon("icon-doctor-1")
                         .subModules(
                                 List.of(
                                         Visit.make(),
@@ -103,7 +103,7 @@ public class ExpertiseSeeder {
                         .builder()
                         .name("متخصص جراحی، ارتوپدی و اورولوژی")
                         .tabName("متخصص ها")
-                        .icon("")
+                        .icon("icon-doctor-1")
                         .subModules(
                                 List.of(
                                         Visit.make(),
@@ -120,7 +120,7 @@ public class ExpertiseSeeder {
                         .builder()
                         .name("متخصص چشم پزشکی")
                         .tabName("متخصص ها")
-                        .icon("")
+                        .icon("icon-doctor-1")
                         .subModules(
                                 List.of(
                                         Visit.make(),
@@ -137,7 +137,7 @@ public class ExpertiseSeeder {
                         .builder()
                         .name("متخصص گوش و حلق و بینی")
                         .tabName("متخصص ها")
-                        .icon("")
+                        .icon("icon-doctor-1")
                         .subModules(
                                 List.of(
                                         Visit.make(),
@@ -154,7 +154,7 @@ public class ExpertiseSeeder {
                         .builder()
                         .name("متخصص پوست")
                         .tabName("متخصص ها")
-                        .icon("")
+                        .icon("icon-doctor-1")
                         .subModules(
                                 List.of(
                                         Visit.make(),
@@ -171,7 +171,7 @@ public class ExpertiseSeeder {
                         .builder()
                         .name("متخصص طب فیزیکی")
                         .tabName("متخصص ها")
-                        .icon("")
+                        .icon("icon-doctor-1")
                         .subModules(
                                 List.of(
                                         Visit.make(),
@@ -188,7 +188,7 @@ public class ExpertiseSeeder {
                         .builder()
                         .name("فوق تخصص غدد")
                         .tabName("متخصص ها")
-                        .icon("")
+                        .icon("icon-doctor-1")
                         .subModules(
                                 List.of(
                                         Visit.make(),
@@ -205,7 +205,7 @@ public class ExpertiseSeeder {
                         .builder()
                         .name("فوق تخصص گوارش")
                         .tabName("متخصص ها")
-                        .icon("")
+                        .icon("icon-doctor-1")
                         .subModules(
                                 List.of(
                                         Visit.make(),
@@ -222,7 +222,7 @@ public class ExpertiseSeeder {
                         .builder()
                         .name("فوق تخصص کلیه")
                         .tabName("متخصص ها")
-                        .icon("")
+                        .icon("icon-doctor-1")
                         .subModules(
                                 List.of(
                                         Visit.make(),
@@ -239,7 +239,7 @@ public class ExpertiseSeeder {
                         .builder()
                         .name("فوق تخصص خون")
                         .tabName("متخصص ها")
-                        .icon("")
+                        .icon("icon-doctor-1")
                         .subModules(
                                 List.of(
                                         Visit.make(),
@@ -256,7 +256,7 @@ public class ExpertiseSeeder {
                         .builder()
                         .name("فوق تخصص روماتولوژی")
                         .tabName("متخصص ها")
-                        .icon("")
+                        .icon("icon-doctor-1")
                         .subModules(
                                 List.of(
                                         Visit.make(),

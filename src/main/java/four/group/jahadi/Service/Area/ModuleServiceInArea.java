@@ -26,6 +26,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static four.group.jahadi.Service.Area.AreaUtils.findArea;
+import static four.group.jahadi.Tests.Modules.ModuleSeeder.tabIcons;
 
 @Service
 public class ModuleServiceInArea {
@@ -200,17 +201,20 @@ public class ModuleServiceInArea {
         return new ResponseEntity<>(modules, HttpStatus.OK);
     }
 
-    public ResponseEntity<List<String>> tabs(ObjectId userId, ObjectId areaId) {
+    public ResponseEntity<Map<String, String>> tabs(ObjectId userId, ObjectId areaId) {
 
         Area foundArea = tripRepository.findByAreaIdAndResponsibleId(areaId, userId)
                 .orElseThrow(InvalidIdException::new)
                 .getAreas().stream().filter(area -> area.getId().equals(areaId))
                 .findFirst().orElseThrow(RuntimeException::new);
 
-        return new ResponseEntity<>(
-                foundArea.getModules().stream().map(ModuleInArea::getModuleTabName).distinct().collect(Collectors.toList()),
-                HttpStatus.OK
-        );
+        HashMap<String, String> tabs = new HashMap<>();
+        foundArea.getModules()
+                .stream()
+                .map(ModuleInArea::getModuleTabName)
+                .distinct().forEach(s -> tabs.put(s, tabIcons.getOrDefault(s, "")));
+
+        return ResponseEntity.ok(tabs);
     }
 
     public ResponseEntity<Module> getModule(ObjectId userId, ObjectId areaId, ObjectId moduleId) {

@@ -8,8 +8,18 @@ import org.bson.types.ObjectId;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ModuleSeeder {
+
+    public static Map<String, String> tabIcons = new HashMap<>(){{
+        put("آزمایشگاه", "icon-laboratory");
+        put("غربالگری", "icon-health-1");
+        put("متخصص ها", "icon-doctor-1");
+        put("پزشک", "icon-advice");
+        put("توان بخشی", "icon-disability");
+        put("پاراکلینیک", "icon-injection-1");
+    }};
     public static HashMap<String, ObjectId> moduleIds;
     private static ModuleRepository moduleRepository;
     private static List<Module> newItems = new ArrayList<>();

@@ -25,7 +25,7 @@ public class DoctorSeeder {
                 Module
                         .builder()
                         .tabName("پزشک")
-                        .icon("")
+                        .icon("icon-advice")
                         .isReferral(true)
                         .name("پزشک عمومی")
                         .subModules(

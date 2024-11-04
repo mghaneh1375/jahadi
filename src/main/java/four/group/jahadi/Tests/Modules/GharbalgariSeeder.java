@@ -17,7 +17,7 @@ public class GharbalgariSeeder {
                         .builder()
                         .name("غربالگری پایه")
                         .tabName("غربالگری")
-                        .icon("")
+                        .icon("icon-health-1")
                         .subModules(
                                 List.of(
                                         General.make(moduleIds.get("پزشک عمومی")),
@@ -33,7 +33,7 @@ public class GharbalgariSeeder {
                         .builder()
                         .name("غربالگری روان")
                         .tabName("غربالگری")
-                        .icon("")
+                        .icon("icon-health-1")
                         .subModules(
                                 List.of(
                                         RavanSeeder.make(moduleIds.get("روانشناس"))

@@ -11,7 +11,7 @@ public class ExperimentSeeder {
                 .builder()
                 .name("آزمایشگاه")
                 .tabName("آزمایشگاه")
-                .icon("")
+                .icon("icon-laboratory")
                 .canSuggestExperiment(false)
                 .canSuggestDrug(false)
                 .isReferral(false)

@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping(value = "api/region/module")
@@ -51,7 +52,7 @@ public class RegionModuleAPIRoutes extends Router {
     @GetMapping(path = "getTabsInArea/{areaId}")
     @ResponseBody
     @Operation(summary = "گرفتن تب های موجود در منطقه")
-    public ResponseEntity<List<String>> getTabsInArea(
+    public ResponseEntity<Map<String, String>> getTabsInArea(
             HttpServletRequest request,
             @PathVariable @ObjectIdConstraint ObjectId areaId
     ) {

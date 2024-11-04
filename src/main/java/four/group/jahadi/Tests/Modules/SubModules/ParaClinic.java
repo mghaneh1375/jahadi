@@ -95,7 +95,7 @@ public class ParaClinic {
                 .builder()
                 .tabName("پاراکلینیک")
                 .name("پاراکلینیک")
-                .icon("")
+                .icon("icon-injection-1")
 //                .subModules(List.of(history, services))
                 .subModules(List.of(services))
                 .build();

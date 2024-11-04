@@ -10,7 +10,7 @@ public class Sight {
         return Module
                 .builder()
                 .name("اتاق بینایی")
-                .icon("")
+                .icon("icon-disability")
                 .tabName("توان بخشی")
                 .subModules(
                         List.of(

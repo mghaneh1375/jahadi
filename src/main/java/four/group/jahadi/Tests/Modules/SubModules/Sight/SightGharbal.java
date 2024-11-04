@@ -86,7 +86,7 @@ public class SightGharbal {
         return Module
                 .builder()
                 .name("غربال دوم بینایی")
-                .icon("")
+                .icon("icon-disability")
                 .tabName("توان بخشی")
                 .subModules(List.of(subModule))
                 .build();
