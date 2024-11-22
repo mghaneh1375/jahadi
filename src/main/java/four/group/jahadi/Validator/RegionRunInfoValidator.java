@@ -56,15 +56,15 @@ public class RegionRunInfoValidator implements ConstraintValidator<ValidatedRegi
             isErrored = true;
         }
 
-        if(!latPattern.matcher(value.getLat() + "").matches()) {
-            errs.put("lat", "عرض جغرافیایی وارد شده نامعتبر است");
-            isErrored = true;
-        }
-
-        if(!lngPattern.matcher(value.getLng() + "").matches()) {
-            errs.put("lat", "طول جغرافیایی وارد شده نامعتبر است");
-            isErrored = true;
-        }
+//        if(!latPattern.matcher(value.getLat() + "").matches()) {
+//            errs.put("lat", "عرض جغرافیایی وارد شده نامعتبر است");
+//            isErrored = true;
+//        }
+//
+//        if(!lngPattern.matcher(value.getLng() + "").matches()) {
+//            errs.put("lat", "طول جغرافیایی وارد شده نامعتبر است");
+//            isErrored = true;
+//        }
 
         if(!ObjectId.isValid(value.getCityId())) {
             errs.put("cityId", "کد شهر نامعتبر است");
