@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import four.group.jahadi.Models.Question.Question;
 import lombok.*;
 import org.bson.types.ObjectId;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.MongoId;
 
@@ -50,4 +51,8 @@ public class SubModule {
     @Field("readonly_sub_module_id")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private ObjectId readOnlySubModuleId;
+
+    @Transient
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Boolean hasPatientForm;
 }

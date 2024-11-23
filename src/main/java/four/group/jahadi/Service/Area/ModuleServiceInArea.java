@@ -5,16 +5,15 @@ import four.group.jahadi.Enums.AccessInModuleArea;
 import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Exception.NotAccessException;
+import four.group.jahadi.Models.*;
 import four.group.jahadi.Models.Area.Area;
 import four.group.jahadi.Models.Area.ModuleInArea;
+import four.group.jahadi.Models.Area.PatientForm;
 import four.group.jahadi.Models.Module;
-import four.group.jahadi.Models.SubModule;
-import four.group.jahadi.Models.Trip;
-import four.group.jahadi.Models.User;
+import four.group.jahadi.Repository.Area.PatientsInAreaRepository;
 import four.group.jahadi.Repository.ModuleRepository;
 import four.group.jahadi.Repository.TripRepository;
 import four.group.jahadi.Repository.UserRepository;
-import four.group.jahadi.Utility.Utility;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -33,12 +32,12 @@ public class ModuleServiceInArea {
 
     @Autowired
     private TripRepository tripRepository;
-
     @Autowired
     private ModuleRepository moduleRepository;
-
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private PatientsInAreaRepository patientsInAreaRepository;
 
     public void addModule(ObjectId userId, ObjectId areaId, List<ObjectId> moduleIds) {
 
@@ -238,9 +237,9 @@ public class ModuleServiceInArea {
 
     public ResponseEntity<SubModule> getSubModule(
             ObjectId userId, ObjectId areaId,
-            ObjectId moduleId, ObjectId subModuleId
+            ObjectId moduleId, ObjectId subModuleId,
+            ObjectId patientId
     ) {
-
         Trip trip = tripRepository.findByAreaIdAndResponsibleIdAndModuleId(
                 areaId, userId, moduleId
         ).orElseThrow(NotAccessException::new);
@@ -253,11 +252,25 @@ public class ModuleServiceInArea {
         );
 
         Module module = moduleRepository.findById(moduleId).orElseThrow(UnknownError::new);
+        SubModule wantedSubModule = module.getSubModules().stream().filter(subModule -> Objects.equals(subModule.getId(), subModuleId)).findFirst()
+                .orElseThrow(InvalidIdException::new);
 
-        return new ResponseEntity<>(
-                module.getSubModules().stream().filter(subModule -> Objects.equals(subModule.getId(), subModuleId)).findFirst()
-                        .orElseThrow(InvalidIdException::new),
-                HttpStatus.OK);
+        if(patientId != null) {
+            AtomicBoolean hasForm = new AtomicBoolean(false);
+            patientsInAreaRepository.findByAreaIdAndPatientId(areaId, patientId)
+                    .ifPresent(patientInArea -> {
+                        if (patientInArea.getReferrals() == null) return;
+                        if (patientInArea.getReferrals().stream().filter(patientReferral -> patientReferral.getModuleId().equals(moduleId))
+                                .map(patientReferral -> patientReferral.getForms().stream().map(PatientForm::getSubModuleId).collect(Collectors.toList()))
+                                .collect(Collectors.toList())
+                                .stream()
+                                .flatMap(List::stream)
+                                .collect(Collectors.toList()).contains(subModuleId))
+                            hasForm.set(true);
+                    });
+            wantedSubModule.setHasPatientForm(hasForm.get());
+        }
+        return new ResponseEntity<>(wantedSubModule, HttpStatus.OK);
     }
 
     static Object[] checkUsers(ObjectId userId, ObjectId areaId,
@@ -285,7 +298,7 @@ public class ModuleServiceInArea {
     }
 
     public synchronized void addMembersToModule(ObjectId userId, ObjectId areaId,
-                                   ObjectId moduleIdInArea, List<ObjectId> userIds) {
+                                                ObjectId moduleIdInArea, List<ObjectId> userIds) {
 
         Object[] tmp = checkUsers(userId, areaId, userIds, tripRepository);
         Trip wantedTrip = (Trip) tmp[0];
@@ -329,7 +342,7 @@ public class ModuleServiceInArea {
 
 
     public synchronized void addSecretariesToModule(ObjectId userId, ObjectId areaId,
-                                       ObjectId moduleIdInArea, List<ObjectId> userIds) {
+                                                    ObjectId moduleIdInArea, List<ObjectId> userIds) {
 
         Object[] tmp = checkUsers(userId, areaId, userIds, tripRepository);
         Trip wantedTrip = (Trip) tmp[0];

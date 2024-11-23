@@ -5,6 +5,7 @@ import four.group.jahadi.Models.Area.ModuleInArea;
 import four.group.jahadi.Models.SubModule;
 import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Service.Area.ModuleServiceInArea;
+import four.group.jahadi.Service.Area.ReportServiceInArea;
 import four.group.jahadi.Service.ModuleService;
 import four.group.jahadi.Validator.ObjectIdConstraint;
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,6 +16,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 import java.util.List;
@@ -24,12 +26,12 @@ import java.util.Map;
 @RequestMapping(value = "api/region/module")
 @Validated
 public class RegionModuleAPIRoutes extends Router {
-
     @Autowired
     private ModuleServiceInArea moduleServiceInArea;
-
     @Autowired
     private ModuleService moduleService;
+    @Autowired
+    private ReportServiceInArea reportServiceInArea;
 
 
     @GetMapping(path = "getAllModules")
@@ -88,9 +90,13 @@ public class RegionModuleAPIRoutes extends Router {
             HttpServletRequest request,
             @PathVariable @ObjectIdConstraint ObjectId areaId,
             @PathVariable @ObjectIdConstraint ObjectId moduleId,
-            @PathVariable @ObjectIdConstraint ObjectId subModuleId
+            @PathVariable @ObjectIdConstraint ObjectId subModuleId,
+            @RequestParam(required = false, name = "patientId") ObjectId patientId
     ) {
-        return moduleServiceInArea.getSubModule(getId(request), areaId, moduleId, subModuleId);
+        return moduleServiceInArea.getSubModule(
+                getId(request), areaId, moduleId,
+                subModuleId, patientId
+        );
     }
 
 
@@ -182,5 +188,15 @@ public class RegionModuleAPIRoutes extends Router {
             @PathVariable @ObjectIdConstraint ObjectId userId
     ) {
         moduleServiceInArea.removeMemberFromSecretaries(getId(request), areaId, moduleIdInArea, userId);
+    }
+
+    @GetMapping(path = "test/{areaId}/{moduleId}")
+    public void test(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            @PathVariable @ObjectIdConstraint ObjectId areaId,
+            @PathVariable @ObjectIdConstraint ObjectId moduleId
+    ) {
+        reportServiceInArea.moduleReport(getId(request), areaId, moduleId, response);
     }
 }

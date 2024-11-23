@@ -33,6 +33,11 @@ public interface UserRepository extends MongoRepository<User, ObjectId>, Filtera
     List<User> findDigestByIdsIn(List<ObjectId> ids);
 
     @Query(value = "{ '_id': { $in: ?0 } }",
+            fields = "{ 'name': 1 }"
+    )
+    List<User> findJustNameByIdsIn(List<ObjectId> ids);
+
+    @Query(value = "{ '_id': { $in: ?0 } }",
             fields = "{ 'name': 1, 'nid': 1, 'phone': 1, 'tel': 1, 'field': 1, 'pic': 1, 'color': 1, 'sex': 1, 'status': 1, 'lodgment': 1 }"
     )
     List<User> findGroupUsersByIdsIn(List<ObjectId> ids);

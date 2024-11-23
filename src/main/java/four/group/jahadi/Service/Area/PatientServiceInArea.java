@@ -944,13 +944,12 @@ public class PatientServiceInArea {
             throw new RuntimeException("بیمار مدنظر در ماژول مدنظر پذیرش نشده است");
 
         PatientReferral wantedReferral = optionalPatientReferral.get();
-
-        PatientForm newPatientForm = PatientForm
+        PatientForm newPatientForm = (PatientForm) PatientForm
                 .builder()
                 .subModuleId(subModuleId)
                 .answers(patientAnswers)
                 .doctorId(userId)
-                .build();
+                .build().createId();
 
         if (marks != null)
             newPatientForm.setMark(marks);

@@ -56,10 +56,7 @@ public interface PatientsInAreaRepository extends MongoRepository<PatientsInArea
     })
     List<PatientJoinArea> findPatientsListInModuleByAreaId(ObjectId areaId, ObjectId moduleId);
 
-    @Query(value = "{areaId: ?0, referrals.moduleId: ?1}")
-    List<Patient> findByAreaIdAndModuleId(ObjectId areaId, ObjectId moduleId);
-
-    @Query(value = "{areaId: ?0, referrals.moduleId: ?1, referrals.recepted: ?2}")
-    List<Patient> findByAreaIdAndModuleIdAndRecepted(ObjectId areaId, ObjectId moduleId, boolean recepted);
+    @Query(value = "{areaId: ?0, referrals: { $elemMatch: {moduleId: ?1, forms: {$exists: true}} } }")
+    List<PatientsInArea> findByAreaIdAndModuleId(ObjectId areaId, ObjectId moduleId);
 
 }
