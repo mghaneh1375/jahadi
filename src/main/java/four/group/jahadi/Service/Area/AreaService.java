@@ -29,6 +29,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static four.group.jahadi.Service.Area.AreaUtils.findArea;
+import static four.group.jahadi.Service.Area.AreaUtils.findStartedArea;
 import static four.group.jahadi.Utility.Utility.getDate;
 import static four.group.jahadi.Utility.Utility.getLastDate;
 
@@ -181,7 +182,7 @@ public class AreaService extends AbstractService<Area, AreaData> {
         Trip wantedTrip = tripRepository.findByAreaIdAndResponsibleId(areaId, userId)
                 .orElseThrow(NotAccessException::new);
 
-        Area area = findArea(wantedTrip, areaId, userId);
+        Area area = findStartedArea(wantedTrip, areaId);
         HashMap<String, Boolean> accesses = new HashMap<>();
         accesses.put("pharmacy", area.getPharmacyManagers() != null && area.getPharmacyManagers().contains(userId));
         accesses.put("dispatcher", area.getDispatchers() != null && area.getDispatchers().contains(userId));
