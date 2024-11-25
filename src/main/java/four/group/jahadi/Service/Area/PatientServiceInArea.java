@@ -527,8 +527,10 @@ public class PatientServiceInArea {
         Area area = AreaUtils.findStartedArea(trip, areaId);
         ModuleInArea moduleInArea = AreaUtils.findModule(
                 area, moduleId,
-                userId.equals(area.getOwnerId()) ? null : userId,
-                userId.equals(area.getOwnerId()) ? null : userId
+                null, null
+//              todo:
+//                userId.equals(area.getOwnerId()) ? null : userId,
+//                userId.equals(area.getOwnerId()) ? null : userId
         );
 
         List<PatientJoinArea> patients = patientsInAreaRepository.findPatientsListInModuleByAreaId(
@@ -985,7 +987,8 @@ public class PatientServiceInArea {
         Area area = AreaUtils.findStartedArea(trip, areaId);
         AreaUtils.findModule(
                 area, moduleId,
-                userId.equals(area.getOwnerId()) ? null : userId
+                null
+//              todo: userId.equals(area.getOwnerId()) ? null : userId
         );
 
         PatientsInArea patientInArea = patientsInAreaRepository.findByAreaIdAndPatientId(

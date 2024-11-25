@@ -60,8 +60,8 @@ public class ExperimentServiceInArea {
         Area startedArea = findStartedArea(trip, areaId);
         findModule(
                 startedArea, moduleId,
-                startedArea.getOwnerId().equals(userId) ? null : userId,
-                null
+//              todo:  startedArea.getOwnerId().equals(userId) ? null : userId,
+                null, null
         );
         Module module = moduleRepository.findById(moduleId).get();
         if (!module.isCanSuggestExperiment())
@@ -132,7 +132,22 @@ public class ExperimentServiceInArea {
             ObjectId moduleId, ObjectId patientId,
             ObjectId experimentId
     ) {
-        PatientsInArea wantedPatient = hasAccess(userId, areaId, moduleId, patientId);
+        Trip trip = tripRepository.findByAreaIdAndResponsibleId(areaId, userId)
+                .orElseThrow(NotAccessException::new);
+
+        Area startedArea = findStartedArea(trip, areaId);
+        findModule(
+                startedArea, moduleId,
+                startedArea.getOwnerId().equals(userId) ? null : userId,
+                null
+        );
+        Module module = moduleRepository.findById(moduleId).get();
+        if (!module.isCanSuggestExperiment())
+            throw new NotAccessException();
+
+        PatientsInArea wantedPatient = patientsInAreaRepository.findByAreaIdAndPatientId(areaId, patientId)
+                .orElseThrow(InvalidIdException::new);
+
         PatientReferral wantedPatientReferral = wantedPatient.getReferrals().stream()
                 .filter(patientReferral ->
                         patientReferral.getModuleId().equals(moduleId) &&

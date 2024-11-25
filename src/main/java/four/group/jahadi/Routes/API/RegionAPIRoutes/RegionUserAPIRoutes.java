@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.Size;
+import java.util.HashMap;
 import java.util.List;
 
 @RestController
@@ -47,6 +48,16 @@ public class RegionUserAPIRoutes extends Router {
     @Operation(summary = "گرفتن لیستی از مناطقی که من جهادگر آنها هستم که هنوز تموم نشده اند")
     public ResponseEntity<List<Trip>> myCartableAreas(HttpServletRequest request) {
         return areaService.myCartableList(getId(request), false);
+    }
+
+    @GetMapping(value = "staticAccesses/{areaId}")
+    @ResponseBody
+    @Operation(summary = "گرفتن دسترسی های من جهادگر به ماژول های استاتیک در یک منطقه خاص")
+    public ResponseEntity<HashMap<String, Boolean>> staticAccesses(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId
+    ) {
+        return areaService.staticAccesses(getId(request), areaId);
     }
 
 }

@@ -177,6 +177,22 @@ public class AreaService extends AbstractService<Area, AreaData> {
         return new ResponseEntity<>(trips, HttpStatus.OK);
     }
 
+    public ResponseEntity<HashMap<String, Boolean>> staticAccesses(ObjectId userId, ObjectId areaId) {
+        Trip wantedTrip = tripRepository.findByAreaIdAndResponsibleId(areaId, userId)
+                .orElseThrow(NotAccessException::new);
+
+        Area area = findArea(wantedTrip, areaId, userId);
+        HashMap<String, Boolean> accesses = new HashMap<>();
+        accesses.put("pharmacy", area.getPharmacyManagers() != null && area.getPharmacyManagers().contains(userId));
+        accesses.put("dispatcher", area.getDispatchers() != null && area.getDispatchers().contains(userId));
+        accesses.put("equipment", area.getEquipmentManagers() != null && area.getEquipmentManagers().contains(userId));
+        accesses.put("laboratory", area.getLaboratoryManager() != null && area.getLaboratoryManager().contains(userId));
+        accesses.put("insurance", area.getInsurancers() != null && area.getInsurancers().contains(userId));
+        accesses.put("trainer", area.getTrainers() != null && area.getTrainers().contains(userId));
+
+        return new ResponseEntity<>(accesses, HttpStatus.OK);
+    }
+
     public ResponseEntity<HashMap<String, Object>> dashboard(ObjectId userId, ObjectId areaId) {
 
         Trip wantedTrip = tripRepository.findByAreaIdAndOwnerId(areaId, userId)
