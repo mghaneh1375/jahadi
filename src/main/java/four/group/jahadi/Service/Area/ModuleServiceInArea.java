@@ -224,9 +224,10 @@ public class ModuleServiceInArea {
 
         Area area = AreaUtils.findStartedArea(trip, areaId);
         AreaUtils.findModule(
-                area, moduleId,
-                userId.equals(area.getOwnerId()) ? null : userId,
-                userId.equals(area.getOwnerId()) ? null : userId
+                area, moduleId, null, null
+// todo: check
+//                userId.equals(area.getOwnerId()) ? null : userId,
+//                userId.equals(area.getOwnerId()) ? null : userId
         );
 
         Module module = moduleRepository.findById(moduleId).orElseThrow(UnknownError::new);

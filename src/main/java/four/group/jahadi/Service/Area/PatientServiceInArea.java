@@ -205,10 +205,11 @@ public class PatientServiceInArea {
         doAddPatientToRegion(area, patientId, patient.getAgeType());
     }
 
-    public ResponseEntity<Patient> inquiryPatient(ObjectId userId, ObjectId areaId,
-                                                  InquiryPatientData patientData) {
-
-        tripRepository.findActiveByAreaIdAndDispatcherId(areaId, userId, Utility.getCurrDate())
+    public ResponseEntity<Patient> inquiryPatient(
+            ObjectId userId, ObjectId areaId,
+            InquiryPatientData patientData
+    ) {
+        tripRepository.findActiveByAreaIdAndResponsibleId(areaId, userId, Utility.getCurrDate())
                 .orElseThrow(NotAccessException::new);
 
         Patient patient = patientRepository.findByIdentifierAndIdentifierType(
@@ -475,7 +476,7 @@ public class PatientServiceInArea {
             foundArea.getModules().stream()
                     .filter(module ->
                             module.getModuleName().equals("غربالگری پایه") ||
-                            module.getModuleName().equals("غربالگری روان")
+                                    module.getModuleName().equals("غربالگری روان")
                     )
                     .forEach(module -> patient.setReferrals(
                             doAddReferral(
@@ -728,18 +729,17 @@ public class PatientServiceInArea {
             MultipartFile[] files
     ) {
 
-        if(files != null) {
-            for(MultipartFile file : files) {
+        if (files != null) {
+            for (MultipartFile file : files) {
                 if (file.getSize() > ONE_MB * 5)
                     throw new RuntimeException("حداکثر حجم مجاز 5MB می باشد");
                 try {
                     String fileType = (String) FileUtils.getFileType(Objects.requireNonNull(file.getOriginalFilename())).getKey();
-                    if(!fileType.equalsIgnoreCase("pdf") &&
+                    if (!fileType.equalsIgnoreCase("pdf") &&
                             !fileType.equalsIgnoreCase("image")
                     )
                         throw new RuntimeException("شما تنها مجاز به آپلود فایل های تصویری و PDF می باشد");
-                }
-                catch (Exception x) {
+                } catch (Exception x) {
                     throw new RuntimeException(x.getMessage());
                 }
             }
@@ -862,7 +862,7 @@ public class PatientServiceInArea {
             if (data.getFileIndex() != null) {
                 String filename = uploadFile(files[data.getFileIndex()], UPLOAD_FOLDER);
                 if (filename == null) {
-                    for(String file : filenames)
+                    for (String file : filenames)
                         removeFile(file, UPLOAD_FOLDER);
                     throw new RuntimeException("خطای ناشناخته هنگام بارگداری فایل");
                 }
@@ -891,7 +891,7 @@ public class PatientServiceInArea {
                     .questionId(data.getQuestionId())
                     .build();
 
-            if(a.getAnswerType().equals(AnswerType.UPLOAD))
+            if (a.getAnswerType().equals(AnswerType.UPLOAD))
                 patientAnswer.setUploadedFile(filenames.get(data.getFileIndex()));
             else
                 patientAnswer.setAnswer(data.getAnswer());
@@ -916,7 +916,7 @@ public class PatientServiceInArea {
                     !data.getSampleInfoDesc().isEmpty())
                 patientAnswer.setSampleInfoDesc(data.getSampleInfoDesc());
 
-            if(a.getCanUploadFile() && data.getFileIndex() != null &&
+            if (a.getCanUploadFile() && data.getFileIndex() != null &&
                     filenames.size() > data.getFileIndex()
             )
                 patientAnswer.setAdditionalUploadedFile(filenames.get(data.getFileIndex()));
