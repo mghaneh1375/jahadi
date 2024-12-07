@@ -63,11 +63,12 @@ public class ReportServiceInArea {
         Area area = findArea(wantedTrip, areaId, userId);
         findModule(area, moduleId, null);
         Module module = moduleRepository.findById(moduleId).get();
-        List<Question> questions = new ArrayList<>();
+        HashMap<ObjectId, List<Question>> subModulesQuestions = new HashMap<>();
         AtomicInteger incRowStep = new AtomicInteger(1);
 
         module.getSubModules()
                 .forEach(subModule -> {
+                    subModulesQuestions.put(subModule.getId(), new ArrayList<>());
                     subModule
                             .getQuestions()
                             .forEach(question -> {
@@ -76,7 +77,9 @@ public class ReportServiceInArea {
                                 if (question.getQuestionType().equals(QuestionType.GROUP)) {
                                     ((GroupQuestion) question).getQuestions()
                                             .stream().filter(question1 -> !question1.getQuestionType().equals(QuestionType.TABLE))
-                                            .forEach(questions::add);
+                                            .forEach(question1 -> {
+                                                subModulesQuestions.get(subModule.getId()).add(question1);
+                                            });
                                     return;
                                 }
                                 if (question.getQuestionType().equals(QuestionType.CHECK_LIST)) {
@@ -84,11 +87,11 @@ public class ReportServiceInArea {
                                     q.getQuestions()
                                             .forEach(question1 -> {
                                                 question1.setOptions(q.getOptions());
-                                                questions.add(question1);
+                                                subModulesQuestions.get(subModule.getId()).add(question1);
                                             });
                                     return;
                                 }
-                                questions.add(question);
+                                subModulesQuestions.get(subModule.getId()).add(question);
                             });
                     subModule
                             .getQuestions()
@@ -103,11 +106,11 @@ public class ReportServiceInArea {
                                             .forEach(question1 -> {
                                                 if (((TableQuestion) question1).getFirstColumn() != null)
                                                     incRowStep.set(Math.max(((TableQuestion) question1).getFirstColumn().size(), incRowStep.get()));
-                                                questions.add(question1);
+                                                subModulesQuestions.get(subModule.getId()).add(question1);
                                             });
                                     return;
                                 }
-                                questions.add(question);
+                                subModulesQuestions.get(subModule.getId()).add(question);
                             });
                 });
 
@@ -118,9 +121,20 @@ public class ReportServiceInArea {
         List<ObjectId> subModuleIds = module.getSubModules().stream().map(SubModule::getId)
                 .collect(Collectors.toList());
 
+        List<Short> maxRows = new ArrayList<>();
         AtomicInteger idx = new AtomicInteger();
-        module.getSubModules().forEach(subModule ->
-                excelService.writeHeader(workbook.getSheetAt(idx.getAndIncrement()), subModule)
+        module.getSubModules().forEach(subModule -> {
+                    Sheet sheet = workbook.getSheetAt(idx.getAndIncrement());
+                    maxRows.add(excelService.writeHeader(sheet, subModule));
+                    for(int i = 0; i < sheet.getRow(0).getLastCellNum(); i++) {
+                        CellRangeAddress mergedCell = excelService.isMergedCell(0, i, sheet);
+                        if(mergedCell == null)
+                            sheet.setColumnWidth(i, 18 * 255);
+                        else {
+                            mergedCell.forEach(cellAddress -> sheet.setColumnWidth(cellAddress.getColumn(), 18 * 255));
+                        }
+                    }
+                }
         );
 
         List<PatientsInArea> patients = patientsInAreaRepository.findByAreaIdAndModuleId(areaId, moduleId);
@@ -142,9 +156,10 @@ public class ReportServiceInArea {
             List<User> doctors = userRepository.findJustNameByIdsIn(new ArrayList<>(doctorIds));
 
             AtomicInteger sheetIdx = new AtomicInteger(0);
-            AtomicInteger rowIdx = new AtomicInteger(2);
+            AtomicInteger rowIdx = new AtomicInteger();
             subModuleIds.forEach(subModuleId -> {
                 Sheet sheet = workbook.getSheetAt(sheetIdx.get());
+                rowIdx.set(maxRows.get(sheetIdx.get()));
                 patients.forEach(patient -> {
                     Patient wantedPatient = patientsInfo
                             .stream()
@@ -168,10 +183,10 @@ public class ReportServiceInArea {
                                                     .filter(user -> user.getId().equals(patientForm.getDoctorId()))
                                                     .findFirst().get();
                                             row.createCell(4).setCellValue(doctor.getName());
-                                            row.createCell(5).setCellValue(patientForm.getCreatedAt() == null ? "" : Utility.convertDateToJalali(patientForm.getCreatedAt()));
+                                            row.createCell(5).setCellValue(patientReferral.getReceptedAt() == null ? "" : Utility.convertDateToJalali(patientReferral.getReceptedAt()));
 
                                             if (incRowStep.get() > 1) {
-                                                for(int i = 0; i < 6; i++) {
+                                                for (int i = 0; i < 6; i++) {
                                                     sheet.addMergedRegion(new CellRangeAddress(
                                                             rowIdx.get() - 1, rowIdx.get(),
                                                             i, i
@@ -180,7 +195,7 @@ public class ReportServiceInArea {
                                             }
 
                                             AtomicInteger cellIdx = new AtomicInteger(6);
-                                            questions.forEach(question -> {
+                                            subModulesQuestions.get(subModuleId).forEach(question -> {
                                                 Optional<PatientAnswer> patientAnswer1 = patientForm.getAnswers()
                                                         .stream()
                                                         .filter(patientAnswer -> patientAnswer.getQuestionId().equals(question.getId()))
@@ -193,8 +208,7 @@ public class ReportServiceInArea {
                                                                 cellIdx.get() - 1, cellIdx.get() - 1
                                                         ));
                                                     }
-                                                }
-                                                else {
+                                                } else {
                                                     if (question.getQuestionType().equals(QuestionType.SIMPLE) &&
                                                             ((SimpleQuestion) question).getOptions() != null
                                                     ) {

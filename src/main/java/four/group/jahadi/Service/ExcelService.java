@@ -2,9 +2,8 @@ package four.group.jahadi.Service;
 
 import four.group.jahadi.Models.Question.*;
 import four.group.jahadi.Models.SubModule;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
@@ -22,7 +21,7 @@ public class ExcelService {
         return workbook;
     }
 
-    private CellRangeAddress isMergedCell(int row, int column, Sheet sheet) {
+    public CellRangeAddress isMergedCell(int row, int column, Sheet sheet) {
         for (CellRangeAddress range : sheet.getMergedRegions()) {
             if (range.isInRange(row, column)) {
                 return range;
@@ -32,15 +31,34 @@ public class ExcelService {
         return null;
     }
 
-    public void writeHeader(Sheet sheet, SubModule subModule) {
-        int rowIdx = 0;
-        Row row = sheet.createRow(rowIdx);
-        row.createCell(0).setCellValue("نام بیمار");
-        row.createCell(1).setCellValue("بیمه");
-        row.createCell(2).setCellValue("سن");
-        row.createCell(3).setCellValue("جنسیت");
-        row.createCell(4).setCellValue("نام دکتر");
-        row.createCell(5).setCellValue("زمان پذیرش");
+    public short writeHeader(Sheet sheet, SubModule subModule) {
+        Row row = sheet.createRow(0);
+        Workbook wb = row.getSheet().getWorkbook();
+        CellStyle parentCellStyle = wb.createCellStyle();
+        parentCellStyle.setAlignment(HorizontalAlignment.CENTER);
+        Font font = wb.createFont();
+        font.setColor(HSSFColor.HSSFColorPredefined.RED.getIndex());
+        font.setBold(true);
+        parentCellStyle.setFont(font);
+
+        Cell c0 = row.createCell(0);
+        c0.setCellStyle(parentCellStyle);
+        c0.setCellValue("نام بیمار");
+        Cell c1 = row.createCell(1);
+        c1.setCellStyle(parentCellStyle);
+        c1.setCellValue("بیمه");
+        Cell c2 = row.createCell(2);
+        c2.setCellStyle(parentCellStyle);
+        c2.setCellValue("سن");
+        Cell c3 = row.createCell(3);
+        c3.setCellStyle(parentCellStyle);
+        c3.setCellValue("جنسیت");
+        Cell c4 = row.createCell(4);
+        c4.setCellStyle(parentCellStyle);
+        c4.setCellValue("نام دکتر");
+        Cell c5 = row.createCell(5);
+        c5.setCellStyle(parentCellStyle);
+        c5.setCellValue("زمان پذیرش");
         AtomicInteger colIdx = new AtomicInteger(6);
         AtomicInteger maxRow = new AtomicInteger(1);
         HashMap<Integer, Question> complexQuestions = new HashMap<>();
@@ -48,13 +66,15 @@ public class ExcelService {
         subModule.getQuestions().forEach(question -> {
             switch (question.getQuestionType()) {
                 case SIMPLE:
-                    row.createCell(colIdx.getAndIncrement())
-                            .setCellValue(((SimpleQuestion) question).getQuestion());
+                    Cell cell2 = row.createCell(colIdx.getAndIncrement());
+                    cell2.setCellStyle(parentCellStyle);
+                    cell2.setCellValue(((SimpleQuestion) question).getQuestion());
                     break;
                 case CHECK_LIST:
                     CheckListGroupQuestion checkListGroupQuestion = (CheckListGroupQuestion) question;
-                    row.createCell(colIdx.get())
-                            .setCellValue(checkListGroupQuestion.getSectionTitle());
+                    Cell cell = row.createCell(colIdx.get());
+                    cell.setCellValue(checkListGroupQuestion.getSectionTitle());
+                    cell.setCellStyle(parentCellStyle);
                     sheet.addMergedRegion(
                             new CellRangeAddress(
                                     0, 0, colIdx.get(), colIdx.get() + checkListGroupQuestion.getQuestions().size() - 1
@@ -72,8 +92,9 @@ public class ExcelService {
                     ((GroupQuestion) question).getQuestions().forEach(question1 -> {
                         switch (question1.getQuestionType()) {
                             case SIMPLE:
-                                row.createCell(colIdx.getAndIncrement())
-                                        .setCellValue(((SimpleQuestion) question1).getQuestion());
+                                Cell cell3 = row.createCell(colIdx.getAndIncrement());
+                                cell3.setCellStyle(parentCellStyle);
+                                cell3.setCellValue(((SimpleQuestion) question1).getQuestion());
                                 break;
                             case CHECK_LIST:
                                 ((CheckListGroupQuestion) question1).getQuestions().forEach(question11 ->
@@ -84,11 +105,12 @@ public class ExcelService {
                                 break;
                             case TABLE:
                                 complexQuestions.put(colIdx.get(), question1);
-                                row.createCell(colIdx.get())
-                                        .setCellValue(
-                                                ((TableQuestion) question1).getTitle() == null ? "test" :
-                                                        ((TableQuestion) question1).getTitle()
-                                        );
+                                Cell cell1 = row.createCell(colIdx.get());
+                                cell1.setCellStyle(parentCellStyle);
+                                cell1.setCellValue(
+                                        ((TableQuestion) question1).getTitle() == null ? "test" :
+                                                ((TableQuestion) question1).getTitle()
+                                );
                                 sheet.addMergedRegion(
                                         new CellRangeAddress(
                                                 0, 0,
@@ -136,7 +158,7 @@ public class ExcelService {
                     AtomicInteger counter2 = new AtomicInteger(0);
                     TableQuestion tableQuestion1 = ((TableQuestion) question);
                     Row newRow = sheet.getRow(1);
-                    if(tableQuestion1.getFirstColumn() != null)
+                    if (tableQuestion1.getFirstColumn() != null)
                         newRow.createCell(colIndex + counter2.getAndIncrement());
 
                     tableQuestion1.getHeaders().forEach(s -> newRow
@@ -145,6 +167,8 @@ public class ExcelService {
                     break;
             }
         });
+
+        return (short) maxRow.get();
     }
 
 }

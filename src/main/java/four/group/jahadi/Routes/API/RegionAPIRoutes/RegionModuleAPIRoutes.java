@@ -190,8 +190,8 @@ public class RegionModuleAPIRoutes extends Router {
         moduleServiceInArea.removeMemberFromSecretaries(getId(request), areaId, moduleIdInArea, userId);
     }
 
-    @GetMapping(path = "test/{areaId}/{moduleId}")
-    public void test(
+    @GetMapping(path = "getModuleReport/{areaId}/{moduleId}")
+    public void getModuleReport(
             HttpServletRequest request,
             HttpServletResponse response,
             @PathVariable @ObjectIdConstraint ObjectId areaId,
