@@ -53,6 +53,20 @@ public class RegionPatientAPIRoutes extends Router {
         patientServiceInArea.createPatientAndAddToRegion(getId(request), areaId, patientData);
     }
 
+    @PutMapping(value = "updatePatient/{patientId}/{areaId}")
+    @ResponseBody
+    @Operation(
+            summary = "ویرایش اطلاعات بیمار در یک منطقه توسط فرد مسئول پذیرش"
+    )
+    public void updatePatient(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId patientId,
+            @PathVariable @ObjectIdConstraint ObjectId areaId,
+            @RequestBody @Valid PatientData patientData
+    ) {
+        patientServiceInArea.updatePatient(patientId, getId(request), areaId, patientData);
+    }
+
     @PostMapping(value = "inquiryPatient/{areaId}")
     @ResponseBody
     @Operation(

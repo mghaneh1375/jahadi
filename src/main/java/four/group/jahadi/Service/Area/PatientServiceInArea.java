@@ -144,6 +144,33 @@ public class PatientServiceInArea {
         return new ResponseEntity<>(output, HttpStatus.OK);
     }
 
+    public void updatePatient(
+            ObjectId patientId, ObjectId userId,
+            ObjectId areaId, PatientData patientData
+    ) {
+        Patient patient = patientRepository.findById(patientId).orElseThrow(InvalidIdException::new);
+        if(!patientsInAreaRepository.existByAreaIdAndPatientId(areaId, patientId))
+            throw new NotAccessException();
+
+        Trip trip = tripRepository.findActiveByAreaIdAndDispatcherId(areaId, userId, Utility.getCurrDate())
+                .orElseThrow(NotAccessException::new);
+        findStartedArea(trip, areaId);
+
+        patient.setAgeType(patientData.getAgeType());
+        patient.setJob(patientData.getJob());
+        patient.setSex(patientData.getSex());
+        patient.setPhone(patientData.getPhone());
+        patient.setName(patientData.getName());
+        patient.setFatherName(patientData.getFatherName());
+        patient.setIdentifier(patientData.getIdentifier());
+        patient.setIdentifierType(patientData.getIdentifierType());
+        patient.setInsurance(patientData.getInsurance());
+        patient.setPatientNo(patientData.getPatientNo());
+        patient.setBirthDate(new Date(patientData.getBirthDate()));
+
+        patientRepository.save(patient);
+    }
+
     public void createPatientAndAddToRegion(ObjectId userId, ObjectId areaId, PatientData patientData) {
 
         //todo: check finalize

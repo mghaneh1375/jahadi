@@ -39,37 +39,41 @@ public class ModuleServiceInArea {
     @Autowired
     private PatientsInAreaRepository patientsInAreaRepository;
 
-    public void addModule(ObjectId userId, ObjectId areaId, List<ObjectId> moduleIds) {
+    public void setModules(ObjectId userId, ObjectId areaId, List<ObjectId> moduleIds) {
 
         Trip wantedTrip = tripRepository.findByAreaIdAndOwnerId(areaId, userId)
                 .orElseThrow(NotAccessException::new);
 
         List<Module> foundModules = moduleRepository.findByIds(moduleIds);
-        if (foundModules.size() != moduleIds.size())
-            throw new NotAccessException();
+//        if (foundModules.size() != moduleIds.size())
+//            throw new NotAccessException();
 
         Area foundArea = wantedTrip
                 .getAreas().stream().filter(area -> area.getId().equals(areaId))
                 .findFirst().orElseThrow(RuntimeException::new);
 
         List<ModuleInArea> modules = foundArea.getModules();
+        List<ModuleInArea> newList = new ArrayList<>();
         moduleIds.forEach(objectId -> {
-            if (modules.stream().noneMatch(moduleInArea -> moduleInArea.getModuleId().equals(objectId))) {
-
-                Module foundModule = foundModules.stream().filter(module -> module.getId().equals(objectId))
-                        .findFirst().get();
-
-                modules.add(ModuleInArea.builder()
-                        .id(new ObjectId())
-                        .moduleId(objectId)
-                        .moduleName(foundModule.getName())
-                        .moduleTabName(foundModule.getTabName())
-                        .build()
-                );
-            }
+            Optional<ModuleInArea> moduleInAreaOptional =
+                    modules.stream().filter(moduleInArea -> moduleInArea.getModuleId().equals(objectId)).findFirst();
+            if (moduleInAreaOptional.isEmpty()) {
+                foundModules
+                        .stream()
+                        .filter(module -> module.getId().equals(objectId))
+                        .findFirst()
+                        .ifPresent(foundModule -> newList.add(ModuleInArea.builder()
+                                .id(new ObjectId())
+                                .moduleId(objectId)
+                                .moduleName(foundModule.getName())
+                                .moduleTabName(foundModule.getTabName())
+                                .build()
+                        ));
+            } else
+                newList.add(moduleInAreaOptional.get());
         });
 
-        foundArea.setModules(modules);
+        foundArea.setModules(newList);
         tripRepository.save(wantedTrip);
     }
 
@@ -258,7 +262,7 @@ public class ModuleServiceInArea {
         SubModule wantedSubModule = module.getSubModules().stream().filter(subModule -> Objects.equals(subModule.getId(), subModuleId)).findFirst()
                 .orElseThrow(InvalidIdException::new);
 
-        if(patientId != null) {
+        if (patientId != null) {
             AtomicBoolean hasForm = new AtomicBoolean(false);
             patientsInAreaRepository.findByAreaIdAndPatientId(areaId, patientId)
                     .ifPresent(patientInArea -> {

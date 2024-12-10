@@ -100,18 +100,18 @@ public class RegionModuleAPIRoutes extends Router {
     }
 
 
-    @PutMapping(path = "addModule/{areaId}")
+    @PutMapping(path = "setModules/{areaId}")
     @ResponseBody
     @Operation(
-            summary = "افزودن ماژول/ماژول ها به یک منطقه توسط مسئول منطقه",
+            summary = "ست کردن ماژول/ماژول ها به یک منطقه توسط مسئول منطقه",
             description = "زمان شروع اردو نباید رسیده باشد"
     )
-    public void addModule(
+    public void setModules(
             HttpServletRequest request,
             @PathVariable @ObjectIdConstraint ObjectId areaId,
             @RequestBody List<ObjectId> moduleIds
     ) {
-        moduleServiceInArea.addModule(getId(request), areaId, moduleIds);
+        moduleServiceInArea.setModules(getId(request), areaId, moduleIds);
     }
 
     @DeleteMapping(path = "removeModule/{areaId}")

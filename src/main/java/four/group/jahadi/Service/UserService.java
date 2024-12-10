@@ -29,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static four.group.jahadi.Utility.FileUtils.removeFile;
 import static four.group.jahadi.Utility.FileUtils.uploadFile;
@@ -292,16 +293,17 @@ public class UserService extends AbstractService<User, SignUpData> {
 
         User user = userRepository.findById(id).orElseThrow(InvalidIdException::new);
 
-        if(params.length > 0) {
+        if (params.length > 0) {
             if (!Objects.equals(params[0], user.getGroupId()))
                 throw new NotAccessException();
         }
 
-        user.getAccesses().stream().filter(access -> access.equals(Access.GROUP))
-                .findFirst().flatMap(access -> groupRepository.findById(user.getGroupId()))
-                .ifPresent(group -> {
-                    user.setGroupCode(group.getCode());
-                    user.setGroupPic(group.getPic());
+        groupRepository.findById(user.getGroupId())
+                .ifPresent(value -> {
+                    user.setGroupCode(value.getCode());
+                    user.getAccesses().stream().filter(access -> access.equals(Access.GROUP))
+                            .findFirst()
+                            .ifPresent(access -> user.setGroupPic(value.getPic()));
                 });
 
         return new ResponseEntity<>(
@@ -496,7 +498,7 @@ public class UserService extends AbstractService<User, SignUpData> {
         try {
             User u = userRepository.findByNID(data.getNid()).orElseThrow(InvalidIdException::new);
 
-            if(!u.getGroupId().equals(groupId))
+            if (!u.getGroupId().equals(groupId))
                 throw new NotAccessException();
 
             String token = jwtTokenProvider.createToken(data.getNid(), u.getAccesses(), u.getGroupId(), u.getId());
@@ -592,14 +594,11 @@ public class UserService extends AbstractService<User, SignUpData> {
     }
 
     public void setGroup(ObjectId id, Integer code) {
-
         Group group = groupRepository.findByCode(code).orElseThrow(InvalidCodeException::new);
-
         User user = userRepository.findById(id).orElseThrow(InvalidIdException::new);
         user.setGroupId(group.getId());
         user.setGroupName(group.getName());
         userRepository.save(user);
-
     }
 
     public void removeFromGroup(ObjectId userId, ObjectId groupId) {
@@ -658,10 +657,12 @@ public class UserService extends AbstractService<User, SignUpData> {
 
         return new ResponseEntity<>(
                 userRepository.findAll(
-                        AccountStatus.ACTIVE, Access.JAHADI,
-                        null, null, null, null,
-                        null, groupId, null
-                ),
+                                AccountStatus.ACTIVE, Access.JAHADI,
+                                null, null, null, null,
+                                null, groupId, null
+                        ).stream()
+                        .filter(user -> !user.getId().equals(userId) && !user.getAccesses().contains(Access.GROUP))
+                        .collect(Collectors.toList()),
                 HttpStatus.OK
         );
     }
@@ -680,7 +681,7 @@ public class UserService extends AbstractService<User, SignUpData> {
                 user.getAccesses().contains(Access.GROUP) ? Access.GROUP : Access.JAHADI
         );
 
-        if(Objects.equals(user.getRole(), Access.JAHADI)) {
+        if (Objects.equals(user.getRole(), Access.JAHADI)) {
             Date currDate = Utility.getCurrDate();
             user.setHasActiveRegion(tripRepository.existNotFinishedByAreaOwnerId(currDate, userId));
             user.setHasActiveTask(tripRepository.existNotFinishedByResponsibleId(currDate, userId));
