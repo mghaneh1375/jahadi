@@ -122,7 +122,7 @@ public class PatientExternalReferralsService {
         List<PatientReferral> referrals = patientInArea
                 .getReferrals()
                 .stream()
-                .filter(patientReferral -> moduleIds.contains(patientReferral.getModuleId()))
+                .filter(patientReferral -> moduleIds.contains(patientReferral.getModuleId()) && patientReferral.getForms() != null && patientReferral.getForms().size() > 0)
                 .collect(Collectors.toList());
 
         List<PatientExternalForm> patientExternalForms =
