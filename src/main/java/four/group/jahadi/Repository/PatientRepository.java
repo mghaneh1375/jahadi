@@ -18,6 +18,9 @@ public interface PatientRepository extends MongoRepository<Patient, ObjectId>, F
     @Query(value = "{identifier: ?0, identifierType: ?1}", count = true)
     Integer countByIdentifierAndIdentifierType(String identifier, IdentifierType identifierType);
 
+    @Query(value = "{_id: {$in: ?0}}")
+    List<Patient> findAllByIds(List<ObjectId> ids);
+
     @Query(value = "{identifier: ?0, identifierType: ?1}")
     Optional<Patient> findByIdentifierAndIdentifierType(String identifier, IdentifierType identifierType);
 

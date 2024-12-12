@@ -19,6 +19,7 @@ import four.group.jahadi.Repository.Area.PatientsInAreaRepository;
 import four.group.jahadi.Repository.ModuleRepository;
 import four.group.jahadi.Repository.PatientRepository;
 import four.group.jahadi.Repository.TripRepository;
+import four.group.jahadi.Repository.UserRepository;
 import four.group.jahadi.Utility.FileUtils;
 import four.group.jahadi.Utility.PairValue;
 import four.group.jahadi.Utility.Utility;
@@ -44,13 +45,10 @@ public class PatientServiceInArea {
 
     @Autowired
     PatientsInAreaRepository patientsInAreaRepository;
-
     @Autowired
     ModuleRepository moduleRepository;
-
     @Autowired
     PatientRepository patientRepository;
-
     @Autowired
     TripRepository tripRepository;
 
@@ -149,7 +147,7 @@ public class PatientServiceInArea {
             ObjectId areaId, PatientData patientData
     ) {
         Patient patient = patientRepository.findById(patientId).orElseThrow(InvalidIdException::new);
-        if(!patientsInAreaRepository.existByAreaIdAndPatientId(areaId, patientId))
+        if (!patientsInAreaRepository.existByAreaIdAndPatientId(areaId, patientId))
             throw new NotAccessException();
 
         Trip trip = tripRepository.findActiveByAreaIdAndDispatcherId(areaId, userId, Utility.getCurrDate())

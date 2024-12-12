@@ -9,14 +9,10 @@ import four.group.jahadi.DTO.Patient.PatientReferralData;
 import four.group.jahadi.DTO.Patient.TrainFormData;
 import four.group.jahadi.Enums.Insurance;
 import four.group.jahadi.Exception.InvalidFieldsException;
-import four.group.jahadi.Models.Area.PatientAnswer;
-import four.group.jahadi.Models.Area.PatientJoinArea;
-import four.group.jahadi.Models.Area.PatientReferral;
-import four.group.jahadi.Models.Area.TrainForm;
+import four.group.jahadi.Models.Area.*;
 import four.group.jahadi.Models.Patient;
 import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Service.Area.PatientServiceInArea;
-import four.group.jahadi.Utility.ValidList;
 import four.group.jahadi.Validator.ObjectIdConstraint;
 import io.swagger.v3.oas.annotations.Operation;
 import org.bson.types.ObjectId;
@@ -29,7 +25,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import javax.validation.constraints.Size;
 import java.util.HashMap;
 import java.util.List;
 
@@ -345,5 +340,4 @@ public class RegionPatientAPIRoutes extends Router {
                 getId(request), areaId, moduleId, subModuleId, patientId
         );
     }
-
 }
