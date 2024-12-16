@@ -5,9 +5,11 @@ import four.group.jahadi.DTO.WareHouseAccessForGroupData;
 import four.group.jahadi.Enums.Sex;
 import four.group.jahadi.Exception.NotActivateAccountException;
 import four.group.jahadi.Exception.UnAuthException;
+import four.group.jahadi.Models.ExternalReferralAccessJoinWithUser;
 import four.group.jahadi.Models.User;
 import four.group.jahadi.Models.WareHouseAccessForGroupJoinWithUser;
 import four.group.jahadi.Routes.Router;
+import four.group.jahadi.Service.ExternalReferralAccessForGroupService;
 import four.group.jahadi.Service.UserService;
 import four.group.jahadi.Service.WareHouseAccessService;
 import four.group.jahadi.Validator.ObjectIdConstraint;
@@ -29,9 +31,10 @@ public class GroupUserAPIRoutes extends Router {
 
     @Autowired
     private UserService userService;
-
     @Autowired
     private WareHouseAccessService wareHouseAccessService;
+    @Autowired
+    private ExternalReferralAccessForGroupService externalReferralAccessForGroupService;
 
     @GetMapping(value = "list")
     @ResponseBody
@@ -102,6 +105,39 @@ public class GroupUserAPIRoutes extends Router {
             @PathVariable @ObjectIdConstraint ObjectId userId
     ) {
         wareHouseAccessService.removeFromWareHouseAccesses(
+                userId, getGroup(request)
+        );
+    }
+
+    @DeleteMapping(value = "revokeExternalReferralAccesses/{userId}")
+    @ResponseBody
+    @Operation(summary = "حذف کاربر از دسترسی کاربران ارجاع خارج در یک گروه")
+    public void revokeExternalReferralAccesses(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId userId
+    ) {
+        externalReferralAccessForGroupService.revokeAccess(
+                userId, getGroup(request)
+        );
+    }
+
+    @GetMapping(value = "getExternalReferralAccesses")
+    @ResponseBody
+    @Operation(summary = "گرفتن لیستی از کاربرانی که در گروه دسترسی بررسی ارجاعات خارجی دارند")
+    public ResponseEntity<List<ExternalReferralAccessJoinWithUser>> getExternalReferralAccesses(
+            HttpServletRequest request
+    ) {
+        return externalReferralAccessForGroupService.list(getGroup(request));
+    }
+
+    @PostMapping(value = "addToExternalReferralAccesses/{userId}")
+    @ResponseBody
+    @Operation(summary = "افزودن کاربری از گروه برای دسترسی بررسی ارجاعات خارج از اردو")
+    public ResponseEntity<ExternalReferralAccessJoinWithUser> addToExternalReferralAccesses(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId userId
+    ) {
+        return externalReferralAccessForGroupService.store(
                 userId, getGroup(request)
         );
     }
