@@ -2,6 +2,7 @@ package four.group.jahadi.Routes;
 
 import four.group.jahadi.Enums.Access;
 import four.group.jahadi.Enums.AccountStatus;
+import four.group.jahadi.Exception.NotAccessException;
 import four.group.jahadi.Exception.NotActivateAccountException;
 import four.group.jahadi.Exception.UnAuthException;
 import four.group.jahadi.Models.TokenInfo;
@@ -47,7 +48,7 @@ public class Router {
             } catch (Exception ignore) {}
         }
 
-        return null;
+        throw new NotAccessException();
     }
 
     protected TokenInfo getTokenInfo(HttpServletRequest request) {
@@ -69,7 +70,7 @@ public class Router {
                         .build();
             } catch (Exception ignore) {}
         }
-        return null;
+        throw new NotAccessException();
     }
 
     protected TokenInfo getFullTokenInfo(HttpServletRequest request) {
@@ -92,7 +93,8 @@ public class Router {
                         .build();
             } catch (Exception ignore) {}
         }
-        return null;
+
+        throw new NotAccessException();
     }
 
     protected ObjectId getId(HttpServletRequest request) {
@@ -108,12 +110,10 @@ public class Router {
                         .getBody();
 
                 return new ObjectId(claims.get("id").toString());
-            } catch (Exception ignore) {
-                ignore.printStackTrace();
-            }
+            } catch (Exception ignore) {}
         }
 
-        return null;
+        throw new NotAccessException();
     }
 
     protected User getUser(HttpServletRequest request)
