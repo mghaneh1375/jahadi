@@ -103,7 +103,6 @@ public class GroupService extends AbstractService<Group, GroupData> {
     }
 
     public void changeCode(ObjectId groupId, int code) {
-
         if(groupId == null)
             throw new NotAccessException();
 
@@ -145,7 +144,6 @@ public class GroupService extends AbstractService<Group, GroupData> {
             throw new NotAccessException();
 
         if(user.getGroupId() == null) {
-
             int code = Utility.randIntForGroupCode();
             Optional<Group> tmp = groupRepository.findByCode(code);
 
@@ -161,7 +159,6 @@ public class GroupService extends AbstractService<Group, GroupData> {
             groupRepository.insert(g);
 
             boolean needUpdateUser = false;
-
             if (!user.getAccesses().contains(Access.GROUP)) {
                 user.getAccesses().add(Access.GROUP);
                 needUpdateUser = true;
@@ -169,12 +166,12 @@ public class GroupService extends AbstractService<Group, GroupData> {
 
             if (user.getGroupId() == null) {
                 user.setGroupId(g.getId());
+                user.setGroupName(g.getName());
                 needUpdateUser = true;
             }
 
             if(needUpdateUser)
                 userRepository.save(user);
-
             return;
         }
 

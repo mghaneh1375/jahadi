@@ -164,9 +164,7 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
     }
 
     public ResponseEntity<Project> findById(ObjectId id, Object... params) {
-
         Project project = projectRepository.findById(id).orElseThrow(InvalidIdException::new);
-
         project.setGroupNames(
                 groupRepository.findByIdsIn(project.getGroupIds())
                         .stream().map(Group::getName).collect(Collectors.toList())

@@ -109,14 +109,25 @@ public class UserService extends AbstractService<User, SignUpData> {
     }
 
     public void update(ObjectId id, UpdateInfoData dto) {
-
         User user = userRepository.findById(id).orElseThrow(InvalidIdException::new);
         BeanUtilsBean notNull = new NullAwareBeanUtilsBean();
-        try {
-            notNull.copyProperties(user, dto);
-            userRepository.save(user);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new RuntimeException(e);
+        if(user.getAccesses().contains(Access.GROUP)) {
+            try {
+                notNull.copyProperties(user, dto);
+                userRepository.save(user);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        else {
+            try {
+                PersonalUpdateInfoData personalUpdateInfoData = new PersonalUpdateInfoData();
+                notNull.copyProperties(personalUpdateInfoData, dto);
+                notNull.copyProperties(user, personalUpdateInfoData);
+                userRepository.save(user);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
@@ -298,13 +309,15 @@ public class UserService extends AbstractService<User, SignUpData> {
                 throw new NotAccessException();
         }
 
-        groupRepository.findById(user.getGroupId())
-                .ifPresent(value -> {
-                    user.setGroupCode(value.getCode());
-                    user.getAccesses().stream().filter(access -> access.equals(Access.GROUP))
-                            .findFirst()
-                            .ifPresent(access -> user.setGroupPic(value.getPic()));
-                });
+        if(user.getGroupId() != null) {
+            groupRepository.findById(user.getGroupId())
+                    .ifPresent(value -> {
+                        user.setGroupCode(value.getCode());
+                        user.getAccesses().stream().filter(access -> access.equals(Access.GROUP))
+                                .findFirst()
+                                .ifPresent(access -> user.setGroupPic(value.getPic()));
+                    });
+        }
 
         return new ResponseEntity<>(
                 user,
@@ -395,7 +408,6 @@ public class UserService extends AbstractService<User, SignUpData> {
     }
 
     public String toggleStatus(ObjectId userId) {
-
         Optional<User> user = userRepository.findById(userId);
         if (user.isEmpty())
             return JSON_NOT_VALID_ID;
@@ -410,13 +422,10 @@ public class UserService extends AbstractService<User, SignUpData> {
             case BLOCKED:
                 u.setStatus(AccountStatus.ACTIVE);
                 if (u.getMembers() != null) {
-
                     Optional<Group> group = groupRepository.findByName(u.getGroupName());
-
                     Group g;
 
                     if (group.isEmpty()) {
-
                         int code = Utility.randIntForGroupCode();
                         Optional<Group> tmp = groupRepository.findByCode(code);
 
@@ -437,6 +446,7 @@ public class UserService extends AbstractService<User, SignUpData> {
                         g = group.get();
 
                     u.setGroupId(g.getId());
+                    u.setGroupName(g.getName());
                 }
                 break;
             default:
@@ -444,7 +454,6 @@ public class UserService extends AbstractService<User, SignUpData> {
         }
 
         userRepository.save(u);
-
         return Utility.generateSuccessMsg("newStatus", u.getStatus().getName());
     }
 
@@ -602,7 +611,6 @@ public class UserService extends AbstractService<User, SignUpData> {
     }
 
     public void removeFromGroup(ObjectId userId, ObjectId groupId) {
-
         if (groupId == null)
             throw new NotAccessException();
 
@@ -612,7 +620,6 @@ public class UserService extends AbstractService<User, SignUpData> {
 
         u.setGroupName(null);
         u.setGroupId(null);
-
         userRepository.save(u);
     }
 

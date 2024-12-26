@@ -20,107 +20,78 @@ import java.util.List;
 @NoArgsConstructor
 @ValidatedUpdateInfo
 public class UpdateInfoData {
-
-
     private String abilities;
     private String diseases;
     private String allergies;
     private BloodType bloodType;
 
-    
     @Size(min = 3, max = 50)
     private String nearbyName;
-
     
     @Size(min = 2, max = 50)
     private String nearbyRel;
-
     
     @JustNumeric
     private String nearbyPhone;
-
     
     @Size(min = 3, max = 50)
     private String name;
 
-    
     @Size(min = 3, max = 50)
     private String fatherName;
 
     private String birthDay;
-
     
     @Size(min = 3, max = 50)
     private String field;
 
-    
     @Size(min = 3, max = 50)
     private String university;
 
-    
     @Year
     private String universityYear;
 
-    
     @Year
     private String endManageYear;
 
-    
     @JustNumeric
     private String nid;
     private Sex sex;
 
     // *************** GROUP SECTION *****************
-
-    
-    @Size(min = 3, max = 50)
-    private String groupName;
-
-    
     @Year
     private String establishYear;
-
     
     @JustNumeric
     private String atlasCode;
 
-    
     @Positive
     private Integer totalTrips;
 
-    
     @Positive
     private Integer recentTrips;
 
-    
     @Positive
     private Integer totalMembers;
 
-    
     @Positive
     private Integer recentMembers;
 
-    
     @Positive
     private Integer managersCount;
 
-    
     @Positive
     private Integer membersPerTrip;
 
-    
     @Positive
     private Integer tripDays;
 
-    
     @Positive
     private Integer regionsCount;
 
-    
     @Size(min = 2, max = 50)
     private String pageAddress;
 
-    
     @Size(min = 7, max = 50)
     private String site;
 

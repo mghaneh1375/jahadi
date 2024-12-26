@@ -51,9 +51,11 @@ public class UserAPIRoutes extends Router {
 
     @PutMapping(value = "setGroup/{code}")
     @ResponseBody
-    public void setGroup(HttpServletRequest request,
-                         @PathVariable @Min(1111) @Max(999999) Integer code) throws UnAuthException, NotActivateAccountException {
-        userService.setGroup(getUser(request).getId(), code);
+    public void setGroup(
+            HttpServletRequest request,
+            @PathVariable @Min(1111) @Max(999999) Integer code
+    ) {
+        userService.setGroup(getId(request), code);
     }
 
     @PostMapping(value = "/signIn")
@@ -130,8 +132,10 @@ public class UserAPIRoutes extends Router {
     }
 
     @PostMapping(value = "/update")
-    public void update(HttpServletRequest request,
-                       @RequestBody @Valid UpdateInfoData updateInfoData) {
+    public void update(
+            HttpServletRequest request,
+            @RequestBody @Valid UpdateInfoData updateInfoData
+    ) {
         userService.update(getId(request), updateInfoData);
     }
 
