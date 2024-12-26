@@ -699,4 +699,18 @@ public class UserService extends AbstractService<User, SignUpData> {
                 HttpStatus.OK
         );
     }
+
+    public void test() {
+        List<Group> groups = groupRepository.findAll();
+        userRepository.findAll()
+                .stream().filter(user -> user.getGroupId() != null)
+                .forEach(user -> groups.stream()
+                        .filter(group -> group.getId().equals(user.getGroupId()))
+                        .findFirst().ifPresent(group -> {
+                            if(!user.getGroupName().equalsIgnoreCase(group.getName())) {
+                                user.setGroupName(group.getName());
+                                userRepository.save(user);
+                            }
+                        }));
+    }
 }

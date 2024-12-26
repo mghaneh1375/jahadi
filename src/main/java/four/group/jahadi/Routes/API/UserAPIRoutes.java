@@ -40,6 +40,10 @@ public class UserAPIRoutes extends Router {
 //    public String store(final @RequestBody @Valid UserData userData) {
 //        return userService.store(userData);
 //    }
+    @GetMapping(value = "test")
+    public void test() {
+        userService.test();
+    }
 
     @PutMapping(value = "setPic", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseBody
