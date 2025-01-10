@@ -1,19 +1,19 @@
 package four.group.jahadi.Service.Area;
 
 import four.group.jahadi.DTO.AddPatientExternalReferralsServiceDAO;
+import four.group.jahadi.DTO.CallHistoryDAO;
+import four.group.jahadi.DTO.PaymentsToPatientDAO;
 import four.group.jahadi.DTO.SetPatientExternalReferralsTrackingStatusDAO;
 import four.group.jahadi.Enums.Module.AnswerType;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Exception.NotAccessException;
+import four.group.jahadi.Models.*;
 import four.group.jahadi.Models.Area.PatientExternalForm;
 import four.group.jahadi.Models.Area.PatientForm;
 import four.group.jahadi.Models.Area.PatientReferral;
 import four.group.jahadi.Models.Area.PatientsInArea;
-import four.group.jahadi.Models.ExternalReferralService;
 import four.group.jahadi.Models.Module;
-import four.group.jahadi.Models.Patient;
 import four.group.jahadi.Models.Question.SimpleQuestion;
-import four.group.jahadi.Models.SubModule;
 import four.group.jahadi.Repository.*;
 import four.group.jahadi.Repository.Area.PatientsInAreaRepository;
 import four.group.jahadi.Utility.PairValue;
@@ -25,10 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -329,6 +326,20 @@ public class PatientExternalReferralsService {
         externalReferralRepository.insert(externalReferralService);
     }
 
+    public void removePatientExternalReferralsService(
+            ObjectId userId, ObjectId groupId,
+            ObjectId areaId, ObjectId patientId,
+            ObjectId formId, ObjectId serviceId
+    ) {
+        if ((userId != null &&
+                !externalReferralAccessForGroupRepository.existsAccessByGroupIdAndUserId(groupId, userId)) ||
+                !tripRepository.existByGroupIdAndAreaId(groupId, areaId)
+        )
+            throw new NotAccessException();
+
+        externalReferralRepository.removeService(patientId, areaId, formId, serviceId);
+    }
+
     public ResponseEntity<List<ExternalReferralService>> getPatientExternalReferralsServices(
             ObjectId userId, ObjectId groupId,
             ObjectId areaId, ObjectId patientId,
@@ -344,5 +355,123 @@ public class PatientExternalReferralsService {
                 externalReferralRepository.findServices(patientId, areaId, formId),
                 HttpStatus.OK
         );
+    }
+
+    public void addPatientExternalReferralsServicesFinanceHistory(
+            ObjectId userId, ObjectId groupId,
+            ObjectId areaId, ObjectId patientId,
+            ObjectId formId, ObjectId serviceId,
+            PaymentsToPatientDAO request
+    ) {
+        if ((userId != null &&
+                !externalReferralAccessForGroupRepository.existsAccessByGroupIdAndUserId(groupId, userId)) ||
+                !tripRepository.existByGroupIdAndAreaId(groupId, areaId)
+        )
+            throw new NotAccessException();
+
+        ExternalReferralService service = externalReferralRepository.findService(patientId, areaId, formId, serviceId)
+                .orElseThrow(InvalidIdException::new);
+
+        List<PaymentsToPatient> payments;
+        if (service.getPayments() == null)
+            payments = new ArrayList<>();
+        else
+            payments = service.getPayments();
+
+        payments.add((PaymentsToPatient) PaymentsToPatient
+                .builder()
+                .action(request.getAction())
+                .amount(request.getAmount())
+                .cardNo(request.getCardNo())
+                .date(request.getDate())
+                .build().createId()
+        );
+
+        service.setPayments(payments);
+        externalReferralRepository.save(service);
+    }
+
+    public void removePatientExternalReferralsServicesFinanceHistory(
+            ObjectId userId, ObjectId groupId,
+            ObjectId areaId, ObjectId patientId,
+            ObjectId formId, ObjectId serviceId,
+            ObjectId financeId
+    ) {
+        if ((userId != null &&
+                !externalReferralAccessForGroupRepository.existsAccessByGroupIdAndUserId(groupId, userId)) ||
+                !tripRepository.existByGroupIdAndAreaId(groupId, areaId)
+        )
+            throw new NotAccessException();
+
+        ExternalReferralService service = externalReferralRepository.findService(patientId, areaId, formId, serviceId)
+                .orElseThrow(InvalidIdException::new);
+
+        if (service.getPayments() == null)
+            throw new NotAccessException();
+
+        int s = service.getPayments().size();
+        service.getPayments().removeIf(paymentsToPatient -> paymentsToPatient.getId().equals(financeId));
+
+        if (s != service.getPayments().size())
+            externalReferralRepository.save(service);
+    }
+
+
+    public void addPatientExternalReferralsServicesCallHistory(
+            ObjectId userId, ObjectId groupId,
+            ObjectId areaId, ObjectId patientId,
+            ObjectId formId, ObjectId serviceId,
+            CallHistoryDAO request
+    ) {
+        if ((userId != null &&
+                !externalReferralAccessForGroupRepository.existsAccessByGroupIdAndUserId(groupId, userId)) ||
+                !tripRepository.existByGroupIdAndAreaId(groupId, areaId)
+        )
+            throw new NotAccessException();
+
+        ExternalReferralService service = externalReferralRepository.findService(patientId, areaId, formId, serviceId)
+                .orElseThrow(InvalidIdException::new);
+
+        List<CallHistory> callHistories;
+        if (service.getPayments() == null)
+            callHistories = new ArrayList<>();
+        else
+            callHistories = service.getCallHistories();
+
+        callHistories.add((CallHistory) CallHistory
+                .builder()
+                .answered(request.getAnswered())
+                .counter(request.getCounter())
+                .description(request.getDescription())
+                .build().createId()
+        );
+
+        service.setCallHistories(callHistories);
+        externalReferralRepository.save(service);
+    }
+
+    public void removePatientExternalReferralsServicesCallHistory(
+            ObjectId userId, ObjectId groupId,
+            ObjectId areaId, ObjectId patientId,
+            ObjectId formId, ObjectId serviceId,
+            ObjectId callId
+    ) {
+        if ((userId != null &&
+                !externalReferralAccessForGroupRepository.existsAccessByGroupIdAndUserId(groupId, userId)) ||
+                !tripRepository.existByGroupIdAndAreaId(groupId, areaId)
+        )
+            throw new NotAccessException();
+
+        ExternalReferralService service = externalReferralRepository.findService(patientId, areaId, formId, serviceId)
+                .orElseThrow(InvalidIdException::new);
+
+        if (service.getCallHistories() == null)
+            throw new NotAccessException();
+
+        int s = service.getCallHistories().size();
+        service.getCallHistories().removeIf(callHistory -> callHistory.getId().equals(callId));
+
+        if (s != service.getCallHistories().size())
+            externalReferralRepository.save(service);
     }
 }

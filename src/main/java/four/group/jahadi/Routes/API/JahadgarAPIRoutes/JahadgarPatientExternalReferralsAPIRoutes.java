@@ -1,6 +1,8 @@
 package four.group.jahadi.Routes.API.JahadgarAPIRoutes;
 
 import four.group.jahadi.DTO.AddPatientExternalReferralsServiceDAO;
+import four.group.jahadi.DTO.CallHistoryDAO;
+import four.group.jahadi.DTO.PaymentsToPatientDAO;
 import four.group.jahadi.DTO.SetPatientExternalReferralsTrackingStatusDAO;
 import four.group.jahadi.Enums.Access;
 import four.group.jahadi.Models.Area.PatientExternalForm;
@@ -96,6 +98,26 @@ public class JahadgarPatientExternalReferralsAPIRoutes extends Router {
         );
     }
 
+    @DeleteMapping(value = "removePatientExternalReferralsService/{areaId}/{patientId}/{formId}/{serviceId}")
+    @Operation(
+            summary = "حذف خدمت برای مراجعه خارج از اردو برای یک بیمار"
+    )
+    public void removePatientExternalReferralsService(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId,
+            @PathVariable @ObjectIdConstraint ObjectId patientId,
+            @PathVariable @ObjectIdConstraint ObjectId formId,
+            @PathVariable @ObjectIdConstraint ObjectId serviceId
+    ) {
+        TokenInfo fullTokenInfo = getFullTokenInfo(request);
+        patientExternalReferralsService.removePatientExternalReferralsService(
+                fullTokenInfo.getAccesses().contains(Access.GROUP)
+                        ? null
+                        : fullTokenInfo.getUserId(),
+                getGroup(request), areaId, patientId, formId, serviceId
+        );
+    }
+
     @GetMapping(value = "getPatientExternalReferralsServices/{areaId}/{patientId}/{formId}")
     @Operation(
             summary = "گرفتن خدمات ارائه شده برای مراجعه خارج از اردو برای یک بیمار"
@@ -112,6 +134,90 @@ public class JahadgarPatientExternalReferralsAPIRoutes extends Router {
                         ? null
                         : fullTokenInfo.getUserId(),
                 getGroup(request), areaId, patientId, formId
+        );
+    }
+
+    @PutMapping(value = "addPatientExternalReferralsServicesFinanceHistory/{areaId}/{patientId}/{formId}/{serviceId}")
+    @Operation(
+            summary = "افزودن تاریخچه مالی خدمت ارائه شده برای مراجعه خارج از اردو برای یک بیمار"
+    )
+    public void addPatientExternalReferralsServicesFinanceHistory(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId,
+            @PathVariable @ObjectIdConstraint ObjectId patientId,
+            @PathVariable @ObjectIdConstraint ObjectId formId,
+            @PathVariable @ObjectIdConstraint ObjectId serviceId,
+            @RequestBody @Valid PaymentsToPatientDAO dao
+            ) {
+        TokenInfo fullTokenInfo = getFullTokenInfo(request);
+        patientExternalReferralsService.addPatientExternalReferralsServicesFinanceHistory(
+                fullTokenInfo.getAccesses().contains(Access.GROUP)
+                        ? null
+                        : fullTokenInfo.getUserId(),
+                getGroup(request), areaId, patientId, formId, serviceId, dao
+        );
+    }
+
+    @DeleteMapping(value = "removePatientExternalReferralsServicesFinanceHistory/{areaId}/{patientId}/{formId}/{serviceId}/{financeId}")
+    @Operation(
+            summary = "حذف تاریخچه مالی خدمت ارائه شده برای مراجعه خارج از اردو برای یک بیمار"
+    )
+    public void removePatientExternalReferralsServicesFinanceHistory(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId,
+            @PathVariable @ObjectIdConstraint ObjectId patientId,
+            @PathVariable @ObjectIdConstraint ObjectId formId,
+            @PathVariable @ObjectIdConstraint ObjectId serviceId,
+            @PathVariable @ObjectIdConstraint ObjectId financeId
+    ) {
+        TokenInfo fullTokenInfo = getFullTokenInfo(request);
+        patientExternalReferralsService.removePatientExternalReferralsServicesFinanceHistory(
+                fullTokenInfo.getAccesses().contains(Access.GROUP)
+                        ? null
+                        : fullTokenInfo.getUserId(),
+                getGroup(request), areaId, patientId, formId, serviceId, financeId
+        );
+    }
+
+    @PutMapping(value = "addPatientExternalReferralsServicesCallHistory/{areaId}/{patientId}/{formId}/{serviceId}")
+    @Operation(
+            summary = "افزودن تاریخچه مالی خدمت ارائه شده برای مراجعه خارج از اردو برای یک بیمار"
+    )
+    public void addPatientExternalReferralsServicesCallHistory(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId,
+            @PathVariable @ObjectIdConstraint ObjectId patientId,
+            @PathVariable @ObjectIdConstraint ObjectId formId,
+            @PathVariable @ObjectIdConstraint ObjectId serviceId,
+            @RequestBody @Valid CallHistoryDAO dao
+    ) {
+        TokenInfo fullTokenInfo = getFullTokenInfo(request);
+        patientExternalReferralsService.addPatientExternalReferralsServicesCallHistory(
+                fullTokenInfo.getAccesses().contains(Access.GROUP)
+                        ? null
+                        : fullTokenInfo.getUserId(),
+                getGroup(request), areaId, patientId, formId, serviceId, dao
+        );
+    }
+
+    @DeleteMapping(value = "removePatientExternalReferralsServicesCallHistory/{areaId}/{patientId}/{formId}/{serviceId}/{callId}")
+    @Operation(
+            summary = "حذف تاریخچه مالی خدمت ارائه شده برای مراجعه خارج از اردو برای یک بیمار"
+    )
+    public void removePatientExternalReferralsServicesCallHistory(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId,
+            @PathVariable @ObjectIdConstraint ObjectId patientId,
+            @PathVariable @ObjectIdConstraint ObjectId formId,
+            @PathVariable @ObjectIdConstraint ObjectId serviceId,
+            @PathVariable @ObjectIdConstraint ObjectId callId
+    ) {
+        TokenInfo fullTokenInfo = getFullTokenInfo(request);
+        patientExternalReferralsService.removePatientExternalReferralsServicesCallHistory(
+                fullTokenInfo.getAccesses().contains(Access.GROUP)
+                        ? null
+                        : fullTokenInfo.getUserId(),
+                getGroup(request), areaId, patientId, formId, serviceId, callId
         );
     }
 }
