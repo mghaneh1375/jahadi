@@ -8,10 +8,7 @@ import four.group.jahadi.Validator.PhoneValidator;
 import org.json.JSONObject;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
-import org.modelmapper.convention.NameTokenizers;
 import org.modelmapper.convention.NameTransformers;
-import org.modelmapper.convention.NamingConventions;
-import org.modelmapper.spi.NamingConvention;
 
 import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
@@ -235,9 +232,8 @@ public class Utility {
                                   String token2, String token3,
                                   String template
     ) {
-
-        if(DEV_MODE)
-            return true;
+//        if(DEV_MODE)
+//            return true;
 
         receptor = convertPersianDigits(receptor);
 
