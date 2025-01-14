@@ -13,8 +13,6 @@ import org.bson.types.ObjectId;
 @Setter
 @ValidatedTripStep1
 public class TripStep1Data extends TripStepData {
-
     private Boolean writeAccess;
     private ObjectId owner;
-
 }

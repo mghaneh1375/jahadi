@@ -23,5 +23,4 @@ public class TripStep2Data extends TripStepData {
 
     private String dailyStartAt;
     private String dailyEndAt;
-
 }

@@ -15,4 +15,6 @@ public interface PresenceListRepository extends MongoRepository<PresenceList, Ob
     @Query(value = "{area_id: ?0}")
     List<PresenceList> findByAreaId(ObjectId areaId);
 
+    @Query(value = "{area_id: ?0}", delete = true)
+    void deleteByAreaId(ObjectId areaId);
 }

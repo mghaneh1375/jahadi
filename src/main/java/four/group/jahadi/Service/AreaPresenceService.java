@@ -87,4 +87,7 @@ public class AreaPresenceService {
         return outputList;
     }
 
+    public void removeByAreaId(ObjectId areaId) {
+        presenceListRepository.deleteByAreaId(areaId);
+    }
 }

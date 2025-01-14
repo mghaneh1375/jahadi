@@ -6,7 +6,6 @@ import four.group.jahadi.DTO.UpdateProjectData;
 import four.group.jahadi.Enums.Status;
 import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Exception.InvalidIdException;
-import four.group.jahadi.Exception.NotAccessException;
 import four.group.jahadi.Models.*;
 import four.group.jahadi.Repository.*;
 import four.group.jahadi.Utility.Utility;
@@ -16,7 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -29,14 +27,14 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
 
     @Autowired
     private ProjectRepository projectRepository;
-
     @Autowired
     private GroupRepository groupRepository;
-
     @Autowired
     private UserRepository userRepository;
     @Autowired
     private TripRepository tripRepository;
+    @Autowired
+    private TripService tripService;
 
     // filters:
     // 1- name
@@ -137,12 +135,13 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
 
 //    @Transactional
     public void remove(ObjectId id) {
-
         Project project = projectRepository.findById(id).orElseThrow(InvalidIdException::new);
         if (Utility.getCurrDate().after(project.getStartAt()))
             throw new InvalidFieldsException("پروژه آغاز شده و امکان حدف آن وجود ندارد");
 
-        tripRepository.deleteTripByProjectId(project.getId());
+        tripRepository
+                .findTripByProjectId(project.getId())
+                .forEach(trip -> tripService.removeTrip(trip));
         projectRepository.delete(project);
     }
 
@@ -189,11 +188,9 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
             throw new InvalidFieldsException("آی دی گروه ها نامعتبر است");
 
         Project project = populateEntity(null, data);
-
         projectRepository.insert(project);
 
         data.getTrips().forEach(x -> {
-
             Trip trip = Trip
                     .builder()
                     .projectId(project.getId())

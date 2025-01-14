@@ -25,8 +25,11 @@ public interface TripRepository extends MongoRepository<Trip, ObjectId>, Filtera
     @Query(value = "{$and: [{'groupsWithAccess': { $elemMatch: {'groupId': ?0, 'writeAccess': true} }}, {'areas.id': ?1}]}", exists = true)
     boolean existByGroupIdAndAreaId(ObjectId groupId, ObjectId areaId);
 
-    @Query(value = "{'projectId': ?0}", delete = true)
-    void deleteTripByProjectId(ObjectId projectId);
+    @Query(value = "{'projectId': ?0}")
+    List<Trip> findTripByProjectId(ObjectId projectId);
+
+    @Query(value = "{'projectId': ?0, '_id': ?1}")
+    Optional<Trip> findTripByProjectIdAndId(ObjectId projectId, ObjectId id);
 
     @Query(value = "{$and: [{'startAt': {$lte: ?0}}, {'endAt': {$gte: ?0}}]  }")
     List<Trip> findActives(Date curr);

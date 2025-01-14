@@ -1,11 +1,15 @@
 package four.group.jahadi.Routes.API.AdminAPIRoutes;
 
 import four.group.jahadi.DTO.ProjectData;
+import four.group.jahadi.DTO.Trip.TripStep1Data;
 import four.group.jahadi.DTO.UpdateProjectData;
 import four.group.jahadi.Enums.Status;
 import four.group.jahadi.Models.Project;
 import four.group.jahadi.Service.ProjectService;
+import four.group.jahadi.Service.TripService;
+import four.group.jahadi.Utility.ValidList;
 import four.group.jahadi.Validator.ObjectIdConstraint;
+import io.swagger.v3.oas.annotations.Operation;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.Size;
 import java.util.List;
 
 @RestController
@@ -24,11 +29,49 @@ public class ProjectAPIRoutes {
 
     @Autowired
     ProjectService projectService;
+    @Autowired
+    TripService tripService;
 
     @PostMapping(value = "/store")
     @ResponseBody
     public ResponseEntity<Project> store(@RequestBody @Valid ProjectData projectData) {
         return projectService.store(projectData);
+    }
+
+    @PostMapping(value = "/addNewTripToProject/{projectId}")
+    @Operation(summary = "افزودن اردو جدید به پروژه")
+    public void addNewTripToProject(
+            @PathVariable @ObjectIdConstraint ObjectId projectId,
+            @RequestBody @Valid @Size(min = 1) ValidList<TripStep1Data> data
+    ) {
+        tripService.store(projectId, data);
+    }
+
+    @PutMapping(value = "/resetGroupAccessesForTrip/{projectId}/{tripId}")
+    @Operation(summary = "ریست کردن دسترسی های موجود در یک اردو در یک پروژه")
+    public void resetGroupAccessesForTrip(
+            @PathVariable @ObjectIdConstraint ObjectId projectId,
+            @PathVariable @ObjectIdConstraint ObjectId tripId,
+            @RequestBody @Valid @Size(min = 1) ValidList<TripStep1Data> data
+    ) {
+        tripService.resetGroupAccessesForTrip(projectId, tripId, data);
+    }
+
+    @DeleteMapping(value = "/removeTripFromProject/{projectId}/{tripId}")
+    @Operation(summary = "حذف یک اردو از پروژه")
+    public void removeTripFromProject(
+            @PathVariable @ObjectIdConstraint ObjectId projectId,
+            @PathVariable @ObjectIdConstraint ObjectId tripId
+    ) {
+        tripService.removeTripFromProject(projectId, tripId);
+    }
+
+    @DeleteMapping(value = "/remove/{projectId}")
+    @Operation(summary = "حذف یک پروژه")
+    public void remove(
+            @PathVariable @ObjectIdConstraint ObjectId projectId
+    ) {
+        projectService.remove(projectId);
     }
 
     @PutMapping(value = "/update/{projectId}")
@@ -57,11 +100,6 @@ public class ProjectAPIRoutes {
     public void setProgress(@PathVariable @ObjectIdConstraint ObjectId id,
                             @RequestParam(value = "progress") @Min(0) @Max(100) int progress) {
         projectService.setProgress(id, progress);
-    }
-
-    @DeleteMapping(value = "/remove/{id}")
-    public void remove(@PathVariable @ObjectIdConstraint ObjectId id) {
-        projectService.remove(id);
     }
 
 }

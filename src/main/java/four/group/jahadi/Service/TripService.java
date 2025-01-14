@@ -3,11 +3,13 @@ package four.group.jahadi.Service;
 import four.group.jahadi.DTO.Trip.TripStep1Data;
 import four.group.jahadi.DTO.Trip.TripStep2Data;
 import four.group.jahadi.DTO.Trip.TripStepData;
+import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Exception.NotAccessException;
 import four.group.jahadi.Models.*;
 import four.group.jahadi.Models.Area.Area;
 import four.group.jahadi.Repository.*;
+import four.group.jahadi.Service.Area.AreaService;
 import four.group.jahadi.Utility.Utility;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,15 +29,14 @@ public class TripService extends AbstractService<Trip, TripStepData> {
 
     @Autowired
     private TripRepository tripRepository;
-
     @Autowired
     private GroupRepository groupRepository;
-
     @Autowired
     private ProjectRepository projectRepository;
-
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private AreaService areaService;
 
 
     // 1- groupId
@@ -138,33 +139,58 @@ public class TripService extends AbstractService<Trip, TripStepData> {
         tripRepository.save(trip);
     }
 
-    //todo: in update project scenario where admin want to add additional trip
     @Override
-    public ResponseEntity<Trip> store(TripStepData data, Object... params) {
-
-        ObjectId projectId = (ObjectId) params[0];
-
-        Project project = projectRepository.findById(projectId).orElseThrow(InvalidIdException::new);
-
-        TripStep1Data dto = (TripStep1Data) data;
-
-//        List<GroupAccess> groupsWithAccess = tr;
-//        groupsWithAccess.add(GroupAccess.builder()
-//                .groupId(dto.getOwner())
-//                .writeAccess(dto.getWriteAccess())
-//                .build()
-//        );
-
-//        Trip trip = Trip
-//                .builder()
-//                .groupsWithAccess()
-//                .projectId(project.getId())
-//                .name(project.getName() + " - ").build();
-
-//        tripRepository.save(trip);
-
-//        return new ResponseEntity<>(trip, HttpStatus.OK);
+    public ResponseEntity<Trip> store(TripStepData dto, Object... params) {
         return null;
+    }
+
+    public void removeTrip(Trip trip) {
+        if (Utility.getCurrDate().after(trip.getStartAt()))
+            throw new InvalidFieldsException("اردو آغاز شده و امکان حدف آن وجود ندارد");
+
+        if(trip.getAreas() != null) {
+            trip.getAreas().forEach(area -> areaService.remove(trip, area.getId()));
+        }
+        tripRepository.delete(trip);
+    }
+
+    public void removeTripFromProject(ObjectId projectId, ObjectId tripId) {
+        Trip trip = tripRepository.findTripByProjectIdAndId(projectId, tripId).orElseThrow(InvalidIdException::new);
+        removeTrip(trip);
+    }
+
+    public void resetGroupAccessesForTrip(ObjectId projectId, ObjectId tripId, List<TripStep1Data> data) {
+        Trip trip = tripRepository.findTripByProjectIdAndId(projectId, tripId).orElseThrow(InvalidIdException::new);
+        List<GroupAccess> groupsWithAccess = new ArrayList<>();
+        data.forEach(tripStepData -> groupsWithAccess.add(
+                GroupAccess.builder()
+                        .groupId(tripStepData.getOwner())
+                        .writeAccess(tripStepData.getWriteAccess())
+                        .build()
+        ));
+
+        trip.setGroupsWithAccess(groupsWithAccess);
+        tripRepository.save(trip);
+    }
+
+    public void store(ObjectId projectId, List<TripStep1Data> data) {
+        Project project = projectRepository.findById(projectId).orElseThrow(InvalidIdException::new);
+        Trip trip = Trip
+                .builder()
+                .projectId(project.getId())
+                .name(null)
+                .build();
+
+        List<GroupAccess> groupsWithAccess = new ArrayList<>();
+        data.forEach(tripStepData -> groupsWithAccess.add(
+                GroupAccess.builder()
+                        .groupId(tripStepData.getOwner())
+                        .writeAccess(tripStepData.getWriteAccess())
+                        .build()
+        ));
+
+        trip.setGroupsWithAccess(groupsWithAccess);
+        tripRepository.save(trip);
     }
 
     @Override

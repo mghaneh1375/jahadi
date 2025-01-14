@@ -72,26 +72,23 @@ public class AreaService extends AbstractService<Area, AreaData> {
 
     public ResponseEntity<List<Area>> store(List<AreaData> areas, Object... params) {
 
+        boolean hasAdminAccess = (boolean) params[0];
         ObjectId tripId = (ObjectId) params[1];
+        Object groupId = params[2];
 
         Trip trip = tripRepository.findById(tripId).orElseThrow(InvalidIdException::new);
 
-        boolean hasAdminAccess = (boolean) params[0];
-
         if (!hasAdminAccess && trip.getGroupsWithAccess().stream().noneMatch(groupAccess ->
-                groupAccess.getWriteAccess() && groupAccess.getGroupId().equals(params[2]))
+                groupAccess.getWriteAccess() && groupAccess.getGroupId().equals(groupId))
         )
             throw new NotAccessException();
 
         List<Area> areaModels = new ArrayList<>();
-
         for (AreaData dto : areas) {
-
             Area area = dto.convertToArea();
-
             User owner = userRepository.findById(area.getOwnerId()).orElseThrow(InvalidIdException::new);
 
-            if (!hasAdminAccess && !Objects.deepEquals(owner.getGroupId(), params[2]))
+            if (!hasAdminAccess && !Objects.deepEquals(owner.getGroupId(), groupId))
                 throw new NotAccessException();
 
             if (trip.getAreas().stream().anyMatch(area1 -> area1.getName().equals(area.getName())))
@@ -409,5 +406,35 @@ public class AreaService extends AbstractService<Area, AreaData> {
             return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
 
         return new ResponseEntity<>(foundArea.getDates(), HttpStatus.OK);
+    }
+
+    public void remove(Trip trip, ObjectId areaId) {
+        Optional<Area> first = trip
+                .getAreas()
+                .stream()
+                .filter(area1 -> area1.getId().equals(areaId))
+                .findFirst();
+        if(first.isEmpty())
+            throw new InvalidIdException();
+
+        if(Utility.getDate(first.get().getStartAt()).before(Utility.getCurrDate()))
+            throw new RuntimeException("منطقه موردنظر شروع شده است و امکان حذف آن وجود ندارد");
+
+        patientsInAreaRepository.deleteByAreaId(areaId);
+        areaPresenceService.removeByAreaId(areaId);
+        // todo: delete other dependencies
+        trip.getAreas().removeIf(area -> area.getId().equals(areaId));
+    }
+
+    public void removeAreaFromTrip(ObjectId tripId, ObjectId areaId, ObjectId groupId) {
+        Trip trip = tripRepository.findById(tripId).orElseThrow(InvalidIdException::new);
+        if(trip.getGroupsWithAccess()
+                .stream()
+                .noneMatch(groupAccess -> groupAccess.getWriteAccess() && groupAccess.getGroupId().equals(groupId))
+        )
+            throw new NotAccessException();
+
+        remove(trip, areaId);
+        tripRepository.save(trip);
     }
 }
