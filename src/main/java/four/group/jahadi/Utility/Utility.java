@@ -232,8 +232,8 @@ public class Utility {
                                   String token2, String token3,
                                   String template
     ) {
-//        if(DEV_MODE)
-//            return true;
+        if(DEV_MODE)
+            return true;
 
         receptor = convertPersianDigits(receptor);
 
