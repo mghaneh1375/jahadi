@@ -22,6 +22,9 @@ public interface TripRepository extends MongoRepository<Trip, ObjectId>, Filtera
     @Query(value = "{'groupsWithAccess.groupId': ?0}", fields = "{'name': 1, 'areas.name': 1, 'projectId': 1, 'groupsWithAccess': 1}")
     List<Trip> findByGroupId(ObjectId groupId);
 
+    @Query(value = "{'groupsWithAccess.groupId': ?0, 'areas.id': ?1}")
+    Optional<Trip> findByGroupIdAndAreaId(ObjectId groupId, ObjectId areaId);
+
     @Query(value = "{$and: [{'groupsWithAccess': { $elemMatch: {'groupId': ?0, 'writeAccess': true} }}, {'areas.id': ?1}]}", exists = true)
     boolean existByGroupIdAndAreaId(ObjectId groupId, ObjectId areaId);
 
@@ -105,7 +108,7 @@ public interface TripRepository extends MongoRepository<Trip, ObjectId>, Filtera
     Optional<Trip> findActiveByAreaIdAndPharmacyManager(ObjectId areaId, ObjectId userId, Date curr);
     @Query(value = "{ 'areas': {$elemMatch: { 'finished': true, 'endAt': {$gte: ?2}, 'id': ?0, $or: [{'ownerId': ?1}, {'equipmentManager': ?1}] } } }")
     Optional<Trip> findActiveByAreaIdAndEquipmentManager(ObjectId areaId, ObjectId userId, Date curr);
-    @Query(value = "{ 'areas': {$elemMatch: { 'finished': true, 'startAt': {$lte: ?2}, 'endAt': {$gte: ?2}, 'id': ?0, $or: [{'ownerId': ?1}, {'trainers': ?1}] } } }")
+    @Query(value = "{ 'areas': {$elemMatch: { $and: [{'finished': true}, {'startAt': {$lte: ?2}}, {'endAt': {$gte: ?2}}, {'id': ?0}, {$or: [{'ownerId': ?1}, {'trainers': ?1}]} ] } } }")
     Optional<Trip> findActiveByAreaIdAndTrainerId(ObjectId areaId, ObjectId userId, Date curr);
 
     @Query(value = "{ 'areas': {$elemMatch: { 'finished': true, 'startAt': {$lte: ?2}, 'endAt': {$gte: ?2}, 'id': ?0, $or: [{'ownerId': ?1}, {'members': ?1}] } } }")

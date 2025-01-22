@@ -232,10 +232,14 @@ public class PatientServiceInArea {
 
     public ResponseEntity<Patient> inquiryPatient(
             ObjectId userId, ObjectId areaId,
-            InquiryPatientData patientData
+            InquiryPatientData patientData,
+            ObjectId groupId
     ) {
-        tripRepository.findActiveByAreaIdAndResponsibleId(areaId, userId, Utility.getCurrDate())
-                .orElseThrow(NotAccessException::new);
+        if (groupId != null)
+            tripRepository.findByGroupIdAndAreaId(groupId, areaId).orElseThrow(NotAccessException::new);
+        else
+            tripRepository.findActiveByAreaIdAndResponsibleId(areaId, userId, Utility.getCurrDate())
+                    .orElseThrow(NotAccessException::new);
 
         Patient patient = patientRepository.findByIdentifierAndIdentifierType(
                 patientData.getIdentifier(), patientData.getIdentifierType()
@@ -422,11 +426,15 @@ public class PatientServiceInArea {
 
     public ResponseEntity<TrainForm> getPatientTrainFrom(
             ObjectId userId, ObjectId areaId,
-            ObjectId patientId
+            ObjectId patientId, ObjectId groupId
     ) {
-
-        Trip trip = tripRepository.findActiveByAreaIdAndTrainerId(areaId, userId, Utility.getCurrDate())
-                .orElseThrow(NotAccessException::new);
+        Trip trip;
+        if (groupId != null)
+            trip = tripRepository.findByGroupIdAndAreaId(groupId, areaId)
+                    .orElseThrow(NotAccessException::new);
+        else
+            trip = tripRepository.findActiveByAreaIdAndTrainerId(areaId, userId, Utility.getCurrDate())
+                    .orElseThrow(NotAccessException::new);
 
         Area foundArea = findStartedArea(trip, areaId);
 //        if (!foundArea.getOwnerId().equals(userId) &&

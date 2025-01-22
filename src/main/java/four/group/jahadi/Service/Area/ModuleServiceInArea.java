@@ -204,10 +204,16 @@ public class ModuleServiceInArea {
         return new ResponseEntity<>(modules, HttpStatus.OK);
     }
 
-    public ResponseEntity<Map<String, String>> tabs(ObjectId userId, ObjectId areaId) {
+    public ResponseEntity<Map<String, String>> tabs(ObjectId userId, ObjectId areaId, ObjectId groupId) {
+        Trip trip;
+        if (groupId != null)
+            trip = tripRepository.findByGroupIdAndAreaId(groupId, areaId)
+                    .orElseThrow(InvalidIdException::new);
+        else
+            trip = tripRepository.findByAreaIdAndResponsibleId(areaId, userId)
+                    .orElseThrow(InvalidIdException::new);
 
-        Area foundArea = tripRepository.findByAreaIdAndResponsibleId(areaId, userId)
-                .orElseThrow(InvalidIdException::new)
+        Area foundArea = trip
                 .getAreas().stream().filter(area -> area.getId().equals(areaId))
                 .findFirst().orElseThrow(RuntimeException::new);
 

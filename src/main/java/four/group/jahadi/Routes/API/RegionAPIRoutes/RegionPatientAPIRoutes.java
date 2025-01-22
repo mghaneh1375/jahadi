@@ -7,10 +7,12 @@ import four.group.jahadi.DTO.Patient.InquiryPatientData;
 import four.group.jahadi.DTO.Patient.PatientData;
 import four.group.jahadi.DTO.Patient.PatientReferralData;
 import four.group.jahadi.DTO.Patient.TrainFormData;
+import four.group.jahadi.Enums.Access;
 import four.group.jahadi.Enums.Insurance;
 import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Models.Area.*;
 import four.group.jahadi.Models.Patient;
+import four.group.jahadi.Models.TokenInfo;
 import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Service.Area.PatientServiceInArea;
 import four.group.jahadi.Validator.ObjectIdConstraint;
@@ -72,7 +74,11 @@ public class RegionPatientAPIRoutes extends Router {
             @PathVariable @ObjectIdConstraint ObjectId areaId,
             @RequestBody @Valid InquiryPatientData inquiryPatientData
     ) {
-        return patientServiceInArea.inquiryPatient(getId(request), areaId, inquiryPatientData);
+        TokenInfo fullTokenInfo = getFullTokenInfo(request);
+        return patientServiceInArea.inquiryPatient(
+                fullTokenInfo.getUserId(), areaId, inquiryPatientData,
+                fullTokenInfo.getAccesses().contains(Access.GROUP) ? fullTokenInfo.getGroupId() : null
+        );
     }
 
     @PutMapping(value = "addPatientToRegion/{areaId}/{patientId}")
@@ -209,8 +215,10 @@ public class RegionPatientAPIRoutes extends Router {
             @PathVariable @ObjectIdConstraint ObjectId areaId,
             @PathVariable @ObjectIdConstraint ObjectId patientId
     ) {
+        TokenInfo fullTokenInfo = getFullTokenInfo(request);
         return patientServiceInArea.getPatientTrainFrom(
-                getId(request), areaId, patientId
+                fullTokenInfo.getUserId(), areaId, patientId,
+                fullTokenInfo.getAccesses().contains(Access.GROUP) ? fullTokenInfo.getGroupId() : null
         );
     }
 

@@ -1,8 +1,10 @@
 package four.group.jahadi.Routes.API.RegionAPIRoutes;
 
+import four.group.jahadi.Enums.Access;
 import four.group.jahadi.Models.Module;
 import four.group.jahadi.Models.Area.ModuleInArea;
 import four.group.jahadi.Models.SubModule;
+import four.group.jahadi.Models.TokenInfo;
 import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Service.Area.ModuleServiceInArea;
 import four.group.jahadi.Service.Area.ReportServiceInArea;
@@ -58,7 +60,11 @@ public class RegionModuleAPIRoutes extends Router {
             HttpServletRequest request,
             @PathVariable @ObjectIdConstraint ObjectId areaId
     ) {
-        return moduleServiceInArea.tabs(getId(request), areaId);
+        TokenInfo fullTokenInfo = getFullTokenInfo(request);
+        return moduleServiceInArea.tabs(
+                fullTokenInfo.getUserId(), areaId,
+                fullTokenInfo.getAccesses().contains(Access.GROUP) ? fullTokenInfo.getGroupId() : null
+        );
     }
 
     @GetMapping(path = "getModulesInTab/{areaId}")
