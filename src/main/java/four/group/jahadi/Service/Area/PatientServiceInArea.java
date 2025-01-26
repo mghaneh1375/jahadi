@@ -1081,4 +1081,15 @@ public class PatientServiceInArea {
                 HttpStatus.OK
         );
     }
+
+    public void removePatientFromArea(ObjectId userId, ObjectId areaId, ObjectId patientId) {
+        Trip trip = tripRepository.findActiveByAreaIdAndDispatcherId(areaId, userId, Utility.getCurrDate())
+                .orElseThrow(NotAccessException::new);
+
+        Area area = findStartedArea(trip, areaId);
+        Patient patient = patientRepository.findById(patientId)
+                .orElseThrow(InvalidIdException::new);
+
+        patientsInAreaRepository.deleteByAreaIdAndPatientId(areaId, patientId);
+    }
 }

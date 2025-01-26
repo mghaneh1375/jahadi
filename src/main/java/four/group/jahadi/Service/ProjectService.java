@@ -146,9 +146,7 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
     }
 
     public void update(ObjectId id, UpdateProjectData dto) {
-
         Project project = projectRepository.findById(id).orElseThrow(InvalidIdException::new);
-
         project = populateEntity(project, dto);
 
         try {

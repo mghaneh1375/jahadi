@@ -93,6 +93,18 @@ public class RegionPatientAPIRoutes extends Router {
         patientServiceInArea.addPatientToRegion(getId(request), areaId, patientId);
     }
 
+    @DeleteMapping(value = "removePatientFromArea/{areaId}/{patientId}")
+    @Operation(
+            summary = "حذف بیمار موجود از لیست پذیرش در یک منطقه توسط فرد مسئول پذیرش"
+    )
+    public void removePatientFromArea(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId,
+            @PathVariable @ObjectIdConstraint ObjectId patientId
+    ) {
+        patientServiceInArea.removePatientFromArea(getId(request), areaId, patientId);
+    }
+
     @GetMapping(value = "getModulePatients/{areaId}/{moduleId}")
     @ResponseBody
     @Operation(
