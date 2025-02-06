@@ -31,7 +31,7 @@ public interface PatientsDrugRepository extends MongoRepository<PatientDrug, Obj
                     "?#{ [11] == null ? { '_id': {$exists: true}} : { 'suggest_count' : {$lte: [11]} } }," +
                     "?#{ [12] == null ? { '_id': {$exists: true}} : { 'giver_id': [12] } }," +
                     "]}}",
-            "{ $project: {areaId: 0, doctorId: 0, giverId: 0, moduleId: 0, drugId: 0, description: 0, giveDescription: 0, givenDrugId: 0} }",
+            "{ $project: {areaId: 0, doctorId: 0, giverId: 0, moduleId: 0, description: 0, giveDescription: 0, givenDrugId: 0} }",
             "{ $skip: ?13 }",
             "{ $limit: ?14 }",
 //            "{ $: ?14 }",
