@@ -1,6 +1,7 @@
 package four.group.jahadi.Service;
 
 import four.group.jahadi.DTO.DrugBookmarkData;
+import four.group.jahadi.Enums.Drug.HowToUse;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Models.Drug;
 import four.group.jahadi.Models.DrugBookmark;
@@ -27,7 +28,16 @@ public class JahadgarDrugService extends AbstractService<DrugBookmark, DrugBookm
     @Override
     public ResponseEntity<List<DrugBookmark>> list(Object... filters) {
         ObjectId userId = (ObjectId) filters[0];
-        return new ResponseEntity<>(drugBookmarkRepository.findByUserId(userId), HttpStatus.OK);
+        List<DrugBookmark> bookmarkList = drugBookmarkRepository.findByUserId(userId);
+        bookmarkList.forEach(drugBookmark -> {
+            if(drugBookmark.getHowToUses() != null)
+                drugBookmark.setHowToUsesFa(drugBookmark.getHowToUses().getFaTranslate());
+            if(drugBookmark.getAmountOfUses() != null)
+                drugBookmark.setAmountOfUsesFa(drugBookmark.getAmountOfUses().getFaTranslate());
+            if(drugBookmark.getUseTimes() != null)
+                drugBookmark.setUseTimesFa(drugBookmark.getUseTimes().getFaTranslate());
+        });
+        return new ResponseEntity<>(bookmarkList, HttpStatus.OK);
     }
 
     @Override
