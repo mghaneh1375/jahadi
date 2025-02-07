@@ -1,9 +1,11 @@
 package four.group.jahadi.Routes.API.RegionAPIRoutes;
 
+import four.group.jahadi.DTO.Area.AreaDigest;
 import four.group.jahadi.DTO.Region.RegionRunInfoData;
 import four.group.jahadi.DTO.Region.RegionSendNotifData;
 import four.group.jahadi.DTO.UpdatePresenceList;
 import four.group.jahadi.Models.Area.AreaDates;
+import four.group.jahadi.Models.TokenInfo;
 import four.group.jahadi.Models.Trip;
 import four.group.jahadi.Models.UserPresenceList;
 import four.group.jahadi.Routes.Router;
@@ -34,6 +36,14 @@ public class RegionManageAPIRoutes extends Router {
     @Operation(summary = "گرفتن لیستی از مناطقی که من مسئول منطفه آنها هستم که هنوز تموم نشده اند")
     public ResponseEntity<List<Trip>> myCartableAreas(HttpServletRequest request) {
         return areaService.myCartableList(getId(request), true);
+    }
+
+    @GetMapping(value = "getGroupAreas")
+    @ResponseBody
+    @Operation(summary = "گرفتن لیستی از مناطقی که متعلق به یک گروه خاص می باشد و هنوز تمام نشده است توسط مسئول انبار")
+    public ResponseEntity<List<AreaDigest>> getGroupAreas(HttpServletRequest request) {
+        TokenInfo tokenInfo = getTokenInfo(request);
+        return areaService.getGroupAreas(tokenInfo.getUserId(), tokenInfo.getGroupId());
     }
 
     @GetMapping(value = "dashboard/{areaId}")

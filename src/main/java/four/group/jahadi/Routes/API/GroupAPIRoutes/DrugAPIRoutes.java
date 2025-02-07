@@ -61,6 +61,14 @@ public class DrugAPIRoutes extends Router {
         );
     }
 
+    @DeleteMapping(value = "remove/{id}")
+    public void remove(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId id
+    ) {
+        drugService.remove(id, getId(request));
+    }
+
     @PutMapping(value = "addAllToDrugsList/{areaId}")
     @ResponseBody
     @Operation(summary = "افزودن یک یا چند دارو به منطقه توسط مسئول گروه")

@@ -1,6 +1,7 @@
 package four.group.jahadi.Service.Area;
 
 import four.group.jahadi.DTO.Area.AreaData;
+import four.group.jahadi.DTO.Area.AreaDigest;
 import four.group.jahadi.DTO.Region.RegionRunInfoData;
 import four.group.jahadi.DTO.Region.RegionSendNotifData;
 import four.group.jahadi.DTO.UpdatePresenceList;
@@ -50,10 +51,10 @@ public class AreaService extends AbstractService<Area, AreaData> {
     private StateRepository stateRepository;
     @Autowired
     private CountryRepository countryRepository;
-
     @Autowired
     private AreaPresenceService areaPresenceService;
-
+    @Autowired
+    private WareHouseAccessForGroupRepository wareHouseAccessForGroupRepository;
 
     @Override
     public ResponseEntity<List<Area>> list(Object... filters) {
@@ -173,6 +174,30 @@ public class AreaService extends AbstractService<Area, AreaData> {
         }
 
         return new ResponseEntity<>(trips, HttpStatus.OK);
+    }
+
+    public ResponseEntity<List<AreaDigest>> getGroupAreas(ObjectId userId, ObjectId groupId) {
+
+        if(!wareHouseAccessForGroupRepository.existsAccessByGroupIdAndUserId(
+                groupId, userId
+        ))
+            throw new NotAccessException();
+
+        List<Trip> trips =
+                tripRepository.findDigestInfoActivesOrNotStartedProjectsByGroupId(Utility.getCurrDate(), groupId);
+        List<AreaDigest> areaDigests = new ArrayList<>();
+        trips.forEach(trip -> {
+            trip.getAreas().forEach(area -> {
+                areaDigests.add(
+                        AreaDigest
+                                .builder()
+                                .id(area.getId())
+                                .name(area.getName())
+                                .build()
+                );
+            });
+        });
+        return new ResponseEntity<>(areaDigests, HttpStatus.OK);
     }
 
     public ResponseEntity<HashMap<String, Boolean>> staticAccesses(ObjectId userId, ObjectId areaId) {

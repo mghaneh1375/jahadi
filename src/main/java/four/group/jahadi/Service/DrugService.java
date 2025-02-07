@@ -166,9 +166,12 @@ public class DrugService extends AbstractService<Drug, DrugData> {
         return drug;
     }
 
-    public void remove(ObjectId id) {
-        //todo: remove logs and check for usage in active trip
-        drugRepository.deleteById(id);
+    public void remove(ObjectId id, ObjectId userId) {
+        //todo: check usage in trips
+        drugRepository.delete(
+                drugRepository.findByIdAndUserId(id, userId)
+                        .orElseThrow(InvalidIdException::new)
+        );
     }
 
     // EXCEL FORMAT

@@ -274,6 +274,7 @@ public class EquipmentService extends AbstractService<Equipment, EquipmentData> 
     }
 
     public void remove(ObjectId equipmentId, ObjectId userId) {
+        //todo: check usage in trips
         equipmentRepository.delete(
                 equipmentRepository.findByIdAndUserId(equipmentId, userId)
                         .orElseThrow(InvalidIdException::new)

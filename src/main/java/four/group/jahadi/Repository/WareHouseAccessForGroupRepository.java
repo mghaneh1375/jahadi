@@ -21,6 +21,9 @@ public interface WareHouseAccessForGroupRepository extends
     @Query(value = "{groupId: ?0, hasAccessForEquipment: true, userId: ?1}", exists = true)
     boolean existsEquipmentAccessByGroupIdAndUserId(ObjectId groupId, ObjectId userId);
 
+    @Query(value = "{groupId: ?0, userId: ?1}", exists = true)
+    boolean existsAccessByGroupIdAndUserId(ObjectId groupId, ObjectId userId);
+
     @Query(value = "{groupId: ?0, userId: ?1}")
     Optional<WareHouseAccessForGroup> findAccessByGroupIdAndUserId(ObjectId groupId, ObjectId userId);
 
