@@ -20,7 +20,7 @@ public interface EquipmentsInAreaRepository extends MongoRepository<AreaEquipmen
     Optional<AreaEquipments> findByAreaIdAndEquipmentId(ObjectId areaId, ObjectId equipmentId);
 
     @Query(value = "{areaId: ?0, equipmentId: {$in: ?1}}", fields = "{_id: 1}")
-    List<ObjectId> findIdsByAreaIdAndIds(ObjectId areaId, List<ObjectId> ids);
+    List<AreaEquipments> findIdsByAreaIdAndIds(ObjectId areaId, List<ObjectId> ids);
 
     @Aggregation(pipeline = {
             "{$match: {areaId: ?0}}",

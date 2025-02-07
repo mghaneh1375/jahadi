@@ -87,9 +87,9 @@ public class EquipmentServiceInArea {
         List<Equipment> equipmentsIter = equipmentRepository.findAllByIdsAndUserId(ids, userId);
 
         List<AreaEquipments> equipments = new ArrayList<>();
-        List<ObjectId> existEquipments = equipmentsInAreaRepository.findIdsByAreaIdAndIds(areaId, ids);
         HashMap<ObjectId, Integer> updates = new HashMap<>();
-        existEquipments.forEach(objectId -> updates.put(objectId, 0));
+        equipmentsInAreaRepository.findIdsByAreaIdAndIds(areaId, ids)
+                .forEach(areaEquipments -> updates.put(areaEquipments.getId(), 0));
 
         List<EquipmentLog> equipmentLogs = new ArrayList<>();
         final String msg = "اختصاص به منطقه " + foundArea.getName() + " در اردو " + trip.getName() + " توسط " + username;
@@ -102,7 +102,7 @@ public class EquipmentServiceInArea {
                         if (equipment.getAvailable() < dto.getTotalCount())
                             throw new RuntimeException("تجهیز " + equipment.getName() + "ظرفیت این تجهیز کمتر از مقدار درخواستی شما می باشد");
 
-                        if (existEquipments.contains(equipment.getId()))
+                        if (updates.containsKey(equipment.getId()))
                             updates.put(equipment.getId(), updates.get(equipment.getId()) + dto.getTotalCount());
                         else
                             equipments.add(
