@@ -24,7 +24,6 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.Size;
-import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -36,33 +35,6 @@ public class EquipmentAPIRoutes extends Router {
     private EquipmentService equipmentService;
     @Autowired
     private EquipmentServiceInArea equipmentServiceInArea;
-
-    @GetMapping(value = "list")
-    @ResponseBody
-    public ResponseEntity<List<Equipment>> list(
-            HttpServletRequest request,
-            @RequestParam(required = false, value = "name") String name,
-            @RequestParam(required = false, value = "minAvailable") Integer minAvailable,
-            @RequestParam(required = false, value = "maxAvailable") Integer maxAvailable,
-            @RequestParam(required = false, value = "healthyStatus") String healthyStatus,
-            @RequestParam(required = false, value = "propertyId") String propertyId,
-            @RequestParam(required = false, value = "location") String location,
-            @RequestParam(required = false, value = "equipmentType") String equipmentType,
-            @RequestParam(required = false, value = "rowNo") String rowNo,
-            @RequestParam(required = false, value = "shelfNo") String shelfNo,
-            @RequestParam(required = false, value = "fromBuyAt") Date fromBuyAt,
-            @RequestParam(required = false, value = "toBuyAt") Date toBuyAt,
-            @RequestParam(required = false, value = "fromGuaranteeExpireAt") Date fromGuaranteeExpireAt,
-            @RequestParam(required = false, value = "toGuaranteeExpireAt") Date toGuaranteeExpireAt
-    ) throws UnAuthException, NotActivateAccountException {
-        User user = getUser(request);
-        return equipmentService.list(
-                user.getId(), name, minAvailable, maxAvailable,
-                healthyStatus, propertyId, location, equipmentType,
-                rowNo, shelfNo, fromBuyAt, toBuyAt,
-                fromGuaranteeExpireAt, toGuaranteeExpireAt
-        );
-    }
 
     @PutMapping(value = "addAllEquipmentsToArea/{areaId}")
     @Operation(summary = "افزودن یک یا چند تجهیز به منطقه توسط مسئول گروه")

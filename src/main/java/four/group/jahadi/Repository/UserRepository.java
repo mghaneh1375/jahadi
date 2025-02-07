@@ -77,4 +77,6 @@ public interface UserRepository extends MongoRepository<User, ObjectId>, Filtera
     @Query(value = "{'nid':  ?0}", count = true)
     Integer countByNID(String nid);
 
+    @Query(value = "{$and: [{'groupId': ?0}, {'accesses': 'GROUP'}]}", fields = "{_id: 1}")
+    User findIdByGroupOwnerId(ObjectId groupId);
 }

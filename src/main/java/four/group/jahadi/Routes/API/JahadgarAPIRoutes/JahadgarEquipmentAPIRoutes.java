@@ -1,11 +1,13 @@
 package four.group.jahadi.Routes.API.JahadgarAPIRoutes;
 
 import four.group.jahadi.DTO.Area.AreaEquipmentsData;
+import four.group.jahadi.Enums.Access;
+import four.group.jahadi.Exception.NotAccessException;
 import four.group.jahadi.Exception.NotActivateAccountException;
 import four.group.jahadi.Exception.UnAuthException;
 import four.group.jahadi.Models.Equipment;
 import four.group.jahadi.Models.TokenInfo;
-import four.group.jahadi.Models.User;
+import four.group.jahadi.Repository.UserRepository;
 import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Service.EquipmentService;
 import four.group.jahadi.Service.EquipmentServiceInArea;
@@ -32,6 +34,8 @@ public class JahadgarEquipmentAPIRoutes extends Router {
     private EquipmentServiceInArea equipmentServiceInArea;
     @Autowired
     private EquipmentService equipmentService;
+    @Autowired
+    private UserRepository userRepository;
 
     @PutMapping(value = "addAllEquipmentsToArea/{areaId}")
     @Operation(summary = "افزودن یک یا چند تجهیز به منطقه توسط مسئول گروه")
@@ -91,9 +95,22 @@ public class JahadgarEquipmentAPIRoutes extends Router {
             @RequestParam(required = false, value = "fromGuaranteeExpireAt") Date fromGuaranteeExpireAt,
             @RequestParam(required = false, value = "toGuaranteeExpireAt") Date toGuaranteeExpireAt
     ) throws UnAuthException, NotActivateAccountException {
-        User user = getUser(request);
+        TokenInfo fullTokenInfo = getFullTokenInfo(request);
+        if(!fullTokenInfo.getAccesses().contains(Access.GROUP)) {
+            ResponseEntity<Boolean> hasAccess = equipmentServiceInArea.checkAccessToWareHouse(
+                    fullTokenInfo.getGroupId(),
+                    fullTokenInfo.getUserId()
+            );
+            if(hasAccess == null || hasAccess.getBody() == null ||
+                    !hasAccess.getBody()
+            )
+                throw new NotAccessException();
+        }
         return equipmentService.list(
-                user.getId(), name, minAvailable, maxAvailable,
+                fullTokenInfo.getAccesses().contains(Access.GROUP)
+                        ? fullTokenInfo.getUserId()
+                        : userRepository.findIdByGroupOwnerId(fullTokenInfo.getGroupId()).getId(),
+                name, minAvailable, maxAvailable,
                 healthyStatus, propertyId, location, equipmentType,
                 rowNo, shelfNo, fromBuyAt, toBuyAt,
                 fromGuaranteeExpireAt, toGuaranteeExpireAt
