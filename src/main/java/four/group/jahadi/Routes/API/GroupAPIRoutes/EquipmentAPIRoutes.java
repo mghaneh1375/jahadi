@@ -1,16 +1,15 @@
 package four.group.jahadi.Routes.API.GroupAPIRoutes;
 
-import four.group.jahadi.DTO.Area.AreaEquipmentsData;
 import four.group.jahadi.DTO.EquipmentData;
 import four.group.jahadi.DTO.ErrorRow;
+import four.group.jahadi.Enums.Access;
 import four.group.jahadi.Exception.NotActivateAccountException;
 import four.group.jahadi.Exception.UnAuthException;
 import four.group.jahadi.Models.Equipment;
-import four.group.jahadi.Models.User;
+import four.group.jahadi.Models.TokenInfo;
 import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Service.EquipmentService;
 import four.group.jahadi.Service.EquipmentServiceInArea;
-import four.group.jahadi.Utility.ValidList;
 import four.group.jahadi.Validator.ObjectIdConstraint;
 import io.swagger.v3.oas.annotations.Operation;
 import org.bson.types.ObjectId;
@@ -23,11 +22,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import javax.validation.constraints.Size;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "api/group/equipment")
+@RequestMapping(value = "api/equipment")
 @Validated
 public class EquipmentAPIRoutes extends Router {
 
@@ -36,42 +34,17 @@ public class EquipmentAPIRoutes extends Router {
     @Autowired
     private EquipmentServiceInArea equipmentServiceInArea;
 
-    @PutMapping(value = "addAllEquipmentsToArea/{areaId}")
-    @Operation(summary = "افزودن یک یا چند تجهیز به منطقه توسط مسئول گروه")
-    public void addAllEquipmentsToArea(
-            HttpServletRequest request,
-            @PathVariable @ObjectIdConstraint ObjectId areaId,
-            @RequestBody @Valid ValidList<AreaEquipmentsData> dataValidList
-    ) throws UnAuthException, NotActivateAccountException {
-        User user = getUser(request);
-        equipmentServiceInArea.addAllEquipmentsToArea(
-                user.getId(), user.getGroupId(),
-                user.getPhone(), areaId, dataValidList,
-                true
-        );
-    }
-
-    @DeleteMapping(value = "removeAllFromEquipmentsList/{areaId}")
-    @Operation(summary = "حذف یک یا چند تجهیز از منطقه توسط مسئول گروه")
-    public void removeAllFromEquipmentsList(
-            HttpServletRequest request,
-            @PathVariable @ObjectIdConstraint ObjectId areaId,
-            @RequestBody @Valid @Size(min = 1) ValidList<ObjectId> drugs
-    ) throws UnAuthException, NotActivateAccountException {
-        User user = getUser(request);
-        equipmentServiceInArea.removeAllFromEquipmentsList(
-                user.getId(), user.getGroupId(), user.getPhone(), areaId, drugs, true
-        );
-    }
-
     @PostMapping(value = "store")
     @ResponseBody
     public ResponseEntity<Equipment> store(
             HttpServletRequest request,
             @RequestBody @Valid EquipmentData dto
     ) throws UnAuthException, NotActivateAccountException {
-        User user = getUser(request);
-        return equipmentService.store(dto, user.getId(), user.getGroupId());
+        TokenInfo fullTokenInfo = getFullTokenInfo(request);
+        return equipmentService.store(dto,
+                fullTokenInfo.getUserId(), fullTokenInfo.getGroupId(),
+                fullTokenInfo.getAccesses().contains(Access.GROUP)
+        );
     }
 
     @PostMapping(value = "batchStore", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -81,8 +54,11 @@ public class EquipmentAPIRoutes extends Router {
             HttpServletRequest request,
             @RequestBody MultipartFile file
     ) throws UnAuthException, NotActivateAccountException {
-        User user = getUser(request);
-        return equipmentService.batchStore(file, user.getId(), user.getGroupId());
+        TokenInfo fullTokenInfo = getFullTokenInfo(request);
+        return equipmentService.batchStore(file,
+                fullTokenInfo.getUserId(), fullTokenInfo.getGroupId(),
+                fullTokenInfo.getAccesses().contains(Access.GROUP)
+        );
     }
 
     @PutMapping(value = "update/{id}")
@@ -91,7 +67,12 @@ public class EquipmentAPIRoutes extends Router {
             @PathVariable @ObjectIdConstraint ObjectId id,
             @RequestBody @Valid EquipmentData dto
     ) {
-        equipmentService.update(id, dto, getId(request));
+        TokenInfo fullTokenInfo = getFullTokenInfo(request);
+        equipmentService.update(
+                id, dto,
+                fullTokenInfo.getUserId(), fullTokenInfo.getGroupId(),
+                fullTokenInfo.getAccesses().contains(Access.GROUP)
+        );
     }
 
     @DeleteMapping(value = "remove/{id}")
@@ -99,7 +80,12 @@ public class EquipmentAPIRoutes extends Router {
             HttpServletRequest request,
             @PathVariable @ObjectIdConstraint ObjectId id
     ) {
-        equipmentService.remove(id, getId(request));
+        TokenInfo fullTokenInfo = getFullTokenInfo(request);
+        equipmentService.remove(
+                id, fullTokenInfo.getUserId(),
+                fullTokenInfo.getGroupId(),
+                fullTokenInfo.getAccesses().contains(Access.GROUP)
+        );
     }
 
 }

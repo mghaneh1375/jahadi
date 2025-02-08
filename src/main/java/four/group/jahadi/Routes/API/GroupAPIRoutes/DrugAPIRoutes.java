@@ -2,11 +2,12 @@ package four.group.jahadi.Routes.API.GroupAPIRoutes;
 
 import four.group.jahadi.DTO.DrugData;
 import four.group.jahadi.DTO.ErrorRow;
+import four.group.jahadi.Enums.Access;
 import four.group.jahadi.Enums.Drug.DrugType;
 import four.group.jahadi.Exception.NotActivateAccountException;
 import four.group.jahadi.Exception.UnAuthException;
 import four.group.jahadi.Models.Drug;
-import four.group.jahadi.Models.User;
+import four.group.jahadi.Models.TokenInfo;
 import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Service.Area.DrugServiceInArea;
 import four.group.jahadi.Service.DrugService;
@@ -25,7 +26,7 @@ import javax.validation.Valid;
 import java.util.List;
 
 @RestController
-@RequestMapping(path = "/api/group/drug")
+@RequestMapping(path = "/api/drug")
 @Validated
 public class DrugAPIRoutes extends Router {
     @Autowired
@@ -39,7 +40,11 @@ public class DrugAPIRoutes extends Router {
             HttpServletRequest request,
             @PathVariable @ObjectIdConstraint ObjectId id
     ) {
-        drugService.remove(id, getId(request));
+        TokenInfo fullTokenInfo = getFullTokenInfo(request);
+        drugService.remove(
+                id, fullTokenInfo.getUserId(), fullTokenInfo.getGroupId(),
+                fullTokenInfo.getAccesses().contains(Access.GROUP)
+        );
     }
 
     @GetMapping(value = "getDrugTypes")
@@ -68,8 +73,11 @@ public class DrugAPIRoutes extends Router {
             HttpServletRequest request,
             @RequestBody @Valid DrugData dto
     ) throws UnAuthException, NotActivateAccountException {
-        User user = getUser(request);
-        return drugService.store(dto, user.getId(), user.getGroupId());
+        TokenInfo fullTokenInfo = getFullTokenInfo(request);
+        return drugService.store(
+                dto, fullTokenInfo.getUserId(), fullTokenInfo.getGroupId(),
+                fullTokenInfo.getAccesses().contains(Access.GROUP)
+        );
     }
 
     @PutMapping(value = "update/{drugId}")
@@ -79,7 +87,11 @@ public class DrugAPIRoutes extends Router {
             @PathVariable @ObjectIdConstraint ObjectId drugId,
             @RequestBody @Valid DrugData dto
     ) {
-        drugService.update(drugId, dto, getId(request));
+        TokenInfo fullTokenInfo = getFullTokenInfo(request);
+        drugService.update(drugId, dto,
+                fullTokenInfo.getUserId(), fullTokenInfo.getGroupId(),
+                fullTokenInfo.getAccesses().contains(Access.GROUP)
+        );
     }
 
     @PostMapping(value = "batchStore", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -89,7 +101,7 @@ public class DrugAPIRoutes extends Router {
             HttpServletRequest request,
             @RequestBody MultipartFile file
     ) throws UnAuthException, NotActivateAccountException {
-        User user = getUser(request);
-        return drugService.batchStore(file, user.getId(), user.getGroupId());
+        TokenInfo tokenInfo = getTokenInfo(request);
+        return drugService.batchStore(file, tokenInfo.getUserId(), tokenInfo.getGroupId());
     }
 }

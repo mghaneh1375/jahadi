@@ -78,7 +78,7 @@ public class DrugServiceInArea {
 
         List<ObjectId> ids = dtoList.stream().map(AreaDrugsData::getDrugId).distinct()
                 .collect(Collectors.toList());
-        List<Drug> drugsIter = drugRepository.findAllByIdsAndUserId(ids, isGroupOwner ? userId : null);
+        List<Drug> drugsIter = drugRepository.findAllByIdsAndGroupId(ids, groupId);
 
         List<AreaDrugs> drugs = new ArrayList<>();
         List<ObjectId> existDrugs = drugsInAreaRepository.findDrugIdsByAreaIdAndDrugIds(areaId, ids)
@@ -166,9 +166,9 @@ public class DrugServiceInArea {
         List<AreaDrugs> areaDrugs = drugsInAreaRepository.removeAreaDrugsByIdAndAreaId(ids, areaId);
         List<DrugLog> drugLogs = new ArrayList<>();
 
-        List<Drug> drugsIter = drugRepository.findAllByIdsAndUserId(
+        List<Drug> drugsIter = drugRepository.findAllByIdsAndGroupId(
                 areaDrugs.stream().map(AreaDrugs::getDrugId).collect(Collectors.toList()),
-                userId
+                groupId
         );
         final String msg = "حذف از منطقه " + foundArea.getName() + " در اردو " + trip.getName() + " توسط " + username;
 

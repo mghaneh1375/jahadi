@@ -15,11 +15,11 @@ import java.util.Optional;
 
 @Repository
 public interface EquipmentRepository extends MongoRepository<Equipment, ObjectId>, FilterableRepository<Equipment> {
-    @Query(value = "{_id: ?0, userId: ?1}")
-    Optional<Equipment> findByIdAndUserId(ObjectId id, ObjectId userId);
+    @Query(value = "{_id: ?0, groupId: ?1}")
+    Optional<Equipment> findByIdAndGroupId(ObjectId id, ObjectId groupId);
 
-    @Query(value = "{_id: {$in: ?0}, userId: ?1}")
-    List<Equipment> findAllByIdsAndUserId(List<ObjectId> ids, ObjectId userId);
+    @Query(value = "{_id: {$in: ?0}, groupId: ?1}")
+    List<Equipment> findAllByIdsAndGroupId(List<ObjectId> ids, ObjectId groupId);
 
     @Query(value = "{ _id: {$in: ?0}}", fields = "{ '_id': 1 }")
     List<Equipment> findByIds(List<ObjectId> ids);

@@ -6,8 +6,10 @@ import four.group.jahadi.Enums.EquipmentHealthStatus;
 import four.group.jahadi.Enums.EquipmentType;
 import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Exception.InvalidIdException;
+import four.group.jahadi.Exception.NotAccessException;
 import four.group.jahadi.Models.Equipment;
 import four.group.jahadi.Repository.EquipmentRepository;
+import four.group.jahadi.Repository.WareHouseAccessForGroupRepository;
 import four.group.jahadi.Utility.Utility;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
@@ -33,6 +35,8 @@ public class EquipmentService extends AbstractService<Equipment, EquipmentData> 
 
     @Autowired
     private EquipmentRepository equipmentRepository;
+    @Autowired
+    private WareHouseAccessForGroupRepository wareHouseAccessForGroupRepository;
 
     @Override
     public ResponseEntity<List<Equipment>> list(Object... filters) {
@@ -69,7 +73,15 @@ public class EquipmentService extends AbstractService<Equipment, EquipmentData> 
     @Override
     public void update(ObjectId id, EquipmentData dto, Object... params) {
         ObjectId userId = (ObjectId) params[0];
-        Equipment equipment = equipmentRepository.findByIdAndUserId(id, userId)
+        ObjectId groupId = (ObjectId) params[1];
+        boolean hasGroupAccess = (boolean) params[2];
+
+        if (!hasGroupAccess &&
+                !wareHouseAccessForGroupRepository.existsEquipmentAccessByGroupIdAndUserId(groupId, userId)
+        )
+            throw new NotAccessException();
+
+        Equipment equipment = equipmentRepository.findByIdAndGroupId(id, groupId)
                 .orElseThrow(InvalidIdException::new);
         equipment.setEquipmentType(dto.getEquipmentType());
         equipment.setName(dto.getName());
@@ -98,6 +110,13 @@ public class EquipmentService extends AbstractService<Equipment, EquipmentData> 
     public ResponseEntity<Equipment> store(EquipmentData dto, Object... params) {
         ObjectId userId = (ObjectId) params[0];
         ObjectId groupId = (ObjectId) params[1];
+        boolean hasGroupAccess = (boolean) params[2];
+
+        if (!hasGroupAccess &&
+                !wareHouseAccessForGroupRepository.existsEquipmentAccessByGroupIdAndUserId(groupId, userId)
+        )
+            throw new NotAccessException();
+
         Equipment equipment = Equipment
                 .builder()
                 .equipmentType(dto.getEquipmentType())
@@ -122,7 +141,6 @@ public class EquipmentService extends AbstractService<Equipment, EquipmentData> 
         equipmentRepository.insert(equipment);
         return new ResponseEntity<>(equipment, HttpStatus.OK);
     }
-
 
     // EXCEL FORMAT
     // A: index, B: equipmentType, C: name, D: producer, E: available,
@@ -234,9 +252,17 @@ public class EquipmentService extends AbstractService<Equipment, EquipmentData> 
         return equipment;
     }
 
-    public ResponseEntity<List<ErrorRow>> batchStore(MultipartFile file, ObjectId userId, ObjectId groupId) {
+    public ResponseEntity<List<ErrorRow>> batchStore(
+            MultipartFile file, ObjectId userId,
+            ObjectId groupId, boolean hasGroupAccess
+    ) {
         if (file == null)
             throw new InvalidFieldsException("لطفا فایل را بارگذاری نمایید");
+        if (!hasGroupAccess &&
+                !wareHouseAccessForGroupRepository.existsEquipmentAccessByGroupIdAndUserId(groupId, userId)
+        )
+            throw new NotAccessException();
+
         try {
             Workbook workbook = new XSSFWorkbook(file.getInputStream());
             Sheet sheet = workbook.getSheetAt(0);
@@ -273,10 +299,18 @@ public class EquipmentService extends AbstractService<Equipment, EquipmentData> 
         return null;
     }
 
-    public void remove(ObjectId equipmentId, ObjectId userId) {
+    public void remove(
+            ObjectId equipmentId, ObjectId userId,
+            ObjectId groupId, boolean hasGroupAccess
+    ) {
+        if (!hasGroupAccess &&
+                !wareHouseAccessForGroupRepository.existsEquipmentAccessByGroupIdAndUserId(groupId, userId)
+        )
+            throw new NotAccessException();
+
         //todo: check usage in trips
         equipmentRepository.delete(
-                equipmentRepository.findByIdAndUserId(equipmentId, userId)
+                equipmentRepository.findByIdAndGroupId(equipmentId, groupId)
                         .orElseThrow(InvalidIdException::new)
         );
     }

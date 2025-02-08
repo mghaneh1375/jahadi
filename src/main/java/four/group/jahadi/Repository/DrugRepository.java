@@ -15,11 +15,11 @@ import java.util.Optional;
 @Repository
 public interface DrugRepository extends MongoRepository<Drug, ObjectId>, FilterableRepository<Drug> {
 
-    @Query(value = "{_id: ?0, userId: ?1}")
-    Optional<Drug> findByIdAndUserId(ObjectId id, ObjectId userId);
+    @Query(value = "{_id: ?0, groupId: ?1}")
+    Optional<Drug> findByIdAndGroupId(ObjectId id, ObjectId groupId);
 
-    @Query(value = "{_id: {$in: ?0}, userId: ?1}")
-    List<Drug> findAllByIdsAndUserId(List<ObjectId> ids, ObjectId userId);
+    @Query(value = "{_id: {$in: ?0}, groupId: ?1}")
+    List<Drug> findAllByIdsAndGroupId(List<ObjectId> ids, ObjectId groupId);
 
     @Query(value = "{ _id: {$in: ?0}}", fields = "{ 'name': 1, 'howToUse': 1, 'description': 1 }")
     List<Drug> findByIds(List<ObjectId> ids);

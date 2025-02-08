@@ -5,10 +5,12 @@ import four.group.jahadi.DTO.ErrorRow;
 import four.group.jahadi.Enums.Drug.*;
 import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Exception.InvalidIdException;
+import four.group.jahadi.Exception.NotAccessException;
 import four.group.jahadi.Models.Drug;
 import four.group.jahadi.Models.DrugLog;
 import four.group.jahadi.Repository.DrugLogRepository;
 import four.group.jahadi.Repository.DrugRepository;
+import four.group.jahadi.Repository.WareHouseAccessForGroupRepository;
 import four.group.jahadi.Utility.PairValue;
 import four.group.jahadi.Utility.Utility;
 import org.apache.poi.ss.usermodel.CellType;
@@ -38,9 +40,10 @@ public class DrugService extends AbstractService<Drug, DrugData> {
 
     @Autowired
     private DrugRepository drugRepository;
-
     @Autowired
     private DrugLogRepository drugLogRepository;
+    @Autowired
+    private WareHouseAccessForGroupRepository wareHouseAccessForGroupRepository;
 
     @Override
     public ResponseEntity<List<Drug>> list(Object... filters) {
@@ -104,6 +107,12 @@ public class DrugService extends AbstractService<Drug, DrugData> {
     public ResponseEntity<Drug> store(DrugData data, Object... params) {
         ObjectId userId = (ObjectId) params[0];
         ObjectId groupId = (ObjectId) params[1];
+        boolean hasGroupAccess = (boolean) params[2];
+        if(!hasGroupAccess &&
+                !wareHouseAccessForGroupRepository.existsDrugAccessByGroupIdAndUserId(groupId, userId)
+        )
+            throw new NotAccessException();
+
         Drug drug = populateEntity(null, data);
         drug.setUserId(userId);
         drug.setGroupId(groupId);
@@ -123,7 +132,14 @@ public class DrugService extends AbstractService<Drug, DrugData> {
     @Override
     public void update(ObjectId id, DrugData drugData, Object... params) {
         ObjectId userId = (ObjectId) params[0];
-        Drug drug = drugRepository.findByIdAndUserId(id, userId)
+        ObjectId groupId = (ObjectId) params[1];
+        boolean hasGroupAccess = (boolean) params[2];
+        if(!hasGroupAccess &&
+                !wareHouseAccessForGroupRepository.existsDrugAccessByGroupIdAndUserId(groupId, userId)
+        )
+            throw new NotAccessException();
+
+        Drug drug = drugRepository.findByIdAndGroupId(id, userId)
                 .orElseThrow(InvalidIdException::new);
         int oldAvailable = drug.getAvailable();
         drug = populateEntity(drug, drugData);
@@ -166,10 +182,14 @@ public class DrugService extends AbstractService<Drug, DrugData> {
         return drug;
     }
 
-    public void remove(ObjectId id, ObjectId userId) {
+    public void remove(ObjectId id, ObjectId userId, ObjectId groupId, boolean hasGroupAccess) {
+        if(!hasGroupAccess &&
+                !wareHouseAccessForGroupRepository.existsDrugAccessByGroupIdAndUserId(groupId, userId)
+        )
+            throw new NotAccessException();
         //todo: check usage in trips
         drugRepository.delete(
-                drugRepository.findByIdAndUserId(id, userId)
+                drugRepository.findByIdAndGroupId(id, groupId)
                         .orElseThrow(InvalidIdException::new)
         );
     }
