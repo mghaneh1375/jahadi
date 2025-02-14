@@ -15,6 +15,7 @@ import four.group.jahadi.Validator.ObjectIdConstraint;
 import io.swagger.v3.oas.annotations.Operation;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -45,6 +46,20 @@ public class JahadgarPatientExternalReferralsAPIRoutes extends Router {
                         ? null
                         : fullTokenInfo.getUserId(),
                 fullTokenInfo.getGroupId(), areaId
+        );
+    }
+
+    @GetMapping(value = "hasExternalReferralAccess")
+    @Operation(summary = "چک کردن اینکه آیا شخص به ارجاعات خارجی اردو دسترسی دارد یا خیر")
+    public ResponseEntity<Boolean> hasExternalReferralAccess(
+            HttpServletRequest request
+    ) {
+        TokenInfo fullTokenInfo = getFullTokenInfo(request);
+        if(fullTokenInfo.getAccesses().contains(Access.GROUP))
+            return new ResponseEntity<>(true, HttpStatus.OK);
+
+        return patientExternalReferralsService.hasExternalReferralAccess(
+                fullTokenInfo.getGroupId(), fullTokenInfo.getUserId()
         );
     }
 

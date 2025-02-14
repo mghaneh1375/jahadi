@@ -113,6 +113,13 @@ public class PatientExternalReferralsService {
         );
     }
 
+    public ResponseEntity<Boolean> hasExternalReferralAccess(ObjectId groupId, ObjectId userId) {
+        return new ResponseEntity<>(
+                externalReferralAccessForGroupRepository.existsAccessByGroupIdAndUserId(groupId, userId),
+                HttpStatus.OK
+        );
+    }
+
     public ResponseEntity<List<PatientExternalForm>> getPatientExternalReferrals(
             ObjectId userId, ObjectId groupId,
             ObjectId areaId, ObjectId patientId
