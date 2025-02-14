@@ -47,7 +47,7 @@ public class DrugService extends AbstractService<Drug, DrugData> {
 
     @Override
     public ResponseEntity<List<Drug>> list(Object... filters) {
-        ObjectId userId = (ObjectId) filters[0];
+        ObjectId groupId = (ObjectId) filters[0];
         try {
             String name = filters.length > 1 ? (String) filters[1] : null;
             Integer minAvailableCount = filters.length > 2 ? (Integer) filters[2] : null;
@@ -61,7 +61,7 @@ public class DrugService extends AbstractService<Drug, DrugData> {
 
             return new ResponseEntity<>(
                     drugRepository.findByFilters(
-                            userId, name, minAvailableCount, maxAvailableCount,
+                            groupId, name, minAvailableCount, maxAvailableCount,
                             drugLocation, drugType, fromExpireAt, toExpireAt,
                             boxNo, shelfNo
                     ),

@@ -218,9 +218,7 @@ public class JahadgarDrugAPIRoutes extends Router {
                 throw new NotAccessException();
         }
         return drugService.list(
-                fullTokenInfo.getAccesses().contains(Access.GROUP)
-                        ? fullTokenInfo.getUserId()
-                        : userRepository.findIdByGroupOwnerId(fullTokenInfo.getGroupId()).getId(),
+                fullTokenInfo.getGroupId(),
                 name, minAvailableCount, maxAvailableCount,
                 drugLocation, drugType, fromExpireAt, toExpireAt,
                 boxNo, shelfNo

@@ -107,9 +107,7 @@ public class JahadgarEquipmentAPIRoutes extends Router {
                 throw new NotAccessException();
         }
         return equipmentService.list(
-                fullTokenInfo.getAccesses().contains(Access.GROUP)
-                        ? fullTokenInfo.getUserId()
-                        : userRepository.findIdByGroupOwnerId(fullTokenInfo.getGroupId()).getId(),
+                fullTokenInfo.getGroupId(),
                 name, minAvailable, maxAvailable,
                 healthyStatus, propertyId, location, equipmentType,
                 rowNo, shelfNo, fromBuyAt, toBuyAt,

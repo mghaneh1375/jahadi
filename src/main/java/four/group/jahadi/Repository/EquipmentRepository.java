@@ -2,7 +2,6 @@ package four.group.jahadi.Repository;
 
 import four.group.jahadi.Enums.EquipmentHealthStatus;
 import four.group.jahadi.Enums.EquipmentType;
-import four.group.jahadi.Models.Drug;
 import four.group.jahadi.Models.Equipment;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -26,7 +25,7 @@ public interface EquipmentRepository extends MongoRepository<Equipment, ObjectId
 
     @Query(value = "{$and :["
             + "{$or: [{'deletedAt': null}, {'deletedAt': {$exists: false}}]},"
-            + "?#{ [0] == null ? { $where : 'true'} : { 'user_id' : [0] } },"
+            + "?#{ [0] == null ? { $where : 'true'} : { 'group_id' : [0] } },"
             + "?#{ [1] == null ? { $where : 'true'} : { 'name': { $regex: [1], $options:'i'} } },"
             + "?#{ [2] == null ? { $where : 'true'} : { 'available' : {$gte: [2]} } },"
             + "?#{ [3] == null ? { $where : 'true'} : { 'available' : {$lte: [3]} } },"
@@ -42,7 +41,7 @@ public interface EquipmentRepository extends MongoRepository<Equipment, ObjectId
             + "?#{ [13] == null ? { $where : 'true'} : { 'guarantee_expire_at' : {$lte: [13]} } },"
             + "]}", fields = "{userId: 0, groupId: 0}")
     List<Equipment> findByFilters(
-            ObjectId userId, String name,
+            ObjectId groupId, String name,
             Integer minAvailable, Integer maxAvailable,
             EquipmentHealthStatus healthStatus,
             String propertyId, String location,

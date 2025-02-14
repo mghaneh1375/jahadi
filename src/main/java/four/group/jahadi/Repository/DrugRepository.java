@@ -31,7 +31,7 @@ public interface DrugRepository extends MongoRepository<Drug, ObjectId>, Filtera
     List<Drug> findLikeName(String name);
 
     @Query(value = "{$and :[{$or: [{'deleted_at': null}, {'deleted_at': {$exists: false}}]},"
-            + "?#{ [0] == null ? { $where : 'true'} : { 'user_id' : [0] } },"
+            + "?#{ [0] == null ? { $where : 'true'} : { 'group_id' : [0] } },"
             + "?#{ [1] == null ? { $where : 'true'} : { name: { $regex: [1], $options:'i'} } },"
             + "?#{ [2] == null ? { $where : 'true'} : { 'available' : {$gte: [2]} } },"
             + "?#{ [3] == null ? { $where : 'true'} : { 'available' : {$lte: [3]} } },"
@@ -43,7 +43,7 @@ public interface DrugRepository extends MongoRepository<Drug, ObjectId>, Filtera
             + "?#{ [9] == null ? { $where : 'true'} : { 'shelf_no' : [9] } },"
             + "]}")
     List<Drug> findByFilters(
-            ObjectId userId, String name,
+            ObjectId groupId, String name,
             Integer minAvailableCount, Integer maxAvailableCount,
             DrugLocation drugLocation, DrugType drugType,
             Date fromExpireAt, Date toExpireAt,
