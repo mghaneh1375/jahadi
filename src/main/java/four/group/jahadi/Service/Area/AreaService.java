@@ -55,6 +55,8 @@ public class AreaService extends AbstractService<Area, AreaData> {
     private AreaPresenceService areaPresenceService;
     @Autowired
     private WareHouseAccessForGroupRepository wareHouseAccessForGroupRepository;
+    @Autowired
+    private ExternalReferralAccessForGroupRepository externalReferralAccessForGroupRepository;
 
     @Override
     public ResponseEntity<List<Area>> list(Object... filters) {
@@ -177,14 +179,12 @@ public class AreaService extends AbstractService<Area, AreaData> {
     }
 
     public ResponseEntity<List<AreaDigest>> getGroupAreas(ObjectId userId, ObjectId groupId) {
-
-        if(!wareHouseAccessForGroupRepository.existsAccessByGroupIdAndUserId(
-                groupId, userId
-        ))
+        if(!wareHouseAccessForGroupRepository.existsAccessByGroupIdAndUserId(groupId, userId) &&
+                !externalReferralAccessForGroupRepository.existsAccessByGroupIdAndUserId(groupId, userId)
+        )
             throw new NotAccessException();
 
-        List<Trip> trips =
-                tripRepository.findDigestInfoActivesOrNotStartedProjectsByGroupId(Utility.getCurrDate(), groupId);
+        List<Trip> trips = tripRepository.findDigestInfoProjectsByGroupId(groupId);
         List<AreaDigest> areaDigests = new ArrayList<>();
         trips.forEach(trip -> {
             trip.getAreas().forEach(area -> {

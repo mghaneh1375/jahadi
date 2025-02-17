@@ -43,9 +43,7 @@ public class TripService extends AbstractService<Trip, TripStepData> {
     // 2- status
     @Override
     public ResponseEntity<List<Trip>> list(Object... filters) {
-
         List<List<Object>> filtersList = new ArrayList<>();
-
         if (filters[0] != null) {
             filtersList.add(new ArrayList<>() {
                 {
@@ -60,7 +58,6 @@ public class TripService extends AbstractService<Trip, TripStepData> {
                 Trip.class,
                 FilteringFactory.abstractParseFromParams(filtersList, Trip.class)
         );
-
         List<Group> groups = groupRepository.findByIdsIn(findFromTripGroupIds(trips));
 
         trips.forEach(trip -> {
