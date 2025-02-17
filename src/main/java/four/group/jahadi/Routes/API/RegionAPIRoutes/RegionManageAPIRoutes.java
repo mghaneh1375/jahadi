@@ -40,10 +40,18 @@ public class RegionManageAPIRoutes extends Router {
 
     @GetMapping(value = "getGroupAreas")
     @ResponseBody
-    @Operation(summary = "گرفتن لیستی از مناطقی که متعلق به یک گروه خاص می باشد و هنوز تمام نشده است توسط مسئول انبار")
+    @Operation(summary = "گرفتن لیستی از مناطقی که متعلق به یک گروه خاص می باشد و هنوز تمام نشده است توسط مسئول انبار یا مسئول ارجاع خارجی")
     public ResponseEntity<List<AreaDigest>> getGroupAreas(HttpServletRequest request) {
         TokenInfo tokenInfo = getTokenInfo(request);
         return areaService.getGroupAreas(tokenInfo.getUserId(), tokenInfo.getGroupId());
+    }
+
+    @GetMapping(value = "getGroupTrips")
+    @ResponseBody
+    @Operation(summary = "گرفتن لیستی از اردوهایی که متعلق به یک گروه خاص می باشد و هنوز تمام نشده است توسط مسئول انبار یا مسئول ارجاع خارجی")
+    public ResponseEntity<List<AreaDigest>> getGroupTrips(HttpServletRequest request) {
+        TokenInfo tokenInfo = getTokenInfo(request);
+        return areaService.getGroupTrips(tokenInfo.getUserId(), tokenInfo.getGroupId());
     }
 
     @GetMapping(value = "dashboard/{areaId}")

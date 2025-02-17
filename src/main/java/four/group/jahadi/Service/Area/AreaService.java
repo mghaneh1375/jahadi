@@ -179,7 +179,7 @@ public class AreaService extends AbstractService<Area, AreaData> {
     }
 
     public ResponseEntity<List<AreaDigest>> getGroupAreas(ObjectId userId, ObjectId groupId) {
-        if(!wareHouseAccessForGroupRepository.existsAccessByGroupIdAndUserId(groupId, userId) &&
+        if (!wareHouseAccessForGroupRepository.existsAccessByGroupIdAndUserId(groupId, userId) &&
                 !externalReferralAccessForGroupRepository.existsAccessByGroupIdAndUserId(groupId, userId)
         )
             throw new NotAccessException();
@@ -198,6 +198,26 @@ public class AreaService extends AbstractService<Area, AreaData> {
             });
         });
         return new ResponseEntity<>(areaDigests, HttpStatus.OK);
+    }
+
+    public ResponseEntity<List<AreaDigest>> getGroupTrips(ObjectId userId, ObjectId groupId) {
+        if (!wareHouseAccessForGroupRepository.existsAccessByGroupIdAndUserId(groupId, userId) &&
+                !externalReferralAccessForGroupRepository.existsAccessByGroupIdAndUserId(groupId, userId)
+        )
+            throw new NotAccessException();
+
+        List<Trip> trips = tripRepository.findDigestTripInfoProjectsByGroupId(groupId);
+        List<AreaDigest> digests = new ArrayList<>();
+        trips.forEach(trip -> {
+            digests.add(
+                    AreaDigest
+                            .builder()
+                            .id(trip.getId())
+                            .name(trip.getName())
+                            .build()
+            );
+        });
+        return new ResponseEntity<>(digests, HttpStatus.OK);
     }
 
     public ResponseEntity<HashMap<String, Boolean>> staticAccesses(ObjectId userId, ObjectId areaId) {
@@ -439,10 +459,10 @@ public class AreaService extends AbstractService<Area, AreaData> {
                 .stream()
                 .filter(area1 -> area1.getId().equals(areaId))
                 .findFirst();
-        if(first.isEmpty())
+        if (first.isEmpty())
             throw new InvalidIdException();
 
-        if(Utility.getDate(first.get().getStartAt()).before(Utility.getCurrDate()))
+        if (Utility.getDate(first.get().getStartAt()).before(Utility.getCurrDate()))
             throw new RuntimeException("منطقه موردنظر شروع شده است و امکان حذف آن وجود ندارد");
 
         patientsInAreaRepository.deleteByAreaId(areaId);
@@ -453,7 +473,7 @@ public class AreaService extends AbstractService<Area, AreaData> {
 
     public void removeAreaFromTrip(ObjectId tripId, ObjectId areaId, ObjectId groupId) {
         Trip trip = tripRepository.findById(tripId).orElseThrow(InvalidIdException::new);
-        if(trip.getGroupsWithAccess()
+        if (trip.getGroupsWithAccess()
                 .stream()
                 .noneMatch(groupAccess -> groupAccess.getWriteAccess() && groupAccess.getGroupId().equals(groupId))
         )

@@ -55,6 +55,9 @@ public interface TripRepository extends MongoRepository<Trip, ObjectId>, Filtera
     @Query(value = "{$and: [{'groupsWithAccess.groupId': ?0}]  }", fields = "{'areas.id': 1, 'areas.name': 1}")
     List<Trip> findDigestInfoProjectsByGroupId(ObjectId groupId);
 
+    @Query(value = "{$and: [{'groupsWithAccess.groupId': ?0}]  }", fields = "{'_id': 1, 'name': 1}")
+    List<Trip> findDigestTripInfoProjectsByGroupId(ObjectId groupId);
+
     @Query(value = "{$and: [{$or: [{'endAt': {$exists: false}}, {'endAt': {$gte: ?0}}]}, {'groupsWithAccess': { $elemMatch: {'groupId': ?1, 'writeAccess': true} }} ] }", exists = true)
     boolean hasExistActiveAreaByGroupIdAndAreaIdAndWriteAccess(Date curr, ObjectId groupId, ObjectId areaId);
 
