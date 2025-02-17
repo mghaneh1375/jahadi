@@ -178,13 +178,18 @@ public class AreaService extends AbstractService<Area, AreaData> {
         return new ResponseEntity<>(trips, HttpStatus.OK);
     }
 
-    public ResponseEntity<List<AreaDigest>> getGroupAreas(ObjectId userId, ObjectId groupId) {
+    public ResponseEntity<List<AreaDigest>> getGroupAreas(
+            ObjectId tripId, ObjectId userId, ObjectId groupId
+    ) {
         if (!wareHouseAccessForGroupRepository.existsAccessByGroupIdAndUserId(groupId, userId) &&
                 !externalReferralAccessForGroupRepository.existsAccessByGroupIdAndUserId(groupId, userId)
         )
             throw new NotAccessException();
 
-        List<Trip> trips = tripRepository.findDigestInfoProjectsByGroupId(groupId);
+        List<Trip> trips = tripId == null
+                ? tripRepository.findDigestInfoProjectsByGroupId(groupId)
+                : tripRepository.findDigestInfoProjectsByGroupIdAndTripId(groupId, tripId);
+
         List<AreaDigest> areaDigests = new ArrayList<>();
         trips.forEach(trip -> {
             trip.getAreas().forEach(area -> {

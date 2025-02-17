@@ -55,6 +55,9 @@ public interface TripRepository extends MongoRepository<Trip, ObjectId>, Filtera
     @Query(value = "{$and: [{'groupsWithAccess.groupId': ?0}]  }", fields = "{'areas.id': 1, 'areas.name': 1}")
     List<Trip> findDigestInfoProjectsByGroupId(ObjectId groupId);
 
+    @Query(value = "{$and: [{'groupsWithAccess.groupId': ?0}, {'_id': ?1}]  }", fields = "{'areas.id': 1, 'areas.name': 1}")
+    List<Trip> findDigestInfoProjectsByGroupIdAndTripId(ObjectId groupId, ObjectId tripId);
+
     @Query(value = "{$and: [{'groupsWithAccess.groupId': ?0}]  }", fields = "{'_id': 1, 'name': 1}")
     List<Trip> findDigestTripInfoProjectsByGroupId(ObjectId groupId);
 
