@@ -4,7 +4,11 @@ import four.group.jahadi.DTO.ProjectData;
 import four.group.jahadi.DTO.Trip.TripStep1Data;
 import four.group.jahadi.DTO.UpdateProjectData;
 import four.group.jahadi.Enums.Status;
+import four.group.jahadi.Exception.NotActivateAccountException;
+import four.group.jahadi.Exception.UnAuthException;
 import four.group.jahadi.Models.Project;
+import four.group.jahadi.Models.User;
+import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Service.ProjectService;
 import four.group.jahadi.Service.TripService;
 import four.group.jahadi.Utility.ValidList;
@@ -16,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -25,7 +30,7 @@ import java.util.List;
 @RestController
 @RequestMapping(value = "/api/admin/project")
 @Validated
-public class ProjectAPIRoutes {
+public class ProjectAPIRoutes extends Router {
 
     @Autowired
     ProjectService projectService;
@@ -60,18 +65,22 @@ public class ProjectAPIRoutes {
     @DeleteMapping(value = "/removeTripFromProject/{projectId}/{tripId}")
     @Operation(summary = "حذف یک اردو از پروژه")
     public void removeTripFromProject(
+            HttpServletRequest request,
             @PathVariable @ObjectIdConstraint ObjectId projectId,
             @PathVariable @ObjectIdConstraint ObjectId tripId
-    ) {
-        tripService.removeTripFromProject(projectId, tripId);
+    ) throws UnAuthException, NotActivateAccountException {
+        User user = getUser(request);
+        tripService.removeTripFromProject(projectId, tripId, user.getId(), user.getNid());
     }
 
     @DeleteMapping(value = "/remove/{projectId}")
     @Operation(summary = "حذف یک پروژه")
     public void remove(
+            HttpServletRequest request,
             @PathVariable @ObjectIdConstraint ObjectId projectId
-    ) {
-        projectService.remove(projectId);
+    ) throws UnAuthException, NotActivateAccountException {
+        User user = getUser(request);
+        projectService.remove(projectId, user.getId(), user.getNid());
     }
 
     @PutMapping(value = "/update/{projectId}")

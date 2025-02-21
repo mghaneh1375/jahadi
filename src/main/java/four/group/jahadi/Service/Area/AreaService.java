@@ -14,9 +14,7 @@ import four.group.jahadi.Models.Area.Area;
 import four.group.jahadi.Models.Area.AreaDates;
 import four.group.jahadi.Repository.*;
 import four.group.jahadi.Repository.Area.PatientsInAreaRepository;
-import four.group.jahadi.Service.AbstractService;
-import four.group.jahadi.Service.AreaPresenceService;
-import four.group.jahadi.Service.NotifService;
+import four.group.jahadi.Service.*;
 import four.group.jahadi.Utility.Utility;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,6 +55,10 @@ public class AreaService extends AbstractService<Area, AreaData> {
     private WareHouseAccessForGroupRepository wareHouseAccessForGroupRepository;
     @Autowired
     private ExternalReferralAccessForGroupRepository externalReferralAccessForGroupRepository;
+    @Autowired
+    private DrugServiceInArea drugServiceInArea;
+    @Autowired
+    private EquipmentServiceInArea equipmentServiceInArea;
 
     @Override
     public ResponseEntity<List<Area>> list(Object... filters) {
@@ -458,7 +460,7 @@ public class AreaService extends AbstractService<Area, AreaData> {
         return new ResponseEntity<>(foundArea.getDates(), HttpStatus.OK);
     }
 
-    public void remove(Trip trip, ObjectId areaId) {
+    public void remove(Trip trip, ObjectId areaId, ObjectId userId, String username) {
         Optional<Area> first = trip
                 .getAreas()
                 .stream()
@@ -467,16 +469,23 @@ public class AreaService extends AbstractService<Area, AreaData> {
         if (first.isEmpty())
             throw new InvalidIdException();
 
-        if (Utility.getDate(first.get().getStartAt()).before(Utility.getCurrDate()))
+        if (
+                first.get().getStartAt() != null &&
+                        Utility.getDate(first.get().getStartAt()).before(Utility.getCurrDate())
+        )
             throw new RuntimeException("منطقه موردنظر شروع شده است و امکان حذف آن وجود ندارد");
 
         patientsInAreaRepository.deleteByAreaId(areaId);
         areaPresenceService.removeByAreaId(areaId);
-        // todo: delete other dependencies
+        drugServiceInArea.returnAllDrugs(userId, username, areaId);
+        equipmentServiceInArea.returnAllEquipments(userId, username, areaId);
         trip.getAreas().removeIf(area -> area.getId().equals(areaId));
     }
 
-    public void removeAreaFromTrip(ObjectId tripId, ObjectId areaId, ObjectId groupId) {
+    public void removeAreaFromTrip(
+            ObjectId tripId, ObjectId areaId,
+            ObjectId groupId, ObjectId userId, String username
+    ) {
         Trip trip = tripRepository.findById(tripId).orElseThrow(InvalidIdException::new);
         if (trip.getGroupsWithAccess()
                 .stream()
@@ -484,7 +493,7 @@ public class AreaService extends AbstractService<Area, AreaData> {
         )
             throw new NotAccessException();
 
-        remove(trip, areaId);
+        remove(trip, areaId, userId, username);
         tripRepository.save(trip);
     }
 }

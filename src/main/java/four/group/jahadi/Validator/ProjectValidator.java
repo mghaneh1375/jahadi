@@ -36,10 +36,10 @@ public class ProjectValidator implements ConstraintValidator<ValidatedProject, P
             isErrored = true;
         }
 
-        if(value.getStartAt() != null && value.getStartAt() < System.currentTimeMillis() - ONE_DAY_MSEC) {
-            errs.put("startAt", "تاریخ شروع باید از امروز بزرگ تر باشد");
-            isErrored = true;
-        }
+//        if(value.getStartAt() != null && value.getStartAt() < System.currentTimeMillis() - ONE_DAY_MSEC) {
+//            errs.put("startAt", "تاریخ شروع باید از امروز بزرگ تر باشد");
+//            isErrored = true;
+//        }
 
         if(value.getEndAt() == null) {
             errs.put("endAt", "تاریخ اتمام نامعتبر است");

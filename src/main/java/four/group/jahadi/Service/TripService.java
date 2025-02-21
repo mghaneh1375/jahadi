@@ -117,9 +117,7 @@ public class TripService extends AbstractService<Trip, TripStepData> {
 
     @Override
     public void update(ObjectId id, TripStepData data, Object... params) {
-
         Trip trip = tripRepository.findById(id).orElseThrow(InvalidIdException::new);
-
         boolean hasAdminAccess = (boolean) params[0];
 
         if (!hasAdminAccess && trip.getGroupsWithAccess().stream().noneMatch(groupAccess ->
@@ -128,10 +126,19 @@ public class TripService extends AbstractService<Trip, TripStepData> {
             throw new NotAccessException();
 
         TripStep2Data dto = (TripStep2Data) data;
+        Date startAt = getDate(new Date(dto.getStartAt()));
+        Date endAt = getLastDate(new Date(dto.getEndAt()));
+
+        Project project = projectRepository.findById(trip.getProjectId()).get();
+        // Validate dates
+        if(project.getStartAt().after(startAt))
+            throw new InvalidFieldsException("تاریخ شروع باید از " + Utility.convertDateToJalali(project.getStartAt()) + " باشد");
+        if(project.getEndAt().before(endAt))
+            throw new InvalidFieldsException("تاریخ اتمام باید از " + Utility.convertDateToJalali(project.getEndAt()) + " باشد");
 
         trip.setName(dto.getName());
-        trip.setStartAt(getDate(new Date(dto.getStartAt())));
-        trip.setEndAt(getLastDate(new Date(dto.getEndAt())));
+        trip.setStartAt(startAt);
+        trip.setEndAt(endAt);
 
         tripRepository.save(trip);
     }
@@ -141,19 +148,24 @@ public class TripService extends AbstractService<Trip, TripStepData> {
         return null;
     }
 
-    public void removeTrip(Trip trip) {
-        if (Utility.getCurrDate().after(trip.getStartAt()))
+    public void removeTrip(Trip trip, ObjectId userId, String username) {
+        if (trip.getStartAt() != null &&
+                Utility.getCurrDate().after(trip.getStartAt())
+        )
             throw new InvalidFieldsException("اردو آغاز شده و امکان حدف آن وجود ندارد");
 
-        if(trip.getAreas() != null) {
-            trip.getAreas().forEach(area -> areaService.remove(trip, area.getId()));
+        if (trip.getAreas() != null) {
+            trip.getAreas().forEach(area -> areaService.remove(trip, area.getId(), userId, username));
         }
         tripRepository.delete(trip);
     }
 
-    public void removeTripFromProject(ObjectId projectId, ObjectId tripId) {
+    public void removeTripFromProject(
+            ObjectId projectId, ObjectId tripId,
+            ObjectId userId, String username
+    ) {
         Trip trip = tripRepository.findTripByProjectIdAndId(projectId, tripId).orElseThrow(InvalidIdException::new);
-        removeTrip(trip);
+        removeTrip(trip, userId, username);
     }
 
     public void resetGroupAccessesForTrip(ObjectId projectId, ObjectId tripId, List<TripStep1Data> data) {

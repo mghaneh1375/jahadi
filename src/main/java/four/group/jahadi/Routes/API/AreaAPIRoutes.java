@@ -47,8 +47,12 @@ public class AreaAPIRoutes extends Router {
             HttpServletRequest request,
             @PathVariable @ObjectIdConstraint ObjectId tripId,
             @PathVariable @ObjectIdConstraint ObjectId areaId
-    ) {
-        areaService.removeAreaFromTrip(tripId, areaId, getTokenInfo(request).getGroupId());
+    ) throws UnAuthException, NotActivateAccountException {
+        User user = getUser(request);
+        areaService.removeAreaFromTrip(
+                tripId, areaId, getTokenInfo(request).getGroupId(),
+                user.getId(), user.getNid()
+        );
     }
 
 //    @PutMapping(value = "update/{tripId}")

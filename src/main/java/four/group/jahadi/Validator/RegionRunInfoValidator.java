@@ -36,10 +36,10 @@ public class RegionRunInfoValidator implements ConstraintValidator<ValidatedRegi
             isErrored = true;
         }
 
-        if(value.getStartAt() != null && value.getStartAt() < System.currentTimeMillis()) {
-            errs.put("startAt", "تاریخ شروع باید از امروز بزرگ تر باشد");
-            isErrored = true;
-        }
+//        if(value.getStartAt() != null && value.getStartAt() < System.currentTimeMillis()) {
+//            errs.put("startAt", "تاریخ شروع باید از امروز بزرگ تر باشد");
+//            isErrored = true;
+//        }
 
         if(value.getEndAt() != null && value.getStartAt() > value.getEndAt()) {
             errs.put("endAt", "تاریخ اتمام باید از شروع بزرگ تر باشد");

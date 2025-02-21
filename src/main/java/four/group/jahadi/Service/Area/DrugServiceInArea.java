@@ -4,7 +4,6 @@ import four.group.jahadi.DTO.Area.AdviceDrugData;
 import four.group.jahadi.DTO.Area.AreaDrugsData;
 import four.group.jahadi.DTO.Area.GiveDrugData;
 import four.group.jahadi.DTO.Patient.PatientAdvices;
-import four.group.jahadi.Enums.Drug.UseTime;
 import four.group.jahadi.Enums.Module.DeliveryStatus;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Exception.NotAccessException;
@@ -24,7 +23,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
