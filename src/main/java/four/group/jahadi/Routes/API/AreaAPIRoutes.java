@@ -1,10 +1,12 @@
 package four.group.jahadi.Routes.API;
 
 import four.group.jahadi.DTO.Area.AreaData;
+import four.group.jahadi.DTO.Area.UpdateAreaData;
 import four.group.jahadi.Enums.Access;
 import four.group.jahadi.Exception.NotActivateAccountException;
 import four.group.jahadi.Exception.UnAuthException;
 import four.group.jahadi.Models.Area.Area;
+import four.group.jahadi.Models.TokenInfo;
 import four.group.jahadi.Models.User;
 import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Service.Area.AreaService;
@@ -55,16 +57,18 @@ public class AreaAPIRoutes extends Router {
         );
     }
 
-//    @PutMapping(value = "update/{tripId}")
-//    public void update(
-//            HttpServletRequest request,
-//            @PathVariable @ObjectIdConstraint ObjectId tripId,
-//            @RequestBody @Valid TripStep2Data tripStep2Data
-//    ) throws UnAuthException, NotActivateAccountException {
-//        User user = getUser(request);
-//        areaService.update(tripId, tripStep2Data,
-//                user.getAccesses().contains(Access.ADMIN), user.getId()
-//        );
-//    }
+    @PutMapping(value = "update/{tripId}")
+    public void update(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId tripId,
+            @RequestBody @Valid @Size(min = 1) ValidList<UpdateAreaData> areas
+    ) throws UnAuthException, NotActivateAccountException {
+        TokenInfo fullTokenInfo = getFullTokenInfo(request);
+        areaService.updateAreas(
+                tripId, areas,
+                fullTokenInfo.getAccesses().contains(Access.ADMIN),
+                fullTokenInfo.getUserId(), fullTokenInfo.getGroupId()
+        );
+    }
 
 }

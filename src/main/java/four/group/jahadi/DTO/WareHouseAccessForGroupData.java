@@ -1,11 +1,13 @@
 package four.group.jahadi.DTO;
 
-import lombok.Data;
-import lombok.NonNull;
+import lombok.*;
 import org.bson.types.ObjectId;
 import org.springframework.validation.annotation.Validated;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Validated
 public class WareHouseAccessForGroupData {
     @NonNull

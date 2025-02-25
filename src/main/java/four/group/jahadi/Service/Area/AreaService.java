@@ -2,6 +2,7 @@ package four.group.jahadi.Service.Area;
 
 import four.group.jahadi.DTO.Area.AreaData;
 import four.group.jahadi.DTO.Area.AreaDigest;
+import four.group.jahadi.DTO.Area.UpdateAreaData;
 import four.group.jahadi.DTO.Region.RegionRunInfoData;
 import four.group.jahadi.DTO.Region.RegionSendNotifData;
 import four.group.jahadi.DTO.UpdatePresenceList;
@@ -16,6 +17,7 @@ import four.group.jahadi.Repository.*;
 import four.group.jahadi.Repository.Area.PatientsInAreaRepository;
 import four.group.jahadi.Service.*;
 import four.group.jahadi.Utility.Utility;
+import four.group.jahadi.Utility.ValidList;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -106,6 +108,39 @@ public class AreaService extends AbstractService<Area, AreaData> {
         tripRepository.save(trip);
 
         return new ResponseEntity<>(areaModels, HttpStatus.OK);
+    }
+
+    public void updateAreas(
+            ObjectId tripId, ValidList<UpdateAreaData> areas,
+            boolean hasAdminAccess, ObjectId userId, ObjectId groupId
+    ) {
+        Trip trip = tripRepository.findById(tripId).orElseThrow(InvalidIdException::new);
+        if (!hasAdminAccess && trip.getGroupsWithAccess().stream().noneMatch(groupAccess ->
+                groupAccess.getWriteAccess() && groupAccess.getGroupId().equals(groupId))
+        )
+            throw new NotAccessException();
+
+        areas.forEach(updateAreaData -> {
+            trip
+                    .getAreas()
+                    .stream()
+                    .filter(area -> area.getId().equals(updateAreaData.getAreaId()))
+                    .findFirst().orElseThrow(InvalidIdException::new);
+        });
+
+        areas.forEach(updateAreaData -> {
+            Area area1 = trip
+                    .getAreas()
+                    .stream()
+                    .filter(area -> area.getId().equals(updateAreaData.getAreaId()))
+                    .findFirst().orElseThrow(InvalidIdException::new);
+
+            area1.setOwnerId(updateAreaData.getOwner());
+            area1.setName(updateAreaData.getName());
+            area1.setColor(updateAreaData.getColor());
+        });
+
+        tripRepository.save(trip);
     }
 
     @Override
