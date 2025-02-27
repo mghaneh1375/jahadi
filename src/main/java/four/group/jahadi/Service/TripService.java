@@ -154,9 +154,9 @@ public class TripService extends AbstractService<Trip, TripStepData> {
         )
             throw new InvalidFieldsException("اردو آغاز شده و امکان حدف آن وجود ندارد");
 
-        if (trip.getAreas() != null) {
-            trip.getAreas().forEach(area -> areaService.remove(trip, area.getId(), userId, username));
-        }
+        if (trip.getAreas() != null)
+            trip.getAreas().forEach(area -> areaService.remove(trip, area.getId(), userId, username, false));
+
         tripRepository.delete(trip);
     }
 

@@ -495,7 +495,10 @@ public class AreaService extends AbstractService<Area, AreaData> {
         return new ResponseEntity<>(foundArea.getDates(), HttpStatus.OK);
     }
 
-    public void remove(Trip trip, ObjectId areaId, ObjectId userId, String username) {
+    public void remove(
+            Trip trip, ObjectId areaId,
+            ObjectId userId, String username, boolean needRemove
+    ) {
         Optional<Area> first = trip
                 .getAreas()
                 .stream()
@@ -512,9 +515,16 @@ public class AreaService extends AbstractService<Area, AreaData> {
 
         patientsInAreaRepository.deleteByAreaId(areaId);
         areaPresenceService.removeByAreaId(areaId);
-        drugServiceInArea.returnAllDrugs(userId, username, areaId);
-        equipmentServiceInArea.returnAllEquipments(userId, username, areaId);
-        trip.getAreas().removeIf(area -> area.getId().equals(areaId));
+        drugServiceInArea.returnAllDrugsByAdmin(
+                userId, username, areaId,
+                first.get().getName(), trip.getName()
+        );
+        equipmentServiceInArea.returnAllEquipmentsByAdmin(
+                userId, username, areaId,
+                first.get().getName(), trip.getName()
+        );
+        if(needRemove)
+            trip.getAreas().removeIf(area -> area.getId().equals(areaId));
     }
 
     public void removeAreaFromTrip(
@@ -528,7 +538,7 @@ public class AreaService extends AbstractService<Area, AreaData> {
         )
             throw new NotAccessException();
 
-        remove(trip, areaId, userId, username);
+        remove(trip, areaId, userId, username, false);
         tripRepository.save(trip);
     }
 }

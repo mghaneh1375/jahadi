@@ -61,7 +61,7 @@ public class EquipmentServiceInArea {
         return new PairValue(foundArea, trip.getName());
     }
 
-//    @Transactional
+    //    @Transactional
     synchronized
     public void addAllEquipmentsToArea(
             ObjectId userId, ObjectId groupId,
@@ -69,7 +69,7 @@ public class EquipmentServiceInArea {
             List<AreaEquipmentsData> dtoList,
             boolean isGroupOwner
     ) {
-        if(!isGroupOwner &&
+        if (!isGroupOwner &&
                 !wareHouseAccessForGroupRepository.existsEquipmentAccessByGroupIdAndUserId(
                         groupId, userId)
         )
@@ -149,14 +149,14 @@ public class EquipmentServiceInArea {
         equipmentsInAreaRepository.saveAll(tmp);
     }
 
-//    @Transactional
+    //    @Transactional
     synchronized
     public void removeAllFromEquipmentsList(
             ObjectId userId, ObjectId groupId,
             String username, ObjectId areaId,
             List<ObjectId> ids, boolean isGroupOwner
     ) {
-        if(!isGroupOwner &&
+        if (!isGroupOwner &&
                 !wareHouseAccessForGroupRepository.existsEquipmentAccessByGroupIdAndUserId(
                         groupId, userId)
         )
@@ -198,14 +198,39 @@ public class EquipmentServiceInArea {
         equipmentLogRepository.saveAll(equipmentLogs);
     }
 
-//    @Transactional
+    //    @Transactional
     synchronized
-    public void returnAllEquipments(ObjectId userId, String username, ObjectId areaId) {
-        PairValue p = checkAccess(userId, areaId);
+    public void returnAllEquipments(
+            ObjectId userId, String username,
+            ObjectId areaId, ObjectId areaOwnerId
+    ) {
+        PairValue p = checkAccess(areaOwnerId != null ? areaOwnerId : userId, areaId);
         Area foundArea = (Area) p.getKey();
-        String tripName = p.getValue().toString();
+        doReturnAllEquipments(
+                userId, username, areaId,
+                foundArea.getName(), p.getValue().toString()
+        );
+    }
+
+    public void returnAllEquipmentsByAdmin(
+            ObjectId userId, String username,
+            ObjectId areaId, String areaName,
+            String tripName
+    ) {
+        doReturnAllEquipments(
+                userId, username, areaId,
+                areaName, tripName
+        );
+    }
+
+    synchronized
+    public void doReturnAllEquipments(
+            ObjectId userId, String username,
+            ObjectId areaId, String areaName,
+            String tripName
+    ) {
         List<AreaEquipments> areaEquipments = equipmentsInAreaRepository.findAvailableEquipmentsByAreaId(areaId);
-        if(areaEquipments.size() == 0)
+        if (areaEquipments.size() == 0)
             return;
 
         List<Equipment> equipments = new ArrayList<>();
@@ -215,7 +240,7 @@ public class EquipmentServiceInArea {
         ).forEach(equipments::add);
 
         Date curr = new Date();
-        final String msg = "عودت از منطقه " + foundArea.getName() + " در اردو " + tripName + " توسط " + username;
+        final String msg = "عودت از منطقه " + areaName + " در اردو " + tripName + " توسط " + username;
         List<EquipmentLog> equipmentLogs = new ArrayList<>();
 
         areaEquipments.forEach(areaEquipments1 -> equipments.stream().filter(equipment -> equipment.getId().equals(areaEquipments1.getEquipmentId()))
@@ -270,7 +295,7 @@ public class EquipmentServiceInArea {
         AreaUtils.findStartedArea(trip, areaId);
 
         AreaEquipments areaEquipments = equipmentsInAreaRepositoryImp.countDown(areaId, equipmentId, count);
-        if(areaEquipments == null)
+        if (areaEquipments == null)
             throw new NotAccessException();
     }
 }

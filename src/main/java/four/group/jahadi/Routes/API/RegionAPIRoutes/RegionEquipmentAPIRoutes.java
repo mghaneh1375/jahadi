@@ -43,7 +43,7 @@ public class RegionEquipmentAPIRoutes extends Router {
             @PathVariable @ObjectIdConstraint ObjectId areaId
     ) {
         TokenInfo tokenInfo = getTokenInfo(request);
-        equipmentServiceInArea.returnAllEquipments(tokenInfo.getUserId(), tokenInfo.getUsername(), areaId);
+        equipmentServiceInArea.returnAllEquipments(tokenInfo.getUserId(), tokenInfo.getUsername(), areaId, null);
     }
     @PostMapping(value = "countDownEquipment/{areaId}/{equipmentId}")
     @ResponseBody

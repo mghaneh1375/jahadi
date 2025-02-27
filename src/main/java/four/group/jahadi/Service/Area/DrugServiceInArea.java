@@ -54,7 +54,7 @@ public class DrugServiceInArea {
 
     // ###################### GROUP ACCESS #######################
 
-//    @Transactional
+    //    @Transactional
     synchronized
     public void addAllToDrugsList(
             ObjectId userId, ObjectId groupId,
@@ -140,7 +140,7 @@ public class DrugServiceInArea {
         drugsInAreaRepository.saveAll(drugsInAreaList);
     }
 
-//    @Transactional
+    //    @Transactional
     synchronized
     public void removeAllFromDrugsList(
             ObjectId userId, ObjectId groupId,
@@ -253,7 +253,7 @@ public class DrugServiceInArea {
     }
 
     private boolean lock(ObjectId areaDrugId) {
-        if(locks.contains(areaDrugId)) {
+        if (locks.contains(areaDrugId)) {
             int retry = 0;
             while (retry < 10 && locks.contains(areaDrugId)) {
                 try {
@@ -263,7 +263,7 @@ public class DrugServiceInArea {
                 }
                 retry++;
             }
-            if(locks.contains(areaDrugId))
+            if (locks.contains(areaDrugId))
                 throw new RuntimeException("Lock exception");
 
             // unlocked by wait a few seconds, so reFetch from db
@@ -317,8 +317,7 @@ public class DrugServiceInArea {
                             .build()
             );
             locks.remove(areaDrugId);
-        }
-        catch (Exception x) {
+        } catch (Exception x) {
             locks.remove(areaDrugId);
             throw x;
         }
@@ -332,7 +331,7 @@ public class DrugServiceInArea {
         });
     }
 
-//    @Transactional
+    //    @Transactional
     synchronized
     public void giveDrug(
             ObjectId userId, ObjectId areaId,
@@ -370,7 +369,7 @@ public class DrugServiceInArea {
                 .orElseThrow(() -> {
                     throw new RuntimeException("unknown exception");
                 });
-        if(lock(areaDrug.getId()))
+        if (lock(areaDrug.getId()))
             areaDrug = drugsInAreaRepository.findById(areaDrug.getId()).get();
 
         try {
@@ -391,8 +390,7 @@ public class DrugServiceInArea {
             drugsInAreaRepository.save(areaDrug);
             patientsDrugRepository.save(patientDrug);
             locks.remove(areaDrug.getId());
-        }
-        catch (Exception x) {
+        } catch (Exception x) {
             locks.remove(areaDrug.getId());
             throw x;
         }
@@ -469,13 +467,24 @@ public class DrugServiceInArea {
         return new ResponseEntity<>(patientDrug, HttpStatus.OK);
     }
 
-//    @Transactional
-    public void returnAllDrugs(ObjectId userId, String username, ObjectId areaId) {
+    //    @Transactional
+    public void returnAllDrugs(
+            ObjectId userId, String username,
+            ObjectId areaId
+    ) {
         PairValue p = checkAccess(userId, areaId);
         Area foundArea = (Area) p.getKey();
         String tripName = p.getValue().toString();
+        doReturnAllDrugs(foundArea.getName(), tripName, username, areaId, userId);
+    }
+
+    public void doReturnAllDrugs(
+            String areaName, String tripName,
+            String username, ObjectId areaId,
+            ObjectId userId
+    ) {
         List<AreaDrugs> areaDrugs = drugsInAreaRepository.findAvailableDrugsByAreaId(areaId);
-        if(areaDrugs.size() == 0)
+        if (areaDrugs.size() == 0)
             return;
 
         List<Drug> drugs = new ArrayList<>();
@@ -485,7 +494,7 @@ public class DrugServiceInArea {
         ).forEach(drugs::add);
 
         Date curr = new Date();
-        final String msg = "عودت از منطقه " + foundArea.getName() + " در اردو " + tripName + " توسط " + username;
+        final String msg = "عودت از منطقه " + areaName + " در اردو " + tripName + " توسط " + username;
         List<DrugLog> drugLogs = new ArrayList<>();
 
         areaDrugs.forEach(areaDrugs1 -> drugs.stream().filter(drug -> drug.getId().equals(areaDrugs1.getDrugId()))
@@ -508,5 +517,12 @@ public class DrugServiceInArea {
         drugLogRepository.saveAll(drugLogs);
         drugRepository.saveAll(drugs);
         drugsInAreaRepository.saveAll(areaDrugs);
+    }
+
+    public void returnAllDrugsByAdmin(
+            ObjectId userId, String username,
+            ObjectId areaId, String areaName, String tripName
+    ) {
+        doReturnAllDrugs(areaName, tripName, username, areaId, userId);
     }
 }
