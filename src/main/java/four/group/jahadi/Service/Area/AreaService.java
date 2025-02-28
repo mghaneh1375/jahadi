@@ -538,7 +538,7 @@ public class AreaService extends AbstractService<Area, AreaData> {
         )
             throw new NotAccessException();
 
-        remove(trip, areaId, userId, username, false);
+        remove(trip, areaId, userId, username, true);
         tripRepository.save(trip);
     }
 }
