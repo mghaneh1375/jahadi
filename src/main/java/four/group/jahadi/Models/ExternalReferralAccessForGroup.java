@@ -9,7 +9,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Document(collection = "ware_house_access_for_group")
+@Document(collection = "external_referral_access_for_group")
 @Builder
 public class ExternalReferralAccessForGroup extends Model {
     @Field("group_id")
