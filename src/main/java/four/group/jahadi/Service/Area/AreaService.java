@@ -266,7 +266,7 @@ public class AreaService extends AbstractService<Area, AreaData> {
         Trip wantedTrip = tripRepository.findByAreaIdAndResponsibleId(areaId, userId)
                 .orElseThrow(NotAccessException::new);
 
-        Area area = findStartedArea(wantedTrip, areaId);
+        Area area = findArea(wantedTrip, areaId);
         HashMap<String, Boolean> accesses = new HashMap<>();
         accesses.put("pharmacy", area.getPharmacyManagers() != null && area.getPharmacyManagers().contains(userId));
         accesses.put("dispatcher", area.getDispatchers() != null && area.getDispatchers().contains(userId));

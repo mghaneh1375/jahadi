@@ -33,6 +33,13 @@ public class AreaUtils {
         return foundArea;
     }
 
+    public static Area findArea(Trip trip, ObjectId areaId) {
+        return trip
+                .getAreas().stream()
+                .filter(area -> area.getId().equals(areaId))
+                .findFirst().orElseThrow(RuntimeException::new);
+    }
+
     public static ModuleInArea findModule(Area area, ObjectId moduleId, ObjectId responsibleId, ObjectId secretaryId) {
 
         ModuleInArea moduleInArea = area
