@@ -320,7 +320,7 @@ public class AreaService extends AbstractService<Area, AreaData> {
         Trip trip = tripRepository.findByAreaIdAndOwnerId(areaId, userId)
                 .orElseThrow(NotAccessException::new);
 
-        Date start = getDate(getDate(new Date(dto.getStartAt())));
+        Date start = getDate(new Date(dto.getStartAt()));
         Date end = getLastDate(new Date(dto.getEndAt()));
 
         if (trip.getStartAt().after(start))
