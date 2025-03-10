@@ -1,6 +1,9 @@
 package four.group.jahadi.Service;
 
 import four.group.jahadi.DTO.AdminSignInData;
+import four.group.jahadi.DTO.ChangePhoneDAO;
+import four.group.jahadi.DTO.ChangePhoneResponseDAO;
+import four.group.jahadi.DTO.DoChangePhoneDAO;
 import four.group.jahadi.DTO.SignUp.*;
 import four.group.jahadi.Enums.Access;
 import four.group.jahadi.Enums.AccountStatus;
@@ -14,6 +17,7 @@ import four.group.jahadi.Repository.ActivationRepository;
 import four.group.jahadi.Repository.GroupRepository;
 import four.group.jahadi.Repository.TripRepository;
 import four.group.jahadi.Repository.UserRepository;
+import four.group.jahadi.Security.JwtTokenFilter;
 import four.group.jahadi.Security.JwtTokenProvider;
 import four.group.jahadi.Utility.*;
 import org.apache.commons.beanutils.BeanUtilsBean;
@@ -131,6 +135,60 @@ public class UserService extends AbstractService<User, SignUpData> {
         }
     }
 
+    public ResponseEntity<ChangePhoneResponseDAO> changePhone(User user, ChangePhoneDAO request) {
+        if(!user.getStatus().equals(AccountStatus.ACTIVE))
+            throw new NotAccessException();
+
+        if(userRepository.countByPhone(request.getNewPhone()) > 0)
+            throw new InvalidFieldsException("این شماره در سیستم موجود است");
+
+        long curr = System.currentTimeMillis();
+        activationRepository.findByPhone(request.getNewPhone()).ifPresent(activation -> {
+            if((curr - activation.getCreatedAt()) / 60000 > 2)
+                activationRepository.deleteByPhone(request.getNewPhone(), curr);
+            throw new InvalidFieldsException("کد قبلی هنوز منقضی نشده است");
+        });
+
+        String token = Utility.randomString(20);
+        Integer code = Utility.randInt();
+        Utility.sendSMS(user.getPhone(), code + "", "", "", "activation");
+        activationRepository.save(
+                Activation
+                        .builder()
+                        .phone(request.getNewPhone())
+                        .token(token)
+                        .code(code)
+                        .nid(user.getPhone())
+                        .createdAt(curr)
+                        .build()
+        );
+
+        return new ResponseEntity<>(
+                ChangePhoneResponseDAO
+                        .builder()
+                        .token(token)
+                        .build(),
+                HttpStatus.OK
+        );
+    }
+
+    public void doChangePhone(User user, DoChangePhoneDAO request, String token) {
+        Activation activation = activationRepository.findByNIDAndCodeAndToken(
+                user.getPhone(), request.getCode(), request.getToken()
+        ).orElseThrow(() -> {
+            throw new InvalidFieldsException("کد وارد شده اشتباه است");
+        });
+
+        if(((System.currentTimeMillis() - activation.getCreatedAt()) / 60000) > 2)
+            throw new InvalidFieldsException("زمان کد ارسال شده منقضی شده است");
+
+        user.setPhone(activation.getPhone());
+        activationRepository.delete(activation);
+
+        logout(token);
+        JwtTokenFilter.removeTokenFromCache(token.replace("Bearer ", ""));
+        userRepository.save(user);
+    }
 
     public ResponseEntity<HashMap<String, Object>> checkUniqueness(SignUpStep1Data dto) {
 
@@ -237,15 +295,11 @@ public class UserService extends AbstractService<User, SignUpData> {
     }
 
     private String sendNewSMS(User user, boolean storeUserDoc) {
-
         int code = Utility.randInt();
         String token = Utility.randomString(20);
         long now = System.currentTimeMillis();
-
         new Thread(() -> {
-
             activationRepository.deleteByPhone(user.getPhone(), now);
-
             Activation activation = Activation.builder()
                     .token(token)
                     .code(code)
@@ -676,7 +730,7 @@ public class UserService extends AbstractService<User, SignUpData> {
 
     public void remove(ObjectId userId) {
         User user = userRepository.findById(userId).orElseThrow(InvalidIdException::new);
-        user.setDeletedAt(new Date());
+        user.setRemoveAt(new Date());
         userRepository.save(user);
     }
 

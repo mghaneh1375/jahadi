@@ -1,8 +1,12 @@
 package four.group.jahadi.Routes.API;
 
+import four.group.jahadi.DTO.ChangePhoneDAO;
+import four.group.jahadi.DTO.ChangePhoneResponseDAO;
+import four.group.jahadi.DTO.DoChangePhoneDAO;
 import four.group.jahadi.DTO.SignUp.*;
 import four.group.jahadi.Exception.NotActivateAccountException;
 import four.group.jahadi.Exception.UnAuthException;
+import four.group.jahadi.Models.TokenInfo;
 import four.group.jahadi.Models.User;
 import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Security.JwtTokenFilter;
@@ -35,7 +39,7 @@ public class UserAPIRoutes extends Router {
     @Autowired
     Seeder seeder;
 
-//    @PostMapping(value = "store")
+    //    @PostMapping(value = "store")
 //    @ResponseBody
 //    public String store(final @RequestBody @Valid UserData userData) {
 //        return userService.store(userData);
@@ -141,6 +145,25 @@ public class UserAPIRoutes extends Router {
             @RequestBody @Valid UpdateInfoData updateInfoData
     ) {
         userService.update(getId(request), updateInfoData);
+    }
+
+    @PostMapping(value = "/changePhone")
+    public ResponseEntity<ChangePhoneResponseDAO> changePhone(
+            HttpServletRequest request,
+            @RequestBody @Valid ChangePhoneDAO changePhoneDAO
+    ) throws UnAuthException, NotActivateAccountException {
+        return userService.changePhone(getUser(request), changePhoneDAO);
+    }
+
+    @PostMapping(value = "/doChangePhone")
+    public void changePhone(
+            HttpServletRequest request,
+            @RequestBody @Valid DoChangePhoneDAO doChangePhoneDAO
+    ) throws UnAuthException, NotActivateAccountException {
+        userService.doChangePhone(
+                getUser(request), doChangePhoneDAO,
+                request.getHeader("Authorization")
+        );
     }
 
     @PostMapping(value = "/forgetPassword")

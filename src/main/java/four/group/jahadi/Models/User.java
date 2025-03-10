@@ -58,7 +58,7 @@ public class User extends Model {
 
     @Field("remove_at")
     @JsonIgnore
-    private Long removeAt;
+    private Date removeAt;
 
     @Field("group_id")
     @JsonIgnore
@@ -473,7 +473,4 @@ public class User extends Model {
     @Field("movement_help_equipments")
     @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     private boolean movementHelpEquipments = false;
-
-    @JsonIgnore
-    private Date deletedAt;
 }

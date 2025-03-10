@@ -16,10 +16,10 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends MongoRepository<User, ObjectId>, FilterableRepository<User> {
 
-    @Query(value = "{'_id':  ?0, 'status':  'ACTIVE', 'deletedAt': null}", count = true)
+    @Query(value = "{'_id':  ?0, 'status':  'ACTIVE', 'removeAt': null}", count = true)
     Integer countActiveBy_id(ObjectId id);
 
-    @Query(value = "{'accesses': ?0, 'status':  'ACTIVE', 'deletedAt': null}", count = true)
+    @Query(value = "{'accesses': ?0, 'status':  'ACTIVE', 'removeAt': null}", count = true)
     Integer countUsersByAccess(String access);
 
     @Query(value = "{ '_id': { $in: ?0 } }",
@@ -45,7 +45,7 @@ public interface UserRepository extends MongoRepository<User, ObjectId>, Filtera
     @Query(value = "{ $and: [{'_id': { $in: ?0 }}, {'groupId': ?1}] }", count = true)
     Integer countByIdsAndGroupId(List<ObjectId> ids, ObjectId groupId);
 
-    @Query(value = "{ 'groupId': ?0, 'deletedAt': null }", count = true)
+    @Query(value = "{ 'groupId': ?0, 'removeAt': null }", count = true)
     Integer countByGroupId(ObjectId groupId);
 
     @Query(value = "{'nid':  ?0}")
@@ -54,7 +54,7 @@ public interface UserRepository extends MongoRepository<User, ObjectId>, Filtera
     @Query(value = "{'_id':  ?0}", fields = "{'name': 1, '_id': 1, 'accesses': 1, 'pic': 1}")
     Optional<User> findDigestById(ObjectId id);
 
-    @Query(value = "{$and :[{'deletedAt': null},"
+    @Query(value = "{$and :[{'removeAt': null},"
             + "?#{ [0] == null ? { $where : 'true'} : { 'status' : [0] } },"
             + "?#{ [1] == null ? { $where : 'true'} : { 'accesses' : [1] } },"
             + "?#{ [3] == null ? { $where : 'true'} : { 'NID' : [3] } },"
