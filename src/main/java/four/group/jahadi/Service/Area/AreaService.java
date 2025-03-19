@@ -268,12 +268,12 @@ public class AreaService extends AbstractService<Area, AreaData> {
 
         Area area = findArea(wantedTrip, areaId);
         HashMap<String, Boolean> accesses = new HashMap<>();
-        accesses.put("pharmacy", area.getPharmacyManagers() != null && area.getPharmacyManagers().contains(userId));
-        accesses.put("dispatcher", area.getDispatchers() != null && area.getDispatchers().contains(userId));
-        accesses.put("equipment", area.getEquipmentManagers() != null && area.getEquipmentManagers().contains(userId));
-        accesses.put("laboratory", area.getLaboratoryManager() != null && area.getLaboratoryManager().contains(userId));
-        accesses.put("insurance", area.getInsurancers() != null && area.getInsurancers().contains(userId));
-        accesses.put("trainer", area.getTrainers() != null && area.getTrainers().contains(userId));
+        accesses.put("pharmacy", area.getOwnerId().equals(userId) || (area.getPharmacyManagers() != null && area.getPharmacyManagers().contains(userId)));
+        accesses.put("dispatcher", area.getOwnerId().equals(userId) || (area.getDispatchers() != null && area.getDispatchers().contains(userId)));
+        accesses.put("equipment", area.getOwnerId().equals(userId) || (area.getEquipmentManagers() != null && area.getEquipmentManagers().contains(userId)));
+        accesses.put("laboratory", area.getOwnerId().equals(userId) || (area.getLaboratoryManager() != null && area.getLaboratoryManager().contains(userId)));
+        accesses.put("insurance", area.getOwnerId().equals(userId) || (area.getInsurancers() != null && area.getInsurancers().contains(userId)));
+        accesses.put("trainer", area.getOwnerId().equals(userId) || (area.getTrainers() != null && area.getTrainers().contains(userId)));
 
         return new ResponseEntity<>(accesses, HttpStatus.OK);
     }
