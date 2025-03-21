@@ -513,20 +513,20 @@ public class UserService extends AbstractService<User, SignUpData> {
 
     public ResponseEntity<String> signIn(SignInData data) {
         try {
-            if (!DEV_MODE) {
-                for (int i = 0; i < cachedToken.size(); i++) {
-                    if (cachedToken.get(i).equals(data)) {
-                        if (cachedToken.get(i).checkExpiration())
-                            return new ResponseEntity<>(
-                                    (String) cachedToken.get(i).getValue(),
-                                    HttpStatus.OK
-                            );
-
-                        cachedToken.remove(i);
-                        break;
-                    }
-                }
-            }
+//            if (!DEV_MODE) {
+//                for (int i = 0; i < cachedToken.size(); i++) {
+//                    if (cachedToken.get(i).equals(data)) {
+//                        if (cachedToken.get(i).checkExpiration())
+//                            return new ResponseEntity<>(
+//                                    (String) cachedToken.get(i).getValue(),
+//                                    HttpStatus.OK
+//                            );
+//
+//                        cachedToken.remove(i);
+//                        break;
+//                    }
+//                }
+//            }
 
             Optional<User> user = userRepository.findByNID(data.getNid());
             if (user.isEmpty() || user.get().getRemoveAt() != null)
@@ -534,18 +534,18 @@ public class UserService extends AbstractService<User, SignUpData> {
 
             User u = user.get();
 
-            if (!DEV_MODE) {
+//            if (!DEV_MODE) {
                 if (!passwordEncoder.matches(data.getPassword(), u.getPassword()))
                     throw new InvalidFieldsException("نام کاربری و یا رمزعبور اشتباه است.");
-            }
+//            }
 
             if (!u.getStatus().equals(AccountStatus.ACTIVE))
                 throw new InvalidFieldsException("اکانت شما غیرفعال می باشد.");
 
             String token = jwtTokenProvider.createToken(data.getNid(), u.getAccesses(), u.getGroupId(), u.getId());
 
-            if (!DEV_MODE)
-                cachedToken.add(new Cache(TOKEN_EXPIRATION, token, data));
+//            if (!DEV_MODE)
+//                cachedToken.add(new Cache(TOKEN_EXPIRATION, token, data));
 
             return new ResponseEntity<>(
                     token, HttpStatus.OK
