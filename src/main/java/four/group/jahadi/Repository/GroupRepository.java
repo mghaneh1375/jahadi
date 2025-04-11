@@ -31,6 +31,9 @@ public interface GroupRepository extends MongoRepository<Group, ObjectId>, Filte
     @Query(value = "{_id: {$in : ?0}}", fields = "{ 'name': 1, 'color': 1, 'isActive': 1, 'owner': 1, 'pic': 1 }")
     List<Group> findByIdsIn(List<ObjectId> ids);
 
+    @Query(value = "{_id: {$in : ?0}}")
+    List<Group> findFullInfoByIds(List<ObjectId> ids);
+
     @Query(value = "{owner: ?0}", fields = "{ '_id': 1 }")
     List<Group> findByUserId(ObjectId userId);
 }

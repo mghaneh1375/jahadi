@@ -8,6 +8,8 @@ import lombok.Setter;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import java.text.SimpleDateFormat;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -19,5 +21,15 @@ public class State extends Model {
     @Field("country_id")
     @JsonSerialize(using = ObjectIdSerialization.class)
     private ObjectId countryId;
+
+
+    @Override
+    public String toString() {
+        return "{" +
+                "\"id\": \"" + this.getId() +
+                "\", \"name\":\"" + name +
+                "\", \"countryId\":\"" + countryId +
+                "\"}\n";
+    }
 
 }

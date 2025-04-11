@@ -8,6 +8,8 @@ import lombok.*;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import static four.group.jahadi.Utility.Utility.printNullableField;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -40,4 +42,18 @@ public class PatientAnswer {
     @JsonSerialize(using = PatientDocSerialization.class)
     private String additionalUploadedFile;
 
+    @Override
+    public String toString() {
+        return "{" +
+                "\"questionId\":" + printNullableField(questionId) +
+                ", \"answer\":" + printNullableField(answer) +
+                ", \"uploadedFile\":" + printNullableField(uploadedFile) +
+                ", \"desc\":" + printNullableField(desc) +
+                ", \"report\":" + printNullableField(report) +
+                ", \"reason\":" + printNullableField(reason) +
+                ", \"time\":" + printNullableField(time) +
+                ", \"sampleInfoDesc\":" + printNullableField(sampleInfoDesc) +
+                ", \"additionalUploadedFile\":" + printNullableField(additionalUploadedFile) +
+                '}';
+    }
 }

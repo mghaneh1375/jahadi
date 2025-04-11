@@ -13,6 +13,8 @@ import org.springframework.data.mongodb.core.mapping.Field;
 import javax.validation.constraints.Size;
 import java.util.List;
 
+import static four.group.jahadi.Utility.Utility.*;
+
 @Getter
 @Setter
 @Document
@@ -42,4 +44,20 @@ public class TableQuestion extends Question {
     private AnswerType answerType;
 
     private Boolean required;
+
+    @Override
+    public String toString() {
+        return "{" +
+                "\"id\":" + printNullableField(this.getId()) +
+                ", \"questionType\":" + printNullableField(this.getQuestionType()) +
+                ", \"title\":" + printNullableField(title) +
+                ", \"cellLabel\":" + printNullableField(cellLabel) +
+                ", \"answerType\":" + printNullableField(answerType) +
+                ", \"rowsCount\":" + printNullableInteger(rowsCount) +
+                ", \"headers\":" + toStringOfList(headers) +
+                ", \"firstColumn\":" + toStringOfList(firstColumn) +
+                ", \"required\":" + required +
+                ", \"rtl\":" + rtl +
+                '}';
+    }
 }

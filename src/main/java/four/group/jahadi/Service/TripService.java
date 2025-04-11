@@ -83,6 +83,16 @@ public class TripService extends AbstractService<Trip, TripStepData> {
         return new ResponseEntity<>(trips, HttpStatus.OK);
     }
 
+    @Override
+    public void update(ObjectId id, TripStepData dto, Object... params) {
+
+    }
+
+    @Override
+    public ResponseEntity<Trip> store(TripStepData dto, Object... params) {
+        return null;
+    }
+
     public ResponseEntity<List<Trip>> myActiveTrips(ObjectId groupId) {
         return new ResponseEntity<>(tripRepository.findActivesByGroupId(
                 groupId, getCurrDate()
@@ -113,73 +123,6 @@ public class TripService extends AbstractService<Trip, TripStepData> {
                 .findFirst().ifPresent(area::setOwner)));
 
         return new ResponseEntity<>(trips, HttpStatus.OK);
-    }
-
-    @Override
-    public void update(ObjectId id, TripStepData data, Object... params) {
-        Trip trip = tripRepository.findById(id).orElseThrow(InvalidIdException::new);
-        boolean hasAdminAccess = (boolean) params[0];
-
-        if (!hasAdminAccess && trip.getGroupsWithAccess().stream().noneMatch(groupAccess ->
-                groupAccess.getWriteAccess() && groupAccess.getGroupId().equals(params[1]))
-        )
-            throw new NotAccessException();
-
-        TripStep2Data dto = (TripStep2Data) data;
-        Date startAt = getDate(new Date(dto.getStartAt()));
-        Date endAt = getLastDate(new Date(dto.getEndAt()));
-
-        Project project = projectRepository.findById(trip.getProjectId()).get();
-        // Validate dates
-        if(project.getStartAt().after(startAt))
-            throw new InvalidFieldsException("تاریخ شروع باید از " + Utility.convertDateToJalali(project.getStartAt()) + " باشد");
-        if(project.getEndAt().before(endAt))
-            throw new InvalidFieldsException("تاریخ اتمام باید از " + Utility.convertDateToJalali(project.getEndAt()) + " باشد");
-
-        trip.setName(dto.getName());
-        trip.setStartAt(startAt);
-        trip.setEndAt(endAt);
-
-        tripRepository.save(trip);
-    }
-
-    @Override
-    public ResponseEntity<Trip> store(TripStepData dto, Object... params) {
-        return null;
-    }
-
-    public void removeTrip(Trip trip, ObjectId userId, String username) {
-        if (trip.getStartAt() != null &&
-                Utility.getCurrDate().after(trip.getStartAt())
-        )
-            throw new InvalidFieldsException("اردو آغاز شده و امکان حدف آن وجود ندارد");
-
-        if (trip.getAreas() != null)
-            trip.getAreas().forEach(area -> areaService.remove(trip, area.getId(), userId, username, false));
-
-        tripRepository.delete(trip);
-    }
-
-    public void removeTripFromProject(
-            ObjectId projectId, ObjectId tripId,
-            ObjectId userId, String username
-    ) {
-        Trip trip = tripRepository.findTripByProjectIdAndId(projectId, tripId).orElseThrow(InvalidIdException::new);
-        removeTrip(trip, userId, username);
-    }
-
-    public void resetGroupAccessesForTrip(ObjectId projectId, ObjectId tripId, List<TripStep1Data> data) {
-        Trip trip = tripRepository.findTripByProjectIdAndId(projectId, tripId).orElseThrow(InvalidIdException::new);
-        List<GroupAccess> groupsWithAccess = new ArrayList<>();
-        data.forEach(tripStepData -> groupsWithAccess.add(
-                GroupAccess.builder()
-                        .groupId(tripStepData.getOwner())
-                        .writeAccess(tripStepData.getWriteAccess())
-                        .build()
-        ));
-
-        trip.setGroupsWithAccess(groupsWithAccess);
-        tripRepository.save(trip);
     }
 
     public void store(ObjectId projectId, List<TripStep1Data> data) {

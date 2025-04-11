@@ -12,8 +12,11 @@ import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+
+import static four.group.jahadi.Utility.Utility.*;
 
 @Getter
 @Setter
@@ -58,4 +61,29 @@ public class Drug extends Model {
     @Field("shelf_no")
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     private String shelfNo;
+
+    @Override
+    public String toString() {
+        return "{" +
+                "\"id\":" + printNullableField(this.getId()) +
+                ", \"createdAt\":" + printNullableDate(this.getCreatedAt()) +
+                ", \"userId\":" + printNullableField(userId) +
+                ", \"groupId\":" + printNullableField(groupId) +
+                ", \"drugType\":" + printNullableField(drugType) +
+                ", \"expireAt\":" + printNullableDate(expireAt) +
+                ", \"dose\":" + printNullableField(dose) +
+                ", \"name\":" + printNullableField(name) +
+                ", \"producer\":" + printNullableField(producer) +
+                ", \"price\":" + printNullableInteger(price) +
+                ", \"description\":" + printNullableField(description) +
+                ", \"available\":" + printNullableInteger(available) +
+                ", \"availablePack\":" + printNullableInteger(availablePack) +
+                ", \"replacements\":" + toStringOfList(replacements) +
+                ", \"visibility\":" + visibility +
+                ", \"priority\":" + printNullableInteger(priority) +
+                ", \"location\":" + printNullableField(location) +
+                ", \"boxNo\":" + printNullableField(boxNo) +
+                ", \"shelfNo\":" + printNullableField(shelfNo) +
+                "}\n";
+    }
 }

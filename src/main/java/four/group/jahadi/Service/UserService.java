@@ -39,7 +39,6 @@ import static four.group.jahadi.Utility.FileUtils.removeFile;
 import static four.group.jahadi.Utility.FileUtils.uploadFile;
 import static four.group.jahadi.Utility.StaticValues.*;
 import static four.group.jahadi.Utility.Utility.convertPersianDigits;
-import static org.springframework.beans.BeanUtils.copyProperties;
 
 
 @Service
@@ -188,62 +187,6 @@ public class UserService extends AbstractService<User, SignUpData> {
         logout(token);
         JwtTokenFilter.removeTokenFromCache(token.replace("Bearer ", ""));
         userRepository.save(user);
-    }
-
-    public ResponseEntity<HashMap<String, Object>> checkUniqueness(SignUpStep1Data dto) {
-
-        if (userRepository.countByPhone(dto.getPhone()) > 0)
-            throw new InvalidFieldsException("شماره همراه وارد شده در سیستم موجود است");
-
-        if (userRepository.countByNID(dto.getNid()) > 0)
-            throw new InvalidFieldsException("کد ملی وارد شده در سیستم موجود است");
-
-        User user = new User();
-        copyProperties(dto, user);
-
-        return sendSMS(user, true);
-    }
-
-    public void checkGroup(SignUpStep3Data dto) {
-        if (groupRepository.countByCode(dto.getGroupCode()) == 0)
-            throw new InvalidFieldsException("کد گروه نامعتبر است");
-    }
-
-    public ResponseEntity<String> signUp(SignUpData dto) {
-
-        Group group = null;
-
-        if (dto.getGroupCode() != null)
-            group = groupRepository.findByCode(dto.getGroupCode()).orElseThrow(InvalidCodeException::new);
-
-        Activation activation = activationRepository.findByPhone(dto.getPhone()).orElseThrow(NotAccessException::new);
-
-        User user = activation.getUser();
-
-        if (group != null) {
-            user.setGroupId(group.getId());
-            user.setGroupName(group.getName());
-        }
-
-        user.setPassword(passwordEncoder.encode(dto.getPassword()));
-        user.setStatus(AccountStatus.PENDING);
-        user.setAccesses(Collections.singletonList(Access.JAHADI));
-
-        user.setNearbyName(dto.getNearbyName());
-        user.setNearbyPhone(dto.getNearbyPhone());
-        user.setNearbyRel(dto.getNearbyRel());
-        user.setAllergies(dto.getAllergies());
-        user.setDiseases(dto.getDiseases());
-        user.setAbilities(dto.getAbilities());
-        user.setBloodType(dto.getBloodType());
-
-        activationRepository.delete(activation);
-        userRepository.insert(user);
-
-        return new ResponseEntity<>(
-                jwtTokenProvider.createToken(user.getNid(), user.getAccesses(), user.getGroupId(), user.getId()),
-                HttpStatus.OK
-        );
     }
 
     @Override
@@ -534,10 +477,10 @@ public class UserService extends AbstractService<User, SignUpData> {
 
             User u = user.get();
 
-//            if (!DEV_MODE) {
+            if (!DEV_MODE) {
                 if (!passwordEncoder.matches(data.getPassword(), u.getPassword()))
                     throw new InvalidFieldsException("نام کاربری و یا رمزعبور اشتباه است.");
-//            }
+            }
 
             if (!u.getStatus().equals(AccountStatus.ACTIVE))
                 throw new InvalidFieldsException("اکانت شما غیرفعال می باشد.");
@@ -618,12 +561,6 @@ public class UserService extends AbstractService<User, SignUpData> {
         }
     }
 
-    public void changeStatus(ObjectId userId, AccountStatus status) {
-        User user = userRepository.findById(userId).orElseThrow(InvalidIdException::new);
-        user.setStatus(status);
-        userRepository.save(user);
-    }
-
     public void changePassword(ObjectId userId, PasswordData passwordData) {
         User user = userRepository.findById(userId).orElseThrow(InvalidIdException::new);
         user.setPassword(passwordEncoder.encode(passwordData.getPassword()));
@@ -677,7 +614,6 @@ public class UserService extends AbstractService<User, SignUpData> {
         userRepository.save(u);
     }
 
-
     public ResponseEntity<HashMap<String, Object>> groupStore(SignUpStep1ForGroupData dto) {
 
         if (userRepository.countByPhone(dto.getPhone()) > 0)
@@ -687,25 +623,6 @@ public class UserService extends AbstractService<User, SignUpData> {
             throw new InvalidFieldsException("کد ملی وارد شده در سیستم موجود است");
 
         return sendSMS(populateEntity(dto), true);
-    }
-
-    public void signUpStep2ForGroups(User user, SignUpStep2ForGroupData dto) {
-
-        if (groupRepository.findByName(dto.getGroupName()).isPresent())
-            throw new InvalidFieldsException("نام گروه جهادی در سیستم موجود است");
-
-        copyProperties(dto, user);
-        userRepository.save(user);
-    }
-
-    public void signUpStep3ForGroups(User user, SignUpStep3ForGroupData dto) {
-        copyProperties(dto, user);
-        userRepository.save(user);
-    }
-
-    public void signUpStep4ForGroups(User user, SignUpStep4ForGroupData dto) {
-        copyProperties(dto, user);
-        userRepository.save(user);
     }
 
     public ResponseEntity<List<User>> findGroupMembersByRegionOwner(ObjectId userId, ObjectId groupId) {

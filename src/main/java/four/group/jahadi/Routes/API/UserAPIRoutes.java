@@ -6,7 +6,6 @@ import four.group.jahadi.DTO.DoChangePhoneDAO;
 import four.group.jahadi.DTO.SignUp.*;
 import four.group.jahadi.Exception.NotActivateAccountException;
 import four.group.jahadi.Exception.UnAuthException;
-import four.group.jahadi.Models.TokenInfo;
 import four.group.jahadi.Models.User;
 import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Security.JwtTokenFilter;
@@ -23,7 +22,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
-
 import java.util.HashMap;
 
 import static four.group.jahadi.Utility.Utility.convertPersianDigits;
@@ -74,58 +72,12 @@ public class UserAPIRoutes extends Router {
 
     // ******************** INDIVIDUAL SIGNUP ************************
 
-    @PostMapping(value = "/signUp")
-    @ResponseBody
-    public ResponseEntity<String> signUp(@RequestBody @Valid SignUpData signUpData) {
-        return userService.signUp(signUpData);
-    }
-
-    @PostMapping(value = "checkSignUpFormStep1")
-    public ResponseEntity<HashMap<String, Object>> checkSignUpFormStep1(@RequestBody @Valid SignUpStep1Data data) {
-        return userService.checkUniqueness(data);
-    }
-
-    @PostMapping(value = "checkSignUpFormStep2")
-    @ResponseBody
-    public void checkSignUpFormStep2(@RequestBody @Valid SignUpStep2Data data) {
-    }
-
-    @PostMapping(value = "checkSignUpFormStep3")
-    @ResponseBody
-    public void checkSignUpFormStep3(@RequestBody @Valid SignUpStep3Data data) {
-        userService.checkGroup(data);
-    }
-
     // ****************** GROUP SIGNUP **********************
 
     @PostMapping(value = "/groupSignUp")
     @ResponseBody
     public ResponseEntity<HashMap<String, Object>> groupSignUp(@RequestBody @Valid SignUpStep1ForGroupData data) {
         return userService.groupStore(data);
-    }
-
-    @PutMapping(value = "signUpStep2ForGroups")
-    public void signUpStep2ForGroups(
-            HttpServletRequest request,
-            @RequestBody @Valid SignUpStep2ForGroupData data
-    ) throws UnAuthException, NotActivateAccountException {
-        userService.signUpStep2ForGroups(getUserWithOutCheckCompleteness(request), data);
-    }
-
-    @PutMapping(value = "signUpStep3ForGroups")
-    public void signUpStep3ForGroups(
-            HttpServletRequest request,
-            @RequestBody @Valid SignUpStep3ForGroupData data
-    ) throws UnAuthException, NotActivateAccountException {
-        userService.signUpStep3ForGroups(getUserWithOutCheckCompleteness(request), data);
-    }
-
-    @PutMapping(value = "signUpStep4ForGroups")
-    public void signUpStep4ForGroups(
-            HttpServletRequest request,
-            @RequestBody @Valid SignUpStep4ForGroupData data
-    ) throws UnAuthException, NotActivateAccountException {
-        userService.signUpStep4ForGroups(getUserWithOutCheckCompleteness(request), data);
     }
 
     @DeleteMapping(value = "logout")

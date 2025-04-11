@@ -5,6 +5,7 @@ import four.group.jahadi.Kavenegar.excepctions.ApiException;
 import four.group.jahadi.Kavenegar.excepctions.HttpException;
 import four.group.jahadi.Kavenegar.models.SendResult;
 import four.group.jahadi.Validator.PhoneValidator;
+import org.bson.types.ObjectId;
 import org.json.JSONObject;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
@@ -284,6 +285,50 @@ public class Utility {
         date.setMinutes(59);
         date.setSeconds(59);
         return date;
+    }
+
+    public static String printNullableField(Object obj) {
+        return obj == null ? null : String.format("\"%s\"", obj.toString());
+    }
+
+    public static String printNullableInteger(Integer obj) {
+        return obj == null ? null : String.format("%d", obj);
+    }
+
+    public static String printNullableDate(Date obj) {
+        return obj == null ? null : String.format("\"%s\"", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX").format(obj));
+    }
+
+    public static String toStringOfList(List<?> objects) {
+        if(objects == null) return "[]";
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < objects.size(); i++) {
+            sb.append("\"").append(objects.get(i).toString()).append("\"");
+            if (i < objects.size() - 1) {
+                sb.append(", ");
+            }
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+
+    public static String toStringOfPairValue(List<PairValue> pairValues) {
+        if(pairValues == null || pairValues.size() == 0) return "[]";
+        StringBuilder sb = new StringBuilder("[");
+        pairValues.forEach(pairValue -> {
+            sb.append(String.format("{\"Key\":\"%s\", \"Value\":\"%s\"},", pairValue.getKey().toString(), pairValue.getValue().toString()));
+        });
+        return sb.append("]").toString();
+    }
+
+    public static String toStringOfHasMap(HashMap<?, Integer> hashMap) {
+        if(hashMap == null) return "{}";
+        StringBuilder sb = new StringBuilder("{");
+        hashMap.keySet().forEach(s -> {
+            sb.append(String.format("\"%s\":%d,", s.toString(), hashMap.get(s)));
+        });
+        sb.setLength(sb.length() - 1);
+        return sb.append("}").toString();
     }
 
     private static final ModelMapper modelMapper;

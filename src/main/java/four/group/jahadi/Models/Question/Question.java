@@ -15,6 +15,8 @@ import org.springframework.data.mongodb.core.mapping.MongoId;
 import javax.persistence.Id;
 import java.io.Serializable;
 
+import static four.group.jahadi.Utility.Utility.printNullableField;
+
 @Getter
 @NoArgsConstructor
 @SuperBuilder
@@ -28,4 +30,12 @@ public class Question implements Serializable {
 
     @Field("question_type")
     private QuestionType questionType;
+
+    @Override
+    public String toString() {
+        return "{" +
+                "\"id\":" + printNullableField(id) +
+                ", \"questionType\":" + printNullableField(questionType) +
+                '}';
+    }
 }

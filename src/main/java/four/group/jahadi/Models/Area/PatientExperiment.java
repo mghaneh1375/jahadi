@@ -5,13 +5,14 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import four.group.jahadi.Enums.Experiment;
 import four.group.jahadi.Models.Model;
 import four.group.jahadi.Models.ObjectIdSerialization;
-import four.group.jahadi.Models.User;
 import lombok.*;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import javax.validation.constraints.Size;
 import javax.persistence.Transient;
+import javax.validation.constraints.Size;
+
+import static four.group.jahadi.Utility.Utility.printNullableField;
 
 @Getter
 @Setter
@@ -34,4 +35,13 @@ public class PatientExperiment extends Model {
     @Transient
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     String moduleName;
+
+    @Override
+    public String toString() {
+        return "{" +
+                "\"doctorId\":" + printNullableField(doctorId) +
+                ", \"experiment\":" + printNullableField(experiment) +
+                ", \"description\":" + printNullableField(description) +
+                '}';
+    }
 }

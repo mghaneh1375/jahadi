@@ -12,6 +12,8 @@ import org.springframework.data.mongodb.core.mapping.Field;
 import java.util.Date;
 import java.util.List;
 
+import static four.group.jahadi.Utility.Utility.*;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -58,4 +60,21 @@ public class Trip extends Model {
     @Transient
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     private String project;
+
+    @Override
+    public String toString() {
+        return "{" +
+                "\"id\":" + printNullableField(this.getId()) +
+                ", \"createdAt\":" + printNullableDate(this.getCreatedAt()) +
+                ", \"name\":" + printNullableField(name) +
+                ", \"no\":" + printNullableInteger(no) +
+                ", \"areas\":" + areas +
+                ", \"projectId\":" + printNullableField(projectId) +
+                ", \"startAt\":" +  printNullableDate(startAt) +
+                ", \"endAt\":" + printNullableDate(endAt) +
+                ", \"dailyStartAt\":" + printNullableField(dailyStartAt) +
+                ", \"dailyEndAt\":" + printNullableField(dailyEndAt) +
+                ", \"groupsWithAccess\":" + toStringOfList(groupsWithAccess) +
+                "}\n";
+    }
 }

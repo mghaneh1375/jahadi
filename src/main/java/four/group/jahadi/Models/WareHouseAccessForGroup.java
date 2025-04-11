@@ -6,6 +6,9 @@ import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import static four.group.jahadi.Utility.Utility.printNullableDate;
+import static four.group.jahadi.Utility.Utility.printNullableField;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -23,4 +26,17 @@ public class WareHouseAccessForGroup extends Model {
     private Boolean hasAccessForDrug;
     @Field("has_access_for_equipment")
     private Boolean hasAccessForEquipment;
+
+
+    @Override
+    public String toString() {
+        return "{" +
+                "\"id\":" + printNullableField(this.getId()) +
+                ", \"groupId\":" + printNullableField(groupId) +
+                ", \"userId\":" + printNullableField(userId) +
+                ", \"hasAccessForDrug\":" + (hasAccessForDrug != null && hasAccessForDrug) +
+                ", \"hasAccessForEquipment\":" + (hasAccessForEquipment != null && hasAccessForEquipment) +
+                ", \"createdAt\":" + printNullableDate(this.getCreatedAt()) +
+                "}\n";
+    }
 }

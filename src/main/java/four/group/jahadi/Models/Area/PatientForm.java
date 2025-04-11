@@ -14,6 +14,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+import static four.group.jahadi.Utility.Utility.*;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -41,4 +43,18 @@ public class PatientForm extends Model {
     @Field("external_referral_tracking_status_last_modified_at")
     @JsonSerialize(using = DateSerialization.class)
     private Date externalReferralTrackingStatusLastModifiedAt;
+
+    @Override
+    public String toString() {
+        return "{" +
+                "\"id\": " + printNullableField(this.getId()) +
+                ", \"createdAt\":" + printNullableDate(this.getCreatedAt()) +
+                ", \"subModuleId\":" + printNullableField(subModuleId) +
+                ", \"doctorId\":" + printNullableField(doctorId) +
+                ", \"answers\":" + answers +
+                ", \"mark\":" + toStringOfHasMap(mark) +
+                ", \"externalReferralTrackingStatus\":" + printNullableField(externalReferralTrackingStatus) +
+                ", \"externalReferralTrackingStatusLastModifiedAt\":" + printNullableDate(externalReferralTrackingStatusLastModifiedAt) +
+                '}';
+    }
 }

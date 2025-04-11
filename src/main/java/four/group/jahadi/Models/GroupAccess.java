@@ -22,4 +22,12 @@ public class GroupAccess {
 
     @Transient
     private Group group;
+
+    @Override
+    public String toString() {
+        return "{" +
+                "\"groupId\":\"" + groupId +
+                "\", \"writeAccess\":" + writeAccess +
+                '}';
+    }
 }

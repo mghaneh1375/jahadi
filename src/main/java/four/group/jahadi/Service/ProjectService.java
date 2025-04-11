@@ -2,11 +2,12 @@ package four.group.jahadi.Service;
 
 import four.group.jahadi.DTO.ProjectData;
 import four.group.jahadi.DTO.Trip.TripStep1Data;
-import four.group.jahadi.DTO.UpdateProjectData;
 import four.group.jahadi.Enums.Status;
-import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Exception.InvalidIdException;
-import four.group.jahadi.Models.*;
+import four.group.jahadi.Models.Group;
+import four.group.jahadi.Models.Project;
+import four.group.jahadi.Models.Trip;
+import four.group.jahadi.Models.User;
 import four.group.jahadi.Repository.*;
 import four.group.jahadi.Utility.Utility;
 import org.bson.types.ObjectId;
@@ -127,37 +128,14 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
         return new ResponseEntity<>(projects, HttpStatus.OK);
     }
 
-    public void setProgress(ObjectId id, int progress) {
-        Project project = projectRepository.findById(id).orElseThrow(InvalidIdException::new);
-        project.setProgress(progress);
-        projectRepository.save(project);
-    }
+    @Override
+    public void update(ObjectId id, ProjectData dto, Object... params) {
 
-//    @Transactional
-    public void remove(ObjectId id, ObjectId userId, String username) {
-        Project project = projectRepository.findById(id).orElseThrow(InvalidIdException::new);
-        if (Utility.getCurrDate().after(project.getStartAt()))
-            throw new InvalidFieldsException("پروژه آغاز شده و امکان حدف آن وجود ندارد");
-
-        tripRepository
-                .findTripByProjectId(project.getId())
-                .forEach(trip -> tripService.removeTrip(trip, userId, username));
-        projectRepository.delete(project);
-    }
-
-    public void update(ObjectId id, UpdateProjectData dto) {
-        Project project = projectRepository.findById(id).orElseThrow(InvalidIdException::new);
-        project = populateEntity(project, dto);
-
-        try {
-            projectRepository.save(project);
-        } catch (Exception x) {
-            throw new InvalidFieldsException("نام وارد شده تکراری است");
-        }
     }
 
     @Override
-    public void update(ObjectId id, ProjectData dto, Object... params) {
+    public ResponseEntity<Project> store(ProjectData dto, Object... params) {
+        return null;
     }
 
     public ResponseEntity<Project> findById(ObjectId id, Object... params) {
@@ -173,43 +151,6 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
         );
     }
 
-    public ResponseEntity<Project> store(ProjectData data, Object... params) {
-
-        if(projectRepository.countByName(data.getName()) > 0)
-            throw new InvalidFieldsException("نام وارد شده تکراری است");
-
-        List<ObjectId> groupIds = data.getTrips().stream()
-                .map(x -> x.stream().map(TripStep1Data::getOwner).collect(Collectors.toList()))
-                .flatMap(List::stream).distinct().collect(Collectors.toList());
-
-        if (groupRepository.countBy_idIn(groupIds) != groupIds.size())
-            throw new InvalidFieldsException("آی دی گروه ها نامعتبر است");
-
-        Project project = populateEntity(null, data);
-        projectRepository.insert(project);
-
-        data.getTrips().forEach(x -> {
-            Trip trip = Trip
-                    .builder()
-                    .projectId(project.getId())
-                    .name(null)
-                    .build();
-
-            List<GroupAccess> groupsWithAccess = new ArrayList<>();
-            x.forEach(tripStep1Data -> groupsWithAccess.add(GroupAccess.builder()
-                            .groupId(tripStep1Data.getOwner())
-                            .writeAccess(tripStep1Data.getWriteAccess())
-                            .build()
-                    )
-            );
-
-            trip.setGroupsWithAccess(groupsWithAccess);
-            tripRepository.save(trip);
-        });
-
-        return new ResponseEntity<>(project, HttpStatus.OK);
-    }
-
     @Override
     Project populateEntity(Project project, ProjectData projectData) {
         return Project.builder()
@@ -222,15 +163,6 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
                 .startAt(getDate(new Date(projectData.getStartAt())))
                 .endAt(getLastDate(new Date(projectData.getEndAt())))
                 .build();
-    }
-
-
-    Project populateEntity(Project project, UpdateProjectData projectData) {
-        project.setName(projectData.getName());
-        project.setColor(projectData.getColor());
-        project.setStartAt(new Date(projectData.getStartAt()));
-        project.setEndAt(new Date(projectData.getEndAt()));
-        return project;
     }
 
     public ResponseEntity<List<Project>> myProjects(ObjectId groupId, ObjectId userId) {

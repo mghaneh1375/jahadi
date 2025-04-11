@@ -1,6 +1,5 @@
 package four.group.jahadi.Routes.API.DrugAPIRoutes;
 
-import four.group.jahadi.DTO.DrugData;
 import four.group.jahadi.Models.Drug;
 import four.group.jahadi.Service.DrugService;
 import four.group.jahadi.Validator.ObjectIdConstraint;
@@ -11,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -21,21 +19,6 @@ public class AdminDrugAPIRoutes {
 
     @Autowired
     DrugService drugService;
-
-//    @PostMapping(value = "store")
-//    @ResponseBody
-//    public ResponseEntity<Drug> store(final @RequestBody @Valid DrugData drugData) {
-//        return drugService.store(drugData);
-//    }
-
-//    @PutMapping(value = "update/{id}")
-//    @ResponseBody
-//    public void update(
-//        final @PathVariable @ObjectIdConstraint ObjectId id,
-//        final @RequestBody @Valid DrugData drugData
-//    ) {
-//        drugService.update(id, drugData);
-//    }
     
     @GetMapping(value = "get/{id}")
     @ResponseBody
@@ -52,15 +35,5 @@ public class AdminDrugAPIRoutes {
             return drugService.list(true, name);
         
         return drugService.list(true);
-    }
-
-    @GetMapping(value = "setDrugReplacements/{drugId}")
-    @ResponseBody
-    @Operation(summary = "ست کردن داروهای جایگزین یک دارو خاص")
-    public void setDrugReplacements(
-            @PathVariable @ObjectIdConstraint ObjectId drugId,
-            @RequestBody List<ObjectId> drugs
-    ) {
-        drugService.setReplacements(drugId, drugs);
     }
 }

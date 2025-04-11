@@ -38,6 +38,9 @@ public interface WareHouseAccessForGroupRepository extends
     })
     List<WareHouseAccessForGroupJoinWithUser> findByGroupId(ObjectId groupId);
 
+    @Query(value = "{groupId: {$in: ?0}}")
+    List<WareHouseAccessForGroup> findByGroupIds(List<ObjectId> groupIds);
+
     @Aggregation(pipeline = {
             "{$match: {$and: [{groupId: ?0}, {userId: ?1}]}}",
             "{$lookup: {from: 'user', localField: 'user_id', foreignField: '_id', as: 'userObj'}}",

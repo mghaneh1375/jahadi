@@ -14,12 +14,16 @@ import four.group.jahadi.Validator.ObjectIdConstraint;
 import io.swagger.v3.oas.annotations.Operation;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.List;
 
@@ -173,4 +177,45 @@ public class RegionManageAPIRoutes extends Router {
     }
 
     // todo finalize area defenition
+
+    @GetMapping(value = "exportTrip/{areaId}")
+    @Operation(summary = "گرفتن خروجی از منطقه")
+    public void exportTrip(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            @PathVariable @ObjectIdConstraint ObjectId areaId
+    ) {
+        areaService.exportTrip(
+                areaId, getId(request), response
+        );
+    }
+
+    @GetMapping(value = "exportAllForConfigLocalServer/{areaId}")
+    @Operation(summary = "گرفتن خروجی از کل دیتابیس")
+    public void exportAllForConfigLocalServer(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            @PathVariable @ObjectIdConstraint ObjectId areaId
+    ) {
+        areaService.exportAllForConfigLocalServer(
+                areaId, getId(request), response
+        );
+    }
+
+    @PostMapping(
+            value = "importDBToConstructLocalServer/{areaId}",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    @ResponseBody
+    @Operation(summary = "ایمپورت کردن کل دیتابیس")
+    public void importDBToConstructLocalServer(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId,
+            @RequestBody @NotNull MultipartFile file
+    ) {
+        areaService.importDBToConstructLocalServer(
+                areaId, getId(request), file
+        );
+    }
+
 }

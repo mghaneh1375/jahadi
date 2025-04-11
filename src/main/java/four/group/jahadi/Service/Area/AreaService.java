@@ -1,5 +1,7 @@
 package four.group.jahadi.Service.Area;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import four.group.jahadi.DTO.Area.AreaData;
 import four.group.jahadi.DTO.Area.AreaDigest;
 import four.group.jahadi.DTO.Area.UpdateAreaData;
@@ -10,27 +12,44 @@ import four.group.jahadi.Enums.Sex;
 import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Exception.NotAccessException;
-import four.group.jahadi.Models.*;
 import four.group.jahadi.Models.Area.Area;
 import four.group.jahadi.Models.Area.AreaDates;
-import four.group.jahadi.Repository.*;
+import four.group.jahadi.Models.Area.PatientsInArea;
+import four.group.jahadi.Models.*;
 import four.group.jahadi.Repository.Area.PatientsInAreaRepository;
+import four.group.jahadi.Repository.Area.PresenceListRepository;
+import four.group.jahadi.Repository.*;
 import four.group.jahadi.Service.*;
 import four.group.jahadi.Utility.Utility;
 import four.group.jahadi.Utility.ValidList;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 import static four.group.jahadi.Service.Area.AreaUtils.findArea;
-import static four.group.jahadi.Service.Area.AreaUtils.findStartedArea;
 import static four.group.jahadi.Utility.Utility.getDate;
 import static four.group.jahadi.Utility.Utility.getLastDate;
 
@@ -61,6 +80,16 @@ public class AreaService extends AbstractService<Area, AreaData> {
     private DrugServiceInArea drugServiceInArea;
     @Autowired
     private EquipmentServiceInArea equipmentServiceInArea;
+    @Autowired
+    private PresenceListRepository presenceListRepository;
+    @Autowired
+    private DrugRepository drugRepository;
+    @Autowired
+    private IOService ioService;
+    @Autowired
+    private ApplicationContext applicationContext;
+    @Autowired
+    private ExportUtils exportUtils;
 
     @Override
     public ResponseEntity<List<Area>> list(Object... filters) {
@@ -523,7 +552,7 @@ public class AreaService extends AbstractService<Area, AreaData> {
                 userId, username, areaId,
                 first.get().getName(), trip.getName()
         );
-        if(needRemove)
+        if (needRemove)
             trip.getAreas().removeIf(area -> area.getId().equals(areaId));
     }
 
@@ -540,5 +569,145 @@ public class AreaService extends AbstractService<Area, AreaData> {
 
         remove(trip, areaId, userId, username, true);
         tripRepository.save(trip);
+    }
+
+    public void exportTrip(
+            ObjectId areaId, ObjectId userId,
+            HttpServletResponse response
+    ) {
+        Trip trip = tripRepository.findByAreaIdAndOwnerId(areaId, userId).orElseThrow(InvalidIdException::new);
+        Area foundArea = findArea(trip, areaId, userId);
+
+        response.setContentType("application/octet-stream");
+        response.setHeader(
+                HttpHeaders.CONTENT_DISPOSITION,
+                ContentDisposition.builder("attachment").filename("tmp.json").build().toString()
+        );
+        try {
+            ServletOutputStream outputStream = response.getOutputStream();
+            response.setStatus(HttpStatus.OK.value());
+            response.flushBuffer();
+
+            List<PatientsInArea> patientsInArea = patientsInAreaRepository.findByAreaId(areaId);
+            ioService.export(patientsInArea, outputStream, "PatientsInArea");
+            response.setStatus(HttpStatus.OK.value());
+            response.flushBuffer();
+        } catch (Exception e) {
+            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
+    }
+
+    public void exportAllForConfigLocalServer(
+            ObjectId areaId, ObjectId userId,
+            HttpServletResponse response
+    ) {
+        Trip trip = tripRepository.findByAreaIdAndOwnerId(areaId, userId).orElseThrow(InvalidIdException::new);
+        Area foundArea = findArea(trip, areaId, userId);
+
+        try {
+            ServletOutputStream outputStream = response.getOutputStream();
+            response.setContentType("application/octet-stream");
+            response.setHeader(
+                    HttpHeaders.CONTENT_DISPOSITION,
+                    ContentDisposition.builder("attachment").filename("export.json").build().toString()
+            );
+
+            // no need for export activation table
+            exportUtils.exportCommon(outputStream);
+            exportUtils.exportUsers(foundArea, outputStream);
+            exportUtils.exportTrip(trip, outputStream);
+            exportUtils.exportGroups(trip, outputStream);
+            exportUtils.exportDrugs(foundArea, outputStream);
+            exportUtils.exportEquipments(foundArea, outputStream);
+            exportUtils.exportPatients(outputStream);
+            response.setStatus(HttpStatus.OK.value());
+            response.flushBuffer();
+        } catch (Exception x) {
+            x.printStackTrace();
+        }
+    }
+
+    public Set<Class> findAllClassesUsingClassLoader(String packageName) {
+        InputStream stream = ClassLoader.getSystemClassLoader()
+                .getResourceAsStream(packageName.replaceAll("[.]", "/"));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+        return reader.lines()
+                .filter(line -> line.endsWith(".class"))
+                .map(line -> getClass(line, packageName))
+                .collect(Collectors.toSet());
+    }
+
+    private Class getClass(String className, String packageName) {
+        try {
+            return Class.forName(packageName + "."
+                    + className.substring(0, className.lastIndexOf('.')));
+        } catch (ClassNotFoundException e) {
+            // handle the exception
+        }
+        return null;
+    }
+
+    private void saveAllList(
+            List<Object> values, Class selectedDB,
+            Set<Class> repositories
+    ) {
+        List<Object> finalValues = values;
+        String[] split = selectedDB.getName().split("\\.");
+        repositories
+                .stream()
+                .filter(aClass -> aClass.getName().endsWith("." + split[split.length - 1] + "Repository"))
+                .findFirst().ifPresent(aClass -> {
+                    BeanFetcher fetcher = new BeanFetcher(applicationContext);
+                    Object bean = fetcher.getBeanByClass(aClass);
+                    try {
+                        Method method = aClass.getMethod("saveAll", Iterable.class);
+                        method.invoke(bean, finalValues);
+                    } catch (NoSuchMethodException | InvocationTargetException |
+                             IllegalAccessException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+    }
+    public void importDBToConstructLocalServer(
+            ObjectId areaId, ObjectId userId,
+            MultipartFile file
+    ) {
+        Set<Class> models = findAllClassesUsingClassLoader("four.group.jahadi.Models");
+        Set<Class> repositories = findAllClassesUsingClassLoader("four.group.jahadi.Repository");
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            InputStream inputStream = file.getInputStream();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+            AtomicReference<Class> selectedDB = new AtomicReference<>(null);
+            List<Object> values = null;
+            while (reader.ready()) {
+                String line = reader.readLine();
+                if (line.length() < 5)
+                    continue;
+                if (selectedDB.get() == null && !line.matches("^\\*\\*\\*\\*\\*\\*\\*[a-zA-Z]*\\*\\*\\*\\*\\*\\*\\*$"))
+                    continue;
+                if (line.matches("^\\*\\*\\*\\*\\*\\*\\*[a-zA-Z]*\\*\\*\\*\\*\\*\\*\\*$")) {
+                    if (values != null && values.size() > 0)
+                        saveAllList(values, selectedDB.get(), repositories);
+                    models
+                            .stream()
+                            .filter(aClass -> aClass.getName().endsWith("." + line.replaceAll("\\*", "")))
+                            .findFirst().ifPresent(selectedDB::set);
+                    values = new ArrayList<>();
+                    continue;
+                }
+                if (selectedDB.get() == null)
+                    continue;
+
+                values.add(objectMapper.readValue(line, selectedDB.get()));
+            }
+
+            if (selectedDB.get() != null && values != null && values.size() > 0)
+                saveAllList(values, selectedDB.get(), repositories);
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

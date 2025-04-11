@@ -13,6 +13,9 @@ import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.util.List;
 
+import static four.group.jahadi.Utility.Utility.printNullableField;
+import static four.group.jahadi.Utility.Utility.toStringOfPairValue;
+
 @Getter
 @Setter
 @Document
@@ -38,4 +41,18 @@ public class SimpleQuestion extends Question {
     @Builder.Default
     @Field("can_write_desc")
     private Boolean canWriteDesc = false;
+
+    @Override
+    public String toString() {
+        return "{" +
+                "\"id\":" + printNullableField(this.getId()) +
+                ", \"questionType\":" + printNullableField(this.getQuestionType()) +
+                ", \"required\":" + required +
+                ", \"question\":" + printNullableField(question) +
+                ", \"answerType\":" + printNullableField(answerType) +
+                ", \"options\":" + toStringOfPairValue(options) +
+                ", \"dynamicOptions\":" + printNullableField(dynamicOptions) +
+                ", \"canWriteDesc\":" + canWriteDesc +
+                '}';
+    }
 }

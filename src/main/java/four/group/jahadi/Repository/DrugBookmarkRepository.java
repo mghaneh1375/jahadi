@@ -13,6 +13,8 @@ import java.util.List;
 public interface DrugBookmarkRepository extends MongoRepository<DrugBookmark, ObjectId>, FilterableRepository<DrugBookmark> {
   @Query(value = "{userId: ?0}")
   List<DrugBookmark> findByUserId(ObjectId userId);
+  @Query(value = "{drugId: {$in: ?0}}")
+  List<DrugBookmark> findByDrugIds(List<ObjectId> drugIds);
 
   @Query(value = "{userId: ?0, drugId: ?1}", delete = true)
   void removeByUserIdAndDrugId(ObjectId userId, ObjectId drugId);

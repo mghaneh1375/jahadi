@@ -15,6 +15,9 @@ import javax.persistence.Transient;
 import java.util.Date;
 import java.util.List;
 
+import static four.group.jahadi.Utility.Utility.printNullableDate;
+import static four.group.jahadi.Utility.Utility.printNullableField;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -51,4 +54,19 @@ public class PatientReferral extends Model {
     @Transient
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     private String moduleTabName;
+
+    @Override
+    public String toString() {
+        return "{" +
+                "\"id\":" + printNullableField(this.getId()) +
+                ", \"createdAt\":" + printNullableDate(this.getCreatedAt()) +
+                ", \"moduleId\":" + printNullableField(moduleId) +
+                ", \"recepted\":" + recepted +
+                ", \"desc\":" + printNullableField(desc) +
+                ", \"forms\":" + forms +
+                ", \"experiments\":" + experiments +
+                ", \"receptedAt\":" + printNullableDate(receptedAt) +
+                ", \"referBy\":" + printNullableField(referBy) +
+                "}";
+    }
 }

@@ -12,6 +12,9 @@ import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import static four.group.jahadi.Utility.Utility.printNullableDate;
+import static four.group.jahadi.Utility.Utility.printNullableField;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -44,4 +47,18 @@ public class DrugBookmark extends Model {
     @Transient
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     private String useTimesFa;
+
+    @Override
+    public String toString() {
+        return "{" +
+                "\"id\":" + printNullableField(this.getId()) +
+                ", \"createdAt\":" + printNullableDate(this.getCreatedAt()) +
+                ", \"drugName\":" + printNullableField(drugName) +
+                ", \"drugId\":" + printNullableField(drugId) +
+                ", \"userId\":" + printNullableField(userId) +
+                ", \"howToUses\":" + printNullableField(howToUses) +
+                ", \"amountOfUses\":" + printNullableField(amountOfUses) +
+                ", \"useTimes\":" + printNullableField(useTimes) +
+                "}\n";
+    }
 }

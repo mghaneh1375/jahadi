@@ -8,10 +8,10 @@ import four.group.jahadi.Models.Model;
 import four.group.jahadi.Models.ObjectIdSerialization;
 import lombok.*;
 import org.bson.types.ObjectId;
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @Getter
@@ -43,4 +43,18 @@ public class AreaEquipments extends Model {
     private Integer totalCount;
 
     private Integer reminder;
+
+    @Override
+    public String toString() {
+        return "{" +
+                "\"id\":\"" + this.getId() +
+                "\", \"createdAt\":\"" + new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX").format(this.getCreatedAt()) +
+                "\", \"equipmentName\":\"" + equipmentName +
+                "\", \"equipmentId\":\"" + equipmentId +
+                "\", \"areaId\":\"" + areaId +
+                "\", \"updatedAt\":\"" + new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX").format(updatedAt) +
+                "\", \"totalCount\":" + totalCount +
+                ", \"reminder\":" + reminder +
+                "}\n";
+    }
 }

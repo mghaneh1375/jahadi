@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static four.group.jahadi.Utility.Utility.*;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -137,4 +139,36 @@ public class Area {
     @JsonIgnore
     @Builder.Default
     private Boolean finished = false;
+
+    @Override
+    public String toString() {
+        return "{" +
+                "\"id\":" + printNullableField(id) +
+                ", \"ownerId\":" + printNullableField(ownerId) +
+                ", \"color\":" + printNullableField(color) +
+                ", \"name\":" + printNullableField(name) +
+                ", \"country\":" + printNullableField(country) +
+                ", \"state\":" + printNullableField(state) +
+                ", \"city\":" + printNullableField(city) +
+                ", \"stateId\":" + printNullableField(stateId) +
+                ", \"cityId\":" + printNullableField(cityId) +
+                ", \"lat\":" + lat +
+                ", \"lng\":" + lng +
+                ", \"startAt\":" + printNullableDate(startAt) +
+                ", \"dates\":" + dates +
+                ", \"endAt\":" + printNullableDate(endAt) +
+                ", \"dailyStartAt\":" + printNullableField(dailyStartAt) +
+                ", \"dailyEndAt\":" + printNullableField(dailyEndAt) +
+                ", \"members\":" + toStringOfList(members) +
+                ", \"experiments\":" + experiments +
+                ", \"modules\":" + modules +
+                ", \"dispatchers\":" + toStringOfList(dispatchers) +
+                ", \"trainers\":" + toStringOfList(trainers) +
+                ", \"insurancers\":" + toStringOfList(insurancers) +
+                ", \"pharmacyManagers\":" + toStringOfList(pharmacyManagers) +
+                ", \"equipmentManagers\":" + toStringOfList(equipmentManagers) +
+                ", \"laboratoryManager\":" + toStringOfList(laboratoryManager) +
+                ", \"finished\":" + finished +
+                "}";
+    }
 }

@@ -32,4 +32,14 @@ public class PresenceList extends Model {
 
     @JsonSerialize(using = DateSerialization.class)
     private Date exit;
+
+    @Override
+    public String toString() {
+        return "{" +
+                "\"areaId\":\"" + areaId +
+                "\", \"userId\":\"" + userId +
+                "\", \"entrance\":" + entrance.toString() +
+                "\", \"exit\":" + exit.toString() +
+                "}\n";
+    }
 }

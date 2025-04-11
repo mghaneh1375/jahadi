@@ -13,6 +13,8 @@ import org.springframework.data.mongodb.core.mapping.Field;
 import java.util.Date;
 import java.util.List;
 
+import static four.group.jahadi.Utility.Utility.*;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -51,4 +53,17 @@ public class Project extends Model {
     @JsonSerialize(using = ObjectIdListSerialization.class)
     private List<ObjectId> tripIds;
 
+    @Override
+    public String toString() {
+        return "{" +
+                "\"id\":" + printNullableField(this.getId()) +
+                ", \"createdAt\":" + printNullableDate(this.getCreatedAt()) +
+                ", \"name\":" + printNullableField(name) +
+                ", \"color\":" + printNullableField(color) +
+                ", \"progress\":" + printNullableInteger(progress) +
+                ", \"startAt\":" + printNullableDate(startAt) +
+                ", \"endAt\":" + printNullableDate(endAt) +
+                ", \"groupIds\":" + toStringOfList(groupIds) +
+                "}\n";
+    }
 }

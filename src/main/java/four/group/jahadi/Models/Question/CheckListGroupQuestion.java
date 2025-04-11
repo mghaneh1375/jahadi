@@ -14,6 +14,8 @@ import org.springframework.data.mongodb.core.mapping.Field;
 import java.util.HashMap;
 import java.util.List;
 
+import static four.group.jahadi.Utility.Utility.*;
+
 @Getter
 @Setter
 @Document
@@ -62,4 +64,23 @@ public class CheckListGroupQuestion extends Question {
 
     @JsonIgnore
     private HashMap<String, Integer> marks;
+
+    @Override
+    public String toString() {
+        return "{" +
+                "\"id\":" + printNullableField(this.getId()) +
+                ", \"questionType\":" + printNullableField(this.getQuestionType()) +
+                ", \"sectionTitle\":" + printNullableField(sectionTitle) +
+                ", \"options\":" + toStringOfPairValue(options) +
+                ", \"questions\":" + questions +
+                ", \"canWriteDesc\":" + canWriteDesc +
+                ", \"canWriteReport\":" + canWriteReport +
+                ", \"canWriteReason\":" + canWriteReason +
+                ", \"canWriteSampleInfoDesc\":" + canWriteSampleInfoDesc +
+                ", \"canWriteTime\":" + canWriteTime +
+                ", \"canUploadFile\":" + canUploadFile +
+                ", \"markable\":" + markable +
+                ", \"marks\":" + toStringOfHasMap(marks) +
+                '}';
+    }
 }
