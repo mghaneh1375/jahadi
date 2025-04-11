@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @ValidatedPasswordRequest
 public class PasswordData {
-
+    private String currPassword;
     private String password;
     private String repeatPassword;
 

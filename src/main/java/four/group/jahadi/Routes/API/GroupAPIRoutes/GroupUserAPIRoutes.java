@@ -2,6 +2,7 @@ package four.group.jahadi.Routes.API.GroupAPIRoutes;
 
 import four.group.jahadi.DTO.AdminSignInData;
 import four.group.jahadi.DTO.WareHouseAccessForGroupData;
+import four.group.jahadi.Enums.AccountStatus;
 import four.group.jahadi.Enums.Sex;
 import four.group.jahadi.Exception.NotActivateAccountException;
 import four.group.jahadi.Exception.UnAuthException;
@@ -12,6 +13,7 @@ import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Service.ExternalReferralAccessForGroupService;
 import four.group.jahadi.Service.UserService;
 import four.group.jahadi.Service.WareHouseAccessService;
+import four.group.jahadi.Validator.EnumValidator;
 import four.group.jahadi.Validator.ObjectIdConstraint;
 import io.swagger.v3.oas.annotations.Operation;
 import org.bson.types.ObjectId;
@@ -47,6 +49,17 @@ public class GroupUserAPIRoutes extends Router {
             @RequestParam(required = false, value = "name") String name
     ) throws UnAuthException, NotActivateAccountException {
         return userService.list(null, null, name, NID, phone, sex, null, getGroup(request), null);
+    }
+
+    @PutMapping(value = "changeStatus/{userId}/{status}")
+    @ResponseBody
+    @Operation(summary = "Available values for status parameter: 1- ACTIVE, 2- PENDING, 3- BLOCKED")
+    public void changeStatus(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId userId,
+            @PathVariable @EnumValidator(enumClazz = AccountStatus.class) String status
+    ) {
+        userService.changeStatusByGroup(getTokenInfo(request).getGroupId(), userId, AccountStatus.valueOf(status.toUpperCase()));
     }
 
     @DeleteMapping(value = "removeFromGroup/{userId}")
@@ -91,7 +104,7 @@ public class GroupUserAPIRoutes extends Router {
     public ResponseEntity<WareHouseAccessForGroupJoinWithUser> addWareHouseAccesses(
             HttpServletRequest request,
             @RequestBody @Valid WareHouseAccessForGroupData dto
-            ) {
+    ) {
         return wareHouseAccessService.store(
                 dto, getGroup(request)
         );

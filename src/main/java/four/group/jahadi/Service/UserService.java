@@ -624,8 +624,18 @@ public class UserService extends AbstractService<User, SignUpData> {
         userRepository.save(user);
     }
 
+    public void changeStatusByGroup(ObjectId groupId, ObjectId userId, AccountStatus status) {
+        User user = userRepository.findById(userId).orElseThrow(InvalidIdException::new);
+        if(!Objects.equals(user.getGroupId(), groupId))
+            throw new NotAccessException();
+        user.setStatus(status);
+        userRepository.save(user);
+    }
+
     public void changePassword(ObjectId userId, PasswordData passwordData) {
         User user = userRepository.findById(userId).orElseThrow(InvalidIdException::new);
+        if(!passwordEncoder.matches(passwordData.getCurrPassword(), user.getPassword()))
+            throw new InvalidFieldsException("رمزعبور فعلی اشتباه است");
         user.setPassword(passwordEncoder.encode(passwordData.getPassword()));
         userRepository.save(user);
     }

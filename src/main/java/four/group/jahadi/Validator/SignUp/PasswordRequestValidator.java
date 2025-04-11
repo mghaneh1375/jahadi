@@ -15,19 +15,17 @@ public class PasswordRequestValidator implements ConstraintValidator<ValidatedPa
 
     @Override
     public boolean isValid(PasswordData value, ConstraintValidatorContext context) {
-
         boolean isErrored = false;
         JSONObject errs = new JSONObject();
 
         if(
-                value.getPassword() == null || value.getRepeatPassword() == null
+                value.getPassword() == null || value.getRepeatPassword() == null ||
+                        value.getCurrPassword() == null
         ) {
             errs.put("loginErr", "لطفا تمام اطلاعات لازم را وارد نمایید");
             isErrored = true;
         }
-
         else {
-
             if(!value.getRepeatPassword().equals(value.getPassword())) {
                 errs.put("password", "رمزعبور وارد شده با تکرار آن یکسان نیست");
                 isErrored = true;
@@ -37,7 +35,6 @@ public class PasswordRequestValidator implements ConstraintValidator<ValidatedPa
                 errs.put("password", "رمزعبور وارد شده معتبر نمی باشد");
                 isErrored = true;
             }
-
         }
 
         if (isErrored) {

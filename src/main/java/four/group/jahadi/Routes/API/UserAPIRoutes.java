@@ -192,8 +192,10 @@ public class UserAPIRoutes extends Router {
     }
 
     @PostMapping(value = "/changePassword")
-    public void changePassword(HttpServletRequest request,
-                               @RequestBody @Valid PasswordData passwordData) throws UnAuthException, NotActivateAccountException {
+    public void changePassword(
+            HttpServletRequest request,
+            @RequestBody @Valid PasswordData passwordData
+    ) throws UnAuthException, NotActivateAccountException {
         userService.changePassword(getUser(request).getId(), passwordData);
     }
 
