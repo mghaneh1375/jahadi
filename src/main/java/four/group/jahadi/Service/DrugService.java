@@ -139,7 +139,7 @@ public class DrugService extends AbstractService<Drug, DrugData> {
         )
             throw new NotAccessException();
 
-        Drug drug = drugRepository.findByIdAndGroupId(id, userId)
+        Drug drug = drugRepository.findByIdAndGroupId(id, groupId)
                 .orElseThrow(InvalidIdException::new);
         int oldAvailable = drug.getAvailable();
         drug = populateEntity(drug, drugData);
