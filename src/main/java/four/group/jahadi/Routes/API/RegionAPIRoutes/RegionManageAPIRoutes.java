@@ -201,21 +201,4 @@ public class RegionManageAPIRoutes extends Router {
                 areaId, getId(request), response
         );
     }
-
-    @PostMapping(
-            value = "importDBToConstructLocalServer/{areaId}",
-            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
-    )
-    @ResponseBody
-    @Operation(summary = "ایمپورت کردن کل دیتابیس")
-    public void importDBToConstructLocalServer(
-            HttpServletRequest request,
-            @PathVariable @ObjectIdConstraint ObjectId areaId,
-            @RequestBody @NotNull MultipartFile file
-    ) {
-        areaService.importDBToConstructLocalServer(
-                areaId, getId(request), file
-        );
-    }
-
 }

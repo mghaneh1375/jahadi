@@ -1,21 +1,13 @@
 package four.group.jahadi.Utility;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
 public class PairValue {
-
-    private Object Key;
-    private Object Value;
-
-    public PairValue(Object Key, Object Value)
-    {
-        this.Key = Key;
-        this.Value = Value;
-    }
-
-    public Object getKey() {
-        return Key;
-    }
-
-    public Object getValue() {
-        return Value;
-    }
-
+    private Object key;
+    private Object value;
 }

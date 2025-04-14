@@ -87,7 +87,7 @@ public class ExportUtils {
         neededUsersId.add(area.getOwnerId());
 //        List<User> users = userRepository.findFullInfoByIdsIn(neededUsersId);
         List<User> users = userRepository.findAll();
-        ioService.export(users, outputStream, "Users");
+        ioService.export(users, outputStream, "User");
     }
 
     public void exportGroups(Trip trip, ServletOutputStream outputStream) {

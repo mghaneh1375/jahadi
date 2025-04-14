@@ -2,12 +2,14 @@ package four.group.jahadi.Models.Question;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import four.group.jahadi.Enums.Module.AnswerType;
+import four.group.jahadi.Enums.Module.QuestionType;
 import four.group.jahadi.Utility.PairValue;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
@@ -41,6 +43,16 @@ public class SimpleQuestion extends Question {
     @Builder.Default
     @Field("can_write_desc")
     private Boolean canWriteDesc = false;
+
+    public SimpleQuestion(ObjectId id, QuestionType questionType, Boolean required, String question, AnswerType answerType, List<PairValue> options, String dynamicOptions, Boolean canWriteDesc) {
+        super(id, questionType);
+        this.required = required;
+        this.question = question;
+        this.answerType = answerType;
+        this.options = options;
+        this.dynamicOptions = dynamicOptions;
+        this.canWriteDesc = canWriteDesc;
+    }
 
     @Override
     public String toString() {

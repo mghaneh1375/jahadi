@@ -112,112 +112,12 @@ public class UserService extends AbstractService<User, SignUpData> {
     }
 
     public void update(ObjectId id, UpdateInfoData dto) {
-        User user = userRepository.findById(id).orElseThrow(InvalidIdException::new);
-        BeanUtilsBean notNull = new NullAwareBeanUtilsBean();
-        if(user.getAccesses().contains(Access.GROUP)) {
-            try {
-                notNull.copyProperties(user, dto);
-                userRepository.save(user);
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        else {
-            try {
-                PersonalUpdateInfoData personalUpdateInfoData = new PersonalUpdateInfoData();
-                notNull.copyProperties(personalUpdateInfoData, dto);
-                notNull.copyProperties(user, personalUpdateInfoData);
-                userRepository.save(user);
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
-
-    public ResponseEntity<ChangePhoneResponseDAO> changePhone(User user, ChangePhoneDAO request) {
-        if(!user.getStatus().equals(AccountStatus.ACTIVE))
-            throw new NotAccessException();
-
-        if(userRepository.countByPhone(request.getNewPhone()) > 0)
-            throw new InvalidFieldsException("این شماره در سیستم موجود است");
-
-        long curr = System.currentTimeMillis();
-        activationRepository.findByPhone(request.getNewPhone()).ifPresent(activation -> {
-            if((curr - activation.getCreatedAt()) / 60000 > 2)
-                activationRepository.deleteByPhone(request.getNewPhone(), curr);
-            throw new InvalidFieldsException("کد قبلی هنوز منقضی نشده است");
-        });
-
-        String token = Utility.randomString(20);
-        Integer code = Utility.randInt();
-        Utility.sendSMS(user.getPhone(), code + "", "", "", "activation");
-        activationRepository.save(
-                Activation
-                        .builder()
-                        .phone(request.getNewPhone())
-                        .token(token)
-                        .code(code)
-                        .nid(user.getPhone())
-                        .createdAt(curr)
-                        .build()
-        );
-
-        return new ResponseEntity<>(
-                ChangePhoneResponseDAO
-                        .builder()
-                        .token(token)
-                        .build(),
-                HttpStatus.OK
-        );
-    }
-
-    public void doChangePhone(User user, DoChangePhoneDAO request, String token) {
-        Activation activation = activationRepository.findByNIDAndCodeAndToken(
-                user.getPhone(), request.getCode(), request.getToken()
-        ).orElseThrow(() -> {
-            throw new InvalidFieldsException("کد وارد شده اشتباه است");
-        });
-
-        if(((System.currentTimeMillis() - activation.getCreatedAt()) / 60000) > 2)
-            throw new InvalidFieldsException("زمان کد ارسال شده منقضی شده است");
-
-        user.setPhone(activation.getPhone());
-        activationRepository.delete(activation);
-
-        logout(token);
-        JwtTokenFilter.removeTokenFromCache(token.replace("Bearer ", ""));
-        userRepository.save(user);
+        return;
     }
 
     @Override
     public ResponseEntity<User> store(SignUpData dto, Object... params) {
-
-//        if (userRepository.countByPhone(dto.getPhone()) > 0)
-//            throw new InvalidFieldsException("شماره همراه وارد شده در سیستم موجود است");
-//
-//        if (userRepository.countByNID(dto.getNid()) > 0)
-//            throw new InvalidFieldsException("کد ملی وارد شده در سیستم موجود است");
-//
-//        if (dto.getGroupCode() != null) {
-//            groupRepository.findByCode(dto.getGroupCode()).orElseThrow(InvalidCodeException::new);
-//        }
-//
-//        User user = userRepository.insert(populateEntity(null, dto));
-//        return new ResponseEntity<>(user, HttpStatus.OK);
-
         return null;
-    }
-
-    public ResponseEntity<HashMap<String, Object>> forgetPass(String NID) {
-
-        if (!Utility.validationNationalCode(NID))
-            throw new InvalidFieldsException("کد ملی وارد شده معتبر نمی باشد");
-
-        User user = userRepository.findByNID(NID).orElseThrow(
-                () -> new InvalidFieldsException("کد ملی وارد شده در سامانه موجود نمی باشد")
-        );
-
-        return sendSMS(user, false);
     }
 
     private ResponseEntity<HashMap<String, Object>> sendSMS(User user, boolean storeUserDoc) {
@@ -321,137 +221,6 @@ public class UserService extends AbstractService<User, SignUpData> {
                 HttpStatus.OK
         );
 
-    }
-
-    public ResponseEntity<String> checkCode(CheckCodeRequest checkCodeRequest) {
-
-        Activation activation = activationRepository.findByPhoneAndCodeAndToken(
-                checkCodeRequest.getPhone(), checkCodeRequest.getCode(), checkCodeRequest.getToken()
-        ).orElseThrow(() -> {
-            throw new InvalidFieldsException("کد وارد شده نامعتبر است");
-        });
-
-        if (activation.getCreatedAt() < System.currentTimeMillis() - SMS_RESEND_MSEC)
-            throw new InvalidFieldsException("کد موردنظر شما منقضی شده است");
-
-        User user = activation.getUser();
-
-        if (user.getCid() != null && userRepository.countByNID(user.getNid()) == 0) {
-
-            userRepository.insert(user);
-            activationRepository.delete(activation);
-
-            return new ResponseEntity<>(
-                    jwtTokenProvider.createToken(user.getNid(), user.getAccesses(), user.getGroupId(), user.getId()),
-                    HttpStatus.OK
-            );
-        } else {
-            activation.setValidated(true);
-            activationRepository.save(activation);
-        }
-
-        return new ResponseEntity<>("", HttpStatus.OK);
-    }
-
-
-    public ResponseEntity<String> checkForgetPassCode(CheckForgetPassCodeRequest checkCodeRequest) {
-
-        Activation activation = activationRepository.findByNIDAndCodeAndToken(
-                checkCodeRequest.getNid(), checkCodeRequest.getCode(), checkCodeRequest.getToken()
-        ).orElseThrow(() -> {
-            throw new InvalidFieldsException("کد وارد شده نامعتبر است");
-        });
-
-        if (activation.getCreatedAt() < System.currentTimeMillis() - SMS_RESEND_MSEC)
-            throw new InvalidFieldsException("کد موردنظر شما منقضی شده است");
-
-        activation.setValidated(true);
-        activationRepository.save(activation);
-
-        return new ResponseEntity<>("", HttpStatus.OK);
-    }
-
-    public void resetPassword(ResetPasswordRequest request) {
-
-        if (!Utility.validationNationalCode(request.getNid()))
-            throw new InvalidFieldsException("کد ملی وارد شده معتبر نمی باشد");
-
-        if (request.getToken().length() != 20)
-            throw new InvalidFieldsException("توکن موردنظر معتبر نمی باشد");
-
-        if (request.getCode() < 100000 || request.getCode() > 999999)
-            throw new InvalidFieldsException("کد وارد شده معتبر نمی باشد.");
-
-        Activation activation =
-                activationRepository.findByNIDAndCodeAndToken(request.getNid(), request.getCode(), request.getToken())
-                        .orElseThrow(() -> {
-                            throw new InvalidFieldsException("کد وارد شده نامعتبر است");
-                        });
-
-        if (!activation.getValidated())
-            throw new NotAccessException();
-
-        if (!request.getPassword().equals(request.getRepeatPassword()))
-            throw new InvalidFieldsException("رمزجدید و تکرار آن یکسان نیستند.");
-
-        if (request.getPassword().length() < 6)
-            throw new InvalidFieldsException("رمزجدید انتخاب شده قوی نیست.");
-
-        activationRepository.delete(activation);
-
-        User user = userRepository.findByNID(activation.getNid()).orElseThrow(InvalidIdException::new);
-        user.setPassword(getEncPass(request.getPassword()));
-        userRepository.save(user);
-    }
-
-    public String toggleStatus(ObjectId userId) {
-        Optional<User> user = userRepository.findById(userId);
-        if (user.isEmpty())
-            return JSON_NOT_VALID_ID;
-
-        User u = user.get();
-
-        switch (u.getStatus()) {
-            case ACTIVE:
-                u.setStatus(AccountStatus.BLOCKED);
-                break;
-            case PENDING:
-            case BLOCKED:
-                u.setStatus(AccountStatus.ACTIVE);
-                if (u.getMembers() != null) {
-                    Optional<Group> group = groupRepository.findByName(u.getGroupName());
-                    Group g;
-
-                    if (group.isEmpty()) {
-                        int code = Utility.randIntForGroupCode();
-                        Optional<Group> tmp = groupRepository.findByCode(code);
-
-                        while (tmp.isPresent())
-                            code = Utility.randIntForGroupCode();
-
-                        g = Group.builder()
-                                .name(u.getGroupName())
-                                .code(code)
-                                .build();
-
-                        g.setOwner(u.getId());
-                        groupRepository.insert(g);
-
-                        if (!u.getAccesses().contains(Access.GROUP))
-                            u.getAccesses().add(Access.GROUP);
-                    } else
-                        g = group.get();
-
-                    u.setGroupId(g.getId());
-                    u.setGroupName(g.getName());
-                }
-                break;
-            default:
-                return JSON_NOT_VALID_PARAMS;
-        }
-
-        userRepository.save(u);
-        return Utility.generateSuccessMsg("newStatus", u.getStatus().getName());
     }
 
     public ResponseEntity<String> signIn(SignInData data) {
@@ -561,46 +330,6 @@ public class UserService extends AbstractService<User, SignUpData> {
         }
     }
 
-    public void changePassword(ObjectId userId, PasswordData passwordData) {
-        User user = userRepository.findById(userId).orElseThrow(InvalidIdException::new);
-        user.setPassword(passwordEncoder.encode(passwordData.getPassword()));
-        userRepository.save(user);
-    }
-
-    public void setPic(ObjectId id, MultipartFile file) {
-
-        if (file == null)
-            throw new BadRequestException();
-
-        if (file.getSize() > ONE_MB * 5)
-            throw new RuntimeException("حداکثر حجم مجاز 5MB می باشد");
-
-        String fileType = FileUtils.uploadImage(file);
-
-        if (fileType == null)
-            throw new RuntimeException("فرمت فایل موردنظر معتبر نمی باشد.");
-
-        String filename = uploadFile(file, PICS_FOLDER);
-        if (filename == null)
-            throw new RuntimeException("خطای ناشناخته هنگام بارگداری فایل");
-
-        User user = userRepository.findById(id).orElseThrow(InvalidIdException::new);
-
-        if (user.getPic() != null && !user.getPic().isEmpty())
-            removeFile(user.getPic(), PICS_FOLDER);
-
-        user.setPic(filename);
-        userRepository.save(user);
-    }
-
-    public void setGroup(ObjectId id, Integer code) {
-        Group group = groupRepository.findByCode(code).orElseThrow(InvalidCodeException::new);
-        User user = userRepository.findById(id).orElseThrow(InvalidIdException::new);
-        user.setGroupId(group.getId());
-        user.setGroupName(group.getName());
-        userRepository.save(user);
-    }
-
     public void removeFromGroup(ObjectId userId, ObjectId groupId) {
         if (groupId == null)
             throw new NotAccessException();
@@ -669,19 +398,5 @@ public class UserService extends AbstractService<User, SignUpData> {
                 user,
                 HttpStatus.OK
         );
-    }
-
-    public void test() {
-        List<Group> groups = groupRepository.findAll();
-        userRepository.findAll()
-                .stream().filter(user -> user.getGroupId() != null)
-                .forEach(user -> groups.stream()
-                        .filter(group -> group.getId().equals(user.getGroupId()))
-                        .findFirst().ifPresent(group -> {
-                            if(!user.getGroupName().equalsIgnoreCase(group.getName())) {
-                                user.setGroupName(group.getName());
-                                userRepository.save(user);
-                            }
-                        }));
     }
 }

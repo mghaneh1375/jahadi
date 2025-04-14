@@ -5,7 +5,6 @@ import four.group.jahadi.Kavenegar.excepctions.ApiException;
 import four.group.jahadi.Kavenegar.excepctions.HttpException;
 import four.group.jahadi.Kavenegar.models.SendResult;
 import four.group.jahadi.Validator.PhoneValidator;
-import org.bson.types.ObjectId;
 import org.json.JSONObject;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
@@ -14,6 +13,7 @@ import org.modelmapper.convention.NameTransformers;
 import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -315,19 +315,28 @@ public class Utility {
     public static String toStringOfPairValue(List<PairValue> pairValues) {
         if(pairValues == null || pairValues.size() == 0) return "[]";
         StringBuilder sb = new StringBuilder("[");
-        pairValues.forEach(pairValue -> {
-            sb.append(String.format("{\"Key\":\"%s\", \"Value\":\"%s\"},", pairValue.getKey().toString(), pairValue.getValue().toString()));
-        });
+        for (int i = 0; i < pairValues.size(); i++) {
+            PairValue pairValue = pairValues.get(i);
+            if(pairValue.getKey() == null || pairValue.getValue() == null)
+                continue;
+            sb.append(String.format("{\"Key\":\"%s\", \"Value\":\"%s\"}", pairValue.getKey().toString(), pairValue.getValue().toString()));
+            if (i < pairValues.size() - 1)
+                sb.append(", ");
+        }
         return sb.append("]").toString();
     }
 
     public static String toStringOfHasMap(HashMap<?, Integer> hashMap) {
         if(hashMap == null) return "{}";
         StringBuilder sb = new StringBuilder("{");
+        AtomicInteger i = new AtomicInteger(0);
+        final int size = hashMap.keySet().size();
         hashMap.keySet().forEach(s -> {
-            sb.append(String.format("\"%s\":%d,", s.toString(), hashMap.get(s)));
+            sb.append(String.format("\"%s\":%d", s.toString(), hashMap.get(s)));
+            if(i.get() < size - 1)
+                sb.append(", ");
+            i.getAndIncrement();
         });
-        sb.setLength(sb.length() - 1);
         return sb.append("}").toString();
     }
 

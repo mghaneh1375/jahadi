@@ -1,6 +1,7 @@
 package four.group.jahadi.Routes.API;
 
 import four.group.jahadi.Models.*;
+import four.group.jahadi.Service.Area.AreaService;
 import four.group.jahadi.Service.CityService;
 import four.group.jahadi.Service.DrugService;
 import four.group.jahadi.Service.ExperimentService;
@@ -9,10 +10,14 @@ import four.group.jahadi.Validator.ObjectIdConstraint;
 import io.swagger.v3.oas.annotations.Operation;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @RestController
@@ -22,12 +27,12 @@ public class PublicAPIRoutes {
 
     @Autowired
     private CityService cityService;
-
     @Autowired
     private ExperimentService experimentService;
-
     @Autowired
     private DrugService drugService;
+    @Autowired
+    private AreaService areaService;
 
     @GetMapping(value = "getAllAvailableExperiments")
     @ResponseBody
@@ -95,6 +100,19 @@ public class PublicAPIRoutes {
     @ResponseBody
     public ResponseEntity<List<City>> getCities(@PathVariable @ObjectIdConstraint ObjectId stateId) {
         return cityService.getCities(stateId);
+    }
+
+    @PostMapping(
+            value = "importDBToConstructLocalServer",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    @ResponseBody
+    @Operation(summary = "ایمپورت کردن کل دیتابیس")
+    public void importDBToConstructLocalServer(
+            HttpServletRequest request,
+            @RequestBody @NotNull MultipartFile file
+    ) {
+        areaService.importDBToConstructLocalServer(file);
     }
 
 }

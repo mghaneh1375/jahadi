@@ -25,7 +25,6 @@ import four.group.jahadi.Utility.ValidList;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -41,7 +40,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -651,12 +649,14 @@ public class AreaService extends AbstractService<Area, AreaData> {
             List<Object> values, Class selectedDB,
             Set<Class> repositories
     ) {
+        System.out.println("Saving data for " + selectedDB.getName());
         List<Object> finalValues = values;
         String[] split = selectedDB.getName().split("\\.");
         repositories
                 .stream()
                 .filter(aClass -> aClass.getName().endsWith("." + split[split.length - 1] + "Repository"))
                 .findFirst().ifPresent(aClass -> {
+                    System.out.println("Repository found: " + aClass.getName());
                     BeanFetcher fetcher = new BeanFetcher(applicationContext);
                     Object bean = fetcher.getBeanByClass(aClass);
                     try {
@@ -668,10 +668,30 @@ public class AreaService extends AbstractService<Area, AreaData> {
                     }
                 });
     }
-    public void importDBToConstructLocalServer(
-            ObjectId areaId, ObjectId userId,
-            MultipartFile file
+
+    private void removeAll(
+            List<Object> values, Class selectedDB,
+            Set<Class> repositories
     ) {
+        List<Object> finalValues = values;
+        String[] split = selectedDB.getName().split("\\.");
+        repositories
+                .stream()
+                .filter(aClass -> aClass.getName().endsWith("." + split[split.length - 1] + "Repository"))
+                .findFirst().ifPresent(aClass -> {
+                    BeanFetcher fetcher = new BeanFetcher(applicationContext);
+                    Object bean = fetcher.getBeanByClass(aClass);
+                    try {
+                        Method method = aClass.getMethod("deleteAll");
+                        method.invoke(bean);
+                    } catch (NoSuchMethodException | InvocationTargetException |
+                             IllegalAccessException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+    }
+
+    public void importDBToConstructLocalServer(MultipartFile file) {
         Set<Class> models = findAllClassesUsingClassLoader("four.group.jahadi.Models");
         Set<Class> repositories = findAllClassesUsingClassLoader("four.group.jahadi.Repository");
         try {
@@ -688,12 +708,19 @@ public class AreaService extends AbstractService<Area, AreaData> {
                 if (selectedDB.get() == null && !line.matches("^\\*\\*\\*\\*\\*\\*\\*[a-zA-Z]*\\*\\*\\*\\*\\*\\*\\*$"))
                     continue;
                 if (line.matches("^\\*\\*\\*\\*\\*\\*\\*[a-zA-Z]*\\*\\*\\*\\*\\*\\*\\*$")) {
+                    System.out.println("New Table: " + line);
                     if (values != null && values.size() > 0)
                         saveAllList(values, selectedDB.get(), repositories);
+                    List<Object> finalValues = values;
                     models
                             .stream()
                             .filter(aClass -> aClass.getName().endsWith("." + line.replaceAll("\\*", "")))
-                            .findFirst().ifPresent(selectedDB::set);
+                            .findFirst().ifPresent(aClass -> {
+                                System.out.println("Find model: " + aClass.getName());
+                                selectedDB.set(aClass);
+                                removeAll(finalValues, selectedDB.get(), repositories);
+                            });
+
                     values = new ArrayList<>();
                     continue;
                 }

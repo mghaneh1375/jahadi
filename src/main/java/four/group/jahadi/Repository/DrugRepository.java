@@ -10,13 +10,9 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface DrugRepository extends MongoRepository<Drug, ObjectId>, FilterableRepository<Drug> {
-
-    @Query(value = "{_id: ?0, groupId: ?1}")
-    Optional<Drug> findByIdAndGroupId(ObjectId id, ObjectId groupId);
 
     @Query(value = "{_id: {$in: ?0}, groupId: ?1}")
     List<Drug> findAllByIdsAndGroupId(List<ObjectId> ids, ObjectId groupId);
@@ -26,12 +22,6 @@ public interface DrugRepository extends MongoRepository<Drug, ObjectId>, Filtera
 
     @Query(value = "{ _id: {$in: ?0}}")
     List<Drug> findFullInfoByIds(List<ObjectId> ids);
-
-    @Query(value = "{ _id: {$in: ?0}}", count = true)
-    Integer countByIds(List<ObjectId> ids);
-
-    @Query(value = "{ name: { $regex: ?0, $options:'i'}}", fields = "{ 'name': 1, '_id': 1, 'price': 1, 'visibility': 1, 'available': 1, 'priority': 1 }", sort = "{'priority': 1}")
-    List<Drug> findLikeName(String name);
 
     @Query(value = "{$and :[{$or: [{'deleted_at': null}, {'deleted_at': {$exists: false}}]},"
             + "?#{ [0] == null ? { $where : 'true'} : { 'group_id' : [0] } },"
@@ -52,14 +42,5 @@ public interface DrugRepository extends MongoRepository<Drug, ObjectId>, Filtera
             Date fromExpireAt, Date toExpireAt,
             String boxNo, String shelfNo
     );
-
-    @Query(value = "{_id: {$exists: true}}", fields = "{ 'name': 1, '_id': 1, 'price': 1, 'visibility': 1, 'available': 1, 'priority': 1 }", sort = "{'priority': 1}")
-    List<Drug> findAllDigests();
-
-    @Query(value = "{ name: { $regex: ?0, $options:'i'}, visibility: true }", fields = "{ 'name': 1, '_id': 1 }", sort = "{'priority': 1}")
-    List<Drug> findLikeNameAndVisible(String name);
-
-    @Query(value = "{ visibility: true }", fields = "{ 'name': 1, '_id': 1 }", sort = "{'priority': 1}")
-    List<Drug> findVisibleDigests();
 
 }

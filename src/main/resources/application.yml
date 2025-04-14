@@ -4,6 +4,7 @@ spring:
       host: 'localhost'
       port: 27017
       database: 'jahadi'
+#      database: 'mirror'
       auto-index-creation: true
 #      uri: 'mongodb://localhost:27017,localhost:27020/jahadi?ReadPreference=primary&w=majority'
   jackson:
