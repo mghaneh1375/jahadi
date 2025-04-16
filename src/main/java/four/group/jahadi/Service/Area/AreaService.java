@@ -567,8 +567,8 @@ public class AreaService extends AbstractService<Area, AreaData> {
             ObjectId areaId, ObjectId userId,
             HttpServletResponse response
     ) {
-        Trip trip = tripRepository.findByAreaIdAndOwnerId(areaId, userId).orElseThrow(InvalidIdException::new);
-        Area foundArea = findArea(trip, areaId, userId);
+        Trip trip = tripRepository.findByAreaId(areaId).orElseThrow(InvalidIdException::new);
+        Area foundArea = findArea(trip, areaId);
 
         try {
             ServletOutputStream outputStream = response.getOutputStream();
