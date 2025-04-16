@@ -17,6 +17,9 @@ import javax.persistence.Id;
 import java.util.ArrayList;
 import java.util.List;
 
+import static four.group.jahadi.Utility.Utility.printNullableField;
+import static four.group.jahadi.Utility.Utility.toStringOfList;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -71,4 +74,15 @@ public class ModuleInArea {
     @Builder.Default
     private List<ObjectId> secretaries = new ArrayList<>();
 
+    @Override
+    public String toString() {
+        return "{" +
+                "\"id\":" + printNullableField(id) +
+                ", \"moduleId\":" + printNullableField(moduleId) +
+                ", \"moduleName\":" + printNullableField(moduleName) +
+                ", \"moduleTabName\":" + printNullableField(moduleTabName) +
+                ", \"members\":" + toStringOfList(members) +
+                ", \"secretaries\":" + toStringOfList(secretaries) +
+                '}';
+    }
 }

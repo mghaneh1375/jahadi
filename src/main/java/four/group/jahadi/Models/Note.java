@@ -13,6 +13,9 @@ import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.util.Date;
 
+import static four.group.jahadi.Utility.Utility.printNullableDate;
+import static four.group.jahadi.Utility.Utility.printNullableField;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -35,4 +38,15 @@ public class Note extends Model {
     @JsonSerialize(using = ObjectIdSerialization.class)
     private ObjectId userId;
 
+    @Override
+    public String toString() {
+        return "{" +
+                "\"id\":" + printNullableField(this.getId()) +
+                ", \"createdAt\":" + printNullableDate(this.getCreatedAt()) +
+                ", \"updatedAt\":" + printNullableDate(updatedAt) +
+                ", \"title\":" + printNullableField(title) +
+                ", \"description\":" + printNullableField(description) +
+                ", \"userId\":" + printNullableField(userId) +
+                "}\n";
+    }
 }

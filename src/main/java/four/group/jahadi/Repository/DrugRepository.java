@@ -24,6 +24,9 @@ public interface DrugRepository extends MongoRepository<Drug, ObjectId>, Filtera
     @Query(value = "{ _id: {$in: ?0}}", fields = "{ 'name': 1, 'howToUse': 1, 'description': 1 }")
     List<Drug> findByIds(List<ObjectId> ids);
 
+    @Query(value = "{ _id: {$in: ?0}}")
+    List<Drug> findFullInfoByIds(List<ObjectId> ids);
+
     @Query(value = "{ _id: {$in: ?0}}", count = true)
     Integer countByIds(List<ObjectId> ids);
 

@@ -9,6 +9,7 @@ import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @Getter
@@ -57,4 +58,27 @@ public class Equipment extends Model {
     @Field("property_id")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String propertyId;
+
+    @Override
+    public String toString() {
+        return "{" +
+                "\"id\":\"" + this.getId() +
+                "\", \"createdAt\":\"" + new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX").format(this.getCreatedAt()) +
+                "\", \"equipmentType\":\"" + equipmentType +
+                "\", \"name\":\"" + name +
+                "\", \"producer\":\"" + producer +
+                "\", \"available\":" + available +
+                ", \"buyAt\":\"" + (buyAt == null ? null : new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX").format(buyAt)) +
+                "\", \"usedAt\":\"" + (usedAt == null ? null : new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX").format(usedAt)) +
+                "\", \"guaranteeExpireAt\":\"" + (guaranteeExpireAt == null ? null : new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX").format(guaranteeExpireAt)) +
+                "\", \"healthStatus\":\"" + healthStatus +
+                "\", \"rowNo\":\"" + rowNo +
+                "\", \"shelfNo\":\"" + shelfNo +
+                "\", \"location\":\"" + location +
+                "\", \"description\":\"" + description +
+                "\", \"userId\":\"" + userId +
+                "\", \"groupId\":\"" + groupId +
+                "\", \"propertyId\":\"" + propertyId +
+                "\"}";
+    }
 }

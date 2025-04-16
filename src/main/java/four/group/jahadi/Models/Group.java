@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 
@@ -46,4 +47,18 @@ public class Group extends ModelWithUser {
     @Transient
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     private Integer tripsCount;
+
+    @Override
+    public String toString() {
+        return "{" +
+                "\"name\":\"" + name +
+                "\", \"color\":\"" + color +
+                "\", \"code\":" + code +
+                ", \"pic\":\"" + pic +
+                "\", \"isActive\":" + isActive +
+                ", \"id\":\"" + this.getId() +
+                "\", \"createdAt\":\"" + new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX").format(this.getCreatedAt()) +
+                "\", \"owner\":\"" + this.getOwner() +
+                "\"}\n";
+    }
 }

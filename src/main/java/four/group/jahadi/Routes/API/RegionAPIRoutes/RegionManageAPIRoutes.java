@@ -19,6 +19,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.List;
@@ -173,4 +174,16 @@ public class RegionManageAPIRoutes extends Router {
     }
 
     // todo finalize area defenition
+
+    @GetMapping(value = "exportAllForConfigLocalServer/{areaId}")
+    @Operation(summary = "گرفتن خروجی از کل دیتابیس")
+    public void exportAllForConfigLocalServer(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            @PathVariable @ObjectIdConstraint ObjectId areaId
+    ) {
+        areaService.exportAllForConfigLocalServer(
+                areaId, getId(request), response
+        );
+    }
 }

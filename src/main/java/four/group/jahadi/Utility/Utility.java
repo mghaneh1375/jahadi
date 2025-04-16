@@ -13,6 +13,7 @@ import org.modelmapper.convention.NameTransformers;
 import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -284,6 +285,59 @@ public class Utility {
         date.setMinutes(59);
         date.setSeconds(59);
         return date;
+    }
+
+    public static String printNullableField(Object obj) {
+        return obj == null ? null : String.format("\"%s\"", obj.toString());
+    }
+
+    public static String printNullableInteger(Integer obj) {
+        return obj == null ? null : String.format("%d", obj);
+    }
+
+    public static String printNullableDate(Date obj) {
+        return obj == null ? null : String.format("\"%s\"", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX").format(obj));
+    }
+
+    public static String toStringOfList(List<?> objects) {
+        if(objects == null) return "[]";
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < objects.size(); i++) {
+            sb.append("\"").append(objects.get(i).toString()).append("\"");
+            if (i < objects.size() - 1) {
+                sb.append(", ");
+            }
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+
+    public static String toStringOfPairValue(List<PairValue> pairValues) {
+        if(pairValues == null || pairValues.size() == 0) return "[]";
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < pairValues.size(); i++) {
+            PairValue pairValue = pairValues.get(i);
+            if(pairValue.getKey() == null || pairValue.getValue() == null)
+                continue;
+            sb.append(String.format("{\"Key\":\"%s\", \"Value\":\"%s\"}", pairValue.getKey().toString(), pairValue.getValue().toString()));
+            if (i < pairValues.size() - 1)
+                sb.append(", ");
+        }
+        return sb.append("]").toString();
+    }
+
+    public static String toStringOfHasMap(HashMap<?, Integer> hashMap) {
+        if(hashMap == null) return "{}";
+        StringBuilder sb = new StringBuilder("{");
+        AtomicInteger i = new AtomicInteger(0);
+        final int size = hashMap.keySet().size();
+        hashMap.keySet().forEach(s -> {
+            sb.append(String.format("\"%s\":%d", s.toString(), hashMap.get(s)));
+            if(i.get() < size - 1)
+                sb.append(", ");
+            i.getAndIncrement();
+        });
+        return sb.append("}").toString();
     }
 
     private static final ModelMapper modelMapper;

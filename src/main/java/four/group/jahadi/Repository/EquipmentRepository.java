@@ -23,6 +23,9 @@ public interface EquipmentRepository extends MongoRepository<Equipment, ObjectId
     @Query(value = "{ _id: {$in: ?0}}", fields = "{ '_id': 1 }")
     List<Equipment> findByIds(List<ObjectId> ids);
 
+    @Query(value = "{ _id: {$in: ?0}}")
+    List<Equipment> findFullInfoByIds(List<ObjectId> ids);
+
     @Query(value = "{$and :["
             + "{$or: [{'deletedAt': null}, {'deletedAt': {$exists: false}}]},"
             + "?#{ [0] == null ? { $where : 'true'} : { 'group_id' : [0] } },"

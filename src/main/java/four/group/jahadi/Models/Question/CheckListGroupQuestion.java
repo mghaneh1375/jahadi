@@ -2,17 +2,21 @@ package four.group.jahadi.Models.Question;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import four.group.jahadi.Enums.Module.QuestionType;
 import four.group.jahadi.Utility.PairValue;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.util.HashMap;
 import java.util.List;
+
+import static four.group.jahadi.Utility.Utility.*;
 
 @Getter
 @Setter
@@ -62,4 +66,38 @@ public class CheckListGroupQuestion extends Question {
 
     @JsonIgnore
     private HashMap<String, Integer> marks;
+
+    public CheckListGroupQuestion(ObjectId id, QuestionType questionType, String sectionTitle, List<PairValue> options, List<SimpleQuestion> questions, Boolean canWriteDesc, Boolean canWriteReport, Boolean canWriteReason, Boolean canWriteSampleInfoDesc, Boolean canWriteTime, Boolean canUploadFile, Boolean markable, HashMap<String, Integer> marks) {
+        super(id, questionType);
+        this.sectionTitle = sectionTitle;
+        this.options = options;
+        this.questions = questions;
+        this.canWriteDesc = canWriteDesc;
+        this.canWriteReport = canWriteReport;
+        this.canWriteReason = canWriteReason;
+        this.canWriteSampleInfoDesc = canWriteSampleInfoDesc;
+        this.canWriteTime = canWriteTime;
+        this.canUploadFile = canUploadFile;
+        this.markable = markable;
+        this.marks = marks;
+    }
+
+    @Override
+    public String toString() {
+        return "{" +
+                "\"id\":" + printNullableField(this.getId()) +
+                ", \"questionType\":" + printNullableField(this.getQuestionType()) +
+                ", \"sectionTitle\":" + printNullableField(sectionTitle) +
+                ", \"options\":" + toStringOfPairValue(options) +
+                ", \"questions\":" + questions +
+                ", \"canWriteDesc\":" + canWriteDesc +
+                ", \"canWriteReport\":" + canWriteReport +
+                ", \"canWriteReason\":" + canWriteReason +
+                ", \"canWriteSampleInfoDesc\":" + canWriteSampleInfoDesc +
+                ", \"canWriteTime\":" + canWriteTime +
+                ", \"canUploadFile\":" + canUploadFile +
+                ", \"markable\":" + markable +
+                ", \"marks\":" + toStringOfHasMap(marks) +
+                '}';
+    }
 }

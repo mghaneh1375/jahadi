@@ -22,6 +22,9 @@ public interface EquipmentsInAreaRepository extends MongoRepository<AreaEquipmen
     @Query(value = "{areaId: ?0, equipmentId: {$in: ?1}}", fields = "{_id: 1}")
     List<AreaEquipments> findIdsByAreaIdAndIds(ObjectId areaId, List<ObjectId> ids);
 
+    @Query(value = "{areaId: ?0}")
+    List<AreaEquipments> findByArea(ObjectId areaId);
+
     @Aggregation(pipeline = {
             "{$match: {areaId: ?0}}",
             "{$lookup: {from: 'equipment', localField: 'equipment_id', foreignField: '_id', as: 'equipmentInfo'}}",

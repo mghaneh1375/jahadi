@@ -27,6 +27,9 @@ public interface UserRepository extends MongoRepository<User, ObjectId>, Filtera
     )
     List<User> findByIdsIn(List<ObjectId> ids);
 
+    @Query(value = "{ '_id': { $in: ?0 } }")
+    List<User> findFullInfoByIdsIn(List<ObjectId> ids);
+
     @Query(value = "{ '_id': { $in: ?0 } }",
             fields = "{ 'name': 1, 'pic': 1, 'color': 1 }"
     )

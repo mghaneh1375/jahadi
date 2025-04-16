@@ -4,10 +4,7 @@ import four.group.jahadi.Enums.Module.Shepesh;
 import lombok.*;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import static four.group.jahadi.Utility.Utility.printNullableField;
 
 @Getter
 @Setter
@@ -23,9 +20,20 @@ public class TrainForm {
 
     @Field(value = "recv_culture_package")
     private Boolean recvCulturePackage;
-
     @Field(value = "recv_shampoo")
     private Boolean recvShampoo;
-
     private String description;
+
+    @Override
+    public String toString() {
+        return "{" +
+                "\"height\":" + height +
+                ", \"weight\":" + weight +
+                ", \"BMI\":" + BMI +
+                ", \"shepesh\":" + printNullableField(shepesh) +
+                ", \"recvCulturePackage\":" + recvCulturePackage +
+                ", \"recvShampoo\":" + recvShampoo +
+                ", \"description\":" + printNullableField(description) +
+                '}';
+    }
 }

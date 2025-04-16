@@ -10,6 +10,7 @@ import lombok.*;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Objects;
 
@@ -54,19 +55,19 @@ public class Patient extends Model {
 
     @Override
     public String toString() {
-        return "Patient{" +
-                "name='" + name + '\'' +
-                ", fatherName='" + fatherName + '\'' +
-                ", sex=" + sex +
-                ", birthDate=" + birthDate +
-                ", phone='" + phone + '\'' +
-                ", identifier='" + identifier + '\'' +
-                ", identifierType=" + identifierType +
-                ", insurance=" + insurance +
-                ", ageType=" + ageType +
-                ", job='" + job + '\'' +
-                ", patientNo='" + patientNo + '\'' +
-                '}';
+        return "{" +
+                "\"name\":\"" + name +
+                "\", \"fatherName\":\"" + fatherName +
+                "\", \"sex\":\"" + sex +
+                "\", \"birthDate\":\"" + new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX").format(birthDate) +
+                "\", \"phone\":\"" + phone +
+                "\", \"identifier\":\"" + identifier +
+                "\", \"identifierType\":\"" + identifierType +
+                "\", \"insurance\":\"" + insurance +
+                "\", \"ageType\":\"" + ageType +
+                "\", \"job\":\"" + job +
+                "\", \"patientNo\":\"" + patientNo +
+                "\"}\n";
     }
 
     @Override

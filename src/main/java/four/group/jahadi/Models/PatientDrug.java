@@ -14,6 +14,8 @@ import org.springframework.data.annotation.Transient;
 
 import java.util.Date;
 
+import static four.group.jahadi.Utility.Utility.*;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -73,6 +75,7 @@ public class PatientDrug extends Model {
     @Field("given_drug_name")
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     private String givenDrugName;
+
     @Transient
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     private Patient patient;
@@ -91,4 +94,31 @@ public class PatientDrug extends Model {
     @Transient
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     private String useTimeFa;
+
+    @Override
+    public String toString() {
+        return "{" +
+                "\"id\":" + printNullableField(this.getId()) +
+                ", \"createdAt\":" + printNullableDate(this.getCreatedAt()) +
+                ", \"areaId\":" + printNullableField(areaId) +
+                ", \"patientId\":" + printNullableField(patientId) +
+                ", \"moduleId\":" + printNullableField(moduleId) +
+                ", \"moduleName\":" + printNullableField(moduleName) +
+                ", \"giverId\":" + printNullableField(giverId) +
+                ", \"doctorId\":" + printNullableField(doctorId) +
+                ", \"drugId\":" + printNullableField(drugId) +
+                ", \"drugName\":" + printNullableField(drugName) +
+                ", \"suggestCount\":" + printNullableInteger(suggestCount) +
+                ", \"giveCount\":" + printNullableInteger(giveCount) +
+                ", \"dedicated\":" + dedicated +
+                ", \"howToUse\":" + printNullableField(howToUse) +
+                ", \"amountOfUse\":" + printNullableField(amountOfUse) +
+                ", \"useTime\":" + printNullableField(useTime) +
+                ", \"giveAt\":" + printNullableDate(giveAt) +
+                ", \"description\":" + printNullableField(description) +
+                ", \"giveDescription\":" + printNullableField(giveDescription) +
+                ", \"givenDrugId\":" + printNullableField(givenDrugId) +
+                ", \"givenDrugName\":" + printNullableField(givenDrugName) +
+                "}\n";
+    }
 }

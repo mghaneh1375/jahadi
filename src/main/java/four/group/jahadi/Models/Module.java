@@ -8,6 +8,9 @@ import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.util.List;
 
+import static four.group.jahadi.Utility.Utility.printNullableDate;
+import static four.group.jahadi.Utility.Utility.printNullableField;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -38,4 +41,19 @@ public class Module extends Model {
     @Field("can_suggest_experiment")
     @Builder.Default
     private boolean canSuggestExperiment = false;
+
+    @Override
+    public String toString() {
+        return "{" +
+                "\"id\":" + printNullableField(this.getId()) +
+                ", \"createdAt\":" + printNullableDate(this.getCreatedAt()) +
+                ", \"name\":" + printNullableField(name) +
+                ", \"tabName\":" + printNullableField(tabName) +
+                ", \"subModules\":" + subModules +
+                ", \"icon\":" + printNullableField(icon) +
+                ", \"isReferral\":" + isReferral +
+                ", \"canSuggestDrug\":" + canSuggestDrug +
+                ", \"canSuggestExperiment\":" + canSuggestExperiment +
+                "}\n";
+    }
 }

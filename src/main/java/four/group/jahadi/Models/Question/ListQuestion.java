@@ -8,6 +8,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
 
+import static four.group.jahadi.Utility.Utility.printNullableField;
+
 @Getter
 @Setter
 @Document
@@ -15,4 +17,13 @@ import java.util.List;
 @SuperBuilder
 public class ListQuestion extends Question {
     private List<Question> questions;
+
+    @Override
+    public String toString() {
+        return "{" +
+                "\"id\":" + printNullableField(this.getId()) +
+                ", \"questionType\":" + printNullableField(this.getQuestionType()) +
+                ", \"questions\":" + questions +
+                '}';
+    }
 }

@@ -10,9 +10,12 @@ import javax.persistence.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+
+import static four.group.jahadi.Utility.Utility.*;
 
 
 @Getter
@@ -417,7 +420,6 @@ public class User extends Model {
     List<MedicalExpertise> medicalExpertises;
 
 
-
     @Field("adult_education")
     @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     private boolean adultEducation = false;
@@ -473,4 +475,122 @@ public class User extends Model {
     @Field("movement_help_equipments")
     @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     private boolean movementHelpEquipments = false;
+
+    @Override
+    public String toString() {
+        return "{" +
+                "\"id\":\"" + this.getId() +
+                "\", \"createdAt\":\"" + new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX").format(this.getCreatedAt()) +
+                "\", \"name\":\"" + name +
+                "\", \"password\":\"" + password +
+                "\", \"fatherName\":\"" + fatherName +
+                "\", \"birthDay\":\"" + birthDay +
+                "\", \"universityYear\":\"" + universityYear +
+                "\", \"field\":\"" + field +
+                "\", \"university\":\"" + university +
+                "\", \"nid\":\"" + nid +
+                "\", \"phone\":\"" + phone +
+                "\", \"sex\":\"" + sex +
+                "\", \"removeAt\":" + (removeAt == null ? null : String.format("\"%s\"", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX").format(removeAt))) +
+                ", \"groupId\":" + printNullableField(groupId) +
+                ", \"abilities\":" + printNullableField(abilities) +
+                ", \"diseases\":" + printNullableField(diseases) +
+                ", \"allergies\":" + printNullableField(allergies) +
+                ", \"bloodType\":" + printNullableField(bloodType) +
+                ", \"nearbyRel\":" + printNullableField(nearbyRel) +
+                ", \"nearbyName\":" + printNullableField(nearbyName) +
+                ", \"nearbyPhone\":" + printNullableField(nearbyPhone) +
+                ", \"color\":" + printNullableField(color) +
+                ", \"pic\":" + printNullableField(pic) +
+                ", \"accesses\":" + toStringOfList(accesses) +
+                ", \"notifs\":" + toStringOfList(notifs) +
+                ", \"status\":" + printNullableField(status) +
+                ", \"groupName\":" + printNullableField(groupName) +
+                ", \"trips\":" + printNullableField(trips) +
+                ", \"endManageYear\":" + printNullableField(endManageYear) +
+                ", \"cid\":" + printNullableField(cid) +
+                ", \"members\":" + printNullableInteger(members) +
+                ", \"establishYear\":" + printNullableField(establishYear) +
+                ", \"atlasCode\":" + printNullableField(atlasCode) +
+                ", \"totalTrips\":" + printNullableInteger(totalTrips) +
+                ", \"recentTrips\":" + printNullableInteger(recentTrips) +
+                ", \"totalMembers\":" + printNullableInteger(totalMembers) +
+                ", \"recentMembers\":" + printNullableInteger(recentMembers) +
+                ", \"managersCount\":" + printNullableInteger(managersCount) +
+                ", \"membersPerTrip\":" + printNullableInteger(membersPerTrip) +
+                ", \"tripDays\":" + printNullableInteger(tripDays) +
+                ", \"regionsCount\":" + printNullableInteger(regionsCount) +
+                ", \"pageAddress\":" + printNullableField(pageAddress) +
+                ", \"site\":" + printNullableField(site) +
+                ", \"platform\":" + printNullableField(platform) +
+                ", \"lodgment\":" + printNullableField(lodgment) +
+                ", \"groupRegistrationPlace\":" + printNullableField(groupRegistrationPlace) +
+                ", \"lodgmentOther\":" + printNullableField(lodgmentOther) +
+                ", \"groupRegistrationPlaceOther\":" + printNullableField(groupRegistrationPlaceOther) +
+                ", \"tripFrequency\":" + printNullableField(tripFrequency) +
+                ", \"tripRadius\":" + printNullableField(tripRadius) +
+                ", \"address\":" + printNullableField(address) +
+                ", \"tel\":" + printNullableField(tel) +
+                ", \"densityUnitCount\":" + printNullableField(densityUnitCount) +
+                ", \"pullToothCount\":" + printNullableInteger(pullToothCount) +
+                ", \"restorationToothCount\":" + printNullableInteger(restorationToothCount) +
+                ", \"rooterCanalCount\":" + printNullableInteger(rooterCanalCount) +
+                ", \"imagingEquipmentCount\":" + printNullableInteger(imagingEquipmentCount) +
+                ", \"barometerCount\":" + printNullableInteger(barometerCount) +
+                ", \"glucometerCount\":" + printNullableInteger(glucometerCount) +
+                ", \"paravanCount\":" + printNullableInteger(paravanCount) +
+                ", \"bedCount\":" + printNullableInteger(bedCount) +
+                ", \"monitoringCount\":" + printNullableInteger(monitoringCount) +
+                ", \"examinationSetCount\":" + printNullableInteger(examinationSetCount) +
+                ", \"ecgCount\":" + printNullableInteger(ecgCount) +
+                ", \"electronicShockCount\":" + printNullableInteger(electronicShockCount) +
+                ", \"revivingBagCount\":" + printNullableInteger(revivingBagCount) +
+                ", \"popEsmirCount\":" + printNullableInteger(popEsmirCount) +
+                ", \"sonoKidCount\":" + printNullableInteger(sonoKidCount) +
+                ", \"wifeExaminationEquipmentCount\":" + printNullableInteger(wifeExaminationEquipmentCount) +
+                ", \"samplingEquipmentCount\":" + printNullableInteger(samplingEquipmentCount) +
+                ", \"geneticallyBedCount\":" + printNullableInteger(geneticallyBedCount) +
+                ", \"optometryEquip1\":" + printNullableInteger(optometryEquip1) +
+                ", \"optometryEquip2\":" + printNullableInteger(optometryEquip2) +
+                ", \"optometryEquip3\":" + printNullableInteger(optometryEquip3) +
+                ", \"optometryEquip4\":" + printNullableInteger(optometryEquip4) +
+                ", \"optometryEquip5\":" + printNullableInteger(optometryEquip5) +
+                ", \"audiologistEquip2\":" + printNullableInteger(audiologistEquip2) +
+                ", \"audiologistEquip1\":" + printNullableInteger(audiologistEquip1) +
+                ", \"audiologistEquip3\":" + printNullableInteger(audiologistEquip3) +
+                ", \"audiologistEquip4\":" + printNullableInteger(audiologistEquip4) +
+                ", \"audiologistEquip5\":" + printNullableInteger(audiologistEquip5) +
+                ", \"imagingEquip1\":" + printNullableInteger(imagingEquip1) +
+                ", \"imagingEquip2\":" + printNullableInteger(imagingEquip2) +
+                ", \"imagingEquip3\":" + printNullableInteger(imagingEquip3) +
+                ", \"laboratoryEquip1\":" + printNullableInteger(laboratoryEquip1) +
+                ", \"laboratoryEquip2\":" + printNullableInteger(laboratoryEquip2) +
+                ", \"laboratoryEquip3\":" + printNullableInteger(laboratoryEquip3) +
+                ", \"laboratoryEquip4\":" + printNullableInteger(laboratoryEquip4) +
+                ", \"laboratoryEquip5\":" + printNullableInteger(laboratoryEquip5) +
+                ", \"mediaEquip1\":" + printNullableInteger(mediaEquip1) +
+                ", \"mediaEquip2\":" + printNullableInteger(mediaEquip2) +
+                ", \"mediaEquip3\":" + printNullableInteger(mediaEquip3) +
+                ", \"customEquips\":" + toStringOfHasMap(customEquips) +
+                ", \"screeningSicknesses\":" + toStringOfList(screeningSicknesses) +
+                ", \"publicDoctors\":" + printNullableInteger(publicDoctors) +
+                ", \"donateMedicine\":" + printNullableInteger(donateMedicine) +
+                ", \"medicalSections\":" + toStringOfList(medicalSections) +
+                ", \"medicalExpertises\":" + toStringOfList(medicalExpertises) +
+                ", \"adultEducation\":" + adultEducation +
+                ", \"childEducation\":" + childEducation +
+                ", \"freeGlass\":" + freeGlass +
+                ", \"freeHearingAids\":" + freeHearingAids +
+                ", \"popEsmirTest\":" + popEsmirTest +
+                ", \"cancerTest\":" + cancerTest +
+                ", \"socialWorkAssistance\":" + socialWorkAssistance +
+                ", \"quitAddiction\":" + quitAddiction +
+                ", \"familyPsychology\":" + familyPsychology +
+                ", \"urineAnalysis\":" + urineAnalysis +
+                ", \"bloodCellsCountTest\":" + bloodCellsCountTest +
+                ", \"bioChemTest\":" + bioChemTest +
+                ", \"hormonTest\":" + hormonTest +
+                ", \"movementHelpEquipments\":" + movementHelpEquipments +
+                "}\n";
+    }
 }

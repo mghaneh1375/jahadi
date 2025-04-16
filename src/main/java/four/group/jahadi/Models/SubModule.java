@@ -13,6 +13,8 @@ import org.springframework.data.mongodb.core.mapping.MongoId;
 import javax.persistence.Id;
 import java.util.List;
 
+import static four.group.jahadi.Utility.Utility.printNullableField;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -55,4 +57,18 @@ public class SubModule {
     @Transient
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Boolean hasPatientForm;
+
+    @Override
+    public String toString() {
+        return "{" +
+                "\"id\":" + printNullableField(id) +
+                ", \"name\":" + printNullableField(name) +
+                ", \"questions\":" + questions +
+                ", \"postAction\":" + printNullableField(postAction) +
+                ", \"isReferral\":" + isReferral +
+                ", \"referTo\":" + printNullableField(referTo) +
+                ", \"readOnlyModuleId\":" + printNullableField(readOnlyModuleId) +
+                ", \"readOnlySubModuleId\":" + printNullableField(readOnlySubModuleId) +
+                '}';
+    }
 }

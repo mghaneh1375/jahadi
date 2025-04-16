@@ -9,6 +9,7 @@ import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 @Getter
@@ -40,4 +41,18 @@ public class PatientsInArea extends Model {
     @Field("train_form")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private TrainForm trainForm;
+
+    @Override
+    public String toString() {
+        return "{" +
+                "\"id\":\"" + this.getId() +
+                "\", \"createdAt\":\"" + new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX").format(this.getCreatedAt()) +
+                "\", \"patientId\":\"" + patientId +
+                "\", \"areaId\":\"" + areaId +
+                "\", \"turn\":" + turn +
+                ", \"trained\":" + trained +
+                ", \"referrals\":" + referrals +
+                ", \"trainForm\":" + trainForm +
+                "}\n";
+    }
 }

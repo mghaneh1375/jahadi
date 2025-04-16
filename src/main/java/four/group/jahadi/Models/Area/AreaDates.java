@@ -6,6 +6,8 @@ import lombok.*;
 
 import java.util.Date;
 
+import static four.group.jahadi.Utility.Utility.printNullableDate;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -18,4 +20,12 @@ public class AreaDates {
 
     @JsonSerialize(using = DateSerialization.class)
     private Date end;
+
+    @Override
+    public String toString() {
+        return "{" +
+                "\"start\":" + printNullableDate(start) +
+                ", \"end\":" + printNullableDate(end) +
+                "}";
+    }
 }
