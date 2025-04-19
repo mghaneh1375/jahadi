@@ -6,6 +6,8 @@ import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import static four.group.jahadi.Utility.Utility.printNullableField;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -26,8 +28,8 @@ public class GroupAccess {
     @Override
     public String toString() {
         return "{" +
-                "\"groupId\":\"" + groupId +
-                "\", \"writeAccess\":" + writeAccess +
+                "\"groupId\":" + printNullableField(groupId) +
+                ", \"writeAccess\":" + writeAccess +
                 '}';
     }
 }

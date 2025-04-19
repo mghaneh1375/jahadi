@@ -702,36 +702,48 @@ public class AreaService extends AbstractService<Area, AreaData> {
             AtomicReference<Class> selectedDB = new AtomicReference<>(null);
             List<Object> values = null;
             while (reader.ready()) {
-                String line = reader.readLine();
-                if (line.length() < 5)
-                    continue;
-                if (selectedDB.get() == null && !line.matches("^\\*\\*\\*\\*\\*\\*\\*[a-zA-Z]*\\*\\*\\*\\*\\*\\*\\*$"))
-                    continue;
-                if (line.matches("^\\*\\*\\*\\*\\*\\*\\*[a-zA-Z]*\\*\\*\\*\\*\\*\\*\\*$")) {
-                    System.out.println("New Table: " + line);
-                    if (values != null && values.size() > 0)
-                        saveAllList(values, selectedDB.get(), repositories);
-                    List<Object> finalValues = values;
-                    models
-                            .stream()
-                            .filter(aClass -> aClass.getName().endsWith("." + line.replaceAll("\\*", "")))
-                            .findFirst().ifPresent(aClass -> {
-                                System.out.println("Find model: " + aClass.getName());
-                                selectedDB.set(aClass);
-                                removeAll(finalValues, selectedDB.get(), repositories);
-                            });
+                try {
+                    String line = reader.readLine();
+                    if (line.length() < 5)
+                        continue;
+                    if (selectedDB.get() == null && !line.matches("^\\*\\*\\*\\*\\*\\*\\*[a-zA-Z]*\\*\\*\\*\\*\\*\\*\\*$"))
+                        continue;
+                    if (line.matches("^\\*\\*\\*\\*\\*\\*\\*[a-zA-Z]*\\*\\*\\*\\*\\*\\*\\*$")) {
+                        System.out.println("New Table: " + line);
+                        if (values != null && values.size() > 0) {
+                            saveAllList(values, selectedDB.get(), repositories);
+                        }
+                        List<Object> finalValues = values;
+                        models
+                                .stream()
+                                .filter(aClass -> aClass.getName().endsWith("." + line.replaceAll("\\*", "")))
+                                .findFirst().ifPresent(aClass -> {
+                                    System.out.println("Find model: " + aClass.getName());
+                                    selectedDB.set(aClass);
+                                    removeAll(finalValues, selectedDB.get(), repositories);
+                                });
 
-                    values = new ArrayList<>();
-                    continue;
+                        values = new ArrayList<>();
+                        continue;
+                    }
+                    if (selectedDB.get() == null)
+                        continue;
+
+                    values.add(objectMapper.readValue(line, selectedDB.get()));
                 }
-                if (selectedDB.get() == null)
-                    continue;
-
-                values.add(objectMapper.readValue(line, selectedDB.get()));
+                catch (Exception x) {
+                    x.printStackTrace();
+                }
             }
 
-            if (selectedDB.get() != null && values != null && values.size() > 0)
-                saveAllList(values, selectedDB.get(), repositories);
+            if (selectedDB.get() != null && values != null && values.size() > 0) {
+                try {
+                    saveAllList(values, selectedDB.get(), repositories);
+                }
+                catch (Exception x) {
+                    x.printStackTrace();
+                }
+            }
 
         } catch (IOException e) {
             throw new RuntimeException(e);
