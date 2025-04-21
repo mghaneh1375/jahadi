@@ -16,6 +16,7 @@ import four.group.jahadi.Repository.Area.DrugsInAreaRepository;
 import four.group.jahadi.Repository.Area.PatientsDrugRepository;
 import four.group.jahadi.Repository.Area.PatientsInAreaRepository;
 import four.group.jahadi.Repository.*;
+import four.group.jahadi.Service.JahadgarDrugService;
 import four.group.jahadi.Utility.PairValue;
 import four.group.jahadi.Utility.Utility;
 import org.bson.types.ObjectId;
@@ -49,6 +50,8 @@ public class DrugServiceInArea {
     private PatientRepository patientRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private JahadgarDrugService jahadgarDrugService;
 
     private static List<ObjectId> locks = new ArrayList<>();
 
@@ -195,6 +198,21 @@ public class DrugServiceInArea {
 
     public ResponseEntity<List<JoinedAreaDrugs>> list(ObjectId userId, ObjectId areaId) {
         tripRepository.findByAreaIdAndResponsibleId(areaId, userId)
+                .orElseThrow(NotAccessException::new);
+
+        return new ResponseEntity<>(
+                drugsInAreaRepository.findDigestByAreaId(areaId),
+                HttpStatus.OK
+        );
+    }
+
+    public ResponseEntity<List<JoinedAreaDrugs>> list(
+            ObjectId groupId, ObjectId areaId, ObjectId userId
+    ) {
+        if (userId != null)
+            jahadgarDrugService.checkAccessToWareHouse(groupId, userId);
+
+        tripRepository.findByGroupIdAndAreaId(groupId, areaId)
                 .orElseThrow(NotAccessException::new);
 
         return new ResponseEntity<>(
@@ -476,6 +494,63 @@ public class DrugServiceInArea {
         Area foundArea = (Area) p.getKey();
         String tripName = p.getValue().toString();
         doReturnAllDrugs(foundArea.getName(), tripName, username, areaId, userId);
+    }
+
+    public void returnDrug(
+            ObjectId drugId, int amount,
+            ObjectId groupId, ObjectId areaId,
+            String username, ObjectId userId
+    ) {
+        if (userId != null)
+            jahadgarDrugService.checkAccessToWareHouse(groupId, userId);
+
+        Trip trip = tripRepository.findByGroupIdAndAreaId(groupId, areaId)
+                .orElseThrow(NotAccessException::new);
+
+        trip.getAreas()
+                .stream()
+                .filter(area -> area.getId().equals(areaId))
+                .findFirst().ifPresent(area ->
+                        doReturnDrug(
+                                area.getName(), trip.getName(),
+                                username, areaId, userId,
+                                drugId, amount
+                        )
+                );
+    }
+
+    public void doReturnDrug(
+            String areaName, String tripName,
+            String username, ObjectId areaId,
+            ObjectId userId, ObjectId drugId,
+            int amount
+    ) {
+        AreaDrugs areaDrug = drugsInAreaRepository.findByAreaIdAndDrugId(areaId, drugId)
+                .orElseThrow(InvalidIdException::new);
+        if (areaDrug.getReminder() < amount)
+            throw new RuntimeException("تعداد داروهای موجود کمتر از مقدار درخواستی شما می باشد");
+
+        Drug drug = drugRepository.findById(drugId)
+                .orElseThrow(InvalidIdException::new);
+
+        Date curr = new Date();
+        final String msg = "عودت " + amount + " تا - از منطقه " + areaName + " در اردو " + tripName + " توسط " + username;
+        List<DrugLog> drugLogs = new ArrayList<>();
+
+        drug.setAvailable(drug.getAvailable() + amount);
+        areaDrug.setReminder(areaDrug.getReminder() - amount);
+        areaDrug.setUpdatedAt(curr);
+
+        drugLogRepository.save(DrugLog
+                .builder()
+                .drugId(drug.getId())
+                .userId(userId)
+                .areaId(areaId)
+                .amount(amount)
+                .desc(msg)
+                .build());
+        drugRepository.save(drug);
+        drugsInAreaRepository.save(areaDrug);
     }
 
     public void doReturnAllDrugs(

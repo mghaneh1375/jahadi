@@ -6,6 +6,7 @@ import four.group.jahadi.Enums.Access;
 import four.group.jahadi.Enums.Drug.DrugType;
 import four.group.jahadi.Exception.NotActivateAccountException;
 import four.group.jahadi.Exception.UnAuthException;
+import four.group.jahadi.Models.Area.JoinedAreaDrugs;
 import four.group.jahadi.Models.Drug;
 import four.group.jahadi.Models.TokenInfo;
 import four.group.jahadi.Routes.Router;
@@ -103,5 +104,19 @@ public class DrugAPIRoutes extends Router {
     ) throws UnAuthException, NotActivateAccountException {
         TokenInfo tokenInfo = getTokenInfo(request);
         return drugService.batchStore(file, tokenInfo.getUserId(), tokenInfo.getGroupId());
+    }
+
+    @GetMapping(value = "list/{areaId}")
+    @ResponseBody
+    @Operation(summary = "گرفتن داروهای موجود در منطقه توسط مسئول انبار داروخانه و یا مسئول گروه")
+    public ResponseEntity<List<JoinedAreaDrugs>> list(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId
+    ) {
+        TokenInfo fullTokenInfo = getFullTokenInfo(request);
+        return drugServiceInArea.list(
+                fullTokenInfo.getGroupId(), areaId,
+                fullTokenInfo.getAccesses().contains(Access.GROUP) ? null : fullTokenInfo.getUserId()
+        );
     }
 }

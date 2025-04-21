@@ -1,5 +1,6 @@
 package four.group.jahadi.Routes.API.RegionAPIRoutes;
 
+import four.group.jahadi.Enums.Access;
 import four.group.jahadi.Models.Area.AreaDrugs;
 import four.group.jahadi.Models.Area.JoinedAreaDrugs;
 import four.group.jahadi.Models.TokenInfo;
@@ -14,6 +15,9 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @RestController
@@ -45,4 +49,21 @@ public class RegionDrugAPIRoutes extends Router {
         drugServiceInArea.returnAllDrugs(tokenInfo.getUserId(), tokenInfo.getUsername(), areaId);
     }
 
+    @PutMapping(value = "returnDrug/{areaId}/{drugId}/{amount}")
+    @ResponseBody
+    @Operation(summary = "عودت تعدادی مشخص از دارو مدنظر به انبار کل توسط مسئول انبار دارو یا مسئول گروه")
+    public void returnDrug(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId,
+            @PathVariable @ObjectIdConstraint ObjectId drugId,
+            @PathVariable @NotNull @Min(0) @Max(1000000) int amount
+    ) {
+        TokenInfo tokenInfo = getTokenInfo(request);
+        drugServiceInArea.returnDrug(
+                drugId, amount,
+                tokenInfo.getGroupId(), areaId,
+                tokenInfo.getUsername(),
+                tokenInfo.getAccesses().contains(Access.GROUP) ? null : tokenInfo.getUserId()
+        );
+    }
 }
