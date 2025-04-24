@@ -8,7 +8,7 @@ import lombok.Setter;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import java.text.SimpleDateFormat;
+import static four.group.jahadi.Utility.Utility.printNullableField;
 
 @Getter
 @Setter
@@ -26,10 +26,10 @@ public class State extends Model {
     @Override
     public String toString() {
         return "{" +
-                "\"id\": \"" + this.getId() +
-                "\", \"name\":\"" + name +
-                "\", \"countryId\":\"" + countryId +
-                "\"}\n";
+                "\"id\":" + printNullableField(this.getId()) +
+                ", \"name\":" + printNullableField(name) +
+                ", \"countryId\":" + printNullableField(countryId) +
+                "}\n";
     }
 
 }
