@@ -3,7 +3,7 @@ package four.group.jahadi.Models;
 import lombok.*;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import static four.group.jahadi.Utility.Utility.*;
+import java.text.SimpleDateFormat;
 
 @Getter
 @Setter
@@ -19,11 +19,11 @@ public class Experiment extends Model {
     @Override
     public String toString() {
         return "{" +
-                "\"id\":" + printNullableField(this.getId()) +
-                ", \"createdAt\":" + printNullableDate(this.getCreatedAt()) +
-                ", \"title\":" + printNullableField(title) +
-                ", \"priority\":" + printNullableInteger(priority) +
+                "\"id\":\"" + this.getId() +
+                "\", \"createdAt\":\"" + new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX").format(this.getCreatedAt()) +
+                "\", \"title\":\"" + title +
+                "\", \"priority\":" + priority +
                 ", \"visibility\":" + visibility +
-                "}\n";
+                '}';
     }
 }

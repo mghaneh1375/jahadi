@@ -9,9 +9,8 @@ import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
-
-import static four.group.jahadi.Utility.Utility.*;
 
 @Getter
 @Setter
@@ -46,11 +45,11 @@ public class PatientsInArea extends Model {
     @Override
     public String toString() {
         return "{" +
-                "\"id\":" + printNullableField(this.getId()) +
-                ", \"createdAt\":" + printNullableDate(this.getCreatedAt()) +
-                ", \"patientId\":" + printNullableField(patientId) +
-                ", \"areaId\":" + printNullableField(areaId) +
-                ", \"turn\":" + printNullableInteger(turn) +
+                "\"id\":\"" + this.getId() +
+                "\", \"createdAt\":\"" + new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX").format(this.getCreatedAt()) +
+                "\", \"patientId\":\"" + patientId +
+                "\", \"areaId\":\"" + areaId +
+                "\", \"turn\":" + turn +
                 ", \"trained\":" + trained +
                 ", \"referrals\":" + referrals +
                 ", \"trainForm\":" + trainForm +

@@ -10,10 +10,8 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
-
-import static four.group.jahadi.Utility.Utility.printNullableDate;
-import static four.group.jahadi.Utility.Utility.printNullableField;
 
 
 @Getter
@@ -53,14 +51,14 @@ public class Group extends ModelWithUser {
     @Override
     public String toString() {
         return "{" +
-                "\"name\":" + printNullableField(name) +
-                ", \"color\":" + printNullableField(color) +
-                ", \"code\":" + printNullableField(code) +
-                ", \"pic\":" + printNullableField(pic) +
-                ", \"isActive\":" + isActive +
-                ", \"id\":" + printNullableField(this.getId()) +
-                ", \"createdAt\":" + printNullableDate(this.getCreatedAt()) +
-                ", \"owner\":" + printNullableField(this.getOwner()) +
-                "}\n";
+                "\"name\":\"" + name +
+                "\", \"color\":\"" + color +
+                "\", \"code\":" + code +
+                ", \"pic\":\"" + pic +
+                "\", \"isActive\":" + isActive +
+                ", \"id\":\"" + this.getId() +
+                "\", \"createdAt\":\"" + new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX").format(this.getCreatedAt()) +
+                "\", \"owner\":\"" + this.getOwner() +
+                "\"}\n";
     }
 }

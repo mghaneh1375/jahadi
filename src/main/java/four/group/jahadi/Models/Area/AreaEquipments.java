@@ -1,5 +1,6 @@
 package four.group.jahadi.Models.Area;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -11,9 +12,8 @@ import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
-
-import static four.group.jahadi.Utility.Utility.*;
 
 @Getter
 @Setter
@@ -48,14 +48,14 @@ public class AreaEquipments extends Model {
     @Override
     public String toString() {
         return "{" +
-                "\"id\":" + printNullableField(this.getId()) +
-                ", \"createdAt\":" + printNullableDate(this.getCreatedAt()) +
-                ", \"equipmentName\":" + printNullableField(equipmentName) +
-                ", \"equipmentId\":" + printNullableField(equipmentId) +
-                ", \"areaId\":" + printNullableField(areaId) +
-                ", \"updatedAt\":" + printNullableDate(updatedAt) +
-                ", \"totalCount\":" + printNullableInteger(totalCount) +
-                ", \"reminder\":" + printNullableInteger(reminder) +
+                "\"id\":\"" + this.getId() +
+                "\", \"createdAt\":\"" + new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX").format(this.getCreatedAt()) +
+                "\", \"equipmentName\":\"" + equipmentName +
+                "\", \"equipmentId\":\"" + equipmentId +
+                "\", \"areaId\":\"" + areaId +
+                "\", \"updatedAt\":\"" + new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX").format(updatedAt) +
+                "\", \"totalCount\":" + totalCount +
+                ", \"reminder\":" + reminder +
                 "}\n";
     }
 }

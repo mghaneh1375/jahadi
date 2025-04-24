@@ -9,9 +9,8 @@ import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
-
-import static four.group.jahadi.Utility.Utility.*;
 
 @Getter
 @Setter
@@ -63,23 +62,23 @@ public class Equipment extends Model {
     @Override
     public String toString() {
         return "{" +
-                "\"id\":" + printNullableField(this.getId()) +
-                ", \"createdAt\":" + printNullableDate(this.getCreatedAt()) +
-                ", \"equipmentType\":" + printNullableField(equipmentType) +
-                ", \"name\":" + printNullableField(name) +
-                ", \"producer\":" + printNullableField(producer) +
-                ", \"available\":" + printNullableInteger(available) +
-                ", \"buyAt\":" + printNullableDate(buyAt) +
-                ", \"usedAt\":" + printNullableDate(usedAt) +
-                ", \"guaranteeExpireAt\":" + printNullableDate(guaranteeExpireAt) +
-                ", \"healthStatus\":" + printNullableField(healthStatus) +
-                ", \"rowNo\":" + printNullableField(rowNo) +
-                ", \"shelfNo\":" + printNullableField(shelfNo) +
-                ", \"location\":" + printNullableField(location) +
-                ", \"description\":" + printNullableField(description) +
-                ", \"userId\":" + printNullableField(userId) +
-                ", \"groupId\":" + printNullableField(groupId) +
-                ", \"propertyId\":" + printNullableField(propertyId) +
-                "}\n";
+                "\"id\":\"" + this.getId() +
+                "\", \"createdAt\":\"" + new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX").format(this.getCreatedAt()) +
+                "\", \"equipmentType\":\"" + equipmentType +
+                "\", \"name\":\"" + name +
+                "\", \"producer\":\"" + producer +
+                "\", \"available\":" + available +
+                ", \"buyAt\":\"" + (buyAt == null ? null : new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX").format(buyAt)) +
+                "\", \"usedAt\":\"" + (usedAt == null ? null : new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX").format(usedAt)) +
+                "\", \"guaranteeExpireAt\":\"" + (guaranteeExpireAt == null ? null : new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX").format(guaranteeExpireAt)) +
+                "\", \"healthStatus\":\"" + healthStatus +
+                "\", \"rowNo\":\"" + rowNo +
+                "\", \"shelfNo\":\"" + shelfNo +
+                "\", \"location\":\"" + location +
+                "\", \"description\":\"" + description +
+                "\", \"userId\":\"" + userId +
+                "\", \"groupId\":\"" + groupId +
+                "\", \"propertyId\":\"" + propertyId +
+                "\"}";
     }
 }
