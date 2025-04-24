@@ -74,7 +74,7 @@ public class Trip extends Model {
                 ", \"endAt\":" + printNullableDate(endAt) +
                 ", \"dailyStartAt\":" + printNullableField(dailyStartAt) +
                 ", \"dailyEndAt\":" + printNullableField(dailyEndAt) +
-                ", \"groupsWithAccess\":" + toStringOfList(groupsWithAccess) +
+                ", \"groupsWithAccess\":" + groupsWithAccess +
                 "}\n";
     }
 }

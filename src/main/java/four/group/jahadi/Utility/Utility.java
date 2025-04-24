@@ -288,7 +288,7 @@ public class Utility {
     }
 
     public static String printNullableField(Object obj) {
-        return obj == null ? null : String.format("\"%s\"", obj.toString());
+        return obj == null ? null : String.format("\"%s\"", obj.toString()).replace("\n", " ");
     }
 
     public static String printNullableInteger(Integer obj) {

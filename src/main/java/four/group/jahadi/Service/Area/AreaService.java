@@ -12,11 +12,13 @@ import four.group.jahadi.Enums.Sex;
 import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Exception.NotAccessException;
-import four.group.jahadi.Models.*;
 import four.group.jahadi.Models.Area.Area;
 import four.group.jahadi.Models.Area.AreaDates;
-import four.group.jahadi.Repository.*;
+import four.group.jahadi.Models.Area.PatientsInArea;
+import four.group.jahadi.Models.*;
 import four.group.jahadi.Repository.Area.PatientsInAreaRepository;
+import four.group.jahadi.Repository.Area.PresenceListRepository;
+import four.group.jahadi.Repository.*;
 import four.group.jahadi.Service.*;
 import four.group.jahadi.Utility.Utility;
 import four.group.jahadi.Utility.ValidList;
@@ -46,7 +48,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static four.group.jahadi.Service.Area.AreaUtils.findArea;
-import static four.group.jahadi.Service.Area.AreaUtils.findStartedArea;
 import static four.group.jahadi.Utility.Utility.getDate;
 import static four.group.jahadi.Utility.Utility.getLastDate;
 
@@ -77,6 +78,12 @@ public class AreaService extends AbstractService<Area, AreaData> {
     private DrugServiceInArea drugServiceInArea;
     @Autowired
     private EquipmentServiceInArea equipmentServiceInArea;
+    @Autowired
+    private PresenceListRepository presenceListRepository;
+    @Autowired
+    private DrugRepository drugRepository;
+    @Autowired
+    private IOService ioService;
     @Autowired
     private ApplicationContext applicationContext;
     @Autowired
@@ -562,6 +569,31 @@ public class AreaService extends AbstractService<Area, AreaData> {
         tripRepository.save(trip);
     }
 
+    public void exportTrip(
+            ObjectId areaId, ObjectId userId,
+            HttpServletResponse response
+    ) {
+        Trip trip = tripRepository.findByAreaIdAndOwnerId(areaId, userId).orElseThrow(InvalidIdException::new);
+        Area foundArea = findArea(trip, areaId, userId);
+
+        response.setContentType("application/octet-stream");
+        response.setHeader(
+                HttpHeaders.CONTENT_DISPOSITION,
+                ContentDisposition.builder("attachment").filename("tmp.json").build().toString()
+        );
+        try {
+            ServletOutputStream outputStream = response.getOutputStream();
+            response.setStatus(HttpStatus.OK.value());
+            response.flushBuffer();
+
+            List<PatientsInArea> patientsInArea = patientsInAreaRepository.findByAreaId(areaId);
+            ioService.export(patientsInArea, outputStream, "PatientsInArea");
+            response.setStatus(HttpStatus.OK.value());
+            response.flushBuffer();
+        } catch (Exception e) {
+            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
+    }
 
     public void exportAllForConfigLocalServer(
             ObjectId areaId, ObjectId userId,
@@ -672,36 +704,48 @@ public class AreaService extends AbstractService<Area, AreaData> {
             AtomicReference<Class> selectedDB = new AtomicReference<>(null);
             List<Object> values = null;
             while (reader.ready()) {
-                String line = reader.readLine();
-                if (line.length() < 5)
-                    continue;
-                if (selectedDB.get() == null && !line.matches("^\\*\\*\\*\\*\\*\\*\\*[a-zA-Z]*\\*\\*\\*\\*\\*\\*\\*$"))
-                    continue;
-                if (line.matches("^\\*\\*\\*\\*\\*\\*\\*[a-zA-Z]*\\*\\*\\*\\*\\*\\*\\*$")) {
-                    System.out.println("New Table: " + line);
-                    if (values != null && values.size() > 0)
-                        saveAllList(values, selectedDB.get(), repositories);
-                    List<Object> finalValues = values;
-                    models
-                            .stream()
-                            .filter(aClass -> aClass.getName().endsWith("." + line.replaceAll("\\*", "")))
-                            .findFirst().ifPresent(aClass -> {
-                                System.out.println("Find model: " + aClass.getName());
-                                selectedDB.set(aClass);
-                                removeAll(finalValues, selectedDB.get(), repositories);
-                            });
+                try {
+                    String line = reader.readLine();
+                    if (line.length() < 5)
+                        continue;
+                    if (selectedDB.get() == null && !line.matches("^\\*\\*\\*\\*\\*\\*\\*[a-zA-Z]*\\*\\*\\*\\*\\*\\*\\*$"))
+                        continue;
+                    if (line.matches("^\\*\\*\\*\\*\\*\\*\\*[a-zA-Z]*\\*\\*\\*\\*\\*\\*\\*$")) {
+                        System.out.println("New Table: " + line);
+                        if (values != null && values.size() > 0) {
+                            saveAllList(values, selectedDB.get(), repositories);
+                        }
+                        List<Object> finalValues = values;
+                        models
+                                .stream()
+                                .filter(aClass -> aClass.getName().endsWith("." + line.replaceAll("\\*", "")))
+                                .findFirst().ifPresent(aClass -> {
+                                    System.out.println("Find model: " + aClass.getName());
+                                    selectedDB.set(aClass);
+                                    removeAll(finalValues, selectedDB.get(), repositories);
+                                });
 
-                    values = new ArrayList<>();
-                    continue;
+                        values = new ArrayList<>();
+                        continue;
+                    }
+                    if (selectedDB.get() == null)
+                        continue;
+
+                    values.add(objectMapper.readValue(line, selectedDB.get()));
                 }
-                if (selectedDB.get() == null)
-                    continue;
-
-                values.add(objectMapper.readValue(line, selectedDB.get()));
+                catch (Exception x) {
+                    x.printStackTrace();
+                }
             }
 
-            if (selectedDB.get() != null && values != null && values.size() > 0)
-                saveAllList(values, selectedDB.get(), repositories);
+            if (selectedDB.get() != null && values != null && values.size() > 0) {
+                try {
+                    saveAllList(values, selectedDB.get(), repositories);
+                }
+                catch (Exception x) {
+                    x.printStackTrace();
+                }
+            }
 
         } catch (IOException e) {
             throw new RuntimeException(e);

@@ -216,7 +216,7 @@ public class DrugServiceInArea {
                 .orElseThrow(NotAccessException::new);
 
         return new ResponseEntity<>(
-                drugsInAreaRepository.findDigestByAreaId(areaId),
+                areaDrugsRepository.findDigestByAreaId(areaId),
                 HttpStatus.OK
         );
     }
@@ -525,7 +525,7 @@ public class DrugServiceInArea {
             ObjectId userId, ObjectId drugId,
             int amount
     ) {
-        AreaDrugs areaDrug = drugsInAreaRepository.findByAreaIdAndDrugId(areaId, drugId)
+        AreaDrugs areaDrug = areaDrugsRepository.findByAreaIdAndDrugId(areaId, drugId)
                 .orElseThrow(InvalidIdException::new);
         if (areaDrug.getReminder() < amount)
             throw new RuntimeException("تعداد داروهای موجود کمتر از مقدار درخواستی شما می باشد");
@@ -550,7 +550,7 @@ public class DrugServiceInArea {
                 .desc(msg)
                 .build());
         drugRepository.save(drug);
-        drugsInAreaRepository.save(areaDrug);
+        areaDrugsRepository.save(areaDrug);
     }
 
     public void doReturnAllDrugs(
