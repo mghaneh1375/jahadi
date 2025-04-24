@@ -2,6 +2,7 @@ package four.group.jahadi.Models.Area;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import four.group.jahadi.Enums.Color;
 import four.group.jahadi.Models.*;
@@ -136,7 +137,7 @@ public class Area {
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     private User owner;
 
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Builder.Default
     private Boolean finished = false;
 

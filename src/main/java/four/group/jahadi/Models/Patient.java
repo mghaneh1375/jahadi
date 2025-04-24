@@ -14,6 +14,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Objects;
 
+import static four.group.jahadi.Utility.Utility.printNullableDate;
+import static four.group.jahadi.Utility.Utility.printNullableField;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -56,18 +59,20 @@ public class Patient extends Model {
     @Override
     public String toString() {
         return "{" +
-                "\"name\":\"" + name +
-                "\", \"fatherName\":\"" + fatherName +
-                "\", \"sex\":\"" + sex +
-                "\", \"birthDate\":\"" + new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX").format(birthDate) +
-                "\", \"phone\":\"" + phone +
-                "\", \"identifier\":\"" + identifier +
-                "\", \"identifierType\":\"" + identifierType +
-                "\", \"insurance\":\"" + insurance +
-                "\", \"ageType\":\"" + ageType +
-                "\", \"job\":\"" + job +
-                "\", \"patientNo\":\"" + patientNo +
-                "\"}\n";
+                "\"id\":" + printNullableField(this.getId()) +
+                ", \"name\":" + printNullableField(name) +
+                ", \"fatherName\":" + printNullableField(fatherName) +
+                ", \"sex\":" + printNullableField(sex) +
+                ", \"birthDate\":" + printNullableDate(birthDate) +
+                ", \"phone\":" + printNullableField(phone) +
+                ", \"identifier\":" + printNullableField(identifier) +
+                ", \"identifierType\":" + printNullableField(identifierType) +
+                ", \"insurance\":" + printNullableField(insurance) +
+                ", \"ageType\":" + printNullableField(ageType) +
+                ", \"job\":" + printNullableField(job) +
+                ", \"patientNo\":" + printNullableField(patientNo) +
+                ", \"createdAt\":" + printNullableDate(this.getCreatedAt()) +
+                "}\n";
     }
 
     @Override
