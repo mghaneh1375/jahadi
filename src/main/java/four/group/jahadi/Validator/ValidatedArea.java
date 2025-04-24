@@ -1,8 +1,5 @@
 package four.group.jahadi.Validator;
 
-
-import four.group.jahadi.Validator.SignUp.GroupSignUpFormValidator;
-
 import javax.validation.Constraint;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;

@@ -1,6 +1,5 @@
 package four.group.jahadi.Service;
 
-import four.group.jahadi.DTO.DrugData;
 import four.group.jahadi.Enums.Drug.*;
 import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Exception.InvalidIdException;
@@ -22,7 +21,7 @@ import java.util.stream.Collectors;
 
 
 @Service
-public class DrugService extends AbstractService<Drug, DrugData> {
+public class DrugService extends AbstractService<Drug> {
 
     @Autowired
     private DrugRepository drugRepository;
@@ -60,16 +59,6 @@ public class DrugService extends AbstractService<Drug, DrugData> {
     }
 
     @Override
-    public void update(ObjectId id, DrugData dto, Object... params) {
-
-    }
-
-    @Override
-    public ResponseEntity<Drug> store(DrugData dto, Object... params) {
-        return null;
-    }
-
-    @Override
     public ResponseEntity<Drug> findById(ObjectId id, Object... params) {
         return new ResponseEntity<>(
                 drugRepository.findById(id).orElseThrow(InvalidIdException::new),
@@ -86,33 +75,6 @@ public class DrugService extends AbstractService<Drug, DrugData> {
                 replacements,
                 HttpStatus.OK
         );
-    }
-
-    @Override
-    Drug populateEntity(Drug drug, DrugData drugData) {
-
-        if (drug == null)
-            drug = new Drug();
-
-        drug.setDrugType(drugData.getDrugType());
-        drug.setName(drugData.getName());
-        drug.setDose(drugData.getDose());
-        drug.setExpireAt(drugData.getExpireAt());
-        drug.setProducer(drugData.getProducer());
-        drug.setAvailable(drugData.getAvailable());
-        drug.setAvailablePack(drugData.getAvailablePack());
-        drug.setPrice(drugData.getPrice());
-        drug.setLocation(drugData.getLocation());
-        drug.setShelfNo(drugData.getShelfNo());
-        drug.setBoxNo(drugData.getBoxNo());
-//        drug.setHowToUses(drugData.getHowToUses());
-//        drug.setAmountOfUses(drugData.getAmountOfUses());
-//        drug.setUseTimes(drugData.getUseTimes());
-//        drug.setDescription(drugData.getDescription());
-//        drug.setVisibility(drugData.getVisibility());
-//        drug.setPriority(drugData.getPriority());
-
-        return drug;
     }
 
     public ResponseEntity<DrugType[]> getDrugTypes() {

@@ -17,7 +17,7 @@ import java.util.List;
 import static four.group.jahadi.Utility.StaticValues.*;
 
 @Service
-public class NoteService extends AbstractService<Note, NoteData> {
+public class NoteService extends AbstractService<Note> {
 
     @Autowired
     NoteRepository noteRepository;
@@ -30,7 +30,6 @@ public class NoteService extends AbstractService<Note, NoteData> {
         );
     }
 
-    @Override
     public void update(ObjectId id, NoteData dto, Object ... params) {
 
         Note note = noteRepository.findById(id).orElseThrow(InvalidIdException::new);
@@ -44,7 +43,6 @@ public class NoteService extends AbstractService<Note, NoteData> {
         noteRepository.save(note);
     }
 
-    @Override
     public ResponseEntity<Note> store(NoteData dto, Object ... params) {
 
         ObjectId userId = (ObjectId) params[0];

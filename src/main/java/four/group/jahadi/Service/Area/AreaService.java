@@ -52,7 +52,7 @@ import static four.group.jahadi.Utility.Utility.getDate;
 import static four.group.jahadi.Utility.Utility.getLastDate;
 
 @Service
-public class AreaService extends AbstractService<Area, AreaData> {
+public class AreaService extends AbstractService<Area> {
 
     @Autowired
     private NotifService notifService;
@@ -91,16 +91,6 @@ public class AreaService extends AbstractService<Area, AreaData> {
 
     @Override
     public ResponseEntity<List<Area>> list(Object... filters) {
-        return null;
-    }
-
-    @Override
-    public void update(ObjectId id, AreaData dto, Object... params) {
-
-    }
-
-    @Override
-    public ResponseEntity<Area> store(AreaData data, Object... params) {
         return null;
     }
 

@@ -1,7 +1,6 @@
 package four.group.jahadi.Service;
 
 import four.group.jahadi.DTO.DrugBookmarkData;
-import four.group.jahadi.Enums.Drug.HowToUse;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Models.Drug;
 import four.group.jahadi.Models.DrugBookmark;
@@ -17,7 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class JahadgarDrugService extends AbstractService<DrugBookmark, DrugBookmarkData> {
+public class JahadgarDrugService extends AbstractService<DrugBookmark> {
     @Autowired
     private DrugBookmarkRepository drugBookmarkRepository;
     @Autowired
@@ -40,10 +39,6 @@ public class JahadgarDrugService extends AbstractService<DrugBookmark, DrugBookm
         return new ResponseEntity<>(bookmarkList, HttpStatus.OK);
     }
 
-    @Override
-    public void update(ObjectId id, DrugBookmarkData dto, Object... params) {}
-
-    @Override
     public ResponseEntity<DrugBookmark> store(DrugBookmarkData dto, Object... params) {
         ObjectId userId = (ObjectId) params[0];
         ObjectId drugId = (ObjectId) params[1];

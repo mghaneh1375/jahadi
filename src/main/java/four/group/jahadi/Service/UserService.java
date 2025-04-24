@@ -1,14 +1,14 @@
 package four.group.jahadi.Service;
 
 import four.group.jahadi.DTO.AdminSignInData;
-import four.group.jahadi.DTO.ChangePhoneDAO;
-import four.group.jahadi.DTO.ChangePhoneResponseDAO;
-import four.group.jahadi.DTO.DoChangePhoneDAO;
-import four.group.jahadi.DTO.SignUp.*;
+import four.group.jahadi.DTO.SignUp.SignInData;
 import four.group.jahadi.Enums.Access;
 import four.group.jahadi.Enums.AccountStatus;
 import four.group.jahadi.Enums.Sex;
-import four.group.jahadi.Exception.*;
+import four.group.jahadi.Exception.BadRequestException;
+import four.group.jahadi.Exception.InvalidFieldsException;
+import four.group.jahadi.Exception.InvalidIdException;
+import four.group.jahadi.Exception.NotAccessException;
 import four.group.jahadi.Models.Activation;
 import four.group.jahadi.Models.Group;
 import four.group.jahadi.Models.Trip;
@@ -17,10 +17,10 @@ import four.group.jahadi.Repository.ActivationRepository;
 import four.group.jahadi.Repository.GroupRepository;
 import four.group.jahadi.Repository.TripRepository;
 import four.group.jahadi.Repository.UserRepository;
-import four.group.jahadi.Security.JwtTokenFilter;
 import four.group.jahadi.Security.JwtTokenProvider;
-import four.group.jahadi.Utility.*;
-import org.apache.commons.beanutils.BeanUtilsBean;
+import four.group.jahadi.Utility.Cache;
+import four.group.jahadi.Utility.PairValue;
+import four.group.jahadi.Utility.Utility;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -28,21 +28,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static four.group.jahadi.Utility.FileUtils.removeFile;
-import static four.group.jahadi.Utility.FileUtils.uploadFile;
 import static four.group.jahadi.Utility.StaticValues.*;
 import static four.group.jahadi.Utility.Utility.convertPersianDigits;
 
 
 @Service
-public class UserService extends AbstractService<User, SignUpData> {
+public class UserService extends AbstractService<User> {
 
     private static final ArrayList<Cache> cachedToken = new ArrayList<>();
     public final static String PICS_FOLDER = "userPics";
@@ -106,19 +102,6 @@ public class UserService extends AbstractService<User, SignUpData> {
         );
     }
 
-    @Override
-    public void update(ObjectId id, SignUpData dto, Object... params) {
-
-    }
-
-    public void update(ObjectId id, UpdateInfoData dto) {
-    }
-
-    @Override
-    public ResponseEntity<User> store(SignUpData dto, Object... params) {
-        return null;
-    }
-
     private ResponseEntity<HashMap<String, Object>> sendSMS(User user, boolean storeUserDoc) {
 
         PairValue existTokenP = existSMS(user.getPhone());
@@ -165,31 +148,6 @@ public class UserService extends AbstractService<User, SignUpData> {
     public PairValue existSMS(String phone) {
         Optional<Activation> activation = activationRepository.findByPhone(phone, System.currentTimeMillis() - SMS_RESEND_MSEC);
         return activation.map(value -> new PairValue(value.getToken(), SMS_RESEND_SEC - (System.currentTimeMillis() - value.getCreatedAt()) / 1000)).orElse(null);
-    }
-
-    User populateEntity(SignUpStep1ForGroupData userData) {
-
-        User user = new User();
-
-        user.setName(userData.getName());
-        user.setPhone(userData.getPhone());
-        user.setNid(userData.getNid());
-        user.setFatherName(userData.getFatherName());
-        user.setBirthDay(userData.getBirthDay());
-        user.setField(userData.getField());
-        user.setUniversity(userData.getUniversity());
-        user.setUniversityYear(userData.getUniversityYear());
-        user.setSex(userData.getSex());
-        user.setEndManageYear(userData.getEndManageYear());
-        user.setCid(userData.getCid());
-
-        user.setPassword(getEncPass(userData.getPassword()));
-        user.setAccesses(new ArrayList<>() {{
-            add(Access.JAHADI);
-        }});
-        user.setStatus(AccountStatus.PENDING);
-
-        return user;
     }
 
     @Override
@@ -340,17 +298,6 @@ public class UserService extends AbstractService<User, SignUpData> {
         u.setGroupName(null);
         u.setGroupId(null);
         userRepository.save(u);
-    }
-
-    public ResponseEntity<HashMap<String, Object>> groupStore(SignUpStep1ForGroupData dto) {
-
-        if (userRepository.countByPhone(dto.getPhone()) > 0)
-            throw new InvalidFieldsException("شماره همراه وارد شده در سیستم موجود است");
-
-        if (userRepository.countByNID(dto.getNid()) > 0)
-            throw new InvalidFieldsException("کد ملی وارد شده در سیستم موجود است");
-
-        return sendSMS(populateEntity(dto), true);
     }
 
     public ResponseEntity<List<User>> findGroupMembersByRegionOwner(ObjectId userId, ObjectId groupId) {

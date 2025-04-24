@@ -1,13 +1,9 @@
 package four.group.jahadi.Service;
 
 import four.group.jahadi.DTO.Trip.TripStep1Data;
-import four.group.jahadi.DTO.Trip.TripStep2Data;
-import four.group.jahadi.DTO.Trip.TripStepData;
-import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Exception.InvalidIdException;
-import four.group.jahadi.Exception.NotAccessException;
-import four.group.jahadi.Models.*;
 import four.group.jahadi.Models.Area.Area;
+import four.group.jahadi.Models.*;
 import four.group.jahadi.Repository.*;
 import four.group.jahadi.Service.Area.AreaService;
 import four.group.jahadi.Utility.Utility;
@@ -18,14 +14,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static four.group.jahadi.Utility.Utility.*;
+import static four.group.jahadi.Utility.Utility.getCurrDate;
 
 @Service
-public class TripService extends AbstractService<Trip, TripStepData> {
+public class TripService extends AbstractService<Trip> {
 
     @Autowired
     private TripRepository tripRepository;
@@ -81,16 +76,6 @@ public class TripService extends AbstractService<Trip, TripStepData> {
                 .findFirst().ifPresent(area::setOwner)));
 
         return new ResponseEntity<>(trips, HttpStatus.OK);
-    }
-
-    @Override
-    public void update(ObjectId id, TripStepData dto, Object... params) {
-
-    }
-
-    @Override
-    public ResponseEntity<Trip> store(TripStepData dto, Object... params) {
-        return null;
     }
 
     public ResponseEntity<List<Trip>> myActiveTrips(ObjectId groupId) {

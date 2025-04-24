@@ -1,7 +1,6 @@
 package four.group.jahadi.Routes.API.GroupAPIRoutes;
 
 import four.group.jahadi.DTO.AdminSignInData;
-import four.group.jahadi.DTO.WareHouseAccessForGroupData;
 import four.group.jahadi.Enums.Sex;
 import four.group.jahadi.Exception.NotActivateAccountException;
 import four.group.jahadi.Exception.UnAuthException;
@@ -83,42 +82,6 @@ public class GroupUserAPIRoutes extends Router {
             HttpServletRequest request
     ) {
         return wareHouseAccessService.list(getGroup(request));
-    }
-
-    @PostMapping(value = "addWareHouseAccesses")
-    @ResponseBody
-    @Operation(summary = "افزودن یا ویرایش کاربری از گروه برای دسترسی انبارداری")
-    public ResponseEntity<WareHouseAccessForGroupJoinWithUser> addWareHouseAccesses(
-            HttpServletRequest request,
-            @RequestBody @Valid WareHouseAccessForGroupData dto
-            ) {
-        return wareHouseAccessService.store(
-                dto, getGroup(request)
-        );
-    }
-
-    @DeleteMapping(value = "removeWareHouseAccesses/{userId}")
-    @ResponseBody
-    @Operation(summary = "حذف کاربر از دسترسی کاربران انبارداری در یک گروه")
-    public void removeWareHouseAccesses(
-            HttpServletRequest request,
-            @PathVariable @ObjectIdConstraint ObjectId userId
-    ) {
-        wareHouseAccessService.removeFromWareHouseAccesses(
-                userId, getGroup(request)
-        );
-    }
-
-    @DeleteMapping(value = "revokeExternalReferralAccesses/{userId}")
-    @ResponseBody
-    @Operation(summary = "حذف کاربر از دسترسی کاربران ارجاع خارج در یک گروه")
-    public void revokeExternalReferralAccesses(
-            HttpServletRequest request,
-            @PathVariable @ObjectIdConstraint ObjectId userId
-    ) {
-        externalReferralAccessForGroupService.revokeAccess(
-                userId, getGroup(request)
-        );
     }
 
     @GetMapping(value = "getExternalReferralAccesses")

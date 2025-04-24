@@ -320,7 +320,7 @@ public class Utility {
             PairValue pairValue = pairValues.get(i);
             if(pairValue.getKey() == null || pairValue.getValue() == null)
                 continue;
-            sb.append(String.format("{\"Key\":\"%s\", \"Value\":\"%s\"}", pairValue.getKey().toString(), pairValue.getValue().toString()));
+            sb.append(String.format("{\"key\":\"%s\", \"value\":\"%s\"}", pairValue.getKey().toString(), pairValue.getValue().toString()));
             if (i < pairValues.size() - 1)
                 sb.append(", ");
         }

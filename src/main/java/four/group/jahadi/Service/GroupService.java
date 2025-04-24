@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 
 @Service
-public class GroupService extends AbstractService<Group, GroupData> {
+public class GroupService extends AbstractService<Group> {
 
     @Autowired
     private GroupRepository groupRepository;
@@ -52,9 +52,6 @@ public class GroupService extends AbstractService<Group, GroupData> {
         groups.forEach(group -> group.setTripsCount(tripRepository.countByGroupId(group.getId())));
         return new ResponseEntity<>(groups, HttpStatus.OK);
     }
-
-    @Override
-    public void update(ObjectId id, GroupData dto, Object ... params) {}
 
     public ResponseEntity<Group> findById(ObjectId id, Object ... params) {
         return new ResponseEntity<>(

@@ -5,27 +5,18 @@
  */
 package four.group.jahadi.Kavenegar.utils;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 /**
  *
  * @author Hadi
  */
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
 public class PairValue {
-
-    private final Object Key;
-    private final Object Value;
-
-    public PairValue(Object Key, Object Value)
-    {
-        this.Key = Key;
-        this.Value = Value;
-    }
-
-    public Object getKey() {
-        return Key;
-    }
-
-    public Object getValue() {
-        return Value;
-    }
-    
+    private Object key;
+    private Object value;
 }

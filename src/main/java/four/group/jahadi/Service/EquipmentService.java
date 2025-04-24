@@ -1,37 +1,22 @@
 package four.group.jahadi.Service;
 
-import four.group.jahadi.DTO.EquipmentData;
-import four.group.jahadi.DTO.ErrorRow;
 import four.group.jahadi.Enums.EquipmentHealthStatus;
 import four.group.jahadi.Enums.EquipmentType;
 import four.group.jahadi.Exception.InvalidFieldsException;
-import four.group.jahadi.Exception.InvalidIdException;
-import four.group.jahadi.Exception.NotAccessException;
 import four.group.jahadi.Models.Equipment;
 import four.group.jahadi.Repository.EquipmentRepository;
 import four.group.jahadi.Repository.WareHouseAccessForGroupRepository;
-import four.group.jahadi.Utility.Utility;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static four.group.jahadi.Utility.Utility.datePattern;
-
 @Service
-public class EquipmentService extends AbstractService<Equipment, EquipmentData> {
+public class EquipmentService extends AbstractService<Equipment> {
 
     @Autowired
     private EquipmentRepository equipmentRepository;
@@ -68,16 +53,6 @@ public class EquipmentService extends AbstractService<Equipment, EquipmentData> 
         } catch (Exception x) {
             throw new InvalidFieldsException(x.getMessage());
         }
-    }
-
-    @Override
-    public void update(ObjectId id, EquipmentData dto, Object... params) {
-
-    }
-
-    @Override
-    public ResponseEntity<Equipment> store(EquipmentData dto, Object... params) {
-        return null;
     }
 
     @Override

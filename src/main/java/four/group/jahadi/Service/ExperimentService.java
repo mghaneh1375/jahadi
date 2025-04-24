@@ -1,6 +1,5 @@
 package four.group.jahadi.Service;
 
-import four.group.jahadi.DTO.ExperimentData;
 import four.group.jahadi.Models.Experiment;
 import four.group.jahadi.Repository.ExperimentRepository;
 import org.bson.types.ObjectId;
@@ -12,7 +11,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class ExperimentService extends AbstractService<Experiment, ExperimentData> {
+public class ExperimentService extends AbstractService<Experiment> {
 
     @Autowired
     private ExperimentRepository experimentRepository;
@@ -31,16 +30,6 @@ public class ExperimentService extends AbstractService<Experiment, ExperimentDat
                 experiments,
                 HttpStatus.OK
         );
-    }
-
-    @Override
-    public void update(ObjectId id, ExperimentData dto, Object... params) {
-
-    }
-
-    @Override
-    public ResponseEntity<Experiment> store(ExperimentData dto, Object... params) {
-        return null;
     }
 
     @Override

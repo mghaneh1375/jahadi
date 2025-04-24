@@ -1,7 +1,6 @@
 package four.group.jahadi.Routes.API;
 
 import four.group.jahadi.DTO.SignUp.SignInData;
-import four.group.jahadi.DTO.SignUp.SignUpStep1ForGroupData;
 import four.group.jahadi.Models.User;
 import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Security.JwtTokenFilter;
@@ -14,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.util.HashMap;
 
 @RestController
 @RequestMapping(path = "/api/user")
@@ -31,16 +29,6 @@ public class UserAPIRoutes extends Router {
     @ResponseBody
     public ResponseEntity<String> signIn(@RequestBody @Valid SignInData signInData) {
         return userService.signIn(signInData);
-    }
-
-    // ******************** INDIVIDUAL SIGNUP ************************
-
-    // ****************** GROUP SIGNUP **********************
-
-    @PostMapping(value = "/groupSignUp")
-    @ResponseBody
-    public ResponseEntity<HashMap<String, Object>> groupSignUp(@RequestBody @Valid SignUpStep1ForGroupData data) {
-        return userService.groupStore(data);
     }
 
     @DeleteMapping(value = "logout")

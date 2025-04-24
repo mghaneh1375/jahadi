@@ -1,7 +1,5 @@
 package four.group.jahadi.Service;
 
-import four.group.jahadi.DTO.ProjectData;
-import four.group.jahadi.DTO.Trip.TripStep1Data;
 import four.group.jahadi.Enums.Status;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Models.Group;
@@ -19,12 +17,9 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static four.group.jahadi.Utility.Utility.getDate;
-import static four.group.jahadi.Utility.Utility.getLastDate;
-
 
 @Service
-public class ProjectService extends AbstractService<Project, ProjectData> {
+public class ProjectService extends AbstractService<Project> {
 
     @Autowired
     private ProjectRepository projectRepository;
@@ -128,16 +123,6 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
         return new ResponseEntity<>(projects, HttpStatus.OK);
     }
 
-    @Override
-    public void update(ObjectId id, ProjectData dto, Object... params) {
-
-    }
-
-    @Override
-    public ResponseEntity<Project> store(ProjectData dto, Object... params) {
-        return null;
-    }
-
     public ResponseEntity<Project> findById(ObjectId id, Object... params) {
         Project project = projectRepository.findById(id).orElseThrow(InvalidIdException::new);
         project.setGroupNames(
@@ -149,20 +134,6 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
                 project,
                 HttpStatus.OK
         );
-    }
-
-    @Override
-    Project populateEntity(Project project, ProjectData projectData) {
-        return Project.builder()
-                .groupIds(projectData.getTrips().stream()
-                        .map(x -> x.stream().map(TripStep1Data::getOwner)
-                                .collect(Collectors.toList()))
-                        .flatMap(List::stream).distinct().collect(Collectors.toList()))
-                .name(projectData.getName())
-                .color(projectData.getColor())
-                .startAt(getDate(new Date(projectData.getStartAt())))
-                .endAt(getLastDate(new Date(projectData.getEndAt())))
-                .build();
     }
 
     public ResponseEntity<List<Project>> myProjects(ObjectId groupId, ObjectId userId) {

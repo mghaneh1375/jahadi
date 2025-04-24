@@ -18,7 +18,7 @@ import org.springframework.http.ResponseEntity;
 import java.io.IOException;
 import java.util.List;
 
-public abstract class AbstractService <T, D> {
+public abstract class AbstractService <T> {
 
     @Autowired
     ModelMapper modelMapper;
@@ -87,15 +87,7 @@ public abstract class AbstractService <T, D> {
 
     public abstract ResponseEntity<List<T>> list(Object ... filters);
 
-    public abstract void update(ObjectId id, D dto, Object ... params);
-
-    public abstract ResponseEntity<T> store(D dto, Object ... params);
-
     public abstract ResponseEntity<T> findById(ObjectId id, Object ...params);
-
-    T populateEntity(T t, D d) {
-        return (T) modelMapper.map(d, t.getClass());
-    }
 
     void validateString(String val, String key, int min, int max) {
         if (val == null || val.length() < min || val.length() > max)
