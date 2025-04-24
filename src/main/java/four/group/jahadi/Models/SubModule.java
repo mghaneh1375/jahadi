@@ -40,6 +40,7 @@ public class SubModule {
 
     @Field("is_referral")
     @Builder.Default
+    @JsonProperty("isReferral")
     private boolean isReferral = false;
 
     @Field("refer_to")

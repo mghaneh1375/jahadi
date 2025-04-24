@@ -1,6 +1,7 @@
 package four.group.jahadi.Models.Question;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import four.group.jahadi.Enums.Module.AnswerType;
 import lombok.Builder;
 import lombok.Getter;
@@ -38,6 +39,7 @@ public class TableQuestion extends Question {
     private String cellLabel;
 
     @Builder.Default
+    @JsonProperty("rtl")
     private boolean rtl = false;
 
     @Field("answer_type")

@@ -1,7 +1,6 @@
 package four.group.jahadi.Repository.Area;
 
 import four.group.jahadi.Models.Area.AreaEquipments;
-import four.group.jahadi.Models.Area.JoinedAreaDrugs;
 import four.group.jahadi.Models.Area.JoinedAreaEquipments;
 import four.group.jahadi.Repository.FilterableRepository;
 import org.bson.types.ObjectId;
@@ -14,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface EquipmentsInAreaRepository extends MongoRepository<AreaEquipments, ObjectId>, FilterableRepository<AreaEquipments> {
+public interface AreaEquipmentsRepository extends MongoRepository<AreaEquipments, ObjectId>, FilterableRepository<AreaEquipments> {
 
     @Query(value = "{areaId: ?0, equipmentId: ?1}")
     Optional<AreaEquipments> findByAreaIdAndEquipmentId(ObjectId areaId, ObjectId equipmentId);

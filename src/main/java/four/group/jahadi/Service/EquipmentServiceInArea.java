@@ -9,7 +9,7 @@ import four.group.jahadi.Models.Area.JoinedAreaEquipments;
 import four.group.jahadi.Models.Equipment;
 import four.group.jahadi.Models.EquipmentLog;
 import four.group.jahadi.Models.Trip;
-import four.group.jahadi.Repository.Area.EquipmentsInAreaRepository;
+import four.group.jahadi.Repository.Area.AreaEquipmentsRepository;
 import four.group.jahadi.Repository.Area.impl.EquipmentsInAreaRepositoryImp;
 import four.group.jahadi.Repository.EquipmentLogRepository;
 import four.group.jahadi.Repository.EquipmentRepository;
@@ -37,7 +37,7 @@ public class EquipmentServiceInArea {
     @Autowired
     private TripRepository tripRepository;
     @Autowired
-    private EquipmentsInAreaRepository equipmentsInAreaRepository;
+    private AreaEquipmentsRepository areaEquipmentsRepository;
     @Autowired
     private EquipmentRepository equipmentRepository;
     @Autowired
@@ -87,7 +87,7 @@ public class EquipmentServiceInArea {
 
         List<AreaEquipments> equipments = new ArrayList<>();
         HashMap<ObjectId, Integer> updates = new HashMap<>();
-        equipmentsInAreaRepository.findIdsByAreaIdAndIds(areaId, ids)
+        areaEquipmentsRepository.findIdsByAreaIdAndIds(areaId, ids)
                 .forEach(areaEquipments -> updates.put(areaEquipments.getId(), 0));
 
         List<EquipmentLog> equipmentLogs = new ArrayList<>();
@@ -133,7 +133,7 @@ public class EquipmentServiceInArea {
         if (equipments.size() != dtoList.size())
             throw new RuntimeException("ids are incorrect");
 
-        Iterable<AreaEquipments> equipmentsInAreaList = equipmentsInAreaRepository.findAllById(updates.keySet());
+        Iterable<AreaEquipments> equipmentsInAreaList = areaEquipmentsRepository.findAllById(updates.keySet());
         List<AreaEquipments> tmp = new ArrayList<>();
         while (equipmentsInAreaList.iterator().hasNext()) {
             AreaEquipments next = equipmentsInAreaList.iterator().next();
@@ -145,8 +145,8 @@ public class EquipmentServiceInArea {
 
         equipmentRepository.saveAll(equipmentsIter);
         equipmentLogRepository.saveAll(equipmentLogs);
-        equipmentsInAreaRepository.insert(equipments);
-        equipmentsInAreaRepository.saveAll(tmp);
+        areaEquipmentsRepository.insert(equipments);
+        areaEquipmentsRepository.saveAll(tmp);
     }
 
     //    @Transactional
@@ -169,7 +169,7 @@ public class EquipmentServiceInArea {
                 .filter(area -> area.getId().equals(areaId))
                 .findFirst().get();
 
-        List<AreaEquipments> areaEquipments = equipmentsInAreaRepository.removeAreaEquipmentsByIdAndAreaId(ids, areaId);
+        List<AreaEquipments> areaEquipments = areaEquipmentsRepository.removeAreaEquipmentsByIdAndAreaId(ids, areaId);
         List<EquipmentLog> equipmentLogs = new ArrayList<>();
         List<Equipment> equipmentsIter = equipmentRepository.findAllByIdsAndGroupId(
                 areaEquipments.stream().map(AreaEquipments::getEquipmentId).collect(Collectors.toList()),
@@ -229,7 +229,7 @@ public class EquipmentServiceInArea {
             ObjectId areaId, String areaName,
             String tripName
     ) {
-        List<AreaEquipments> areaEquipments = equipmentsInAreaRepository.findAvailableEquipmentsByAreaId(areaId);
+        List<AreaEquipments> areaEquipments = areaEquipmentsRepository.findAvailableEquipmentsByAreaId(areaId);
         if (areaEquipments.size() == 0)
             return;
 
@@ -262,7 +262,7 @@ public class EquipmentServiceInArea {
 
         equipmentLogRepository.saveAll(equipmentLogs);
         equipmentRepository.saveAll(equipments);
-        equipmentsInAreaRepository.saveAll(areaEquipments);
+        areaEquipmentsRepository.saveAll(areaEquipments);
     }
 
     public ResponseEntity<List<JoinedAreaEquipments>> list(ObjectId userId, ObjectId areaId) {
@@ -271,7 +271,7 @@ public class EquipmentServiceInArea {
                 .orElseThrow(NotAccessException::new);
 
         return new ResponseEntity<>(
-                equipmentsInAreaRepository.findDigestByAreaId(areaId),
+                areaEquipmentsRepository.findDigestByAreaId(areaId),
                 HttpStatus.OK
         );
     }
