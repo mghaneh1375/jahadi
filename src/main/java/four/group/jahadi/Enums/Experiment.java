@@ -13,7 +13,7 @@ public enum Experiment {
     AST("AST(SGOT)"), ALT("ALT(SGPT)"),
     TSH("TSH"), LH("LH"), FSH("FSH");
 
-    private String faTranslate;
+    private final String faTranslate;
 
     Experiment(String faTranslate) {
         this.faTranslate = faTranslate;

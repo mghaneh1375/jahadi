@@ -16,7 +16,7 @@ public class UserDigestSerialization extends JsonSerializer<User> {
         jsonGenerator.writeStringField("name", user.getName());
         jsonGenerator.writeStringField("phone", user.getPhone());
         jsonGenerator.writeStringField("NID", user.getNid());
-        jsonGenerator.writeStringField("sex", user.getSex().getName());;
+        jsonGenerator.writeStringField("sex", user.getSex().getName());
         jsonGenerator.writeEndObject();
     }
 }

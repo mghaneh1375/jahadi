@@ -6,7 +6,7 @@ public enum ExternalReferralTrackingStatus {
     SURGERY("جراحی و بستری"),
     RAPID_SERV("خدمات سرپایی");
 
-    private String faTranslate;
+    private final String faTranslate;
 
     ExternalReferralTrackingStatus(String faTranslate) {
         this.faTranslate = faTranslate;

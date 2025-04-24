@@ -3,7 +3,7 @@ package four.group.jahadi.Service;
 import org.springframework.context.ApplicationContext;
 
 public class BeanFetcher {
-    private ApplicationContext applicationContext;
+    private final ApplicationContext applicationContext;
 
     public BeanFetcher(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;

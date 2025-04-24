@@ -1,16 +1,16 @@
 package four.group.jahadi.Models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import four.group.jahadi.Enums.Drug.AmountOfUse;
 import four.group.jahadi.Enums.Drug.HowToUse;
 import four.group.jahadi.Enums.Drug.UseTime;
 import lombok.*;
 import org.bson.types.ObjectId;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
-import org.springframework.data.annotation.Transient;
 
 import java.util.Date;
 
@@ -24,7 +24,7 @@ import static four.group.jahadi.Utility.Utility.*;
 @Builder
 public class PatientDrug extends Model {
     @Field("area_id")
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private ObjectId areaId;
     @Field("patient_id")
     @JsonSerialize(using = ObjectIdSerialization.class)

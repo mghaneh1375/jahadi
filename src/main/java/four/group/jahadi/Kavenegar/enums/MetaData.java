@@ -27,9 +27,9 @@ public enum MetaData {
     InvalidDate(114),
     MsgIsTooLarge(115),
     RecpNotEqualWithMessage(116);
-    private int value;
+    private final int value;
 
-    private MetaData(int type) {
+    MetaData(int type) {
         this.value = type;
     }
 

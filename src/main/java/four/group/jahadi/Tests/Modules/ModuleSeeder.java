@@ -22,7 +22,7 @@ public class ModuleSeeder {
     }};
     public static HashMap<String, ObjectId> moduleIds;
     private static ModuleRepository moduleRepository;
-    private static List<Module> newItems = new ArrayList<>();
+    private static final List<Module> newItems = new ArrayList<>();
 
     private static void addModule(Module module) {
         Module sameModuleItr = moduleRepository.findByName(module.getName());

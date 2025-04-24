@@ -2,6 +2,7 @@ package four.group.jahadi.Models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import four.group.jahadi.Enums.Drug.*;
 import lombok.AllArgsConstructor;
@@ -47,11 +48,11 @@ public class Drug extends Model {
     @Field("available_pack")
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     private Integer availablePack;
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private List<ObjectId> replacements;
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Boolean visibility;
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Integer priority;
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     private DrugLocation location;

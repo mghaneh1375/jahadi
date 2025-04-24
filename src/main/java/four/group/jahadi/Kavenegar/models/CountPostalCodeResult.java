@@ -12,8 +12,8 @@ import com.google.gson.JsonObject;
  */
 public class CountPostalCodeResult{
 
-    private String section;
-    private Long value;
+    private final String section;
+    private final Long value;
 
     public CountPostalCodeResult(JsonObject json){
         this.section = json.get("section").getAsString();

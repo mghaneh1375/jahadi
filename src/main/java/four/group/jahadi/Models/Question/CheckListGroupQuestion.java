@@ -1,7 +1,7 @@
 package four.group.jahadi.Models.Question;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import four.group.jahadi.Enums.Module.QuestionType;
 import four.group.jahadi.Utility.PairValue;
 import lombok.Builder;
@@ -60,11 +60,11 @@ public class CheckListGroupQuestion extends Question {
     private Boolean canUploadFile = false;
 
     @Builder.Default
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     private Boolean markable = false;
 
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private HashMap<String, Integer> marks;
 
     public CheckListGroupQuestion(ObjectId id, QuestionType questionType, String sectionTitle, List<PairValue> options, List<SimpleQuestion> questions, Boolean canWriteDesc, Boolean canWriteReport, Boolean canWriteReason, Boolean canWriteSampleInfoDesc, Boolean canWriteTime, Boolean canUploadFile, Boolean markable, HashMap<String, Integer> marks) {

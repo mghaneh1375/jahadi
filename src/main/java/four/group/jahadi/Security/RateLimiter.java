@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 public class RateLimiter implements Filter {
 
     private static final int MAX_REQUESTS_PER_SECOND = 600; //or whatever you want it to be
-    private LoadingCache<String, Integer> requestCountsPerIpAddress;
+    private final LoadingCache<String, Integer> requestCountsPerIpAddress;
 
     public RateLimiter(){
         super();

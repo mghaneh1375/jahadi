@@ -70,29 +70,23 @@ public class SolarCalendar {
             if (date > 79) {
                 date = date - 79;
                 if (date <= 186) {
-                    switch (date % 31) {
-                        case 0:
-                            month = date / 31;
-                            date = 31;
-                            break;
-                        default:
-                            month = (date / 31) + 1;
-                            date = (date % 31);
-                            break;
+                    if (date % 31 == 0) {
+                        month = date / 31;
+                        date = 31;
+                    } else {
+                        month = (date / 31) + 1;
+                        date = (date % 31);
                     }
                     year = miladiYear - 621;
                 } else {
                     date = date - 186;
 
-                    switch (date % 30) {
-                        case 0:
-                            month = (date / 30) + 6;
-                            date = 30;
-                            break;
-                        default:
-                            month = (date / 30) + 7;
-                            date = (date % 30);
-                            break;
+                    if (date % 30 == 0) {
+                        month = (date / 30) + 6;
+                        date = 30;
+                    } else {
+                        month = (date / 30) + 7;
+                        date = (date % 30);
                     }
                     year = miladiYear - 621;
                 }
@@ -104,15 +98,12 @@ public class SolarCalendar {
                 }
                 date = date + ld;
 
-                switch (date % 30) {
-                    case 0:
-                        month = (date / 30) + 9;
-                        date = 30;
-                        break;
-                    default:
-                        month = (date / 30) + 10;
-                        date = (date % 30);
-                        break;
+                if (date % 30 == 0) {
+                    month = (date / 30) + 9;
+                    date = 30;
+                } else {
+                    month = (date / 30) + 10;
+                    date = (date % 30);
                 }
                 year = miladiYear - 622;
             }
@@ -128,29 +119,23 @@ public class SolarCalendar {
                 date = date - ld;
 
                 if (date <= 186) {
-                    switch (date % 31) {
-                        case 0:
-                            month = (date / 31);
-                            date = 31;
-                            break;
-                        default:
-                            month = (date / 31) + 1;
-                            date = (date % 31);
-                            break;
+                    if (date % 31 == 0) {
+                        month = (date / 31);
+                        date = 31;
+                    } else {
+                        month = (date / 31) + 1;
+                        date = (date % 31);
                     }
                     year = miladiYear - 621;
                 } else {
                     date = date - 186;
 
-                    switch (date % 30) {
-                        case 0:
-                            month = (date / 30) + 6;
-                            date = 30;
-                            break;
-                        default:
-                            month = (date / 30) + 7;
-                            date = (date % 30);
-                            break;
+                    if (date % 30 == 0) {
+                        month = (date / 30) + 6;
+                        date = 30;
+                    } else {
+                        month = (date / 30) + 7;
+                        date = (date % 30);
                     }
                     year = miladiYear - 621;
                 }
@@ -159,15 +144,12 @@ public class SolarCalendar {
             else {
                 date = date + 10;
 
-                switch (date % 30) {
-                    case 0:
-                        month = (date / 30) + 9;
-                        date = 30;
-                        break;
-                    default:
-                        month = (date / 30) + 10;
-                        date = (date % 30);
-                        break;
+                if (date % 30 == 0) {
+                    month = (date / 30) + 9;
+                    date = 30;
+                } else {
+                    month = (date / 30) + 10;
+                    date = (date % 30);
                 }
                 year = miladiYear - 622;
             }

@@ -53,7 +53,7 @@ public class DrugServiceInArea {
     @Autowired
     private JahadgarDrugService jahadgarDrugService;
 
-    private static List<ObjectId> locks = new ArrayList<>();
+    private static final List<ObjectId> locks = new ArrayList<>();
 
     // ###################### GROUP ACCESS #######################
 

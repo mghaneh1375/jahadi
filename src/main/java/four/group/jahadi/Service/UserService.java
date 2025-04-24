@@ -45,7 +45,7 @@ import static org.springframework.beans.BeanUtils.copyProperties;
 @Service
 public class UserService extends AbstractService<User, SignUpData> {
 
-    private static ArrayList<Cache> cachedToken = new ArrayList<>();
+    private static final ArrayList<Cache> cachedToken = new ArrayList<>();
     public final static String PICS_FOLDER = "userPics";
 
     @Autowired
@@ -762,19 +762,5 @@ public class UserService extends AbstractService<User, SignUpData> {
                 user,
                 HttpStatus.OK
         );
-    }
-
-    public void test() {
-        List<Group> groups = groupRepository.findAll();
-        userRepository.findAll()
-                .stream().filter(user -> user.getGroupId() != null)
-                .forEach(user -> groups.stream()
-                        .filter(group -> group.getId().equals(user.getGroupId()))
-                        .findFirst().ifPresent(group -> {
-                            if(!user.getGroupName().equalsIgnoreCase(group.getName())) {
-                                user.setGroupName(group.getName());
-                                userRepository.save(user);
-                            }
-                        }));
     }
 }

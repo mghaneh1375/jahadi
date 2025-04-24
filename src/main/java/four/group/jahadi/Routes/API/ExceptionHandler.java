@@ -40,7 +40,7 @@ public class ExceptionHandler extends ResponseEntityExceptionHandler {
             }
         }
 
-        return this.handleExceptionInternal(ex, (Object)null, headers, status, request);
+        return this.handleExceptionInternal(ex, null, headers, status, request);
     }
 
 
