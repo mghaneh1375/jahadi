@@ -4,8 +4,6 @@ import four.group.jahadi.Models.Area.AreaDrugs;
 import four.group.jahadi.Models.Area.JoinedAreaDrugs;
 import four.group.jahadi.Repository.FilterableRepository;
 import org.bson.types.ObjectId;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
@@ -15,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface DrugsInAreaRepository extends MongoRepository<AreaDrugs, ObjectId>, FilterableRepository<AreaDrugs> {
+public interface AreaDrugsRepository extends MongoRepository<AreaDrugs, ObjectId>, FilterableRepository<AreaDrugs> {
 
     @Query(value = "{areaId: ?0}", count = true)
     Integer countByAreaId(ObjectId areaId);

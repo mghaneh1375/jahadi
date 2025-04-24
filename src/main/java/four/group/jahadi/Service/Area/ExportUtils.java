@@ -5,7 +5,7 @@ import four.group.jahadi.Models.Area.Area;
 import four.group.jahadi.Models.Area.AreaDrugs;
 import four.group.jahadi.Models.Area.AreaEquipments;
 import four.group.jahadi.Repository.*;
-import four.group.jahadi.Repository.Area.DrugsInAreaRepository;
+import four.group.jahadi.Repository.Area.AreaDrugsRepository;
 import four.group.jahadi.Repository.Area.EquipmentsInAreaRepository;
 import four.group.jahadi.Repository.Area.PatientsDrugRepository;
 import four.group.jahadi.Repository.Area.PatientsInAreaRepository;
@@ -26,7 +26,7 @@ public class ExportUtils {
     private final ProjectRepository projectRepository;
     private final DrugRepository drugRepository;
     private final DrugBookmarkRepository drugBookmarkRepository;
-    private final DrugsInAreaRepository drugsInAreaRepository;
+    private final AreaDrugsRepository areaDrugsRepository;
     private final GroupRepository groupRepository;
     private final EquipmentRepository equipmentRepository;
     private final EquipmentsInAreaRepository equipmentsInAreaRepository;
@@ -46,7 +46,7 @@ public class ExportUtils {
             ProjectRepository projectRepository,
             DrugRepository drugRepository,
             DrugBookmarkRepository drugBookmarkRepository,
-            DrugsInAreaRepository drugsInAreaRepository,
+            AreaDrugsRepository areaDrugsRepository,
             GroupRepository groupRepository,
             EquipmentRepository equipmentRepository,
             EquipmentsInAreaRepository equipmentsInAreaRepository,
@@ -65,7 +65,7 @@ public class ExportUtils {
         this.projectRepository = projectRepository;
         this.drugRepository = drugRepository;
         this.drugBookmarkRepository = drugBookmarkRepository;
-        this.drugsInAreaRepository = drugsInAreaRepository;
+        this.areaDrugsRepository = areaDrugsRepository;
         this.groupRepository = groupRepository;
         this.equipmentRepository = equipmentRepository;
         this.equipmentsInAreaRepository = equipmentsInAreaRepository;
@@ -126,7 +126,7 @@ public class ExportUtils {
     }
 
     public void exportDrugs(Area area, ServletOutputStream outputStream) {
-        List<AreaDrugs> drugsInArea = drugsInAreaRepository.findByAreaId(area.getId());
+        List<AreaDrugs> drugsInArea = areaDrugsRepository.findByAreaId(area.getId());
         ioService.export(drugRepository.findFullInfoByIds(drugsInArea.stream().map(AreaDrugs::getDrugId).collect(Collectors.toList())), outputStream, "Drug");
         ioService.export(drugBookmarkRepository.findByDrugIds(drugsInArea.stream().map(AreaDrugs::getDrugId).collect(Collectors.toList())), outputStream, "DrugBookmark");
         ioService.export(drugsInArea, outputStream, "AreaDrugs");

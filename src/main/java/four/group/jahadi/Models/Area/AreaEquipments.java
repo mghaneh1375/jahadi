@@ -2,6 +2,7 @@ package four.group.jahadi.Models.Area;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import four.group.jahadi.Models.DateSerialization;
 import four.group.jahadi.Models.Model;
@@ -30,7 +31,7 @@ public class AreaEquipments extends Model {
     private ObjectId equipmentId;
 
     @Field("area_id")
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private ObjectId areaId;
 
     @Field("updated_at")

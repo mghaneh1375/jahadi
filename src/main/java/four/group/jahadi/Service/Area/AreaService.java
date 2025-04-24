@@ -693,7 +693,9 @@ public class AreaService extends AbstractService<Area, AreaData> {
 
     public void importDBToConstructLocalServer(MultipartFile file) {
         Set<Class> models = findAllClassesUsingClassLoader("four.group.jahadi.Models");
+        models.addAll(findAllClassesUsingClassLoader("four.group.jahadi.Models.Area"));
         Set<Class> repositories = findAllClassesUsingClassLoader("four.group.jahadi.Repository");
+        repositories.addAll(findAllClassesUsingClassLoader("four.group.jahadi.Repository.Area"));
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);

@@ -2,6 +2,7 @@ package four.group.jahadi.Models.Area;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import four.group.jahadi.Enums.AccessInModuleArea;
 import four.group.jahadi.Models.ListOfUsersSerialization;
@@ -44,7 +45,7 @@ public class ModuleInArea {
     @Field("module_tab_name")
     private String moduleTabName;
 
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Builder.Default
     private List<ObjectId> members = new ArrayList<>();
 
@@ -70,7 +71,7 @@ public class ModuleInArea {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Boolean hasSecretaryAccess;
 
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Builder.Default
     private List<ObjectId> secretaries = new ArrayList<>();
 

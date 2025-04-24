@@ -1,7 +1,7 @@
 package four.group.jahadi.Models.Area;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import four.group.jahadi.Models.DateSerialization;
 import four.group.jahadi.Models.Model;
@@ -11,8 +11,9 @@ import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import static four.group.jahadi.Utility.Utility.*;
 
 @Getter
 @Setter
@@ -30,7 +31,7 @@ public class AreaDrugs extends Model {
     private ObjectId drugId;
 
     @Field("area_id")
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private ObjectId areaId;
 
     @Field("updated_at")
@@ -46,14 +47,14 @@ public class AreaDrugs extends Model {
     @Override
     public String toString() {
         return "{" +
-                "\"id\":\"" + this.getId() +
-                "\", \"createdAt\":\"" + new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX").format(this.getCreatedAt()) +
-                "\", \"drugName\":\"" + drugName +
-                "\", \"drugId\":\"" + drugId +
-                "\", \"areaId\":\"" + areaId +
-                "\", \"updatedAt\":\"" + new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX").format(updatedAt) +
-                "\", \"totalCount\":" + totalCount +
-                ", \"reminder\":" + reminder +
+                "\"id\":" + this.getId() +
+                ", \"createdAt\":" + printNullableDate(this.getCreatedAt()) +
+                ", \"drugName\":" + printNullableField(drugName) +
+                ", \"drugId\":" + printNullableField(drugId) +
+                ", \"areaId\":" + printNullableField(areaId) +
+                ", \"updatedAt\":" + printNullableDate(updatedAt) +
+                ", \"totalCount\":" + printNullableInteger(totalCount) +
+                ", \"reminder\":" + printNullableInteger(reminder) +
                 "}\n";
     }
 }
