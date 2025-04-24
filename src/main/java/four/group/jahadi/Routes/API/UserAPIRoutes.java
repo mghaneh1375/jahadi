@@ -6,7 +6,6 @@ import four.group.jahadi.DTO.DoChangePhoneDAO;
 import four.group.jahadi.DTO.SignUp.*;
 import four.group.jahadi.Exception.NotActivateAccountException;
 import four.group.jahadi.Exception.UnAuthException;
-import four.group.jahadi.Models.TokenInfo;
 import four.group.jahadi.Models.User;
 import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Security.JwtTokenFilter;
@@ -23,7 +22,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
-
 import java.util.HashMap;
 
 import static four.group.jahadi.Utility.Utility.convertPersianDigits;
@@ -44,11 +42,6 @@ public class UserAPIRoutes extends Router {
 //    public String store(final @RequestBody @Valid UserData userData) {
 //        return userService.store(userData);
 //    }
-    @GetMapping(value = "test")
-    public void test() {
-        userService.test();
-    }
-
     @PutMapping(value = "setPic", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseBody
     public void setPic(HttpServletRequest request,
