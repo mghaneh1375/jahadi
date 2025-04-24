@@ -37,9 +37,9 @@ public class Seeder {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    private static List<User> jahadgars = new ArrayList<>();
-    private static List<User> groupUsers = new ArrayList<>();
-    private static List<Group> groups = new ArrayList<>();
+    private static final List<User> jahadgars = new ArrayList<>();
+    private static final List<User> groupUsers = new ArrayList<>();
+    private static final List<Group> groups = new ArrayList<>();
 
     public void createUserWithGroup(int idx, int code) {
 

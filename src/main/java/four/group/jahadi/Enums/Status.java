@@ -2,6 +2,6 @@ package four.group.jahadi.Enums;
 
 public enum Status {
 
-    IN_PROGRESS, NOT_START, FINISHED;
+    IN_PROGRESS, NOT_START, FINISHED
 
 }

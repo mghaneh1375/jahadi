@@ -1,6 +1,6 @@
 package four.group.jahadi.Models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -17,10 +17,10 @@ import static four.group.jahadi.Utility.Utility.printNullableField;
 @Builder
 public class WareHouseAccessForGroup extends Model {
     @Field("group_id")
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private ObjectId groupId;
     @Field("user_id")
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private ObjectId userId;
     @Field("has_access_for_drug")
     private Boolean hasAccessForDrug;

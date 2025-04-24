@@ -1,6 +1,7 @@
 package four.group.jahadi.Models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,19 +24,19 @@ import java.util.List;
 public class ExternalReferralService extends Model {
 
     @Field("patient_id")
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private ObjectId patientId;
 
     @Field("form_id")
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private ObjectId formId;
 
     @Field("area_id")
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private ObjectId areaId;
 
     @Field("module_id")
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private ObjectId moduleId;
 
     @Field("created_by")

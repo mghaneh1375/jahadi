@@ -25,8 +25,8 @@ public class Utility {
             "^[1-4]\\d{3}-((0[1-6]-((3[0-1])|([1-2][0-9])|(0[1-9])))|((1[0-2]|(0[7-9]))-(30|([1-2][0-9])|(0[1-9]))))$"
     );
     private static final String AB = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-    private static SecureRandom rnd = new SecureRandom();
-    private static Random random = new Random();
+    private static final SecureRandom rnd = new SecureRandom();
+    private static final Random random = new Random();
 
     public static String convertDateToJalali(Date date) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
@@ -56,7 +56,7 @@ public class Utility {
     public static String getToday(String delimeter) {
         Locale loc = new Locale("en_US");
         SolarCalendar sc = new SolarCalendar();
-        return String.valueOf(sc.year) + delimeter + String.format(loc, "%02d",
+        return sc.year + delimeter + String.format(loc, "%02d",
                 sc.month) + delimeter + String.format(loc, "%02d", sc.date);
     }
 
@@ -247,15 +247,11 @@ public class Utility {
             KavenegarApi api = new KavenegarApi("6D3779666A7065566E323932566E526B69756F44564530554752435771647443423336474D6B6F7579556B3D");
             SendResult Result = api.verifyLookup(receptor, token, token2, token3, template);
 
-            if(Result.getStatus() == 6 ||
-                    Result.getStatus() == 11 ||
-                    Result.getStatus() == 13 ||
-                    Result.getStatus() == 14 ||
-                    Result.getStatus() == 100
-            )
-                return false;
-
-            return true;
+            return Result.getStatus() != 6 &&
+                    Result.getStatus() != 11 &&
+                    Result.getStatus() != 13 &&
+                    Result.getStatus() != 14 &&
+                    Result.getStatus() != 100;
         } catch (HttpException ex) {
             System.out.print("HttpException  : " + ex.getMessage());
         } catch (ApiException ex) {
@@ -288,7 +284,7 @@ public class Utility {
     }
 
     public static String printNullableField(Object obj) {
-        return obj == null ? null : String.format("\"%s\"", obj.toString());
+        return obj == null ? null : String.format("\"%s\"", obj);
     }
 
     public static String printNullableInteger(Integer obj) {

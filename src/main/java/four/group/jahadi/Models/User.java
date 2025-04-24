@@ -1,15 +1,15 @@
 package four.group.jahadi.Models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import four.group.jahadi.Enums.*;
 import lombok.*;
 import org.bson.types.ObjectId;
-import javax.persistence.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import javax.persistence.Transient;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -28,7 +28,7 @@ public class User extends Model {
 
     private String name;
 
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
     @Field("father_name")
@@ -60,11 +60,11 @@ public class User extends Model {
     private Sex sex;
 
     @Field("remove_at")
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Date removeAt;
 
     @Field("group_id")
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private ObjectId groupId;
 
     @Transient
@@ -104,7 +104,7 @@ public class User extends Model {
     @JsonSerialize(using = PicSerialization.class)
     private String pic;
 
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private List<Access> accesses;
 
     @Transient

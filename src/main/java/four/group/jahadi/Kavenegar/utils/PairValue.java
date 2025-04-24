@@ -11,8 +11,8 @@ package four.group.jahadi.Kavenegar.utils;
  */
 public class PairValue {
 
-    private Object Key;
-    private Object Value;
+    private final Object Key;
+    private final Object Value;
 
     public PairValue(Object Key, Object Value)
     {

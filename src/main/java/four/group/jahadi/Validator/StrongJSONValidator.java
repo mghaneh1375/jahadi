@@ -105,8 +105,7 @@ public class StrongJSONValidator implements
             if(value instanceof Double && (double)value < 0)
                 return false;
 
-            if(value instanceof Float && (float)value < 0)
-                return false;
+            return !(value instanceof Float) || !((float) value < 0);
 
 //            if(value instanceof String) {
 //
@@ -135,8 +134,6 @@ public class StrongJSONValidator implements
 //                value = n.doubleValue();
 //                return true;
 //            }
-
-            return true;
         }
 
         if(a.equals(Positive.class) && b.equals(Integer.class) && (int)value >= 0)

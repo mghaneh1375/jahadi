@@ -1,7 +1,7 @@
 package four.group.jahadi.Models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import four.group.jahadi.Models.Question.Question;
 import lombok.*;
@@ -35,7 +35,7 @@ public class SubModule {
     private List<Question> questions;
 
     @Field("post_action")
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String postAction;
 
     @Field("is_referral")
@@ -43,7 +43,7 @@ public class SubModule {
     private boolean isReferral = false;
 
     @Field("refer_to")
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private ObjectId referTo;
 
     @Field("readonly_module_id")

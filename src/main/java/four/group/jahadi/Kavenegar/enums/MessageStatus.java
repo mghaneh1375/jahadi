@@ -20,7 +20,7 @@ public enum MessageStatus {
     Incorrect(100);
     private final int value;
 
-    private MessageStatus(int type) {
+    MessageStatus(int type) {
         this.value = type;
     }
 

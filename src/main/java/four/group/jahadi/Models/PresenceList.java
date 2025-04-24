@@ -1,7 +1,7 @@
 package four.group.jahadi.Models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.*;
 import org.bson.types.ObjectId;
@@ -18,8 +18,8 @@ import java.util.Date;
 @Document(collection = "presence_list")
 public class PresenceList extends Model {
 
-    @JsonIgnore
     @Field("area_id")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private ObjectId areaId;
 
     @Field("user_id")

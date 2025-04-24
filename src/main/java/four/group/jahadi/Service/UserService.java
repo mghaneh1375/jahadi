@@ -44,7 +44,7 @@ import static four.group.jahadi.Utility.Utility.convertPersianDigits;
 @Service
 public class UserService extends AbstractService<User, SignUpData> {
 
-    private static ArrayList<Cache> cachedToken = new ArrayList<>();
+    private static final ArrayList<Cache> cachedToken = new ArrayList<>();
     public final static String PICS_FOLDER = "userPics";
 
     @Autowired
@@ -112,7 +112,6 @@ public class UserService extends AbstractService<User, SignUpData> {
     }
 
     public void update(ObjectId id, UpdateInfoData dto) {
-        return;
     }
 
     @Override

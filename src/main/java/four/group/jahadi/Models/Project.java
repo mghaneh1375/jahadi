@@ -1,7 +1,7 @@
 package four.group.jahadi.Models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import four.group.jahadi.Enums.Color;
 import lombok.*;
@@ -38,7 +38,7 @@ public class Project extends Model {
     private Date endAt;
 
     @Field("group_ids")
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private List<ObjectId> groupIds;
 
     @Transient

@@ -11,9 +11,9 @@ import com.google.gson.JsonObject;
  */
 public class AccountInfoResult {
 
-    private  Long remainCredit;
-    private Long expireDate;
-    private String type;
+    private final Long remainCredit;
+    private final Long expireDate;
+    private final String type;
 
     public AccountInfoResult(JsonObject json){
         this.remainCredit = json.get("remaincredit").getAsLong();

@@ -16,7 +16,7 @@ public enum MessageType {
     AppMemory(3);
     private final int value;
 
-    private MessageType(int type) {
+    MessageType(int type) {
         this.value = type;
     }
 

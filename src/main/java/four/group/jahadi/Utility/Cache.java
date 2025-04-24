@@ -2,11 +2,11 @@ package four.group.jahadi.Utility;
 
 public class Cache {
 
-    private long created;
-    private int validSec; // تا چند ثانیه بعد معتبر باشد
+    private final long created;
+    private final int validSec; // تا چند ثانیه بعد معتبر باشد
     private Object value;
-    private Object key;
-    private Object secondaryKey;
+    private final Object key;
+    private final Object secondaryKey;
 
     public Cache(int validSec, Object value, Object key) {
         this.key = key;

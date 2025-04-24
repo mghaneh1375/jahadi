@@ -24,6 +24,7 @@ import org.apache.http.util.EntityUtils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -34,7 +35,7 @@ public class KavenegarApi {
 
     static final String API_PATH = "https://api.kavenegar.com/v1/%s/%s.json";
 
-    private String apiKey;
+    private final String apiKey;
 
     public KavenegarApi(String apiKey) {
         this.apiKey = apiKey;
@@ -120,7 +121,7 @@ public class KavenegarApi {
     }
 
     public SendResult send(String sender, String receptor, String message, MessageType type, long date) throws BaseException {
-        return send(sender, Arrays.asList(receptor), message, type, date).get(0);
+        return send(sender, Collections.singletonList(receptor), message, type, date).get(0);
     }
 
     public List<SendResult> send(String sender, List<String> receptors, String message) throws BaseException {
@@ -132,8 +133,8 @@ public class KavenegarApi {
     }
 
     public SendResult send(String sender, String receptor, String message, MessageType type, long date, String localId) throws BaseException {
-        List<String> receptors = Arrays.asList(receptor);
-        List<String> localIds = Arrays.asList(localId);
+        List<String> receptors = Collections.singletonList(receptor);
+        List<String> localIds = Collections.singletonList(localId);
         return send(sender, receptors, message, MessageType.MobileMemory, 0, localIds).get(0);
     }
 
@@ -238,7 +239,7 @@ public class KavenegarApi {
     }
 
     public StatusResult status(Long messageId) throws BaseException {
-        return status(Arrays.asList(messageId)).get(0);
+        return status(Collections.singletonList(messageId)).get(0);
     }
 
 
@@ -259,7 +260,7 @@ public class KavenegarApi {
     }
 
     public StatusLocalMessageIdResult statusLocalMessageId(Long localId) throws BaseException {
-        return statusLocalMessageId(Arrays.asList(localId)).get(0);
+        return statusLocalMessageId(Collections.singletonList(localId)).get(0);
     }
 
     /*
@@ -370,7 +371,7 @@ public class KavenegarApi {
     }
 
     public StatusResult cancel(Long messageId) throws BaseException {
-        return cancel(Arrays.asList(messageId)).get(0);
+        return cancel(Collections.singletonList(messageId)).get(0);
     }
 
     /*
