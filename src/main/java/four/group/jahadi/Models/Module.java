@@ -2,6 +2,7 @@ package four.group.jahadi.Models;
 
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -32,14 +33,17 @@ public class Module extends Model {
 
     @Field("is_referral")
     @Builder.Default
+    @JsonProperty("isReferral")
     private boolean isReferral = true;
 
     @Field("can_suggest_drug")
     @Builder.Default
+    @JsonProperty("canSuggestDrug")
     private boolean canSuggestDrug = false;
 
     @Field("can_suggest_experiment")
     @Builder.Default
+    @JsonProperty("canSuggestExperiment")
     private boolean canSuggestExperiment = false;
 
     @Override

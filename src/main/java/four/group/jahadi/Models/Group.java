@@ -1,6 +1,7 @@
 package four.group.jahadi.Models;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import four.group.jahadi.Enums.Color;
 import four.group.jahadi.Models.Area.Area;
@@ -40,6 +41,7 @@ public class Group extends ModelWithUser {
 
     @Field("is_active")
     @Builder.Default
+    @JsonProperty("isActive")
     private boolean isActive = true;
 
     @Transient
