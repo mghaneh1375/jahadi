@@ -115,9 +115,10 @@ public class ExportUtils {
         }
     }
 
-    public void exportTrip(Trip trip, ServletOutputStream outputStream) {
+    public void exportTrip(Trip trip, ObjectId areaId, ServletOutputStream outputStream) {
         try {
             ioService.export(Collections.singletonList(projectRepository.findById(trip.getProjectId()).get()), outputStream, "Project");
+            trip.setAreas(trip.getAreas().stream().filter(area -> area.getId().equals(areaId)).collect(Collectors.toList()));
             ioService.export(Collections.singletonList(trip), outputStream, "Trip");
         }
         catch (Exception ignore) {

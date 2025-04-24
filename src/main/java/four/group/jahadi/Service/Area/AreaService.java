@@ -613,7 +613,7 @@ public class AreaService extends AbstractService<Area, AreaData> {
             // no need for export activation table
             exportUtils.exportCommon(outputStream);
             exportUtils.exportUsers(foundArea, outputStream);
-            exportUtils.exportTrip(trip, outputStream);
+            exportUtils.exportTrip(trip, areaId, outputStream);
             exportUtils.exportGroups(trip, outputStream);
             exportUtils.exportDrugs(foundArea, outputStream);
             exportUtils.exportEquipments(foundArea, outputStream);
