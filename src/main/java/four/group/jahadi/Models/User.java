@@ -10,7 +10,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import javax.persistence.Transient;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -479,19 +478,19 @@ public class User extends Model {
     @Override
     public String toString() {
         return "{" +
-                "\"id\":\"" + this.getId() +
-                "\", \"createdAt\":\"" + new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX").format(this.getCreatedAt()) +
-                "\", \"name\":\"" + name +
-                "\", \"password\":\"" + password +
-                "\", \"fatherName\":\"" + fatherName +
-                "\", \"birthDay\":\"" + birthDay +
-                "\", \"universityYear\":\"" + universityYear +
-                "\", \"field\":\"" + field +
-                "\", \"university\":\"" + university +
-                "\", \"nid\":\"" + nid +
-                "\", \"phone\":\"" + phone +
-                "\", \"sex\":\"" + sex +
-                "\", \"removeAt\":" + (removeAt == null ? null : String.format("\"%s\"", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX").format(removeAt))) +
+                "\"id\":" + printNullableField(this.getId()) +
+                ", \"createdAt\":" + printNullableDate(this.getCreatedAt()) +
+                ", \"name\":" + printNullableField(name) +
+                ", \"password\":" + printNullableField(password) +
+                ", \"fatherName\":" + printNullableField(fatherName) +
+                ", \"birthDay\":" + printNullableField(birthDay) +
+                ", \"universityYear\":" + printNullableField(universityYear) +
+                ", \"field\":" + printNullableField(field) +
+                ", \"university\":" + printNullableField(university) +
+                ", \"nid\":" + printNullableField(nid) +
+                ", \"phone\":" + printNullableField(phone) +
+                ", \"sex\":" + printNullableField(sex) +
+                ", \"removeAt\":" + printNullableDate(removeAt) +
                 ", \"groupId\":" + printNullableField(groupId) +
                 ", \"abilities\":" + printNullableField(abilities) +
                 ", \"diseases\":" + printNullableField(diseases) +
