@@ -296,7 +296,12 @@ public class Utility {
     }
 
     public static String printNullableDate(Date obj) {
-        return obj == null ? null : String.format("\"%s\"", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX").format(obj));
+        if (obj == null) return null;
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX"); // Use XXX instead of X for better compatibility
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC")); // Explicitly setting timezone
+
+        return "\"" + sdf.format(obj) + "\"";
     }
 
     public static String toStringOfList(List<?> objects) {

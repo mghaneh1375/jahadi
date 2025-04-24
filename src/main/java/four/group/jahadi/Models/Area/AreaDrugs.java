@@ -47,7 +47,7 @@ public class AreaDrugs extends Model {
     @Override
     public String toString() {
         return "{" +
-                "\"id\":" + this.getId() +
+                "\"id\":" + printNullableField(this.getId()) +
                 ", \"createdAt\":" + printNullableDate(this.getCreatedAt()) +
                 ", \"drugName\":" + printNullableField(drugName) +
                 ", \"drugId\":" + printNullableField(drugId) +
