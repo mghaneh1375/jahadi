@@ -1,10 +1,10 @@
 package four.group.jahadi.Models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import four.group.jahadi.Enums.Drug.*;
+import four.group.jahadi.Enums.Drug.DrugLocation;
+import four.group.jahadi.Enums.Drug.DrugType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,7 +13,6 @@ import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
