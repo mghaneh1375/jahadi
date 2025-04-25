@@ -42,6 +42,7 @@ public class EquipmentServiceInArea {
     private EquipmentRepository equipmentRepository;
     @Autowired
     private EquipmentLogRepository equipmentLogRepository;
+
     @Autowired
     private EquipmentsInAreaRepositoryImp equipmentsInAreaRepositoryImp;
 
@@ -294,8 +295,35 @@ public class EquipmentServiceInArea {
         ).orElseThrow(InvalidIdException::new);
         AreaUtils.findStartedArea(trip, areaId);
 
-        AreaEquipments areaEquipments = equipmentsInAreaRepositoryImp.countDown(areaId, equipmentId, count);
-        if (areaEquipments == null)
-            throw new NotAccessException();
+        equipmentsInAreaRepositoryImp.countDown(areaId, equipmentId, count);
+    }
+
+    synchronized
+    public void countDownEquipmentByGroup(
+            ObjectId groupId, ObjectId areaId, ObjectId userId,
+            ObjectId equipmentId, int count
+    ) {
+        if (userId != null)
+            checkAccessToWareHouse(groupId, userId);
+
+        tripRepository.findByGroupIdAndAreaId(groupId, areaId)
+                .orElseThrow(NotAccessException::new);
+
+        equipmentsInAreaRepositoryImp.countDown(areaId, equipmentId, count);
+    }
+
+    public ResponseEntity<List<JoinedAreaEquipments>> list(
+            ObjectId groupId, ObjectId areaId, ObjectId userId
+    ) {
+        if (userId != null)
+            checkAccessToWareHouse(groupId, userId);
+
+        tripRepository.findByGroupIdAndAreaId(groupId, areaId)
+                .orElseThrow(NotAccessException::new);
+
+        return new ResponseEntity<>(
+                areaEquipmentsRepository.findDigestByAreaId(areaId),
+                HttpStatus.OK
+        );
     }
 }

@@ -539,6 +539,7 @@ public class DrugServiceInArea {
 
         drug.setAvailable(drug.getAvailable() + amount);
         areaDrug.setReminder(areaDrug.getReminder() - amount);
+        areaDrug.setTotalCount(areaDrug.getTotalCount() - amount);
         areaDrug.setUpdatedAt(curr);
 
         drugLogRepository.save(DrugLog

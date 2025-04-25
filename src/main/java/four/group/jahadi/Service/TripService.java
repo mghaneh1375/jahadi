@@ -3,6 +3,7 @@ package four.group.jahadi.Service;
 import four.group.jahadi.DTO.Trip.TripStep1Data;
 import four.group.jahadi.DTO.Trip.TripStep2Data;
 import four.group.jahadi.DTO.Trip.TripStepData;
+import four.group.jahadi.Enums.Status;
 import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Exception.NotAccessException;
@@ -52,6 +53,46 @@ public class TripService extends AbstractService<Trip, TripStepData> {
                     add(filters[0]);
                 }
             });
+        }
+        if(filters[1] != null) {
+            Status status = (Status) filters[1];
+            Date curr = getCurrDate();
+            switch (status) {
+                case FINISHED:
+                    filtersList.add(new ArrayList<>() {
+                        {
+                            add("end_at");
+                            add("lt");
+                            add(curr);
+                        }
+                    });
+                    break;
+                case NOT_START:
+                    filtersList.add(new ArrayList<>() {
+                        {
+                            add("start_at");
+                            add("gt");
+                            add(curr);
+                        }
+                    });
+                    break;
+                case IN_PROGRESS:
+                    filtersList.add(new ArrayList<>() {
+                        {
+                            add("start_at");
+                            add("lte");
+                            add(curr);
+                        }
+                    });
+                    filtersList.add(new ArrayList<>() {
+                        {
+                            add("end_at");
+                            add("gte");
+                            add(curr);
+                        }
+                    });
+                    break;
+            }
         }
 
         List<Trip> trips = tripRepository.findAllWithFilter(

@@ -5,6 +5,7 @@ import four.group.jahadi.DTO.ErrorRow;
 import four.group.jahadi.Enums.Access;
 import four.group.jahadi.Exception.NotActivateAccountException;
 import four.group.jahadi.Exception.UnAuthException;
+import four.group.jahadi.Models.Area.JoinedAreaEquipments;
 import four.group.jahadi.Models.Equipment;
 import four.group.jahadi.Models.TokenInfo;
 import four.group.jahadi.Routes.Router;
@@ -22,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import java.util.List;
 
 @RestController
@@ -88,4 +90,34 @@ public class EquipmentAPIRoutes extends Router {
         );
     }
 
+    @GetMapping(value = "list/{areaId}")
+    @ResponseBody
+    @Operation(summary = "گرفتن تجهیزات موجود در منطقه توسط مسئول انبار تجهیز و یا مسئول گروه")
+    public ResponseEntity<List<JoinedAreaEquipments>> list(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId
+    ) {
+        TokenInfo fullTokenInfo = getFullTokenInfo(request);
+        return equipmentServiceInArea.list(
+                fullTokenInfo.getGroupId(), areaId,
+                fullTokenInfo.getAccesses().contains(Access.GROUP) ? null : fullTokenInfo.getUserId()
+        );
+    }
+
+    @PostMapping(value = "countDownEquipment/{areaId}/{equipmentId}")
+    @ResponseBody
+    @Operation(summary = "کم کردن تعداد یک تجهیز در منطقه توسط مسئول گروه یا مسئول انبار تجهیز", description = "این عملیات غیرقابل بازگشت است و از فراخوانی آن اطمینان داشته باشید")
+    public void countDownEquipment(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId,
+            @PathVariable @ObjectIdConstraint ObjectId equipmentId,
+            @RequestParam(value = "count") @Min(0) Integer count
+    ) {
+        TokenInfo fullTokenInfo = getFullTokenInfo(request);
+        equipmentServiceInArea.countDownEquipmentByGroup(
+                fullTokenInfo.getGroupId(), areaId,
+                fullTokenInfo.getAccesses().contains(Access.GROUP) ? null : fullTokenInfo.getUserId(),
+                equipmentId, count
+        );
+    }
 }
