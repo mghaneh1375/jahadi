@@ -1,7 +1,6 @@
 package four.group.jahadi.Service.Area;
 
 import four.group.jahadi.DTO.Area.AdviceDrugData;
-import four.group.jahadi.DTO.Area.AreaDrugsData;
 import four.group.jahadi.DTO.Area.GiveDrugData;
 import four.group.jahadi.DTO.Patient.PatientAdvices;
 import four.group.jahadi.Enums.Module.DeliveryStatus;
@@ -24,15 +23,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
 public class DrugServiceInArea {
 
     private final static Integer PAGE_SIZE = 20;
-    @Autowired
-    private WareHouseAccessForGroupRepository wareHouseAccessForGroupRepository;
     @Autowired
     private DrugRepository drugRepository;
     @Autowired
@@ -51,145 +51,6 @@ public class DrugServiceInArea {
     private UserRepository userRepository;
 
     private static final List<ObjectId> locks = new ArrayList<>();
-
-    // ###################### GROUP ACCESS #######################
-
-    //    @Transactional
-    synchronized
-    public void addAllToDrugsList(
-            ObjectId userId, ObjectId groupId,
-            String username, ObjectId areaId, List<AreaDrugsData> dtoList,
-            boolean isGroupOwner
-    ) {
-        if (!isGroupOwner &&
-                !wareHouseAccessForGroupRepository.existsDrugAccessByGroupIdAndUserId(
-                        groupId, userId
-                )
-        )
-            throw new NotAccessException();
-
-        Trip trip = tripRepository.findActiveAreaByGroupIdAndAreaIdAndWriteAccess(Utility.getCurrDate(), groupId, areaId)
-                .orElseThrow(NotAccessException::new);
-        Area foundArea = trip.getAreas().stream()
-                .filter(area -> area.getId().equals(areaId))
-                .findFirst().get();
-
-        List<ObjectId> ids = dtoList.stream().map(AreaDrugsData::getDrugId).distinct()
-                .collect(Collectors.toList());
-        List<Drug> drugsIter = drugRepository.findAllByIdsAndGroupId(ids, groupId);
-
-        List<AreaDrugs> drugs = new ArrayList<>();
-        List<ObjectId> existDrugs = areaDrugsRepository.findDrugIdsByAreaIdAndDrugIds(areaId, ids)
-                .stream().map(AreaDrugs::getDrugId).collect(Collectors.toList());
-        HashMap<ObjectId, Integer> updates = new HashMap<>();
-        existDrugs.forEach(objectId -> updates.put(objectId, 0));
-
-        List<DrugLog> drugLogs = new ArrayList<>();
-        final String msg = "اختصاص به منطقه " + foundArea.getName() + " در اردو " + trip.getName() + " توسط " + username;
-
-        for (Drug drug : drugsIter) {
-            dtoList.stream()
-                    .filter(areaDrugsData -> areaDrugsData.getDrugId().equals(drug.getId()))
-                    .findFirst().ifPresent(dto -> {
-
-                        if (drug.getAvailable() < dto.getTotalCount())
-                            throw new RuntimeException("داروی " + drug.getName() + "ظرفیت این دارو کمتر از مقدار درخواستی شما می باشد");
-
-                        if (existDrugs.contains(drug.getId()))
-                            updates.put(drug.getId(), updates.get(drug.getId()) + dto.getTotalCount());
-                        else
-                            drugs.add(
-                                    AreaDrugs
-                                            .builder()
-                                            .drugName(drug.getName())
-                                            .drugId(drug.getId())
-                                            .areaId(areaId)
-                                            .totalCount(dto.getTotalCount())
-                                            .reminder(dto.getTotalCount())
-                                            .updatedAt(new Date())
-                                            .build()
-                            );
-
-                        drug.setAvailable(drug.getAvailable() - dto.getTotalCount());
-                        drugLogs.add(
-                                DrugLog
-                                        .builder()
-                                        .drugId(drug.getId())
-                                        .userId(userId)
-                                        .areaId(areaId)
-                                        .amount(-dto.getTotalCount())
-                                        .desc(msg)
-                                        .build()
-                        );
-                    });
-        }
-
-        if (drugs.size() + updates.size() != dtoList.size())
-            throw new RuntimeException("ids are incorrect");
-
-        List<AreaDrugs> drugsInAreaList = areaDrugsRepository.findByAreaIdAndDrugIds(areaId, new ArrayList<>(updates.keySet()));
-        drugsInAreaList.forEach(next -> {
-            next.setReminder(updates.get(next.getDrugId()) + next.getReminder());
-            next.setTotalCount(updates.get(next.getDrugId()) + next.getTotalCount());
-            next.setUpdatedAt(new Date());
-        });
-
-        drugRepository.saveAll(drugsIter);
-        drugLogRepository.saveAll(drugLogs);
-        areaDrugsRepository.insert(drugs);
-        areaDrugsRepository.saveAll(drugsInAreaList);
-    }
-
-    //    @Transactional
-    synchronized
-    public void removeAllFromDrugsList(
-            ObjectId userId, ObjectId groupId,
-            String username, ObjectId areaId,
-            List<ObjectId> ids, boolean isGroupOwner
-    ) {
-        if (!isGroupOwner &&
-                !wareHouseAccessForGroupRepository.existsDrugAccessByGroupIdAndUserId(
-                        groupId, userId
-                )
-        )
-            throw new NotAccessException();
-
-        Trip trip = tripRepository.findActiveAreaByGroupIdAndAreaIdAndWriteAccess(
-                Utility.getCurrDate(), groupId, areaId
-        ).orElseThrow(NotAccessException::new);
-        Area foundArea = trip.getAreas().stream()
-                .filter(area -> area.getId().equals(areaId))
-                .findFirst().get();
-
-        List<AreaDrugs> areaDrugs = areaDrugsRepository.removeAreaDrugsByIdAndAreaId(ids, areaId);
-        List<DrugLog> drugLogs = new ArrayList<>();
-
-        List<Drug> drugsIter = drugRepository.findAllByIdsAndGroupId(
-                areaDrugs.stream().map(AreaDrugs::getDrugId).collect(Collectors.toList()),
-                groupId
-        );
-        final String msg = "حذف از منطقه " + foundArea.getName() + " در اردو " + trip.getName() + " توسط " + username;
-
-        for (Drug drug : drugsIter) {
-            areaDrugs.stream().filter(areaDrug -> areaDrug.getDrugId().equals(drug.getId())).findFirst()
-                    .ifPresent(areaDrug -> {
-                        drug.setAvailable(drug.getAvailable() + areaDrug.getReminder());
-                        drugLogs.add(
-                                DrugLog
-                                        .builder()
-                                        .drugId(drug.getId())
-                                        .userId(userId)
-                                        .areaId(areaId)
-                                        .amount(areaDrug.getReminder())
-                                        .desc(msg)
-                                        .build()
-                        );
-                    });
-        }
-
-        drugRepository.saveAll(drugsIter);
-        drugLogRepository.saveAll(drugLogs);
-    }
 
     // ###################### JAHADGAR ACCESS #######################
 

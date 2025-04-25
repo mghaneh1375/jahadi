@@ -1,8 +1,6 @@
 package four.group.jahadi.Validator;
 
 import four.group.jahadi.DTO.DrugData;
-import four.group.jahadi.DTO.ModuleData;
-import four.group.jahadi.Models.Section;
 import org.json.JSONObject;
 import org.springframework.util.ObjectUtils;
 

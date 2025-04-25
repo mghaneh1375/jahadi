@@ -1,7 +1,5 @@
 package four.group.jahadi.Validator;
 
-import four.group.jahadi.DTO.ProjectData;
-
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 

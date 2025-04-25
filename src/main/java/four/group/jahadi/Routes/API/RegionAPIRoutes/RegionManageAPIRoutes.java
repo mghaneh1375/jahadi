@@ -1,8 +1,6 @@
 package four.group.jahadi.Routes.API.RegionAPIRoutes;
 
 import four.group.jahadi.DTO.Area.AreaDigest;
-import four.group.jahadi.DTO.Region.RegionRunInfoData;
-import four.group.jahadi.DTO.Region.RegionSendNotifData;
 import four.group.jahadi.DTO.UpdatePresenceList;
 import four.group.jahadi.Models.Area.AreaDates;
 import four.group.jahadi.Models.TokenInfo;
@@ -14,16 +12,13 @@ import four.group.jahadi.Validator.ObjectIdConstraint;
 import io.swagger.v3.oas.annotations.Operation;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.List;
 
@@ -69,25 +64,6 @@ public class RegionManageAPIRoutes extends Router {
         return areaService.dashboard(getId(request), areaId);
     }
 
-    @PostMapping(value = "sendTripAlarmToAllMembers/{areaId}")
-    @ResponseBody
-    @Operation(summary = "ارسال پیام به اعضای منطقه توسط مسئول منطقه")
-    public void sendTripAlarmToAllMembers(HttpServletRequest request,
-                                          @PathVariable @ObjectIdConstraint ObjectId areaId,
-                                          @RequestBody @Valid RegionSendNotifData dto) {
-        areaService.sendTripAlarmToAllMembers(getId(request), areaId, dto);
-    }
-
-    @PutMapping(value = "setRunInfo/{areaId}")
-    @ResponseBody
-    @Operation(summary = "ست کردن اطلاعات منطقه", description = "ست کردن اطلاعاتی نظیر شهر محل برگزاری، مختصات جغرافیایی و روز و زمان شروع و پایان")
-    public void setRunInfo(HttpServletRequest request,
-                           @PathVariable @ObjectIdConstraint ObjectId areaId,
-                           @RequestBody @Valid RegionRunInfoData regionRunInfoData
-    ) {
-        areaService.setRunInfo(getId(request), areaId, regionRunInfoData);
-    }
-
     @GetMapping(value = "getRunInfo/{areaId}")
     @ResponseBody
     @Operation(summary = "گرفتن اطلاعات منطقه", description = "گرفتن اطلاعاتی نظیر شهر محل برگزاری، مختصات جغرافیایی و روز و زمان شروع و پایان")
@@ -96,15 +72,6 @@ public class RegionManageAPIRoutes extends Router {
             @PathVariable @ObjectIdConstraint ObjectId areaId
     ) {
         return areaService.getRunInfo(getId(request), areaId);
-    }
-
-    @PutMapping(value = "finalize/{areaId}")
-    @ResponseBody
-    @Operation(summary = "نهایی سازی ساخت منطقه توسط مسئول منطقه", description = "بعد از آخرین مرحله در تکمیل اطلاعات منطقه (یعنی اختصاص منشی به ماژول ها) باید این api فراخوانی شود تا چک شود آیا تمامی اطلاعات لازم وارد شده است یا نه و منطقه نهایی سازی بشود")
-    public void finalizeArea(HttpServletRequest request,
-                             @PathVariable @ObjectIdConstraint ObjectId areaId
-    ) {
-        areaService.finalizeArea(getId(request), areaId);
     }
 
     @PutMapping(value = "submitEntrance/{userId}/{areaId}")

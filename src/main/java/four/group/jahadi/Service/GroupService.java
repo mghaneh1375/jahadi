@@ -1,6 +1,5 @@
 package four.group.jahadi.Service;
 
-import four.group.jahadi.DTO.GroupData;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Models.Group;
 import four.group.jahadi.Models.User;
@@ -58,10 +57,6 @@ public class GroupService extends AbstractService<Group> {
                 groupRepository.findById(id).orElseThrow(InvalidIdException::new),
                 HttpStatus.OK
         );
-    }
-
-    public ResponseEntity<Group> store(GroupData data, Object ... params) {
-        return null;
     }
 
     public ResponseEntity<HashMap<String, Object>> statisticData(ObjectId groupId) {

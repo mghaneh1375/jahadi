@@ -1,7 +1,6 @@
 package four.group.jahadi.Routes.API.JahadgarAPIRoutes;
 
 import four.group.jahadi.DTO.Area.AdviceDrugData;
-import four.group.jahadi.DTO.Area.AreaDrugsData;
 import four.group.jahadi.DTO.Area.GiveDrugData;
 import four.group.jahadi.DTO.DrugBookmarkData;
 import four.group.jahadi.DTO.Patient.PatientAdvices;
@@ -19,7 +18,6 @@ import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Service.Area.DrugServiceInArea;
 import four.group.jahadi.Service.DrugService;
 import four.group.jahadi.Service.JahadgarDrugService;
-import four.group.jahadi.Utility.ValidList;
 import four.group.jahadi.Validator.ObjectIdConstraint;
 import io.swagger.v3.oas.annotations.Operation;
 import org.bson.types.ObjectId;
@@ -30,7 +28,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import javax.validation.constraints.Size;
 import java.util.Date;
 import java.util.List;
 
@@ -76,21 +73,6 @@ public class JahadgarDrugAPIRoutes extends Router {
             HttpServletRequest request
     ) {
         return jahadgarDrugService.list(getId(request));
-    }
-
-    @PutMapping(value = "addAllToDrugsList/{areaId}")
-    @ResponseBody
-    @Operation(summary = "افزودن یک یا چند دارو به منطقه توسط مسئول انبار دارو گروه یا مسئول گروه")
-    public void addAllToDrugsList(
-            HttpServletRequest request,
-            @PathVariable @ObjectIdConstraint ObjectId areaId,
-            @RequestBody @Valid @Size(min = 1) ValidList<AreaDrugsData> drugsData
-    ) {
-        TokenInfo tokenInfo = getFullTokenInfo(request);
-        drugServiceInArea.addAllToDrugsList(
-                tokenInfo.getUserId(), tokenInfo.getGroupId(), tokenInfo.getUsername(),
-                areaId, drugsData, tokenInfo.getAccesses().contains(Access.GROUP)
-        );
     }
 
     @PostMapping(value = "advice/{patientId}/{moduleId}/{areaDrugId}")
@@ -174,21 +156,6 @@ public class JahadgarDrugAPIRoutes extends Router {
             @RequestBody @Valid GiveDrugData data
     ) {
         drugServiceInArea.giveDrug(getId(request), areaId, adviceId, data);
-    }
-
-
-    @DeleteMapping(value = "removeAllFromDrugsList/{areaId}")
-    @Operation(summary = "حذف یک یا چند دارو از منطقه توسط مسئول گروه یا مسئول انبار دارو")
-    public void removeAllFromDrugsList(
-            HttpServletRequest request,
-            @PathVariable @ObjectIdConstraint ObjectId areaId,
-            @RequestBody @Valid @Size(min = 1) ValidList<ObjectId> drugs
-    ) {
-        TokenInfo tokenInfo = getFullTokenInfo(request);
-        drugServiceInArea.removeAllFromDrugsList(
-                tokenInfo.getUserId(), tokenInfo.getGroupId(),
-                tokenInfo.getUsername(), areaId, drugs, tokenInfo.getAccesses().contains(Access.GROUP)
-        );
     }
 
     @GetMapping(value = "list")

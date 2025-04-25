@@ -1,10 +1,5 @@
 package four.group.jahadi.Utility;
 
-import four.group.jahadi.Kavenegar.KavenegarApi;
-import four.group.jahadi.Kavenegar.excepctions.ApiException;
-import four.group.jahadi.Kavenegar.excepctions.HttpException;
-import four.group.jahadi.Kavenegar.models.SendResult;
-import four.group.jahadi.Validator.PhoneValidator;
 import org.json.JSONObject;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
@@ -14,16 +9,12 @@ import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static four.group.jahadi.Utility.StaticValues.DEV_MODE;
 
 public class Utility {
 
-    public static final Pattern datePattern = Pattern.compile(
-            "^[1-4]\\d{3}-((0[1-6]-((3[0-1])|([1-2][0-9])|(0[1-9])))|((1[0-2]|(0[7-9]))-(30|([1-2][0-9])|(0[1-9]))))$"
-    );
     private static final String AB = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
     private static final SecureRandom rnd = new SecureRandom();
     private static final Random random = new Random();
@@ -35,38 +26,12 @@ public class Utility {
         return JalaliCalendar.gregorianToJalali(new JalaliCalendar.YearMonthDate(splited[0], splited[1], splited[2])).format("/") + " - " + dateTime[1];
     }
 
-    public static Date convertJalaliToGregorianDate(String jaladiDate) {
-        String[] splited = jaladiDate.split("-");
-        Date date = new Date();
-        JalaliCalendar.YearMonthDate gregorian = JalaliCalendar.jalaliToGregorian(
-                new JalaliCalendar.YearMonthDate(
-                        splited[0], splited[1], splited[2]
-                )
-        );
-        date.setYear(gregorian.getYear() - 1900);
-        date.setMonth(gregorian.getMonth());
-        date.setDate(gregorian.getDate());
-        return date;
-    }
-
     public static boolean isNumeric(String str) {
         return str.matches("-?\\d+(\\.\\d+)?");
     }
 
-    public static String getToday(String delimeter) {
-        Locale loc = new Locale("en_US");
-        SolarCalendar sc = new SolarCalendar();
-        return sc.year + delimeter + String.format(loc, "%02d",
-                sc.month) + delimeter + String.format(loc, "%02d", sc.date);
-    }
-
     public static int convertStringToDate(String date) {
         return Integer.parseInt(date.substring(0, 4) + date.substring(5, 7) + date.substring(8, 10));
-    }
-
-    public static String convertIntToDate(Integer d) {
-        String date = d + "";
-        return date.substring(0, 4) + "/" + date.substring(4, 6) + "/" + date.substring(6, 8);
     }
 
     public static String convertPersianDigits(String number) {
@@ -116,38 +81,6 @@ public class Utility {
         }
 
         return jsonObject;
-    }
-
-    public static String generateErr(String msg) {
-        return new JSONObject()
-                .put("status", "nok")
-                .put("msg", msg)
-                .toString();
-    }
-
-    public static String generateErr(String msg, PairValue... pairValues) {
-
-        JSONObject jsonObject = new JSONObject()
-                .put("status", "nok")
-                .put("msg", msg);
-
-        for (PairValue p : pairValues)
-            jsonObject.put(p.getKey().toString(), p.getValue());
-
-        return jsonObject.toString();
-    }
-
-    public static String generateSuccessMsg(String key, Object val, PairValue... pairValues) {
-
-        JSONObject jsonObject = new JSONObject()
-                .put("status", "ok")
-                .put(key, val);
-
-        for (PairValue p : pairValues)
-            jsonObject.put(p.getKey().toString(), p.getValue());
-
-        return jsonObject.toString();
-
     }
 
     public static boolean validationNationalCode(String code) {
@@ -207,58 +140,12 @@ public class Utility {
 
         return r;
     }
-    public static int randIntForGroupCode() {
-
-        int r = 0;
-        for (int i = 0; i < 6; i++) {
-            int x = random.nextInt(10);
-
-            while (x == 0)
-                x = random.nextInt(10);
-
-            r += x * Math.pow(10, i);
-        }
-
-        return r;
-    }
 
     public static String randomString(int len) {
         StringBuilder sb = new StringBuilder(len);
         for (int i = 0; i < len; i++)
             sb.append(AB.charAt(rnd.nextInt(AB.length())));
         return sb.toString();
-    }
-
-    public static boolean sendSMS(String receptor, String token,
-                                  String token2, String token3,
-                                  String template
-    ) {
-        if(DEV_MODE)
-            return true;
-
-        receptor = convertPersianDigits(receptor);
-
-        if(!PhoneValidator.isValid(receptor)) {
-            System.out.println("not valid phone num");
-            return false;
-        }
-
-        try {
-            KavenegarApi api = new KavenegarApi("6D3779666A7065566E323932566E526B69756F44564530554752435771647443423336474D6B6F7579556B3D");
-            SendResult Result = api.verifyLookup(receptor, token, token2, token3, template);
-
-            return Result.getStatus() != 6 &&
-                    Result.getStatus() != 11 &&
-                    Result.getStatus() != 13 &&
-                    Result.getStatus() != 14 &&
-                    Result.getStatus() != 100;
-        } catch (HttpException ex) {
-            System.out.print("HttpException  : " + ex.getMessage());
-        } catch (ApiException ex) {
-            System.out.print("ApiException : " + ex.getMessage());
-        }
-
-        return false;
     }
 
     public static Date getCurrDate() {
@@ -273,13 +160,6 @@ public class Utility {
         date.setHours(0);
         date.setMinutes(0);
         date.setSeconds(0);
-        return date;
-    }
-
-    public static Date getLastDate(Date date) {
-        date.setHours(23);
-        date.setMinutes(59);
-        date.setSeconds(59);
         return date;
     }
 

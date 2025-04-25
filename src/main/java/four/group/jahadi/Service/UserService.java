@@ -9,17 +9,14 @@ import four.group.jahadi.Exception.BadRequestException;
 import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Exception.NotAccessException;
-import four.group.jahadi.Models.Activation;
 import four.group.jahadi.Models.Group;
 import four.group.jahadi.Models.Trip;
 import four.group.jahadi.Models.User;
-import four.group.jahadi.Repository.ActivationRepository;
 import four.group.jahadi.Repository.GroupRepository;
 import four.group.jahadi.Repository.TripRepository;
 import four.group.jahadi.Repository.UserRepository;
 import four.group.jahadi.Security.JwtTokenProvider;
 import four.group.jahadi.Utility.Cache;
-import four.group.jahadi.Utility.PairValue;
 import four.group.jahadi.Utility.Utility;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,8 +30,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static four.group.jahadi.Utility.StaticValues.*;
-import static four.group.jahadi.Utility.Utility.convertPersianDigits;
+import static four.group.jahadi.Utility.StaticValues.DEV_MODE;
 
 
 @Service
@@ -47,9 +43,6 @@ public class UserService extends AbstractService<User> {
     private UserRepository userRepository;
 
     @Autowired
-    private ActivationRepository activationRepository;
-
-    @Autowired
     private GroupRepository groupRepository;
 
     @Autowired
@@ -60,10 +53,6 @@ public class UserService extends AbstractService<User> {
 
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
-
-    public String getEncPass(String pass) {
-        return passwordEncoder.encode(convertPersianDigits(pass));
-    }
 
     @Override
     public ResponseEntity<List<User>> list(Object... filters) {
@@ -100,54 +89,6 @@ public class UserService extends AbstractService<User> {
                 users,
                 HttpStatus.OK
         );
-    }
-
-    private ResponseEntity<HashMap<String, Object>> sendSMS(User user, boolean storeUserDoc) {
-
-        PairValue existTokenP = existSMS(user.getPhone());
-        HashMap<String, Object> output = new HashMap<>();
-
-        if (existTokenP != null) {
-            output.put("token", existTokenP.getKey().toString());
-            output.put("reminder", existTokenP.getValue());
-        } else {
-            String token = sendNewSMS(user, storeUserDoc);
-            output.put("token", token);
-            output.put("reminder", SMS_RESEND_SEC);
-        }
-
-        return new ResponseEntity<>(output, HttpStatus.OK);
-    }
-
-    private String sendNewSMS(User user, boolean storeUserDoc) {
-        int code = Utility.randInt();
-        String token = Utility.randomString(20);
-        long now = System.currentTimeMillis();
-        new Thread(() -> {
-            activationRepository.deleteByPhone(user.getPhone(), now);
-            Activation activation = Activation.builder()
-                    .token(token)
-                    .code(code)
-                    .createdAt(now)
-                    .build();
-
-            if (storeUserDoc) {
-                activation.setUser(user);
-                activation.setPhone(user.getPhone());
-            } else
-                activation.setNid(user.getNid());
-
-            activationRepository.insert(activation);
-            Utility.sendSMS(user.getPhone(), code + "", "", "", "activation");
-
-        }).start();
-
-        return token;
-    }
-
-    public PairValue existSMS(String phone) {
-        Optional<Activation> activation = activationRepository.findByPhone(phone, System.currentTimeMillis() - SMS_RESEND_MSEC);
-        return activation.map(value -> new PairValue(value.getToken(), SMS_RESEND_SEC - (System.currentTimeMillis() - value.getCreatedAt()) / 1000)).orElse(null);
     }
 
     @Override

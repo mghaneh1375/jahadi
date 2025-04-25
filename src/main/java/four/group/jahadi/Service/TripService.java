@@ -1,7 +1,5 @@
 package four.group.jahadi.Service;
 
-import four.group.jahadi.DTO.Trip.TripStep1Data;
-import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Models.Area.Area;
 import four.group.jahadi.Models.*;
 import four.group.jahadi.Repository.*;
@@ -108,26 +106,6 @@ public class TripService extends AbstractService<Trip> {
                 .findFirst().ifPresent(area::setOwner)));
 
         return new ResponseEntity<>(trips, HttpStatus.OK);
-    }
-
-    public void store(ObjectId projectId, List<TripStep1Data> data) {
-        Project project = projectRepository.findById(projectId).orElseThrow(InvalidIdException::new);
-        Trip trip = Trip
-                .builder()
-                .projectId(project.getId())
-                .name(null)
-                .build();
-
-        List<GroupAccess> groupsWithAccess = new ArrayList<>();
-        data.forEach(tripStepData -> groupsWithAccess.add(
-                GroupAccess.builder()
-                        .groupId(tripStepData.getOwner())
-                        .writeAccess(tripStepData.getWriteAccess())
-                        .build()
-        ));
-
-        trip.setGroupsWithAccess(groupsWithAccess);
-        tripRepository.save(trip);
     }
 
     @Override
