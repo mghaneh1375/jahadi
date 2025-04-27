@@ -155,8 +155,6 @@ public class EquipmentServiceInArea {
         ).orElseThrow(InvalidIdException::new);
         AreaUtils.findStartedArea(trip, areaId);
 
-        AreaEquipments areaEquipments = equipmentsInAreaRepositoryImp.countDown(areaId, equipmentId, count);
-        if (areaEquipments == null)
-            throw new NotAccessException();
+        equipmentsInAreaRepositoryImp.countDown(areaId, equipmentId, count);
     }
 }

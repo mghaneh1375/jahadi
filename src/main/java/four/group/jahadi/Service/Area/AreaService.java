@@ -45,6 +45,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static four.group.jahadi.Service.Area.AreaUtils.findArea;
+import static four.group.jahadi.Utility.Utility.*;
 
 @Service
 public class AreaService extends AbstractService<Area> {
@@ -289,8 +290,8 @@ public class AreaService extends AbstractService<Area> {
         output.put("country", foundArea.getCountry());
         output.put("dailyStartAt", foundArea.getDailyStartAt());
         output.put("dailyEndAt", foundArea.getDailyEndAt());
-        output.put("startAt", Utility.convertDateToJalali(foundArea.getStartAt()));
-        output.put("endAt", Utility.convertDateToJalali(foundArea.getEndAt()));
+        output.put("startAt", Utility.convertUTCDateToJalali(foundArea.getStartAt()));
+        output.put("endAt", Utility.convertUTCDateToJalali(foundArea.getEndAt()));
         output.put("lat", foundArea.getLat());
         output.put("lng", foundArea.getLng());
 
@@ -310,10 +311,10 @@ public class AreaService extends AbstractService<Area> {
 
         Date now = Utility.getCurrDate();
 
-        if (foundArea.getStartAt() == null || foundArea.getStartAt().after(now))
+        if (foundArea.getStartAt() == null || isUtcAfter(foundArea.getStartAt(), now))
             throw new InvalidFieldsException("اردو در منطقه موردنظر هنوز شروع نشده است");
 
-        if (foundArea.getEndAt().before(now))
+        if (isUtcBefore(foundArea.getEndAt(), now))
             throw new InvalidFieldsException("اردو در منطفه موردنظر به اتمام رسیده است");
 
         if (foundArea.getMembers().stream().noneMatch(objectId -> objectId.equals(jahadgarId)))
@@ -375,53 +376,6 @@ public class AreaService extends AbstractService<Area> {
             return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
 
         return new ResponseEntity<>(foundArea.getDates(), HttpStatus.OK);
-    }
-
-    public void remove(
-            Trip trip, ObjectId areaId,
-            ObjectId userId, String username, boolean needRemove
-    ) {
-        Optional<Area> first = trip
-                .getAreas()
-                .stream()
-                .filter(area1 -> area1.getId().equals(areaId))
-                .findFirst();
-        if (first.isEmpty())
-            throw new InvalidIdException();
-
-        if (
-                first.get().getStartAt() != null &&
-                        Utility.getDate(first.get().getStartAt()).before(Utility.getCurrDate())
-        )
-            throw new RuntimeException("منطقه موردنظر شروع شده است و امکان حذف آن وجود ندارد");
-
-        patientsInAreaRepository.deleteByAreaId(areaId);
-        areaPresenceService.removeByAreaId(areaId);
-        drugServiceInArea.returnAllDrugsByAdmin(
-                userId, username, areaId,
-                first.get().getName(), trip.getName()
-        );
-        equipmentServiceInArea.returnAllEquipmentsByAdmin(
-                userId, username, areaId,
-                first.get().getName(), trip.getName()
-        );
-        if (needRemove)
-            trip.getAreas().removeIf(area -> area.getId().equals(areaId));
-    }
-
-    public void removeAreaFromTrip(
-            ObjectId tripId, ObjectId areaId,
-            ObjectId groupId, ObjectId userId, String username
-    ) {
-        Trip trip = tripRepository.findById(tripId).orElseThrow(InvalidIdException::new);
-        if (trip.getGroupsWithAccess()
-                .stream()
-                .noneMatch(groupAccess -> groupAccess.getWriteAccess() && groupAccess.getGroupId().equals(groupId))
-        )
-            throw new NotAccessException();
-
-        remove(trip, areaId, userId, username, true);
-        tripRepository.save(trip);
     }
 
     public void exportTrip(

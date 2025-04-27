@@ -10,7 +10,6 @@ import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Service.Area.AreaService;
 import four.group.jahadi.Utility.ValidList;
 import four.group.jahadi.Validator.ObjectIdConstraint;
-import io.swagger.v3.oas.annotations.Operation;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -39,20 +38,6 @@ public class AreaAPIRoutes extends Router {
     ) throws UnAuthException, NotActivateAccountException {
         User user = getUser(request);
         return areaService.store(areas, user.getAccesses().contains(Access.ADMIN), tripId, user.getGroupId());
-    }
-
-    @DeleteMapping(value = "removeAreaFromTrip/{tripId}/{areaId}")
-    @Operation(summary = "حذف منطقه از اردو توسط مسئول گروهی که دسترسی write برای آن اردو داشته باشد")
-    public void removeAreaFromTrip(
-            HttpServletRequest request,
-            @PathVariable @ObjectIdConstraint ObjectId tripId,
-            @PathVariable @ObjectIdConstraint ObjectId areaId
-    ) throws UnAuthException, NotActivateAccountException {
-        User user = getUser(request);
-        areaService.removeAreaFromTrip(
-                tripId, areaId, getTokenInfo(request).getGroupId(),
-                user.getId(), user.getNid()
-        );
     }
 
 }

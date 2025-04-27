@@ -8,6 +8,7 @@ import four.group.jahadi.Models.PresenceList;
 import four.group.jahadi.Models.User;
 import four.group.jahadi.Models.UserPresenceList;
 import four.group.jahadi.Repository.Area.PresenceListRepository;
+import four.group.jahadi.Utility.Utility;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -52,7 +53,7 @@ public class AreaPresenceService {
                 presenceList.setExit(data.getExit());
 
             if(presenceList.getEntrance() != null && presenceList.getExit() != null &&
-                    presenceList.getExit().before(presenceList.getEntrance())
+                    Utility.isUtcBefore(presenceList.getExit(), presenceList.getEntrance())
             )
                 throw new InvalidFieldsException("زمان ورود باید قبل از خروج باشد");
         }
