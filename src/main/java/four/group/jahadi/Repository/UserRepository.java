@@ -5,7 +5,6 @@ import four.group.jahadi.Enums.AccountStatus;
 import four.group.jahadi.Enums.Sex;
 import four.group.jahadi.Models.User;
 import org.bson.types.ObjectId;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;

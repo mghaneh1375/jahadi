@@ -5,7 +5,6 @@ import four.group.jahadi.Models.User;
 import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Security.JwtTokenFilter;
 import four.group.jahadi.Service.UserService;
-import four.group.jahadi.Tests.Seeder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -21,9 +20,6 @@ public class UserAPIRoutes extends Router {
 
     @Autowired
     UserService userService;
-
-    @Autowired
-    Seeder seeder;
 
     @PostMapping(value = "/signIn")
     @ResponseBody

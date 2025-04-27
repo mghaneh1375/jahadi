@@ -1,8 +1,5 @@
 package four.group.jahadi.Repository;
 
-import four.group.jahadi.Enums.Access;
-import four.group.jahadi.Enums.AccountStatus;
-import four.group.jahadi.Enums.Sex;
 import four.group.jahadi.Models.Project;
 import four.group.jahadi.Models.User;
 import org.bson.types.ObjectId;

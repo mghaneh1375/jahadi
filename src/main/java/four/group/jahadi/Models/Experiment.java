@@ -10,7 +10,6 @@ import static four.group.jahadi.Utility.Utility.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Document(collection = "experiment")
-@Builder
 public class Experiment extends Model {
     private String title;
     private Integer priority;

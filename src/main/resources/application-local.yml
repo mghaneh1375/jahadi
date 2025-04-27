@@ -37,9 +37,11 @@ token:
       custom: 'D/RG6sq9~=payYb8df:@h'
 app:
   security:
-    level: 'dev'
+    level: '07022fc1b04d76ca568553c0411ce2547be5cf8acacd4e63c0daa5277129d8b3'
+    dev: 'KJ1AZh+tkKQ9JA6XkeBuZ0gQRRVilnRYb6Xp1FmXWA=='
   password:
     hash: 't6DSPiQSAX77k9rCsNTqJd7Zr+tyjwY3bE0cosIrXXp+hT71AWF8gTM/GBSs1zaFD3jgkIhZmicnIXcHzTmd53sPcBzY0bR1hn1YYUXvJL4xMTF3e3Pa61gNgSQ='
-  checksum: 'fDbC4Mt52s+/Vmtfnk0p6Tp3/IWsVLPw6PFwc2AX/f02foHB6T4WwIhRJ65F9lSlT4P5DT50SBF9zY6VgYZ1VT8PLmnig0GaPrJHlkw8THUxSCL3rjyCD1cKlpI='
+  checksum: 'fnvI3ORWCQnbQTDx0JMrINMpHObVezh2nBpWCaaEu5fmnpSBfdvn3nVZM4aqthVyCGaIo0PiWU6RJKoTyruuCatzGLGq8NE5HSP1H77VtcvPYu00Wo2PS0im4g0='
+  main-file-path: 'C:\Users\user\IdeaProjects\Jahadi\target\classes\four\group\jahadi\JahadiApplication.class'
   license:
     key: '4Gz6P4kWiyVquji0S2oV+NsynysUwlFYSV/NbwqtrN60GUJhKvUF3CLedYBpXCn808Pqp3N/eYLeHTnAeLJAbhTR/EuzzgQYb+KrCI/G9HOQ7O6XuQP2ytnymiA='

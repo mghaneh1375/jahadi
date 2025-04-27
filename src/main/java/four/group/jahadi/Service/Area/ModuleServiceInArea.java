@@ -25,7 +25,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static four.group.jahadi.Service.Area.AreaUtils.findArea;
-import static four.group.jahadi.Tests.Modules.ModuleSeeder.tabIcons;
 
 @Service
 public class ModuleServiceInArea {
