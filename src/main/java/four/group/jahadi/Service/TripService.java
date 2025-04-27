@@ -1,5 +1,6 @@
 package four.group.jahadi.Service;
 
+import four.group.jahadi.Enums.Status;
 import four.group.jahadi.Models.Area.Area;
 import four.group.jahadi.Models.*;
 import four.group.jahadi.Repository.*;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -45,6 +47,46 @@ public class TripService extends AbstractService<Trip> {
                     add(filters[0]);
                 }
             });
+        }
+        if(filters[1] != null) {
+            Status status = (Status) filters[1];
+            Date curr = getCurrDate();
+            switch (status) {
+                case FINISHED:
+                    filtersList.add(new ArrayList<>() {
+                        {
+                            add("end_at");
+                            add("lt");
+                            add(curr);
+                        }
+                    });
+                    break;
+                case NOT_START:
+                    filtersList.add(new ArrayList<>() {
+                        {
+                            add("start_at");
+                            add("gt");
+                            add(curr);
+                        }
+                    });
+                    break;
+                case IN_PROGRESS:
+                    filtersList.add(new ArrayList<>() {
+                        {
+                            add("start_at");
+                            add("lte");
+                            add(curr);
+                        }
+                    });
+                    filtersList.add(new ArrayList<>() {
+                        {
+                            add("end_at");
+                            add("gte");
+                            add(curr);
+                        }
+                    });
+                    break;
+            }
         }
 
         List<Trip> trips = tripRepository.findAllWithFilter(
