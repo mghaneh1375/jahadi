@@ -183,7 +183,7 @@ public class ReportServiceInArea {
                                                     .filter(user -> user.getId().equals(patientForm.getDoctorId()))
                                                     .findFirst().get();
                                             row.createCell(4).setCellValue(doctor.getName());
-                                            row.createCell(5).setCellValue(patientReferral.getReceptedAt() == null ? "" : Utility.convertDateToJalali(patientReferral.getReceptedAt()));
+                                            row.createCell(5).setCellValue(patientReferral.getReceptedAt() == null ? "" : Utility.convertUTCDateToJalali(patientReferral.getReceptedAt()));
 
                                             if (incRowStep.get() > 1) {
                                                 for (int i = 0; i < 6; i++) {

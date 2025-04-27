@@ -180,7 +180,7 @@ public class PatientExternalReferralsService {
                         PatientExternalForm form = PatientExternalForm
                                 .builder()
                                 .referredFrom(moduleHashMap.get(patientReferral.getModuleId()))
-                                .createdAt(Utility.convertDateToJalali(patientForm.getCreatedAt()))
+                                .createdAt(Utility.convertUTCDateToJalali(patientForm.getCreatedAt()))
                                 .doctor(
                                         patientForm.getDoctorId() == null || !doctorsHashMap.containsKey(patientForm.getDoctorId())
                                                 ? "" : doctorsHashMap.get(patientForm.getDoctorId())

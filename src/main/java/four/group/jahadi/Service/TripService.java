@@ -172,10 +172,10 @@ public class TripService extends AbstractService<Trip, TripStepData> {
 
         Project project = projectRepository.findById(trip.getProjectId()).get();
         // Validate dates
-        if(project.getStartAt().after(startAt))
-            throw new InvalidFieldsException("تاریخ شروع باید از " + Utility.convertDateToJalali(project.getStartAt()) + " باشد");
-        if(project.getEndAt().before(endAt))
-            throw new InvalidFieldsException("تاریخ اتمام باید از " + Utility.convertDateToJalali(project.getEndAt()) + " باشد");
+        if(isUtcAfter(project.getStartAt(), startAt))
+            throw new InvalidFieldsException("تاریخ شروع باید از " + Utility.convertDateToSimpleJalali(project.getStartAt()) + " باشد");
+        if(isUtcBefore(project.getEndAt(), endAt))
+            throw new InvalidFieldsException("تاریخ اتمام باید از " + Utility.convertDateToSimpleJalali(project.getEndAt()) + " باشد");
 
         trip.setName(dto.getName());
         trip.setStartAt(startAt);
@@ -191,7 +191,7 @@ public class TripService extends AbstractService<Trip, TripStepData> {
 
     public void removeTrip(Trip trip, ObjectId userId, String username) {
         if (trip.getStartAt() != null &&
-                Utility.getCurrDate().after(trip.getStartAt())
+                isUtcAfter(Utility.getCurrDate(), trip.getStartAt())
         )
             throw new InvalidFieldsException("اردو آغاز شده و امکان حدف آن وجود ندارد");
 

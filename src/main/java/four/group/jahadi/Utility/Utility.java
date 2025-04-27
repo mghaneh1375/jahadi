@@ -12,6 +12,11 @@ import org.modelmapper.convention.NameTransformers;
 
 import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
@@ -20,6 +25,18 @@ import java.util.stream.Collectors;
 import static four.group.jahadi.Utility.StaticValues.DEV_MODE;
 
 public class Utility {
+    private static final SimpleDateFormat sdfSSSXXX;
+    private static final ZoneId tehranZoneId = ZoneId.of("Asia/Tehran");
+    private static final SimpleDateFormat simpleDateFormat;
+    private static final DateTimeFormatter dateTimeFormatter;
+
+    static {
+        sdfSSSXXX = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        sdfSSSXXX.setTimeZone(TimeZone.getTimeZone("UTC"));
+        simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+                .withZone(ZoneOffset.UTC);
+    }
 
     public static final Pattern datePattern = Pattern.compile(
             "^[1-4]\\d{3}-((0[1-6]-((3[0-1])|([1-2][0-9])|(0[1-9])))|((1[0-2]|(0[7-9]))-(30|([1-2][0-9])|(0[1-9]))))$"
@@ -28,9 +45,12 @@ public class Utility {
     private static final SecureRandom rnd = new SecureRandom();
     private static final Random random = new Random();
 
-    public static String convertDateToJalali(Date date) {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-        String[] dateTime = simpleDateFormat.format(date).split(" ");
+    public static String convertDateToSimpleJalali(Date date) {
+        String[] splited = simpleDateFormat.format(date).split("-");
+        return JalaliCalendar.gregorianToJalali(new JalaliCalendar.YearMonthDate(splited[0], splited[1], splited[2])).format("/");
+    }
+    public static String convertUTCDateToJalali(Date date) {
+        String[] dateTime = dateTimeFormatter.format(convertToUTCInstant(date)).split(" ");
         String[] splited = dateTime[0].split("-");
         return JalaliCalendar.gregorianToJalali(new JalaliCalendar.YearMonthDate(splited[0], splited[1], splited[2])).format("/") + " - " + dateTime[1];
     }
@@ -53,20 +73,8 @@ public class Utility {
         return str.matches("-?\\d+(\\.\\d+)?");
     }
 
-    public static String getToday(String delimeter) {
-        Locale loc = new Locale("en_US");
-        SolarCalendar sc = new SolarCalendar();
-        return sc.year + delimeter + String.format(loc, "%02d",
-                sc.month) + delimeter + String.format(loc, "%02d", sc.date);
-    }
-
     public static int convertStringToDate(String date) {
         return Integer.parseInt(date.substring(0, 4) + date.substring(5, 7) + date.substring(8, 10));
-    }
-
-    public static String convertIntToDate(Integer d) {
-        String date = d + "";
-        return date.substring(0, 4) + "/" + date.substring(4, 6) + "/" + date.substring(6, 8);
     }
 
     public static String convertPersianDigits(String number) {
@@ -291,13 +299,35 @@ public class Utility {
         return obj == null ? null : String.format("%d", obj);
     }
 
+    public static boolean isUtcAfter(Date dateToCheck, Date referenceDate) {
+        Instant utcInstantToCheck = convertToUTCInstant(dateToCheck);
+        Instant utcReferenceInstant = convertToInstant(referenceDate);
+        return utcInstantToCheck.isAfter(utcReferenceInstant);
+    }
+
+    public static boolean isUtcBefore(Date dateToCheck, Date referenceDate) {
+        Instant utcInstantToCheck = convertToUTCInstant(dateToCheck);
+        Instant utcReferenceInstant = convertToInstant(referenceDate);
+        return utcInstantToCheck.isBefore(utcReferenceInstant);
+    }
+
+    public static Instant convertToInstant(Date date) {
+        Instant instant = date.toInstant();
+        ZonedDateTime tehranTime = instant.atZone(tehranZoneId);
+        ZonedDateTime utcTime = tehranTime.withZoneSameLocal(ZoneOffset.UTC);
+        return utcTime.toInstant();
+    }
+
+    public static Instant convertToUTCInstant(Date date) {
+        Instant instant = date.toInstant();
+        ZonedDateTime tehranTime = instant.atZone(tehranZoneId);
+        ZonedDateTime utcTime = tehranTime.withZoneSameInstant(ZoneOffset.UTC);
+        return utcTime.toInstant();
+    }
+
     public static String printNullableDate(Date obj) {
         if (obj == null) return null;
-
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX"); // Use XXX instead of X for better compatibility
-        sdf.setTimeZone(TimeZone.getTimeZone("UTC")); // Explicitly setting timezone
-
-        return "\"" + sdf.format(obj) + "\"";
+        return "\"" + sdfSSSXXX.format(obj) + "\"";
     }
 
     public static String toStringOfList(List<?> objects) {

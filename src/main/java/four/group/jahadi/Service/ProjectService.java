@@ -18,8 +18,7 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static four.group.jahadi.Utility.Utility.getDate;
-import static four.group.jahadi.Utility.Utility.getLastDate;
+import static four.group.jahadi.Utility.Utility.*;
 
 
 @Service
@@ -136,7 +135,7 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
 //    @Transactional
     public void remove(ObjectId id, ObjectId userId, String username) {
         Project project = projectRepository.findById(id).orElseThrow(InvalidIdException::new);
-        if (Utility.getCurrDate().after(project.getStartAt()))
+        if (isUtcAfter(Utility.getCurrDate(), project.getStartAt()))
             throw new InvalidFieldsException("پروژه آغاز شده و امکان حدف آن وجود ندارد");
 
         tripRepository

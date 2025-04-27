@@ -48,8 +48,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static four.group.jahadi.Service.Area.AreaUtils.findArea;
-import static four.group.jahadi.Utility.Utility.getDate;
-import static four.group.jahadi.Utility.Utility.getLastDate;
+import static four.group.jahadi.Utility.Utility.*;
 
 @Service
 public class AreaService extends AbstractService<Area, AreaData> {
@@ -350,11 +349,11 @@ public class AreaService extends AbstractService<Area, AreaData> {
         Date start = getDate(new Date(dto.getStartAt()));
         Date end = getLastDate(new Date(dto.getEndAt()));
 
-        if (trip.getStartAt().after(start))
-            throw new InvalidFieldsException("زمان آغاز باید بعد از " + Utility.convertDateToJalali(trip.getStartAt()) + " باشد");
+        if (isUtcAfter(trip.getStartAt(), start))
+            throw new InvalidFieldsException("زمان آغاز باید بعد از " + Utility.convertDateToSimpleJalali(trip.getStartAt()) + " باشد");
 
-        if (trip.getEndAt().before(end))
-            throw new InvalidFieldsException("زمان پایان باید قبل از " + Utility.convertDateToJalali(trip.getEndAt()) + " باشد");
+        if (isUtcBefore(trip.getEndAt(), end))
+            throw new InvalidFieldsException("زمان پایان باید قبل از " + Utility.convertDateToSimpleJalali(trip.getEndAt()) + " باشد");
 
         Area foundArea = trip
                 .getAreas().stream().filter(area -> area.getId().equals(areaId))
@@ -398,8 +397,8 @@ public class AreaService extends AbstractService<Area, AreaData> {
         output.put("country", foundArea.getCountry());
         output.put("dailyStartAt", foundArea.getDailyStartAt());
         output.put("dailyEndAt", foundArea.getDailyEndAt());
-        output.put("startAt", Utility.convertDateToJalali(foundArea.getStartAt()));
-        output.put("endAt", Utility.convertDateToJalali(foundArea.getEndAt()));
+        output.put("startAt", Utility.convertUTCDateToJalali(foundArea.getStartAt()));
+        output.put("endAt", Utility.convertUTCDateToJalali(foundArea.getEndAt()));
         output.put("lat", foundArea.getLat());
         output.put("lng", foundArea.getLng());
 
@@ -455,10 +454,10 @@ public class AreaService extends AbstractService<Area, AreaData> {
 
         Date now = Utility.getCurrDate();
 
-        if (foundArea.getStartAt() == null || foundArea.getStartAt().after(now))
+        if (foundArea.getStartAt() == null || isUtcAfter(foundArea.getStartAt(), now))
             throw new InvalidFieldsException("اردو در منطقه موردنظر هنوز شروع نشده است");
 
-        if (foundArea.getEndAt().before(now))
+        if (isUtcBefore(foundArea.getEndAt(), now))
             throw new InvalidFieldsException("اردو در منطفه موردنظر به اتمام رسیده است");
 
         if (foundArea.getMembers().stream().noneMatch(objectId -> objectId.equals(jahadgarId)))
@@ -536,7 +535,8 @@ public class AreaService extends AbstractService<Area, AreaData> {
 
         if (
                 first.get().getStartAt() != null &&
-                        Utility.getDate(first.get().getStartAt()).before(Utility.getCurrDate())
+                        Utility.isUtcBefore(Utility.getDate(first.get().getStartAt()), Utility.getCurrDate())
+
         )
             throw new RuntimeException("منطقه موردنظر شروع شده است و امکان حذف آن وجود ندارد");
 
