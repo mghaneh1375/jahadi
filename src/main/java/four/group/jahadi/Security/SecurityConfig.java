@@ -47,8 +47,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/api/user/checkSignUpFormStep3",
             "/api/user/signUp",
             "/api/user/forgetPassword",
-            "/api/user/resetPassword",
-            "/api/admin/project/**"
+            "/api/user/resetPassword"
     };
 
     @Override
