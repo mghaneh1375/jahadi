@@ -285,4 +285,13 @@ public class Utility {
     public static <D, T> D map(final T entity, Class<D> outClass) {
         return modelMapper.map(entity, outClass);
     }
+
+    public static Map<String, String> tabIcons = new HashMap<>(){{
+        put("آزمایشگاه", "icon-laboratory");
+        put("غربالگری", "icon-health-1");
+        put("متخصص ها", "icon-doctor-1");
+        put("پزشک", "icon-advice");
+        put("توان بخشی", "icon-disability");
+        put("پاراکلینیک", "icon-injection-1");
+    }};
 }

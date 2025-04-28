@@ -2,6 +2,7 @@ package four.group.jahadi.Service.Area;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.introspect.AnnotatedClass;
 import four.group.jahadi.DTO.Area.AreaData;
 import four.group.jahadi.DTO.Area.AreaDigest;
 import four.group.jahadi.DTO.UpdatePresenceList;
@@ -24,10 +25,12 @@ import four.group.jahadi.Utility.Utility;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -37,6 +40,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -434,6 +438,32 @@ public class AreaService extends AbstractService<Area> {
         }
     }
 
+    public static Set<Class<?>> getClassesWithAnnotation(ClassLoader classLoader, Class<? extends Annotation> annotation) {
+        Set<Class<?>> annotatedClasses = new HashSet<>();
+        try {
+            Set<Class<?>> allClasses = getAllClassesFromClasspath(classLoader);
+            for (Class<?> clazz : allClasses) {
+                if (clazz.isAnnotationPresent(annotation)) {
+                    annotatedClasses.add(clazz);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return annotatedClasses;
+    }
+
+    private static Set<Class<?>> getAllClassesFromClasspath(ClassLoader classLoader) {
+        Set<Class<?>> classes = new HashSet<>();
+        try {
+            classes.add(AnnotatedClass.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return classes;
+    }
+
     public Set<Class> findAllClassesUsingClassLoader(String packageName) {
         InputStream stream = ClassLoader.getSystemClassLoader()
                 .getResourceAsStream(packageName.replaceAll("[.]", "/"));
@@ -455,12 +485,11 @@ public class AreaService extends AbstractService<Area> {
     }
 
     private void saveAllList(
-            List<Object> values, Class selectedDB,
-            Set<Class> repositories
+            List<Object> values, Class<?> selectedDB,
+            Set<Class<?>> repositories
     ) {
-        System.out.println("Saving data for " + selectedDB.getName());
-        List<Object> finalValues = values;
-        String[] split = selectedDB.getName().split("\\.");
+        System.out.println("Saving data for " + selectedDB.getAnnotation(Document.class).collection());
+        String[] split = selectedDB.getAnnotation(Document.class).collection().split("\\.");
         repositories
                 .stream()
                 .filter(aClass -> aClass.getName().endsWith("." + split[split.length - 1] + "Repository"))
@@ -470,7 +499,7 @@ public class AreaService extends AbstractService<Area> {
                     Object bean = fetcher.getBeanByClass(aClass);
                     try {
                         Method method = aClass.getMethod("saveAll", Iterable.class);
-                        method.invoke(bean, finalValues);
+                        method.invoke(bean, values);
                     } catch (NoSuchMethodException | InvocationTargetException |
                              IllegalAccessException e) {
                         throw new RuntimeException(e);
@@ -480,7 +509,7 @@ public class AreaService extends AbstractService<Area> {
 
     private void removeAll(
             List<Object> values, Class selectedDB,
-            Set<Class> repositories
+            Set<Class<?>> repositories
     ) {
         List<Object> finalValues = values;
         String[] split = selectedDB.getName().split("\\.");
@@ -500,11 +529,16 @@ public class AreaService extends AbstractService<Area> {
                 });
     }
 
+    public static String capitalizeFirstChar(String input) {
+        if (input == null || input.isEmpty()) {
+            return input;
+        }
+        return input.substring(0, 1).toUpperCase() + input.substring(1);
+    }
+
     public void importDBToConstructLocalServer(MultipartFile file) {
-        Set<Class> models = findAllClassesUsingClassLoader("four.group.jahadi.Models");
-        models.addAll(findAllClassesUsingClassLoader("four.group.jahadi.Models.Area"));
-        Set<Class> repositories = findAllClassesUsingClassLoader("four.group.jahadi.Repository");
-        repositories.addAll(findAllClassesUsingClassLoader("four.group.jahadi.Repository.Area"));
+        Set<Class<?>> models = getClassesWithAnnotation(ClassLoader.getSystemClassLoader(), Document.class);
+        Set<Class<?>> repositories = getClassesWithAnnotation(ClassLoader.getSystemClassLoader(), Repository.class);
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -527,9 +561,12 @@ public class AreaService extends AbstractService<Area> {
                         List<Object> finalValues = values;
                         models
                                 .stream()
-                                .filter(aClass -> aClass.getName().endsWith("." + line.replaceAll("\\*", "")))
+                                .filter(aClass ->
+                                        capitalizeFirstChar(aClass.getAnnotation(Document.class).collection())
+                                                .endsWith("." + line.replaceAll("\\*", ""))
+                                )
                                 .findFirst().ifPresent(aClass -> {
-                                    System.out.println("Find model: " + aClass.getName());
+                                    System.out.println("Find model: " + aClass.getAnnotation(Document.class).collection());
                                     selectedDB.set(aClass);
                                     removeAll(finalValues, selectedDB.get(), repositories);
                                 });
@@ -541,8 +578,7 @@ public class AreaService extends AbstractService<Area> {
                         continue;
 
                     values.add(objectMapper.readValue(line, selectedDB.get()));
-                }
-                catch (Exception x) {
+                } catch (Exception x) {
                     x.printStackTrace();
                 }
             }
@@ -550,8 +586,7 @@ public class AreaService extends AbstractService<Area> {
             if (selectedDB.get() != null && values != null && values.size() > 0) {
                 try {
                     saveAllList(values, selectedDB.get(), repositories);
-                }
-                catch (Exception x) {
+                } catch (Exception x) {
                     x.printStackTrace();
                 }
             }
