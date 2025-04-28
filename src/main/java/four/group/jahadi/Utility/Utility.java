@@ -367,7 +367,7 @@ public class Utility {
 
     public static String printNullableDate(LocalDateTime obj) {
         if (obj == null) return null;
-        return "\"" + sdfSSSXXX.format(obj) + "\"";
+        return "\"" + obj.format(dateTimeFormatter) + "\"";
     }
 
     public static String toStringOfList(List<?> objects) {
