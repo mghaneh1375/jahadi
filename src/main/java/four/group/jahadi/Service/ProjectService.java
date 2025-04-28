@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -135,7 +136,7 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
 //    @Transactional
     public void remove(ObjectId id, ObjectId userId, String username) {
         Project project = projectRepository.findById(id).orElseThrow(InvalidIdException::new);
-        if (isUtcAfter(Utility.getCurrDate(), project.getStartAt()))
+        if (project.getStartAt().isAfter(Utility.getCurrLocalDateTime()))
             throw new InvalidFieldsException("پروژه آغاز شده و امکان حدف آن وجود ندارد");
 
         tripRepository
@@ -218,8 +219,8 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
                         .flatMap(List::stream).distinct().collect(Collectors.toList()))
                 .name(projectData.getName())
                 .color(projectData.getColor())
-                .startAt(getDate(new Date(projectData.getStartAt())))
-                .endAt(getLastDate(new Date(projectData.getEndAt())))
+                .startAt(getLocalDateTime(new Date(projectData.getStartAt())))
+                .endAt(getLastLocalDateTime(new Date(projectData.getEndAt())))
                 .build();
     }
 
@@ -227,8 +228,8 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
     Project populateEntity(Project project, UpdateProjectData projectData) {
         project.setName(projectData.getName());
         project.setColor(projectData.getColor());
-        project.setStartAt(new Date(projectData.getStartAt()));
-        project.setEndAt(new Date(projectData.getEndAt()));
+        project.setStartAt(getLocalDateTime(new Date(projectData.getStartAt())));
+        project.setEndAt(getLastLocalDateTime(new Date(projectData.getEndAt())));
         return project;
     }
 

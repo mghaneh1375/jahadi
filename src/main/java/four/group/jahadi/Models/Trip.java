@@ -9,7 +9,7 @@ import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static four.group.jahadi.Utility.Utility.*;
@@ -38,12 +38,12 @@ public class Trip extends Model {
     @Field("start_at")
     @JsonSerialize(using = DateSerialization.class)
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private Date startAt;
+    private LocalDateTime startAt;
 
     @Field("end_at")
     @JsonSerialize(using = DateSerialization.class)
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private Date endAt;
+    private LocalDateTime endAt;
 
     @Field("daily_start_at")
     @JsonInclude(JsonInclude.Include.NON_NULL)

@@ -12,10 +12,7 @@ import org.modelmapper.convention.NameTransformers;
 
 import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -26,7 +23,7 @@ import static four.group.jahadi.Utility.StaticValues.DEV_MODE;
 
 public class Utility {
     private static final SimpleDateFormat sdfSSSXXX;
-    private static final ZoneId tehranZoneId = ZoneId.of("Asia/Tehran");
+    public static final ZoneId tehranZoneId = ZoneId.of("Asia/Tehran");
     private static final SimpleDateFormat simpleDateFormat;
     private static final DateTimeFormatter dateTimeFormatter;
 
@@ -51,6 +48,12 @@ public class Utility {
     }
     public static String convertUTCDateToJalali(Date date) {
         String[] dateTime = dateTimeFormatter.format(convertToUTCInstant(date)).split(" ");
+        String[] splited = dateTime[0].split("-");
+        return JalaliCalendar.gregorianToJalali(new JalaliCalendar.YearMonthDate(splited[0], splited[1], splited[2])).format("/") + " - " + dateTime[1];
+    }
+
+    public static String convertUTCDateToJalali(LocalDateTime date) {
+        String[] dateTime = dateTimeFormatter.format(date).split(" ");
         String[] splited = dateTime[0].split("-");
         return JalaliCalendar.gregorianToJalali(new JalaliCalendar.YearMonthDate(splited[0], splited[1], splited[2])).format("/") + " - " + dateTime[1];
     }
@@ -269,6 +272,16 @@ public class Utility {
         return false;
     }
 
+    public static LocalDateTime getCurrLocalDateTime() {
+        Date date = new Date();
+        date.setHours(0);
+        date.setMinutes(0);
+        date.setSeconds(0);
+        return Instant.ofEpochMilli(date.getTime())
+                .atZone(tehranZoneId)
+                .toLocalDateTime();
+    }
+
     public static Date getCurrDate() {
         Date date = new Date();
         date.setHours(0);
@@ -289,6 +302,28 @@ public class Utility {
         date.setMinutes(59);
         date.setSeconds(59);
         return date;
+    }
+
+    public static LocalDateTime getLocalDateTime(Date date) {
+        date.setHours(0);
+        date.setMinutes(0);
+        date.setSeconds(0);
+        return Instant.ofEpochMilli(date.getTime())
+                .atZone(tehranZoneId)
+                .toLocalDateTime();
+    }
+
+    public static LocalDateTime getLocalDateTime(LocalDateTime date) {
+        return date.withHour(0).withMinute(0).withSecond(0).withNano(0);
+    }
+
+    public static LocalDateTime getLastLocalDateTime(Date date) {
+        date.setHours(23);
+        date.setMinutes(59);
+        date.setSeconds(59);
+        return Instant.ofEpochMilli(date.getTime())
+                .atZone(tehranZoneId)
+                .toLocalDateTime();
     }
 
     public static String printNullableField(Object obj) {
@@ -326,6 +361,11 @@ public class Utility {
     }
 
     public static String printNullableDate(Date obj) {
+        if (obj == null) return null;
+        return "\"" + sdfSSSXXX.format(obj) + "\"";
+    }
+
+    public static String printNullableDate(LocalDateTime obj) {
         if (obj == null) return null;
         return "\"" + sdfSSSXXX.format(obj) + "\"";
     }

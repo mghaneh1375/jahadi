@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -167,15 +168,15 @@ public class TripService extends AbstractService<Trip, TripStepData> {
             throw new NotAccessException();
 
         TripStep2Data dto = (TripStep2Data) data;
-        Date startAt = getDate(new Date(dto.getStartAt()));
-        Date endAt = getLastDate(new Date(dto.getEndAt()));
+        LocalDateTime startAt = getLocalDateTime(new Date(dto.getStartAt()));
+        LocalDateTime endAt = getLastLocalDateTime(new Date(dto.getEndAt()));
 
         Project project = projectRepository.findById(trip.getProjectId()).get();
         // Validate dates
-        if(isUtcAfter(project.getStartAt(), startAt))
-            throw new InvalidFieldsException("تاریخ شروع باید از " + Utility.convertDateToSimpleJalali(project.getStartAt()) + " باشد");
-        if(isUtcBefore(project.getEndAt(), endAt))
-            throw new InvalidFieldsException("تاریخ اتمام باید از " + Utility.convertDateToSimpleJalali(project.getEndAt()) + " باشد");
+        if(project.getStartAt().isAfter(startAt))
+            throw new InvalidFieldsException("تاریخ شروع باید از " + Utility.convertUTCDateToJalali(project.getStartAt()) + " باشد");
+        if(project.getEndAt().isBefore(endAt))
+            throw new InvalidFieldsException("تاریخ اتمام باید از " + Utility.convertUTCDateToJalali(project.getEndAt()) + " باشد");
 
         trip.setName(dto.getName());
         trip.setStartAt(startAt);
@@ -191,7 +192,7 @@ public class TripService extends AbstractService<Trip, TripStepData> {
 
     public void removeTrip(Trip trip, ObjectId userId, String username) {
         if (trip.getStartAt() != null &&
-                isUtcAfter(Utility.getCurrDate(), trip.getStartAt())
+                Utility.getCurrLocalDateTime().isAfter(trip.getStartAt())
         )
             throw new InvalidFieldsException("اردو آغاز شده و امکان حدف آن وجود ندارد");
 

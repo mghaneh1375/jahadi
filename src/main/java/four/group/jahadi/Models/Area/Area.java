@@ -12,8 +12,8 @@ import org.springframework.data.mongodb.core.mapping.MongoId;
 
 import javax.persistence.Id;
 import javax.persistence.Transient;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import static four.group.jahadi.Utility.Utility.*;
@@ -70,7 +70,7 @@ public class Area {
     @Field("start_at")
     @JsonSerialize(using = DateSerialization.class)
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private Date startAt;
+    private LocalDateTime startAt;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<AreaDates> dates;
@@ -78,7 +78,7 @@ public class Area {
     @Field("end_at")
     @JsonSerialize(using = DateSerialization.class)
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private Date endAt;
+    private LocalDateTime endAt;
 
     @Field("daily_start_at")
     @JsonInclude(JsonInclude.Include.NON_NULL)

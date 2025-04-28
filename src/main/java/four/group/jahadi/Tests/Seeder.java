@@ -1,18 +1,18 @@
 package four.group.jahadi.Tests;
 
 import four.group.jahadi.Enums.*;
-import four.group.jahadi.Models.*;
-import four.group.jahadi.Models.Area.Area;
-import four.group.jahadi.Models.Area.ModuleInArea;
+import four.group.jahadi.Models.Group;
+import four.group.jahadi.Models.User;
 import four.group.jahadi.Repository.*;
 import four.group.jahadi.Tests.Modules.ModuleSeeder;
-import four.group.jahadi.Utility.Utility;
-import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class Seeder {
@@ -114,137 +114,6 @@ public class Seeder {
         jahadgars.add(user);
     }
 
-    private Project projectSeeder() {
-
-        Date startDate = Utility.getCurrDate();
-        Calendar c = Calendar.getInstance();
-        c.setTime(startDate);
-        c.add(Calendar.DATE, -5);
-        startDate = c.getTime();
-
-        Date endDate = new Date();
-        Calendar c2 = Calendar.getInstance();
-        c2.setTime(endDate);
-        c2.add(Calendar.DATE, 25);
-        endDate = c2.getTime();
-
-        Project project = Project.builder()
-                .groupIds(List.of(groups.get(0).getId(), groups.get(1).getId()))
-                .startAt(startDate)
-                .endAt(endDate)
-                .name("sample project")
-                .color(Color.BLUE)
-                .build();
-
-        projectRepository.insert(project);
-
-        tripSeeder(project.getId());
-
-        return project;
-    }
-
-    private Trip tripSeeder(ObjectId projectId) {
-
-        Date startDate = new Date();
-        Calendar c = Calendar.getInstance();
-        c.setTime(startDate);
-        c.add(Calendar.DATE, -2);
-        startDate = c.getTime();
-
-        Date endDate = new Date();
-        Calendar c2 = Calendar.getInstance();
-        c2.setTime(endDate);
-        c2.add(Calendar.DATE, 20);
-        endDate = c2.getTime();
-
-        Area area1 = areaSeeder(jahadgars.get(0).getId());
-        Area area2 = areaSeeder(jahadgars.get(1).getId());
-
-        List<ModuleInArea> moduleInAreaList = new ArrayList<>();
-
-        moduleRepository.findAll().forEach(module -> moduleInAreaList.add(
-                ModuleInArea
-                        .builder()
-                        .members(
-                                List.of(jahadgars.get(2).getId(), jahadgars.get(3).getId())
-                        )
-                        .id(new ObjectId())
-                        .moduleId(module.getId())
-                        .moduleName(module.getName())
-                        .secretaries(List.of(jahadgars.get(4).getId()))
-                        .build()
-        ));
-
-        area1.setModules(moduleInAreaList);
-        area1.setMembers(List.of(jahadgars.get(2).getId(), jahadgars.get(3).getId(), jahadgars.get(4).getId()));
-
-        area2.setModules(moduleInAreaList);
-        area2.setMembers(List.of(jahadgars.get(2).getId(), jahadgars.get(3).getId(), jahadgars.get(4).getId()));
-
-        Trip trip = Trip.builder()
-                .groupsWithAccess(List.of(
-                                GroupAccess
-                                        .builder()
-                                        .writeAccess(true)
-                                        .groupId(groupUsers.get(0).getId())
-                                        .build(),
-                                GroupAccess
-                                        .builder()
-                                        .writeAccess(false)
-                                        .groupId(groupUsers.get(1).getId())
-                                        .build()
-                        )
-                )
-                .name("sample trip")
-                .no(1)
-                .dailyStartAt("10:00")
-                .dailyEndAt("23:00")
-                .projectId(projectId)
-                .startAt(startDate)
-                .endAt(endDate)
-                .areas(List.of(area1, area2))
-                .build();
-
-        tripRepository.insert(trip);
-        return trip;
-    }
-
-    private Area areaSeeder(ObjectId userId) {
-
-        Date startDate = new Date();
-        Calendar c = Calendar.getInstance();
-        c.setTime(startDate);
-        c.add(Calendar.DATE, -1);
-        startDate = c.getTime();
-
-        Date endDate = new Date();
-        Calendar c2 = Calendar.getInstance();
-        c2.setTime(endDate);
-        c2.add(Calendar.DATE, 17);
-        endDate = c2.getTime();
-
-        City city = cityRepository.findAll().get(0);
-
-        return Area
-                .builder()
-                .id(new ObjectId())
-                .ownerId(userId)
-                .dailyStartAt("10:00")
-                .dailyEndAt("23:00")
-                .startAt(startDate)
-                .endAt(endDate)
-                .color(Color.BLACK)
-                .name("area 1")
-                .city(city.getName())
-                .cityId(city.getId())
-                .stateId(city.getStateId())
-                .state("استان")
-                .lat(34.3442)
-                .lng(44.343)
-                .country("ایران")
-                .build();
-    }
-
     public void moduleSeeder() {
         ModuleSeeder.seed(moduleRepository);
     }
@@ -264,8 +133,6 @@ public class Seeder {
 
         createUser(6, null);
         createUser(7, 281234);
-
-        projectSeeder();
     }
 
 }
