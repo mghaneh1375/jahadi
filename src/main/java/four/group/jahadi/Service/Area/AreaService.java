@@ -43,6 +43,7 @@ import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -313,12 +314,12 @@ public class AreaService extends AbstractService<Area> {
         Trip trip = tripRepository.findByAreaIdAndOwnerId(areaId, userId).orElseThrow(InvalidIdException::new);
         Area foundArea = findArea(trip, areaId, userId);
 
-        Date now = Utility.getCurrDate();
+        LocalDateTime now = Utility.getCurrLocalDateTime();
 
-        if (foundArea.getStartAt() == null || isUtcAfter(foundArea.getStartAt(), now))
+        if (foundArea.getStartAt() == null || foundArea.getStartAt().isAfter(now))
             throw new InvalidFieldsException("اردو در منطقه موردنظر هنوز شروع نشده است");
 
-        if (isUtcBefore(foundArea.getEndAt(), now))
+        if (foundArea.getEndAt().isBefore(now))
             throw new InvalidFieldsException("اردو در منطفه موردنظر به اتمام رسیده است");
 
         if (foundArea.getMembers().stream().noneMatch(objectId -> objectId.equals(jahadgarId)))

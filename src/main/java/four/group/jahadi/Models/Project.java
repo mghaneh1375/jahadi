@@ -10,7 +10,7 @@ import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static four.group.jahadi.Utility.Utility.*;
@@ -31,11 +31,11 @@ public class Project extends Model {
 
     @Field("start_at")
     @JsonSerialize(using = DateSerialization.class)
-    private Date startAt;
+    private LocalDateTime startAt;
 
     @Field("end_at")
     @JsonSerialize(using = DateSerialization.class)
-    private Date endAt;
+    private LocalDateTime endAt;
 
     @Field("group_ids")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)

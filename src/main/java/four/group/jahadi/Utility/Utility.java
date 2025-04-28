@@ -7,10 +7,7 @@ import org.modelmapper.convention.NameTransformers;
 
 import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -20,7 +17,7 @@ import static four.group.jahadi.Utility.StaticValues.DEV_MODE;
 
 public class Utility {
     private static final SimpleDateFormat sdfSSSXXX;
-    private static final ZoneId tehranZoneId = ZoneId.of("Asia/Tehran");
+    public static final ZoneId tehranZoneId = ZoneId.of("Asia/Tehran");
     private static final SimpleDateFormat simpleDateFormat;
     private static final DateTimeFormatter dateTimeFormatter;
 
@@ -42,6 +39,12 @@ public class Utility {
     }
     public static String convertUTCDateToJalali(Date date) {
         String[] dateTime = dateTimeFormatter.format(convertToUTCInstant(date)).split(" ");
+        String[] splited = dateTime[0].split("-");
+        return JalaliCalendar.gregorianToJalali(new JalaliCalendar.YearMonthDate(splited[0], splited[1], splited[2])).format("/") + " - " + dateTime[1];
+    }
+
+    public static String convertUTCDateToJalali(LocalDateTime date) {
+        String[] dateTime = dateTimeFormatter.format(date).split(" ");
         String[] splited = dateTime[0].split("-");
         return JalaliCalendar.gregorianToJalali(new JalaliCalendar.YearMonthDate(splited[0], splited[1], splited[2])).format("/") + " - " + dateTime[1];
     }
@@ -218,6 +221,11 @@ public class Utility {
     }
 
     public static String printNullableDate(Date obj) {
+        if (obj == null) return null;
+        return "\"" + sdfSSSXXX.format(obj) + "\"";
+    }
+
+    public static String printNullableDate(LocalDateTime obj) {
         if (obj == null) return null;
         return "\"" + sdfSSSXXX.format(obj) + "\"";
     }
