@@ -29,6 +29,7 @@ public class JahadiApplication {
 
 
     public static void main(String[] args) {
+        TimeZone.setDefault(TimeZone.getTimeZone("Iran"));
         SpringApplication.run(JahadiApplication.class, args);
     }
 

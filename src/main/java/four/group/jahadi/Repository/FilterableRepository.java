@@ -1,7 +1,5 @@
 package four.group.jahadi.Repository;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
@@ -20,15 +18,7 @@ import java.util.Map;
 public interface FilterableRepository<T> {
 
     // this method is used to get a page of results from the database with filtering
-    Page<T> findAllWithFilter(Class<T> typeParameterClass,
-                              Filtering filtering, Pageable pageable);
-
-    // this method is used to get a page of results from the database with filtering
     List<T> findAllWithFilter(Class<T> typeParameterClass, Filtering filtering);
-
-    // this method is used to get all the possible values for a filter
-    // so that the ui can show a dropdown with all the possible values with checkboxes or radio buttons
-    List<Object> getAllPossibleValuesForFilter(Class<T> typeParameterClass, Filtering filtering, String filterKey);
 
     default Query constructQueryFromFiltering(Filtering filtering) {
         Query query = new Query();
