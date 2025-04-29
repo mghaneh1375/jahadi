@@ -1,6 +1,5 @@
 package four.group.jahadi.Models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.AllArgsConstructor;
@@ -12,8 +11,8 @@ import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Data
@@ -50,7 +49,7 @@ public class ExternalReferralService extends Model {
     private Long userPaid;
     @Field("jahadi_paid")
     private Long jahadiPaid;
-    private Date date;
+    private LocalDateTime date;
     private String location;
     @Field("hospital_cost")
     private Long hospitalCost;

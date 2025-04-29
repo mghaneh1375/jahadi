@@ -12,7 +12,7 @@ import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import static four.group.jahadi.Utility.Utility.*;
 
@@ -63,7 +63,7 @@ public class PatientDrug extends Model {
     @Field("give_at")
     @JsonSerialize(using = DateSerialization.class)
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private Date giveAt;
+    private LocalDateTime giveAt;
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     private String description;
     @Field("give_description")

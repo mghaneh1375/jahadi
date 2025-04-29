@@ -98,7 +98,7 @@ public class DrugServiceInArea {
 //    }
 
     private PairValue checkAccess(ObjectId userId, ObjectId areaId) {
-        Trip trip = tripRepository.findActiveByAreaIdAndPharmacyManager(areaId, userId, Utility.getCurrDate())
+        Trip trip = tripRepository.findActiveByAreaIdAndPharmacyManager(areaId, userId, Utility.getCurrLocalDateTime())
                 .orElseThrow(NotAccessException::new);
 
         Area foundArea = trip
@@ -199,7 +199,7 @@ public class DrugServiceInArea {
             ObjectId adviceId, GiveDrugData data
     ) {
         Trip trip = tripRepository.findActiveByAreaIdAndPharmacyManager(
-                areaId, userId, Utility.getCurrDate()
+                areaId, userId, Utility.getCurrLocalDateTime()
         ).orElseThrow(InvalidIdException::new);
         AreaUtils.findStartedArea(trip, areaId);
         PatientDrug patientDrug = patientsDrugRepository.findById(adviceId)
@@ -215,7 +215,7 @@ public class DrugServiceInArea {
         int diff;
         if (!patientDrug.isDedicated()) {
             patientDrug.setDedicated(true);
-            patientDrug.setGiveAt(new Date());
+            patientDrug.setGiveAt(LocalDateTime.now());
             diff = data.getAmount() - (
                     patientDrug.getGiveCount() == null
                             ? 0
@@ -261,8 +261,8 @@ public class DrugServiceInArea {
             ObjectId userId, ObjectId areaId,
             ObjectId patientId, ObjectId moduleId,
             ObjectId doctorId, DeliveryStatus deliveryStatus,
-            ObjectId drugId, Date startAdviceAt, Date endAdviceAt,
-            Date startGiveAt, Date endGiveAt,
+            ObjectId drugId, LocalDateTime startAdviceAt, LocalDateTime endAdviceAt,
+            LocalDateTime startGiveAt, LocalDateTime endGiveAt,
             Integer startSuggestCount, Integer endSuggestCount,
             ObjectId giverId, Integer pageNo
     ) {
@@ -271,11 +271,11 @@ public class DrugServiceInArea {
 
         if (patientId == null) {
             trip = tripRepository.findActiveByAreaIdAndPharmacyManager(
-                    areaId, userId, Utility.getCurrDate()
+                    areaId, userId, Utility.getCurrLocalDateTime()
             ).orElseThrow(NotAccessException::new);
         } else {
             trip = tripRepository.findActiveByAreaIdAndResponsibleId(
-                    areaId, userId, Utility.getCurrDate()
+                    areaId, userId, Utility.getCurrLocalDateTime()
             ).orElseThrow(NotAccessException::new);
         }
         AreaUtils.findStartedArea(trip, areaId);
@@ -354,7 +354,6 @@ public class DrugServiceInArea {
                 .collect(Collectors.toList())
         ).forEach(drugs::add);
 
-        Date curr = new Date();
         final String msg = "عودت از منطقه " + areaName + " در اردو " + tripName + " توسط " + username;
         List<DrugLog> drugLogs = new ArrayList<>();
 
@@ -372,7 +371,7 @@ public class DrugServiceInArea {
                                     .build()
                     );
                     areaDrugs1.setReminder(0);
-                    areaDrugs1.setUpdatedAt(curr);
+                    areaDrugs1.setUpdatedAt(LocalDateTime.now());
                 }));
 
         drugLogRepository.saveAll(drugLogs);

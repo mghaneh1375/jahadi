@@ -6,7 +6,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,7 +14,7 @@ import java.util.Optional;
 public interface TripRepository extends MongoRepository<Trip, ObjectId>, FilterableRepository<Trip> {
 
     @Query(value = "{ $and: [{'groupsWithAccess.groupId': ?0}, {'startAt': {$lte: ?1}}, {'endAt': {$gte: ?1}}] }", fields = "{'name': 1, 'areas.name': 1, 'areas._id': 1}")
-    List<Trip> findActivesByGroupId(ObjectId groupId, Date curr);
+    List<Trip> findActivesByGroupId(ObjectId groupId, LocalDateTime curr);
 
     @Query(value = "{ 'groupsWithAccess.groupId': ?0 }", count = true)
     Integer countByGroupId(ObjectId groupId);
@@ -35,19 +35,19 @@ public interface TripRepository extends MongoRepository<Trip, ObjectId>, Filtera
     Optional<Trip> findTripByProjectIdAndId(ObjectId projectId, ObjectId id);
 
     @Query(value = "{$and: [{'startAt': {$lte: ?0}}, {'endAt': {$gte: ?0}}]  }")
-    List<Trip> findActives(Date curr);
+    List<Trip> findActives(LocalDateTime curr);
 
     @Query(value = "{$and: [{'startAt': {$lte: ?0}}, {'endAt': {$gte: ?0}}, {'areas.ownerId': ?1}]  }", fields = "{projectId: true}")
-    List<Trip> findActivesProjectIdsByAreaOwnerId(Date curr, ObjectId areaOwnerId);
+    List<Trip> findActivesProjectIdsByAreaOwnerId(LocalDateTime curr, ObjectId areaOwnerId);
 
     @Query(value = "{$and: [{'endAt': {$gte: ?0}}, {'areas.ownerId': ?1}]  }", fields = "{projectId: true}")
-    List<Trip> findActivesOrNotStartedProjectIdsByAreaOwnerId(Date curr, ObjectId areaOwnerId);
+    List<Trip> findActivesOrNotStartedProjectIdsByAreaOwnerId(LocalDateTime curr, ObjectId areaOwnerId);
 
     @Query(value = "{$and: [{'startAt': {$exists: false}, 'projectId': ?2}, {'groupsWithAccess.groupId': ?1}]  }", fields = "{'projectId': false, 'areas.members': false, 'createdAt': false}")
-    List<Trip> findNeedActionByGroupId(Date curr, ObjectId groupId, ObjectId projectId);
+    List<Trip> findNeedActionByGroupId(LocalDateTime curr, ObjectId groupId, ObjectId projectId);
 
     @Query(value = "{$and: [{'endAt': {$exists: true}}, {'endAt': {$gte: ?0}}, {'groupsWithAccess.groupId': ?1}]  }", fields = "{'projectId': false, 'areas.members': false, 'createdAt': false}")
-    List<Trip> findActivesOrNotStartedProjectsByGroupId(Date curr, ObjectId groupId);
+    List<Trip> findActivesOrNotStartedProjectsByGroupId(LocalDateTime curr, ObjectId groupId);
 
     @Query(value = "{$and: [{'groupsWithAccess.groupId': ?0}]  }", fields = "{'areas.id': 1, 'areas.name': 1}")
     List<Trip> findDigestInfoProjectsByGroupId(ObjectId groupId);
@@ -59,10 +59,10 @@ public interface TripRepository extends MongoRepository<Trip, ObjectId>, Filtera
     List<Trip> findDigestTripInfoProjectsByGroupId(ObjectId groupId);
 
     @Query(value = "{$and: [{'areas': {$elemMatch: { 'id': ?2, $or: [{'endAt': {$exists: false}}, {'endAt': {$gte: ?0}}] } } }, {'groupsWithAccess': { $elemMatch: {'groupId': ?1, 'writeAccess': true} }} ] }", fields = "{'name': 1, 'areas.name': 1, 'areas.id': 1}")
-    Optional<Trip> findActiveAreaByGroupIdAndAreaIdAndWriteAccess(Date curr, ObjectId groupId, ObjectId areaId);
+    Optional<Trip> findActiveAreaByGroupIdAndAreaIdAndWriteAccess(LocalDateTime curr, ObjectId groupId, ObjectId areaId);
 
     @Query(value = "{$and: [{'endAt': {$exists: true}}, {'endAt': {$gte: ?0}}]  }", fields = "{'projectId': false, 'areas.members': false, 'createdAt': false}")
-    List<Trip> findActivesOrNotStartedProjects(Date curr);
+    List<Trip> findActivesOrNotStartedProjects(LocalDateTime curr);
 
     @Query(value = "{$and: [{'endAt': {$gte: ?0}}, {'areas.ownerId': ?1}] }",
             fields = "{'groupsWithAccess': false, 'projectId':  false, " +
@@ -73,7 +73,7 @@ public interface TripRepository extends MongoRepository<Trip, ObjectId>, Filtera
                     "'areas.trainers': false, 'areas.insurancers': false, 'areas.pharmacyManagers': false, " +
                     "'areas.equipmentManagers': false, 'areas.laboratoryManager': false } "
     )
-    List<Trip> findNotFinishedByAreaOwnerId(Date curr, ObjectId areaOwnerId);
+    List<Trip> findNotFinishedByAreaOwnerId(LocalDateTime curr, ObjectId areaOwnerId);
 
     @Query(value = "{$and: [{'endAt': {$gte: ?0}}, {'areas.members': ?1}] }",
             fields = "{'groupsWithAccess': false, 'projectId':  false, " +
@@ -84,13 +84,13 @@ public interface TripRepository extends MongoRepository<Trip, ObjectId>, Filtera
                     "'areas.trainers': false, 'areas.insurancers': false, 'areas.pharmacyManagers': false, " +
                     "'areas.equipmentManagers': false, 'areas.laboratoryManager': false } "
     )
-    List<Trip> findNotFinishedByMemberId(Date curr, ObjectId memberId);
+    List<Trip> findNotFinishedByMemberId(LocalDateTime curr, ObjectId memberId);
 
     @Query(value = "{$and: [{'endAt': {$gte: ?0}}, {'areas.ownerId': ?1}]  }", exists = true)
-    Boolean existNotFinishedByAreaOwnerId(Date curr, ObjectId areaOwnerId);
+    Boolean existNotFinishedByAreaOwnerId(LocalDateTime curr, ObjectId areaOwnerId);
 
     @Query(value = "{$and: [{'endAt': {$gte: ?0}}, {'areas.members': ?1}]  }", exists = true)
-    Boolean existNotFinishedByResponsibleId(Date curr, ObjectId userId);
+    Boolean existNotFinishedByResponsibleId(LocalDateTime curr, ObjectId userId);
 
     @Query(value = "{'areas': {$elemMatch: {'id': ?0, 'ownerId': ?1}} }", fields = "{'areas.members': true, 'areas.id': true, 'areas.ownerId': 1}")
     Optional<Trip> getMembersByAreaIdAndOwnerId(ObjectId areaId, ObjectId areaOwnerId);
@@ -102,21 +102,21 @@ public interface TripRepository extends MongoRepository<Trip, ObjectId>, Filtera
     Optional<Trip> findByAreaIdAndResponsibleIdAndModuleId(ObjectId areaId, ObjectId userId, ObjectId moduleId);
 
     @Query(value = "{ 'areas': {$elemMatch: { 'finished': true, 'startAt': {$lte: ?2}, 'endAt': {$gte: ?2}, 'id': ?0, $or: [{'ownerId': ?1}, {'insurancers': ?1}] } } }")
-    Optional<Trip> findActiveByAreaIdAndInsurancerId(ObjectId areaId, ObjectId userId, Date curr);
+    Optional<Trip> findActiveByAreaIdAndInsurancerId(ObjectId areaId, ObjectId userId, LocalDateTime curr);
 
     @Query(value = "{ 'areas': {$elemMatch: { 'finished': true, 'endAt': {$gte: ?2}, 'id': ?0, $or: [{'ownerId': ?1}, {'pharmacyManagers': ?1}] } } }")
-    Optional<Trip> findActiveByAreaIdAndPharmacyManager(ObjectId areaId, ObjectId userId, Date curr);
+    Optional<Trip> findActiveByAreaIdAndPharmacyManager(ObjectId areaId, ObjectId userId, LocalDateTime curr);
     @Query(value = "{ 'areas': {$elemMatch: { 'finished': true, 'endAt': {$gte: ?2}, 'id': ?0, $or: [{'ownerId': ?1}, {'equipmentManager': ?1}] } } }")
-    Optional<Trip> findActiveByAreaIdAndEquipmentManager(ObjectId areaId, ObjectId userId, Date curr);
+    Optional<Trip> findActiveByAreaIdAndEquipmentManager(ObjectId areaId, ObjectId userId, LocalDateTime curr);
     @Query(value = "{ 'areas': {$elemMatch: { $and: [{'finished': true}, {'startAt': {$lte: ?2}}, {'endAt': {$gte: ?2}}, {'id': ?0}, {$or: [{'ownerId': ?1}, {'trainers': ?1}]} ] } } }")
-    Optional<Trip> findActiveByAreaIdAndTrainerId(ObjectId areaId, ObjectId userId, Date curr);
+    Optional<Trip> findActiveByAreaIdAndTrainerId(ObjectId areaId, ObjectId userId, LocalDateTime curr);
 
     @Query(value = "{ 'areas': {$elemMatch: { 'finished': true, 'startAt': {$lte: ?2}, 'endAt': {$gte: ?2}, 'id': ?0, $or: [{'ownerId': ?1}, {'members': ?1}] } } }")
-    Optional<Trip> findActiveByAreaIdAndResponsibleId(ObjectId areaId, ObjectId userId, Date curr);
+    Optional<Trip> findActiveByAreaIdAndResponsibleId(ObjectId areaId, ObjectId userId, LocalDateTime curr);
 
     @Query(value = "{ 'areas': {$elemMatch: { 'id': ?0, $or: [{'ownerId': ?1}, {'members': ?1}] }} }")
     Optional<Trip> findByAreaIdAndResponsibleId(ObjectId areaId, ObjectId userId);
 
     @Query(value = "{ 'areas': {$elemMatch: {'startAt': {$lte: ?2}, 'endAt': {$gte: ?2}, 'id': ?0, $or: [{'ownerId': ?1}, {'dispatchers': ?1}] } } }")
-    Optional<Trip> findActiveByAreaIdAndDispatcherId(ObjectId areaId, ObjectId userId, Date curr);
+    Optional<Trip> findActiveByAreaIdAndDispatcherId(ObjectId areaId, ObjectId userId, LocalDateTime curr);
 }

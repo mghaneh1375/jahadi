@@ -4,7 +4,8 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import four.group.jahadi.Models.DateSerialization;
 import lombok.*;
 
-import java.util.Date;
+
+import java.time.LocalDateTime;
 
 import static four.group.jahadi.Utility.Utility.printNullableDate;
 
@@ -16,10 +17,10 @@ import static four.group.jahadi.Utility.Utility.printNullableDate;
 public class AreaDates {
 
     @JsonSerialize(using = DateSerialization.class)
-    private Date start;
+    private LocalDateTime start;
 
     @JsonSerialize(using = DateSerialization.class)
-    private Date end;
+    private LocalDateTime end;
 
     @Override
     public String toString() {

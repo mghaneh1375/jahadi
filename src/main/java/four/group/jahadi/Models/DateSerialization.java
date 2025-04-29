@@ -6,11 +6,11 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import four.group.jahadi.Utility.Utility;
 
 import java.io.IOException;
-import java.util.Date;
+import java.time.LocalDateTime;
 
-public class DateSerialization extends JsonSerializer<Date> {
+public class DateSerialization extends JsonSerializer<LocalDateTime> {
     @Override
-    public void serialize(Date date, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
+    public void serialize(LocalDateTime date, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
         jsonGenerator.writeString(Utility.convertUTCDateToJalali(date));
     }
 }

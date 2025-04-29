@@ -52,10 +52,10 @@ public class JahadgarEquipmentAPIRoutes extends Router {
             @RequestParam(required = false, value = "equipmentType") String equipmentType,
             @RequestParam(required = false, value = "rowNo") String rowNo,
             @RequestParam(required = false, value = "shelfNo") String shelfNo,
-            @RequestParam(required = false, value = "fromBuyAt") Date fromBuyAt,
-            @RequestParam(required = false, value = "toBuyAt") Date toBuyAt,
-            @RequestParam(required = false, value = "fromGuaranteeExpireAt") Date fromGuaranteeExpireAt,
-            @RequestParam(required = false, value = "toGuaranteeExpireAt") Date toGuaranteeExpireAt
+            @RequestParam(required = false, value = "fromBuyAt") LocalDateTime fromBuyAt,
+            @RequestParam(required = false, value = "toBuyAt") LocalDateTime toBuyAt,
+            @RequestParam(required = false, value = "fromGuaranteeExpireAt") LocalDateTime fromGuaranteeExpireAt,
+            @RequestParam(required = false, value = "toGuaranteeExpireAt") LocalDateTime toGuaranteeExpireAt
     ) throws UnAuthException, NotActivateAccountException {
         TokenInfo fullTokenInfo = getFullTokenInfo(request);
         if(!fullTokenInfo.getAccesses().contains(Access.GROUP)) {

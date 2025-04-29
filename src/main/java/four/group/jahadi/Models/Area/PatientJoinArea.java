@@ -8,7 +8,7 @@ import lombok.*;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -23,7 +23,7 @@ public class PatientJoinArea {
     private ObjectId id;
 
     @Field("created_at")
-    private Date createdAt;
+    private LocalDateTime createdAt;
 
     private Boolean trained = false;
     private Patient patientInfo;

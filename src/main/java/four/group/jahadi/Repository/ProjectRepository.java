@@ -7,7 +7,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -18,7 +18,7 @@ public interface ProjectRepository extends MongoRepository<Project, ObjectId>, F
             + "?#{ [1] == null ? { $where : 'true'} : { 'startAt' : {$gt: [2]} } },"
             + "?#{ [2] == null ? { $where : 'true'} : { 'endAt' : {$lt: [2]} } },"
             + "]}", fields = "{'id': 1, 'createdAt': 1, 'name': 1, 'nid': 1, 'phone': 1, 'sex': 1, 'groupName': 1, 'status': 1, 'accesses': 1}")
-    List<User> findAll(String name, Boolean justActive, Boolean justArchive, Date now);
+    List<User> findAll(String name, Boolean justActive, Boolean justArchive, LocalDateTime now);
 
     @Query(value = "{'group_ids': {$in: ?0}}")
     List<Project> findByOwner(List<ObjectId> owner);

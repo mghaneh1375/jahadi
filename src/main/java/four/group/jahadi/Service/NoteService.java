@@ -11,10 +11,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
-import static four.group.jahadi.Utility.StaticValues.*;
+import static four.group.jahadi.Utility.StaticValues.JSON_NOT_ACCESS;
+import static four.group.jahadi.Utility.StaticValues.JSON_OK;
 
 @Service
 public class NoteService extends AbstractService<Note> {
@@ -37,7 +38,7 @@ public class NoteService extends AbstractService<Note> {
         if(!note.getUserId().equals(params[0]))
             throw new NotAccessException();
 
-        note.setUpdatedAt(new Date());
+        note.setUpdatedAt(LocalDateTime.now());
         note.setTitle(dto.getTitle());
         note.setDescription(dto.getDescription());
         noteRepository.save(note);
@@ -51,7 +52,7 @@ public class NoteService extends AbstractService<Note> {
         note.setDescription(dto.getDescription());
         note.setTitle(dto.getTitle());
         note.setUserId(userId);
-        note.setUpdatedAt(new Date());
+        note.setUpdatedAt(LocalDateTime.now());
 
         note = noteRepository.insert(note);
 

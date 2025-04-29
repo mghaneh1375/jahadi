@@ -244,7 +244,7 @@ public class UserService extends AbstractService<User> {
     public ResponseEntity<List<User>> findGroupMembersByRegionOwner(ObjectId userId, ObjectId groupId) {
 
         List<Trip> trips =
-                tripRepository.findActivesOrNotStartedProjectIdsByAreaOwnerId(Utility.getCurrDate(), userId);
+                tripRepository.findActivesOrNotStartedProjectIdsByAreaOwnerId(Utility.getCurrLocalDateTime(), userId);
 
         if (trips.size() == 0)
             throw new NotAccessException();
@@ -263,7 +263,7 @@ public class UserService extends AbstractService<User> {
 
     public void remove(ObjectId userId) {
         User user = userRepository.findById(userId).orElseThrow(InvalidIdException::new);
-        user.setRemoveAt(new Date());
+        user.setRemoveAt(LocalDateTime.now());
         userRepository.save(user);
     }
 
@@ -276,7 +276,7 @@ public class UserService extends AbstractService<User> {
         );
 
         if (Objects.equals(user.getRole(), Access.JAHADI)) {
-            Date currDate = Utility.getCurrDate();
+            LocalDateTime currDate = Utility.getCurrLocalDateTime();
             user.setHasActiveRegion(tripRepository.existNotFinishedByAreaOwnerId(currDate, userId));
             user.setHasActiveTask(tripRepository.existNotFinishedByResponsibleId(currDate, userId));
         }

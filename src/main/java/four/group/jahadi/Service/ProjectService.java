@@ -14,7 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -50,7 +50,7 @@ public class ProjectService extends AbstractService<Project> {
                 }
             });
 
-        Date today = Utility.getCurrDate();
+        LocalDateTime today = Utility.getCurrLocalDateTime();
 
         if (filters[1] != null) {
 
@@ -143,7 +143,7 @@ public class ProjectService extends AbstractService<Project> {
         if (groupId != null)
             projects = projectRepository.findByOwner(Collections.singletonList(groupId));
         else {
-            List<Trip> trips = tripRepository.findActivesProjectIdsByAreaOwnerId(Utility.getCurrDate(), userId);
+            List<Trip> trips = tripRepository.findActivesProjectIdsByAreaOwnerId(Utility.getCurrLocalDateTime(), userId);
             if (trips.size() > 0)
                 projects = projectRepository.findByIds(trips.stream().map(Trip::getProjectId).collect(Collectors.toList()));
         }
@@ -158,7 +158,7 @@ public class ProjectService extends AbstractService<Project> {
 
         projects.forEach(project -> {
             List<Trip> trips =
-                    tripRepository.findNeedActionByGroupId(Utility.getCurrDate(), groupId, project.getId());
+                    tripRepository.findNeedActionByGroupId(Utility.getCurrLocalDateTime(), groupId, project.getId());
 
             if(trips.size() == 0)
                 return;

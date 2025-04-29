@@ -8,7 +8,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -39,7 +39,7 @@ public interface DrugRepository extends MongoRepository<Drug, ObjectId>, Filtera
             ObjectId groupId, String name,
             Integer minAvailableCount, Integer maxAvailableCount,
             DrugLocation drugLocation, DrugType drugType,
-            Date fromExpireAt, Date toExpireAt,
+            LocalDateTime fromExpireAt, LocalDateTime toExpireAt,
             String boxNo, String shelfNo
     );
 

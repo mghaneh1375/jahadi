@@ -8,7 +8,7 @@ import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -28,10 +28,10 @@ public class PresenceList extends Model {
     private ObjectId userId;
 
     @JsonSerialize(using = DateSerialization.class)
-    private Date entrance;
+    private LocalDateTime entrance;
 
     @JsonSerialize(using = DateSerialization.class)
-    private Date exit;
+    private LocalDateTime exit;
 
     @Override
     public String toString() {

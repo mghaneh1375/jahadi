@@ -38,10 +38,10 @@ public class EquipmentService extends AbstractService<Equipment> {
             EquipmentType equipmentType = filters.length > 7 && filters[7] != null ? EquipmentType.valueOf(filters[7].toString().toUpperCase()) : null;
             String rowNo = filters.length > 8 ? (String) filters[8] : null;
             String shelfNo = filters.length > 9 ? (String) filters[9] : null;
-            Date fromBuyAt = filters.length > 10 ? (Date) filters[10] : null;
-            Date toBuyAt = filters.length > 11 ? (Date) filters[11] : null;
-            Date fromGuaranteeExpireAt = filters.length > 12 ? (Date) filters[12] : null;
-            Date toGuaranteeExpireAt = filters.length > 13 ? (Date) filters[13] : null;
+            LocalDateTime fromBuyAt = filters.length > 10 ? (LocalDateTime) filters[10] : null;
+            LocalDateTime toBuyAt = filters.length > 11 ? (LocalDateTime) filters[11] : null;
+            LocalDateTime fromGuaranteeExpireAt = filters.length > 12 ? (LocalDateTime) filters[12] : null;
+            LocalDateTime toGuaranteeExpireAt = filters.length > 13 ? (LocalDateTime) filters[13] : null;
             return new ResponseEntity<>(
                     equipmentRepository.findByFilters(
                             groupId, name, minAvailable, maxAvailable, healthyStatus,

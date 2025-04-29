@@ -9,7 +9,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,8 +40,8 @@ public interface PatientsDrugRepository extends MongoRepository<PatientDrug, Obj
             ObjectId areaId, ObjectId patientId,
             ObjectId moduleId, ObjectId doctorId,
             Boolean justGiven, ObjectId drugId,
-            Date startAdviceAt, Date endAdviceAt,
-            Date startGiveAt, Date endGiveAt,
+            LocalDateTime startAdviceAt, LocalDateTime endAdviceAt,
+            LocalDateTime startGiveAt, LocalDateTime endGiveAt,
             Integer startSuggestCount, Integer endSuggestCount,
             ObjectId giverId, Integer skip, Integer limit
     );

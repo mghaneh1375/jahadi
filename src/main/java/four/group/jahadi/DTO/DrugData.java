@@ -10,7 +10,7 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -26,7 +26,7 @@ public class DrugData {
     private String producer;
 
     @NotNull
-    private Date expireAt;
+    private LocalDateTime expireAt;
 
     @NotNull
     private DrugLocation location;

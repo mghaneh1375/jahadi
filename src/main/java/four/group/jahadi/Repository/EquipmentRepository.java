@@ -8,7 +8,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,9 +19,6 @@ public interface EquipmentRepository extends MongoRepository<Equipment, ObjectId
 
     @Query(value = "{_id: {$in: ?0}, groupId: ?1}")
     List<Equipment> findAllByIdsAndGroupId(List<ObjectId> ids, ObjectId groupId);
-
-    @Query(value = "{ _id: {$in: ?0}}", fields = "{ '_id': 1 }")
-    List<Equipment> findByIds(List<ObjectId> ids);
 
     @Query(value = "{ _id: {$in: ?0}}")
     List<Equipment> findFullInfoByIds(List<ObjectId> ids);
@@ -50,8 +47,8 @@ public interface EquipmentRepository extends MongoRepository<Equipment, ObjectId
             String propertyId, String location,
             EquipmentType equipmentType,
             String rowNo, String shelfNo,
-            Date fromBuyAt, Date toBuyAt,
-            Date fromGuaranteeAt, Date toGuaranteeAt
+            LocalDateTime fromBuyAt, LocalDateTime toBuyAt,
+            LocalDateTime fromGuaranteeAt, LocalDateTime toGuaranteeAt
     );
 
 }

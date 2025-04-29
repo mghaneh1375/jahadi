@@ -136,8 +136,8 @@ public class AreaService extends AbstractService<Area> {
     public ResponseEntity<List<Trip>> myCartableList(ObjectId userId, boolean isForOwner) {
 
         List<Trip> trips = isForOwner
-                ? tripRepository.findNotFinishedByAreaOwnerId(Utility.getCurrDate(), userId)
-                : tripRepository.findNotFinishedByMemberId(Utility.getCurrDate(), userId);
+                ? tripRepository.findNotFinishedByAreaOwnerId(Utility.getCurrLocalDateTime(), userId)
+                : tripRepository.findNotFinishedByMemberId(Utility.getCurrLocalDateTime(), userId);
 
         if (trips != null && trips.size() > 0) {
             trips.forEach(trip -> {
@@ -347,12 +347,12 @@ public class AreaService extends AbstractService<Area> {
 
         if (foundArea.getDates() == null)
             foundArea.setDates(new ArrayList<>() {{
-                add(AreaDates.builder().start(new Date()).build());
+                add(AreaDates.builder().start(LocalDateTime.now()).build());
             }});
         else if (foundArea.getDates().get(foundArea.getDates().size() - 1).getEnd() == null)
             throw new RuntimeException("اردو پیش از این شروع شده است");
         else
-            foundArea.getDates().add(AreaDates.builder().start(new Date()).build());
+            foundArea.getDates().add(AreaDates.builder().start(LocalDateTime.now()).build());
 
         tripRepository.save(trip);
     }
@@ -367,7 +367,7 @@ public class AreaService extends AbstractService<Area> {
         else if (foundArea.getDates().get(foundArea.getDates().size() - 1).getEnd() != null)
             throw new RuntimeException("اردو پیش از این تمام شده است");
         else
-            foundArea.getDates().get(foundArea.getDates().size() - 1).setEnd(new Date());
+            foundArea.getDates().get(foundArea.getDates().size() - 1).setEnd(LocalDateTime.now());
 
         tripRepository.save(trip);
     }

@@ -3,10 +3,12 @@ package four.group.jahadi.Models.Area;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import four.group.jahadi.Models.DateSerialization;
 import four.group.jahadi.Models.ObjectIdSerialization;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
 import org.bson.types.ObjectId;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
@@ -15,7 +17,7 @@ public class PatientExternalForm {
     @JsonSerialize(using = ObjectIdSerialization.class)
     private ObjectId formId;
     @JsonSerialize(using = DateSerialization.class)
-    private Date statusLastModifiedAt;
+    private LocalDateTime statusLastModifiedAt;
     private String referredFrom;
     private String referredTo;
     private String reason;

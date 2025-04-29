@@ -11,7 +11,8 @@ import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import java.util.Date;
+
+import java.time.LocalDateTime;
 
 import static four.group.jahadi.Utility.Utility.*;
 
@@ -37,7 +38,7 @@ public class AreaDrugs extends Model {
     @Field("updated_at")
     @JsonSerialize(using = DateSerialization.class)
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private Date updatedAt;
+    private LocalDateTime updatedAt;
 
     @Field("total_count")
     @JsonInclude(JsonInclude.Include.NON_ABSENT)

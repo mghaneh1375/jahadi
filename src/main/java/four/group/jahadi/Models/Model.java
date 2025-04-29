@@ -10,7 +10,7 @@ import org.springframework.data.mongodb.core.mapping.MongoId;
 
 import javax.persistence.Id;
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Getter
 public abstract class Model implements Serializable {
@@ -25,11 +25,11 @@ public abstract class Model implements Serializable {
     @CreatedDate
     @JsonSerialize(using = DateSerialization.class)
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private Date createdAt;
+    private LocalDateTime createdAt;
 
     public Model createId() {
         this.id = new ObjectId();
-        this.createdAt = new Date();
+        this.createdAt = LocalDateTime.now();
         return this;
     }
 

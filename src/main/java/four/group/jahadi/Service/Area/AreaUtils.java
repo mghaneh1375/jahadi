@@ -5,10 +5,9 @@ import four.group.jahadi.Exception.NotAccessException;
 import four.group.jahadi.Models.Area.Area;
 import four.group.jahadi.Models.Area.ModuleInArea;
 import four.group.jahadi.Models.Trip;
-import four.group.jahadi.Utility.Utility;
 import org.bson.types.ObjectId;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 public class AreaUtils {
 
@@ -27,7 +26,7 @@ public class AreaUtils {
 
         if (foundArea.getDates() == null ||
                 foundArea.getDates().get(foundArea.getDates().size() - 1).getEnd() != null ||
-                Utility.isUtcAfter(foundArea.getDates().get(foundArea.getDates().size() - 1).getStart(), new Date())
+                foundArea.getDates().get(foundArea.getDates().size() - 1).getStart().isAfter(LocalDateTime.now())
         )
             throw new RuntimeException("اردو در وضعیت شروع فعالیت ها قرار ندارد");
 

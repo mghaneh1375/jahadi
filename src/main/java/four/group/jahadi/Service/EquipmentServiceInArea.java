@@ -23,6 +23,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -44,7 +45,7 @@ public class EquipmentServiceInArea {
     private EquipmentsInAreaRepositoryImp equipmentsInAreaRepositoryImp;
 
     private PairValue checkAccess(ObjectId userId, ObjectId areaId) {
-        Trip trip = tripRepository.findActiveByAreaIdAndEquipmentManager(areaId, userId, Utility.getCurrDate())
+        Trip trip = tripRepository.findActiveByAreaIdAndEquipmentManager(areaId, userId, Utility.getCurrLocalDateTime())
                 .orElseThrow(NotAccessException::new);
 
         Area foundArea = trip
@@ -100,7 +101,6 @@ public class EquipmentServiceInArea {
                 .collect(Collectors.toList())
         ).forEach(equipments::add);
 
-        Date curr = new Date();
         final String msg = "عودت از منطقه " + areaName + " در اردو " + tripName + " توسط " + username;
         List<EquipmentLog> equipmentLogs = new ArrayList<>();
 
@@ -118,7 +118,7 @@ public class EquipmentServiceInArea {
                                     .build()
                     );
                     areaEquipments1.setReminder(0);
-                    areaEquipments1.setUpdatedAt(curr);
+                    areaEquipments1.setUpdatedAt(LocalDateTime.now());
                 }));
 
         equipmentLogRepository.saveAll(equipmentLogs);
@@ -128,7 +128,7 @@ public class EquipmentServiceInArea {
 
     public ResponseEntity<List<JoinedAreaEquipments>> list(ObjectId userId, ObjectId areaId) {
 
-        tripRepository.findActiveByAreaIdAndEquipmentManager(areaId, userId, Utility.getCurrDate())
+        tripRepository.findActiveByAreaIdAndEquipmentManager(areaId, userId, Utility.getCurrLocalDateTime())
                 .orElseThrow(NotAccessException::new);
 
         return new ResponseEntity<>(
@@ -151,7 +151,7 @@ public class EquipmentServiceInArea {
             ObjectId equipmentId, int count
     ) {
         Trip trip = tripRepository.findActiveByAreaIdAndEquipmentManager(
-                areaId, userId, Utility.getCurrDate()
+                areaId, userId, Utility.getCurrLocalDateTime()
         ).orElseThrow(InvalidIdException::new);
         AreaUtils.findStartedArea(trip, areaId);
 
