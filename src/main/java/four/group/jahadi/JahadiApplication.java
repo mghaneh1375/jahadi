@@ -20,6 +20,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.data.mongodb.config.EnableMongoAuditing;
 
 import javax.annotation.PostConstruct;
+import java.util.TimeZone;
 
 @SpringBootApplication()
 @OpenAPIDefinition(info = @Info(title = "Jahadi API", version = "2.0", description = "Jahadi Information"))
@@ -56,6 +57,7 @@ public class JahadiApplication {
     public static String ENCRYPTION_KEY = "|)q,xeI3w4g@WtH[`7>}f6vN$Q3iY)[P";
 
     public static void main(String[] args) {
+        TimeZone.setDefault(TimeZone.getTimeZone("Iran"));
 //        if (!"SECURE_WRAPPER".equals(System.getenv("APP_SAFE_START"))) {
 //            System.err.println("Must be started via launch.sh");
 //            System.exit(1);
