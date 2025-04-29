@@ -19,7 +19,6 @@ import four.group.jahadi.Repository.Area.PatientsInAreaRepository;
 import four.group.jahadi.Repository.ModuleRepository;
 import four.group.jahadi.Repository.PatientRepository;
 import four.group.jahadi.Repository.TripRepository;
-import four.group.jahadi.Repository.UserRepository;
 import four.group.jahadi.Utility.FileUtils;
 import four.group.jahadi.Utility.PairValue;
 import four.group.jahadi.Utility.Utility;
@@ -30,12 +29,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static four.group.jahadi.Service.Area.AreaUtils.findModule;
 import static four.group.jahadi.Service.Area.AreaUtils.findStartedArea;
-import static four.group.jahadi.Utility.FileUtils.*;
+import static four.group.jahadi.Utility.FileUtils.removeFile;
+import static four.group.jahadi.Utility.FileUtils.uploadFile;
 import static four.group.jahadi.Utility.StaticValues.ONE_MB;
 
 @Service
@@ -56,7 +57,7 @@ public class PatientServiceInArea {
 
         //todo: check finalize
 
-        Trip trip = tripRepository.findActiveByAreaIdAndDispatcherId(areaId, userId, Utility.getCurrDate())
+        Trip trip = tripRepository.findActiveByAreaIdAndDispatcherId(areaId, userId, Utility.getCurrLocalDateTime())
                 .orElseThrow(NotAccessException::new);
 
         findStartedArea(trip, areaId);
@@ -72,7 +73,7 @@ public class PatientServiceInArea {
             Boolean justHasInsurance, Boolean justHasNotInsurance
     ) {
 
-        Trip trip = tripRepository.findActiveByAreaIdAndInsurancerId(areaId, userId, Utility.getCurrDate())
+        Trip trip = tripRepository.findActiveByAreaIdAndInsurancerId(areaId, userId, Utility.getCurrLocalDateTime())
                 .orElseThrow(NotAccessException::new);
 
         findStartedArea(trip, areaId);
@@ -102,7 +103,7 @@ public class PatientServiceInArea {
             Boolean justTrained, Boolean justNotTrained
     ) {
 
-        Trip trip = tripRepository.findActiveByAreaIdAndTrainerId(areaId, userId, Utility.getCurrDate())
+        Trip trip = tripRepository.findActiveByAreaIdAndTrainerId(areaId, userId, Utility.getCurrLocalDateTime())
                 .orElseThrow(NotAccessException::new);
 
         findStartedArea(trip, areaId);
@@ -150,7 +151,7 @@ public class PatientServiceInArea {
         if (!patientsInAreaRepository.existByAreaIdAndPatientId(areaId, patientId))
             throw new NotAccessException();
 
-        Trip trip = tripRepository.findActiveByAreaIdAndDispatcherId(areaId, userId, Utility.getCurrDate())
+        Trip trip = tripRepository.findActiveByAreaIdAndDispatcherId(areaId, userId, Utility.getCurrLocalDateTime())
                 .orElseThrow(NotAccessException::new);
         findStartedArea(trip, areaId);
 
@@ -164,7 +165,7 @@ public class PatientServiceInArea {
         patient.setIdentifierType(patientData.getIdentifierType());
         patient.setInsurance(patientData.getInsurance());
         patient.setPatientNo(patientData.getPatientNo());
-        patient.setBirthDate(new Date(patientData.getBirthDate()));
+        patient.setBirthDate(Utility.getLocalDateTime(new Date(patientData.getBirthDate())));
 
         patientRepository.save(patient);
     }
@@ -173,7 +174,7 @@ public class PatientServiceInArea {
 
         //todo: check finalize
 
-        Trip trip = tripRepository.findActiveByAreaIdAndDispatcherId(areaId, userId, Utility.getCurrDate())
+        Trip trip = tripRepository.findActiveByAreaIdAndDispatcherId(areaId, userId, Utility.getCurrLocalDateTime())
                 .orElseThrow(NotAccessException::new);
 
         Area area = findStartedArea(trip, areaId);
@@ -199,7 +200,7 @@ public class PatientServiceInArea {
                 .identifierType(patientData.getIdentifierType())
                 .insurance(patientData.getInsurance())
                 .patientNo(patientData.getPatientNo())
-                .birthDate(new Date(patientData.getBirthDate()))
+                .birthDate(Utility.getLocalDateTime(new Date(patientData.getBirthDate())))
                 .build();
 
         patientRepository.insert(newPatient);
@@ -218,7 +219,7 @@ public class PatientServiceInArea {
 
     public void addPatientToRegion(ObjectId userId, ObjectId areaId, ObjectId patientId) {
 
-        Trip trip = tripRepository.findActiveByAreaIdAndDispatcherId(areaId, userId, Utility.getCurrDate())
+        Trip trip = tripRepository.findActiveByAreaIdAndDispatcherId(areaId, userId, Utility.getCurrLocalDateTime())
                 .orElseThrow(NotAccessException::new);
 
         Area area = findStartedArea(trip, areaId);
@@ -238,7 +239,7 @@ public class PatientServiceInArea {
         if (groupId != null)
             tripRepository.findByGroupIdAndAreaId(groupId, areaId).orElseThrow(NotAccessException::new);
         else
-            tripRepository.findActiveByAreaIdAndResponsibleId(areaId, userId, Utility.getCurrDate())
+            tripRepository.findActiveByAreaIdAndResponsibleId(areaId, userId, Utility.getCurrLocalDateTime())
                     .orElseThrow(NotAccessException::new);
 
         Patient patient = patientRepository.findByIdentifierAndIdentifierType(
@@ -394,7 +395,7 @@ public class PatientServiceInArea {
             ObjectId patientId, TrainFormData data
     ) {
 
-        Trip trip = tripRepository.findActiveByAreaIdAndTrainerId(areaId, userId, Utility.getCurrDate())
+        Trip trip = tripRepository.findActiveByAreaIdAndTrainerId(areaId, userId, Utility.getCurrLocalDateTime())
                 .orElseThrow(NotAccessException::new);
 
         Area foundArea = findStartedArea(trip, areaId);
@@ -433,7 +434,7 @@ public class PatientServiceInArea {
             trip = tripRepository.findByGroupIdAndAreaId(groupId, areaId)
                     .orElseThrow(NotAccessException::new);
         else
-            trip = tripRepository.findActiveByAreaIdAndTrainerId(areaId, userId, Utility.getCurrDate())
+            trip = tripRepository.findActiveByAreaIdAndTrainerId(areaId, userId, Utility.getCurrLocalDateTime())
                     .orElseThrow(NotAccessException::new);
 
         Area foundArea = findStartedArea(trip, areaId);
@@ -454,7 +455,7 @@ public class PatientServiceInArea {
 
     public ResponseEntity<List<PatientReferral>> getPatientReferrals(ObjectId userId, ObjectId areaId, ObjectId patientId) {
 
-        Trip trip = tripRepository.findActiveByAreaIdAndResponsibleId(areaId, userId, Utility.getCurrDate())
+        Trip trip = tripRepository.findActiveByAreaIdAndResponsibleId(areaId, userId, Utility.getCurrLocalDateTime())
                 .orElseThrow(NotAccessException::new);
 
         Area foundArea = findStartedArea(trip, areaId);
@@ -489,7 +490,7 @@ public class PatientServiceInArea {
             ObjectId userId, ObjectId areaId,
             ObjectId patientId, Boolean hasTrained
     ) {
-        Trip trip = tripRepository.findActiveByAreaIdAndTrainerId(areaId, userId, Utility.getCurrDate())
+        Trip trip = tripRepository.findActiveByAreaIdAndTrainerId(areaId, userId, Utility.getCurrLocalDateTime())
                 .orElseThrow(NotAccessException::new);
 
         Area foundArea = findStartedArea(trip, areaId);
@@ -527,7 +528,7 @@ public class PatientServiceInArea {
     public void setPatientInsuranceStatus(
             ObjectId userId, ObjectId areaId, ObjectId patientId, Insurance insuranceStatus
     ) {
-        Trip trip = tripRepository.findActiveByAreaIdAndTrainerId(areaId, userId, Utility.getCurrDate())
+        Trip trip = tripRepository.findActiveByAreaIdAndTrainerId(areaId, userId, Utility.getCurrLocalDateTime())
                 .orElseThrow(NotAccessException::new);
 
         Area foundArea = findStartedArea(trip, areaId);
@@ -628,7 +629,7 @@ public class PatientServiceInArea {
         PatientReferral wantedReferral = optionalPatientReferral.get();
         wantedReferral.setRecepted(isRecepted);
         if (isRecepted)
-            wantedReferral.setReceptedAt(new Date());
+            wantedReferral.setReceptedAt(LocalDateTime.now());
 
         patientsInAreaRepository.save(patientInArea);
     }
@@ -1083,7 +1084,7 @@ public class PatientServiceInArea {
     }
 
     public void removePatientFromArea(ObjectId userId, ObjectId areaId, ObjectId patientId) {
-        Trip trip = tripRepository.findActiveByAreaIdAndDispatcherId(areaId, userId, Utility.getCurrDate())
+        Trip trip = tripRepository.findActiveByAreaIdAndDispatcherId(areaId, userId, Utility.getCurrLocalDateTime())
                 .orElseThrow(NotAccessException::new);
 
         Area area = findStartedArea(trip, areaId);

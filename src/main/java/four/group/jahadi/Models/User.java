@@ -10,7 +10,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import javax.persistence.Transient;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 
@@ -60,7 +60,7 @@ public class User extends Model {
 
     @Field("remove_at")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private Date removeAt;
+    private LocalDateTime removeAt;
 
     @Field("group_id")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)

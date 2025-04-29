@@ -25,6 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -284,7 +285,7 @@ public class PatientExternalReferralsService {
                 patientInArea, request.getFormId()
         ).getSecond();
         patientForm1.setExternalReferralTrackingStatus(request.getStatus());
-        patientForm1.setExternalReferralTrackingStatusLastModifiedAt(new Date());
+        patientForm1.setExternalReferralTrackingStatusLastModifiedAt(LocalDateTime.now());
         patientsInAreaRepository.save(patientInArea);
     }
 

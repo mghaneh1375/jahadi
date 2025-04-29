@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.Size;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -148,10 +148,10 @@ public class JahadgarDrugAPIRoutes extends Router {
             @RequestParam(value = "deliveryStatus", required = false) DeliveryStatus deliveryStatus,
             @RequestParam(value = "doctorId", required = false) ObjectId doctorId,
             @RequestParam(value = "drugId", required = false) ObjectId drugId,
-            @RequestParam(value = "startAdviceAt", required = false) Date startAdviceAt,
-            @RequestParam(value = "endAdviceAt", required = false) Date endAdviceAt,
-            @RequestParam(value = "startGiveAt", required = false) Date startGiveAt,
-            @RequestParam(value = "endGiveAt", required = false) Date endGiveAt,
+            @RequestParam(value = "startAdviceAt", required = false) LocalDateTime startAdviceAt,
+            @RequestParam(value = "endAdviceAt", required = false) LocalDateTime endAdviceAt,
+            @RequestParam(value = "startGiveAt", required = false) LocalDateTime startGiveAt,
+            @RequestParam(value = "endGiveAt", required = false) LocalDateTime endGiveAt,
             @RequestParam(value = "startSuggestCount", required = false) Integer startSuggestCount,
             @RequestParam(value = "endSuggestCount", required = false) Integer endSuggestCount,
             @RequestParam(value = "giverId", required = false) ObjectId giverId,
@@ -201,8 +201,8 @@ public class JahadgarDrugAPIRoutes extends Router {
             @RequestParam(required = false, name = "maxAvailableCount") Integer maxAvailableCount,
             @RequestParam(required = false, name = "drugLocation") String drugLocation,
             @RequestParam(required = false, name = "drugType") String drugType,
-            @RequestParam(required = false, name = "fromExpireAt") Date fromExpireAt,
-            @RequestParam(required = false, name = "toExpireAt") Date toExpireAt,
+            @RequestParam(required = false, name = "fromExpireAt") LocalDateTime fromExpireAt,
+            @RequestParam(required = false, name = "toExpireAt") LocalDateTime toExpireAt,
             @RequestParam(required = false, name = "boxNo") String boxNo,
             @RequestParam(required = false, name = "shelfNo") String shelfNo
     ) throws UnAuthException, NotActivateAccountException {

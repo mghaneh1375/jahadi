@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -17,5 +17,5 @@ public class PaymentsToPatient extends Model {
     @Field("card_no")
     private String cardNo;
     private String action;
-    private Date date;
+    private LocalDateTime date;
 }

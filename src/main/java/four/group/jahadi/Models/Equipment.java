@@ -9,7 +9,8 @@ import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import java.util.Date;
+
+import java.time.LocalDateTime;
 
 import static four.group.jahadi.Utility.Utility.*;
 
@@ -29,14 +30,14 @@ public class Equipment extends Model {
     @Field("buy_at")
     @JsonSerialize(using = DateSerialization.class)
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private Date buyAt;
+    private LocalDateTime buyAt;
     @Field("used_at")
     @JsonSerialize(using = DateSerialization.class)
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private Date usedAt;
+    private LocalDateTime usedAt;
     @Field("guarantee_expire_at")
     @JsonSerialize(using = DateSerialization.class)
-    private Date guaranteeExpireAt;
+    private LocalDateTime guaranteeExpireAt;
     @Field("health_status")
     private EquipmentHealthStatus healthStatus;
     @Field("row_no")

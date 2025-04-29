@@ -26,13 +26,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static four.group.jahadi.Utility.Utility.datePattern;
+import static four.group.jahadi.Utility.Utility.getLocalDateTime;
 
 
 @Service
@@ -54,8 +55,8 @@ public class DrugService extends AbstractService<Drug, DrugData> {
             Integer maxAvailableCount = filters.length > 3 ? (Integer) filters[3] : null;
             DrugLocation drugLocation = filters.length > 4 && filters[4] != null ? DrugLocation.valueOf(filters[4].toString().toUpperCase()) : null;
             DrugType drugType = filters.length > 5 && filters[5] != null ? DrugType.valueOf(filters[5].toString().toUpperCase()) : null;
-            Date fromExpireAt = filters.length > 6 ? (Date) filters[6] : null;
-            Date toExpireAt = filters.length > 7 ? (Date) filters[7] : null;
+            LocalDateTime fromExpireAt = filters.length > 6 ? (LocalDateTime) filters[6] : null;
+            LocalDateTime toExpireAt = filters.length > 7 ? (LocalDateTime) filters[7] : null;
             String boxNo = filters.length > 8 ? (String) filters[8] : null;
             String shelfNo = filters.length > 9 ? (String) filters[9] : null;
 
@@ -231,7 +232,7 @@ public class DrugService extends AbstractService<Drug, DrugData> {
                 case 4:
                     if (!datePattern.matcher(value.toString()).matches())
                         throw new InvalidFieldsException("فرمت تاریخ انقضا نامعتبر است.");
-                    drug.setExpireAt(Utility.convertJalaliToGregorianDate(value.toString()));
+                    drug.setExpireAt(getLocalDateTime(Utility.convertJalaliToGregorianDate(value.toString())));
                     break;
                 case 5:
                     validateString(value.toString(), "شرکت سازنده", 2, 100);

@@ -24,11 +24,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import static four.group.jahadi.Utility.Utility.datePattern;
+import static four.group.jahadi.Utility.Utility.getLocalDateTime;
 
 @Service
 public class EquipmentService extends AbstractService<Equipment, EquipmentData> {
@@ -53,10 +54,10 @@ public class EquipmentService extends AbstractService<Equipment, EquipmentData> 
             EquipmentType equipmentType = filters.length > 7 && filters[7] != null ? EquipmentType.valueOf(filters[7].toString().toUpperCase()) : null;
             String rowNo = filters.length > 8 ? (String) filters[8] : null;
             String shelfNo = filters.length > 9 ? (String) filters[9] : null;
-            Date fromBuyAt = filters.length > 10 ? (Date) filters[10] : null;
-            Date toBuyAt = filters.length > 11 ? (Date) filters[11] : null;
-            Date fromGuaranteeExpireAt = filters.length > 12 ? (Date) filters[12] : null;
-            Date toGuaranteeExpireAt = filters.length > 13 ? (Date) filters[13] : null;
+            LocalDateTime fromBuyAt = filters.length > 10 ? (LocalDateTime) filters[10] : null;
+            LocalDateTime toBuyAt = filters.length > 11 ? (LocalDateTime) filters[11] : null;
+            LocalDateTime fromGuaranteeExpireAt = filters.length > 12 ? (LocalDateTime) filters[12] : null;
+            LocalDateTime toGuaranteeExpireAt = filters.length > 13 ? (LocalDateTime) filters[13] : null;
             return new ResponseEntity<>(
                     equipmentRepository.findByFilters(
                             groupId, name, minAvailable, maxAvailable, healthyStatus,
@@ -187,7 +188,7 @@ public class EquipmentService extends AbstractService<Equipment, EquipmentData> 
                 case 5:
                     if (!datePattern.matcher(value.toString()).matches())
                         throw new InvalidFieldsException("فرمت تاریخ خرید نامعتبر است.");
-                    equipment.setBuyAt(Utility.convertJalaliToGregorianDate(value.toString()));
+                    equipment.setBuyAt(getLocalDateTime(Utility.convertJalaliToGregorianDate(value.toString())));
                     break;
                 case 6:
                     equipment.setHealthStatus(
@@ -221,12 +222,12 @@ public class EquipmentService extends AbstractService<Equipment, EquipmentData> 
                 case 12:
                     if (!datePattern.matcher(value.toString()).matches())
                         throw new InvalidFieldsException("فرمت تاریخ انقضای گارانتی نامعتبر است.");
-                    equipment.setGuaranteeExpireAt(Utility.convertJalaliToGregorianDate(value.toString()));
+                    equipment.setGuaranteeExpireAt(getLocalDateTime(Utility.convertJalaliToGregorianDate(value.toString())));
                     break;
                 case 13:
                     if (!datePattern.matcher(value.toString()).matches())
                         throw new InvalidFieldsException("فرمت تاریخ استفاده نامعتبر است.");
-                    equipment.setUsedAt(Utility.convertJalaliToGregorianDate(value.toString()));
+                    equipment.setUsedAt(getLocalDateTime(Utility.convertJalaliToGregorianDate(value.toString())));
                     break;
             }
         }

@@ -9,7 +9,7 @@ import org.springframework.validation.annotation.Validated;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
@@ -26,5 +26,5 @@ public class PaymentsToPatientDAO {
     @Min(value = 0, message = "مبلغ واریزی باید حداقل 0 باشد")
     private Integer amount;
     @NonNull
-    private Date date;
+    private LocalDateTime date;
 }

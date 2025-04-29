@@ -8,13 +8,12 @@ import four.group.jahadi.Models.PresenceList;
 import four.group.jahadi.Models.User;
 import four.group.jahadi.Models.UserPresenceList;
 import four.group.jahadi.Repository.Area.PresenceListRepository;
-import four.group.jahadi.Utility.Utility;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,7 +28,7 @@ public class AreaPresenceService {
                 .builder()
                 .areaId(areaId)
                 .userId(userId)
-                .entrance(new Date())
+                .entrance(LocalDateTime.now())
                 .build()
         );
     }
@@ -45,7 +44,7 @@ public class AreaPresenceService {
             throw new NotAccessException();
 
         if(data.getJustSetExit() != null && data.getJustSetExit())
-            presenceList.setExit(new Date());
+            presenceList.setExit(LocalDateTime.now());
         else {
             if(data.getEntrance() != null)
                 presenceList.setEntrance(data.getEntrance());
@@ -53,7 +52,7 @@ public class AreaPresenceService {
                 presenceList.setExit(data.getExit());
 
             if(presenceList.getEntrance() != null && presenceList.getExit() != null &&
-                    Utility.isUtcBefore(presenceList.getExit(), presenceList.getEntrance())
+                    presenceList.getExit().isBefore(presenceList.getEntrance())
             )
                 throw new InvalidFieldsException("زمان ورود باید قبل از خروج باشد");
         }

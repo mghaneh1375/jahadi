@@ -13,7 +13,7 @@ import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import javax.persistence.Transient;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static four.group.jahadi.Utility.Utility.printNullableDate;
@@ -42,7 +42,7 @@ public class PatientReferral extends Model {
     @Field("recepted_at")
     @JsonSerialize(using = DateSerialization.class)
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private Date receptedAt;
+    private LocalDateTime receptedAt;
 
     @Field("refer_by")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)

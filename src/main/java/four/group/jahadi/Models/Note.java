@@ -11,7 +11,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import static four.group.jahadi.Utility.Utility.printNullableDate;
 import static four.group.jahadi.Utility.Utility.printNullableField;
@@ -26,7 +26,7 @@ public class Note extends Model {
     @Field("updated_at")
     @UpdateTimestamp
     @JsonSerialize(using = DateSerialization.class)
-    private Date updatedAt;
+    private LocalDateTime updatedAt;
 
     private String title;
 

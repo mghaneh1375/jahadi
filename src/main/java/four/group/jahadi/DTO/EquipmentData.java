@@ -10,7 +10,7 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -29,9 +29,9 @@ public class EquipmentData {
     @Max(value = 100000, message = "مقدار موجودی باید حداکثر 100000 باشد")
     private Integer available;
     @NotNull
-    private Date buyAt;
-    private Date usedAt;
-    private Date guaranteeExpireAt;
+    private LocalDateTime buyAt;
+    private LocalDateTime usedAt;
+    private LocalDateTime guaranteeExpireAt;
     @NotNull
     private EquipmentHealthStatus healthStatus;
     @NotNull

@@ -13,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,7 +35,7 @@ public class AdminService {
         List<Trip> trips;
 
         try {
-            trips = tripRepository.findActivesOrNotStartedProjects(Utility.getCurrDate());
+            trips = tripRepository.findActivesOrNotStartedProjects(Utility.getCurrLocalDateTime());
         } catch (Exception x) {
             x.printStackTrace();
             return null;

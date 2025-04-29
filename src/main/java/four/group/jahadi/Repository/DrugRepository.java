@@ -8,7 +8,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,9 +30,6 @@ public interface DrugRepository extends MongoRepository<Drug, ObjectId>, Filtera
     @Query(value = "{ _id: {$in: ?0}}", count = true)
     Integer countByIds(List<ObjectId> ids);
 
-    @Query(value = "{ name: { $regex: ?0, $options:'i'}}", fields = "{ 'name': 1, '_id': 1, 'price': 1, 'visibility': 1, 'available': 1, 'priority': 1 }", sort = "{'priority': 1}")
-    List<Drug> findLikeName(String name);
-
     @Query(value = "{$and :[{$or: [{'deleted_at': null}, {'deleted_at': {$exists: false}}]},"
             + "?#{ [0] == null ? { $where : 'true'} : { 'group_id' : [0] } },"
             + "?#{ [1] == null ? { $where : 'true'} : { name: { $regex: [1], $options:'i'} } },"
@@ -49,7 +46,7 @@ public interface DrugRepository extends MongoRepository<Drug, ObjectId>, Filtera
             ObjectId groupId, String name,
             Integer minAvailableCount, Integer maxAvailableCount,
             DrugLocation drugLocation, DrugType drugType,
-            Date fromExpireAt, Date toExpireAt,
+            LocalDateTime fromExpireAt, LocalDateTime toExpireAt,
             String boxNo, String shelfNo
     );
 

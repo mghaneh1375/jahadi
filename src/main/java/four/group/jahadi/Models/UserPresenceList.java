@@ -7,7 +7,7 @@ import org.bson.types.ObjectId;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -28,15 +28,15 @@ public class UserPresenceList {
         private ObjectId id;
 
         @JsonSerialize(using = DateSerialization.class)
-        private Date entrance;
+        LocalDateTime entrance;
 
         @JsonSerialize(using = DateSerialization.class)
-        private Date exit;
+        LocalDateTime exit;
     }
 
     @Field("created_at")
     @CreatedDate
     @JsonSerialize(using = DateSerialization.class)
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private Date createdAt;
+    LocalDateTime createdAt;
 }

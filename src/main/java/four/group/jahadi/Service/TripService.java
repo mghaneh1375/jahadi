@@ -57,7 +57,7 @@ public class TripService extends AbstractService<Trip, TripStepData> {
         }
         if(filters[1] != null) {
             Status status = (Status) filters[1];
-            Date curr = getCurrDate();
+            LocalDateTime curr = getCurrLocalDateTime();
             switch (status) {
                 case FINISHED:
                     filtersList.add(new ArrayList<>() {
@@ -127,7 +127,7 @@ public class TripService extends AbstractService<Trip, TripStepData> {
 
     public ResponseEntity<List<Trip>> myActiveTrips(ObjectId groupId) {
         return new ResponseEntity<>(tripRepository.findActivesByGroupId(
-                groupId, getCurrDate()
+                groupId, getCurrLocalDateTime()
         ), HttpStatus.OK);
     }
 
@@ -137,7 +137,7 @@ public class TripService extends AbstractService<Trip, TripStepData> {
 
         try {
             trips = tripRepository.findActivesOrNotStartedProjectsByGroupId(
-                    Utility.getCurrDate(), groupId
+                    Utility.getCurrLocalDateTime(), groupId
             );
         } catch (Exception x) {
             x.printStackTrace();
@@ -251,7 +251,7 @@ public class TripService extends AbstractService<Trip, TripStepData> {
 
     public ResponseEntity<List<Group>> getGroupsWhichHasActiveTrip() {
 
-        List<Trip> activeTrips = tripRepository.findActives(Utility.getCurrDate());
+        List<Trip> activeTrips = tripRepository.findActives(Utility.getCurrLocalDateTime());
 
         List<Group> groups = groupRepository.findByIdsIn(findFromTripGroupIds(activeTrips));
         groups.forEach(x -> x.setAreas(new ArrayList<>()));

@@ -10,7 +10,7 @@ import lombok.*;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 import static four.group.jahadi.Utility.Utility.printNullableDate;
@@ -34,7 +34,7 @@ public class Patient extends Model {
 
     @Field("birth_date")
     @JsonSerialize(using = DateSerialization.class)
-    private Date birthDate;
+    private LocalDateTime birthDate;
 
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     private String phone;

@@ -32,6 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.InvocationTargetException;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -721,7 +722,7 @@ public class UserService extends AbstractService<User, SignUpData> {
     public ResponseEntity<List<User>> findGroupMembersByRegionOwner(ObjectId userId, ObjectId groupId) {
 
         List<Trip> trips =
-                tripRepository.findActivesOrNotStartedProjectIdsByAreaOwnerId(Utility.getCurrDate(), userId);
+                tripRepository.findActivesOrNotStartedProjectIdsByAreaOwnerId(Utility.getCurrLocalDateTime(), userId);
 
         if (trips.size() == 0)
             throw new NotAccessException();
@@ -740,7 +741,7 @@ public class UserService extends AbstractService<User, SignUpData> {
 
     public void remove(ObjectId userId) {
         User user = userRepository.findById(userId).orElseThrow(InvalidIdException::new);
-        user.setRemoveAt(new Date());
+        user.setRemoveAt(LocalDateTime.now());
         userRepository.save(user);
     }
 
@@ -753,7 +754,7 @@ public class UserService extends AbstractService<User, SignUpData> {
         );
 
         if (Objects.equals(user.getRole(), Access.JAHADI)) {
-            Date currDate = Utility.getCurrDate();
+            LocalDateTime currDate = Utility.getCurrLocalDateTime();
             user.setHasActiveRegion(tripRepository.existNotFinishedByAreaOwnerId(currDate, userId));
             user.setHasActiveTask(tripRepository.existNotFinishedByResponsibleId(currDate, userId));
         }

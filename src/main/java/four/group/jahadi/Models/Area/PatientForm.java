@@ -10,7 +10,7 @@ import lombok.*;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 
@@ -42,7 +42,7 @@ public class PatientForm extends Model {
 
     @Field("external_referral_tracking_status_last_modified_at")
     @JsonSerialize(using = DateSerialization.class)
-    private Date externalReferralTrackingStatusLastModifiedAt;
+    private LocalDateTime externalReferralTrackingStatusLastModifiedAt;
 
     @Override
     public String toString() {

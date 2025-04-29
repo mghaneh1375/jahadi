@@ -13,7 +13,7 @@ import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static four.group.jahadi.Utility.Utility.*;
@@ -35,7 +35,7 @@ public class Drug extends Model {
     @Field("drug_type")
     private DrugType drugType;
     @Field("expire_at")
-    private Date expireAt;
+    private LocalDateTime expireAt;
     private String dose;
     private String name;
     private String producer;

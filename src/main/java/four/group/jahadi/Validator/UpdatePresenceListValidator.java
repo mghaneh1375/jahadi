@@ -1,7 +1,6 @@
 package four.group.jahadi.Validator;
 
 import four.group.jahadi.DTO.UpdatePresenceList;
-import four.group.jahadi.Utility.Utility;
 import org.json.JSONObject;
 
 import javax.validation.ConstraintValidator;
@@ -29,7 +28,7 @@ public class UpdatePresenceListValidator implements ConstraintValidator<Validate
 
         if((value.getJustSetExit() == null || !value.getJustSetExit()) &&
                 value.getEntrance() != null && value.getExit() !=null &&
-                Utility.isUtcBefore(value.getExit(), value.getEntrance())
+                value.getExit().isBefore(value.getEntrance())
         ) {
             errs.put("entrance", "زمان ورود باید قبل از زمان خروج باشد");
             isErrored = true;
