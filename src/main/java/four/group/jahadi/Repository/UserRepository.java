@@ -13,10 +13,8 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
+@MyRepository(model = "User")
 public interface UserRepository extends MongoRepository<User, ObjectId>, FilterableRepository<User> {
-
-    @Query(value = "{'_id':  ?0, 'status':  'ACTIVE', 'removeAt': null}", count = true)
-    Integer countActiveBy_id(ObjectId id);
 
     @Query(value = "{'accesses': ?0, 'status':  'ACTIVE', 'removeAt': null}", count = true)
     Integer countUsersByAccess(String access);
@@ -25,9 +23,6 @@ public interface UserRepository extends MongoRepository<User, ObjectId>, Filtera
             fields = "{ 'name': 1, 'nid': 1, 'phone': 1, 'tel': 1, 'field': 1, 'pic': 1, 'color': 1, 'sex': 1  }"
     )
     List<User> findByIdsIn(List<ObjectId> ids);
-
-    @Query(value = "{ '_id': { $in: ?0 } }")
-    List<User> findFullInfoByIdsIn(List<ObjectId> ids);
 
     @Query(value = "{ '_id': { $in: ?0 } }",
             fields = "{ 'name': 1, 'pic': 1, 'color': 1 }"
@@ -72,13 +67,4 @@ public interface UserRepository extends MongoRepository<User, ObjectId>, Filtera
     List<User> findAll(AccountStatus status, Access access, String name,
                        String NID, String phone, Sex sex, String groupName,
                        ObjectId groupId, Boolean justGroupRequests);
-
-    @Query(value = "{'phone':  ?0}", count = true)
-    Integer countByPhone(String phone);
-
-    @Query(value = "{'nid':  ?0}", count = true)
-    Integer countByNID(String nid);
-
-    @Query(value = "{$and: [{'groupId': ?0}, {'accesses': 'GROUP'}]}", fields = "{_id: 1}")
-    User findIdByGroupOwnerId(ObjectId groupId);
 }

@@ -3,6 +3,7 @@ package four.group.jahadi.Repository.Area;
 import four.group.jahadi.Models.Area.AreaDrugs;
 import four.group.jahadi.Models.Area.JoinedAreaDrugs;
 import four.group.jahadi.Repository.FilterableRepository;
+import four.group.jahadi.Repository.MyRepository;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -13,13 +14,8 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
+@MyRepository(model = "DrugsInArea")
 public interface AreaDrugsRepository extends MongoRepository<AreaDrugs, ObjectId>, FilterableRepository<AreaDrugs> {
-
-    @Query(value = "{areaId: ?0}", count = true)
-    Integer countByAreaId(ObjectId areaId);
-
-    @Query(value = "{areaId: ?0, drugId: ?1}", exists = true)
-    Boolean existByAreaIdAndDrugId(ObjectId areaId, ObjectId drugId);
 
     @Query(value = "{areaId: ?0, drugId: ?1}")
     Optional<AreaDrugs> findByAreaIdAndDrugId(ObjectId areaId, ObjectId drugId);
@@ -46,15 +42,6 @@ public interface AreaDrugsRepository extends MongoRepository<AreaDrugs, ObjectId
     })
     List<JoinedAreaDrugs> findDigestByAreaId(ObjectId areaId);
 
-    @Query(value = "{areaId: ?0, drugId: {$in: ?1}}", fields = "{drugId: 1}")
-    List<AreaDrugs> findDrugIdsByAreaIdAndDrugIds(ObjectId areaId, List<ObjectId> ids);
-
-    @Query(value = "{areaId: ?0, drugId: {$in: ?1}}")
-    List<AreaDrugs> findByAreaIdAndDrugIds(ObjectId areaId, List<ObjectId> ids);
-
     @Query(value = "{areaId: ?0, reminder: {$gt: 0}}")
     List<AreaDrugs> findAvailableDrugsByAreaId(ObjectId areaId);
-
-    @Query(value = "{_id: {$in: ?0}, areaId: ?1}", delete = true)
-    List<AreaDrugs> removeAreaDrugsByIdAndAreaId(List<ObjectId> ids, ObjectId areaId);
 }

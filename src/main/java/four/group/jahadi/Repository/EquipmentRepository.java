@@ -10,15 +10,10 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Repository
+@MyRepository(model = "Equipment")
 public interface EquipmentRepository extends MongoRepository<Equipment, ObjectId>, FilterableRepository<Equipment> {
-    @Query(value = "{_id: ?0, groupId: ?1}")
-    Optional<Equipment> findByIdAndGroupId(ObjectId id, ObjectId groupId);
-
-    @Query(value = "{_id: {$in: ?0}, groupId: ?1}")
-    List<Equipment> findAllByIdsAndGroupId(List<ObjectId> ids, ObjectId groupId);
 
     @Query(value = "{ _id: {$in: ?0}}")
     List<Equipment> findFullInfoByIds(List<ObjectId> ids);

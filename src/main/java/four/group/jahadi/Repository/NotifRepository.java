@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
+@MyRepository(model = "Notif")
 public interface NotifRepository extends MongoRepository<Notif, ObjectId>, FilterableRepository<Notif> {
 
     @Query(value = "{user_id: ?0, seen: false}", fields = "{'id': 1, 'msg': 1, 'seen':  1, 'created_at':  1}")

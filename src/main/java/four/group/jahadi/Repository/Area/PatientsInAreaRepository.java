@@ -4,6 +4,7 @@ import four.group.jahadi.Models.Area.PatientJoinArea;
 import four.group.jahadi.Models.Patient;
 import four.group.jahadi.Models.Area.PatientsInArea;
 import four.group.jahadi.Repository.FilterableRepository;
+import four.group.jahadi.Repository.MyRepository;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
+@MyRepository(model = "PatientsInArea")
 public interface PatientsInAreaRepository extends MongoRepository<PatientsInArea, ObjectId>, FilterableRepository<PatientsInArea> {
 
     @Query(value = "{areaId: ?0}", count = true)

@@ -2,7 +2,9 @@ package four.group.jahadi.Service.Area;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.introspect.AnnotatedClass;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.google.common.base.CaseFormat;
 import four.group.jahadi.DTO.Area.AreaData;
 import four.group.jahadi.DTO.Area.AreaDigest;
 import four.group.jahadi.DTO.UpdatePresenceList;
@@ -30,7 +32,6 @@ import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -43,6 +44,7 @@ import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -50,13 +52,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static four.group.jahadi.Service.Area.AreaUtils.findArea;
-import static four.group.jahadi.Utility.Utility.*;
 
 @Service
 public class AreaService extends AbstractService<Area> {
-
-    @Autowired
-    private NotifService notifService;
     @Autowired
     private TripRepository tripRepository;
     @Autowired
@@ -73,8 +71,6 @@ public class AreaService extends AbstractService<Area> {
     private AreaPresenceService areaPresenceService;
     @Autowired
     private WareHouseAccessForGroupRepository wareHouseAccessForGroupRepository;
-    @Autowired
-    private ExternalReferralAccessForGroupRepository externalReferralAccessForGroupRepository;
     @Autowired
     private DrugServiceInArea drugServiceInArea;
     @Autowired
@@ -182,9 +178,7 @@ public class AreaService extends AbstractService<Area> {
     public ResponseEntity<List<AreaDigest>> getGroupAreas(
             ObjectId tripId, ObjectId userId, ObjectId groupId
     ) {
-        if (!wareHouseAccessForGroupRepository.existsAccessByGroupIdAndUserId(groupId, userId) &&
-                !externalReferralAccessForGroupRepository.existsAccessByGroupIdAndUserId(groupId, userId)
-        )
+        if (!wareHouseAccessForGroupRepository.existsAccessByGroupIdAndUserId(groupId, userId))
             throw new NotAccessException();
 
         List<Trip> trips = tripId == null
@@ -207,9 +201,7 @@ public class AreaService extends AbstractService<Area> {
     }
 
     public ResponseEntity<List<AreaDigest>> getGroupTrips(ObjectId userId, ObjectId groupId) {
-        if (!wareHouseAccessForGroupRepository.existsAccessByGroupIdAndUserId(groupId, userId) &&
-                !externalReferralAccessForGroupRepository.existsAccessByGroupIdAndUserId(groupId, userId)
-        )
+        if (!wareHouseAccessForGroupRepository.existsAccessByGroupIdAndUserId(groupId, userId))
             throw new NotAccessException();
 
         List<Trip> trips = tripRepository.findDigestTripInfoProjectsByGroupId(groupId);
@@ -439,10 +431,13 @@ public class AreaService extends AbstractService<Area> {
         }
     }
 
-    public static Set<Class<?>> getClassesWithAnnotation(ClassLoader classLoader, Class<? extends Annotation> annotation) {
+    public static Set<Class<?>> getClassesWithAnnotation(
+            Class<? extends Annotation> annotation,
+            String... packageNames
+    ) {
         Set<Class<?>> annotatedClasses = new HashSet<>();
         try {
-            Set<Class<?>> allClasses = getAllClassesFromClasspath(classLoader);
+            Set<Class<?>> allClasses = findAllClassesUsingClassLoader(packageNames);
             for (Class<?> clazz : allClasses) {
                 if (clazz.isAnnotationPresent(annotation)) {
                     annotatedClasses.add(clazz);
@@ -455,27 +450,25 @@ public class AreaService extends AbstractService<Area> {
         return annotatedClasses;
     }
 
-    private static Set<Class<?>> getAllClassesFromClasspath(ClassLoader classLoader) {
-        Set<Class<?>> classes = new HashSet<>();
-        try {
-            classes.add(AnnotatedClass.class);
-        } catch (Exception e) {
-            e.printStackTrace();
+    public static Set<Class<?>> findAllClassesUsingClassLoader(String... packageNames) {
+        Set<Class<?>> output = new HashSet<>();
+        for (int i = 0; i < packageNames.length; i++) {
+            String packageName = packageNames[i];
+            InputStream stream = ClassLoader.getSystemClassLoader()
+                    .getResourceAsStream(packageName.replaceAll("[.]", "/"));
+            BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+            output.addAll(
+                    reader.lines()
+                            .filter(line -> line.endsWith(".class"))
+                            .map(line -> getClass(line, packageName))
+                            .collect(Collectors.toSet())
+            );
         }
-        return classes;
+
+        return output;
     }
 
-    public Set<Class> findAllClassesUsingClassLoader(String packageName) {
-        InputStream stream = ClassLoader.getSystemClassLoader()
-                .getResourceAsStream(packageName.replaceAll("[.]", "/"));
-        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
-        return reader.lines()
-                .filter(line -> line.endsWith(".class"))
-                .map(line -> getClass(line, packageName))
-                .collect(Collectors.toSet());
-    }
-
-    private Class getClass(String className, String packageName) {
+    private static Class<?> getClass(String className, String packageName) {
         try {
             return Class.forName(packageName + "."
                     + className.substring(0, className.lastIndexOf('.')));
@@ -490,10 +483,11 @@ public class AreaService extends AbstractService<Area> {
             Set<Class<?>> repositories
     ) {
         System.out.println("Saving data for " + selectedDB.getAnnotation(Document.class).collection());
-        String[] split = selectedDB.getAnnotation(Document.class).collection().split("\\.");
+        String className = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, selectedDB.getAnnotation(Document.class).collection());
+
         repositories
                 .stream()
-                .filter(aClass -> aClass.getName().endsWith("." + split[split.length - 1] + "Repository"))
+                .filter(aClass -> aClass.getAnnotation(MyRepository.class).model().equalsIgnoreCase(className))
                 .findFirst().ifPresent(aClass -> {
                     System.out.println("Repository found: " + aClass.getName());
                     BeanFetcher fetcher = new BeanFetcher(applicationContext);
@@ -509,14 +503,12 @@ public class AreaService extends AbstractService<Area> {
     }
 
     private void removeAll(
-            List<Object> values, Class selectedDB,
-            Set<Class<?>> repositories
+            Class selectedDB, Set<Class<?>> repositories
     ) {
-        List<Object> finalValues = values;
         String[] split = selectedDB.getName().split("\\.");
         repositories
                 .stream()
-                .filter(aClass -> aClass.getName().endsWith("." + split[split.length - 1] + "Repository"))
+                .filter(aClass -> aClass.getAnnotation(MyRepository.class).model().equalsIgnoreCase(split[split.length - 1]))
                 .findFirst().ifPresent(aClass -> {
                     BeanFetcher fetcher = new BeanFetcher(applicationContext);
                     Object bean = fetcher.getBeanByClass(aClass);
@@ -538,11 +530,19 @@ public class AreaService extends AbstractService<Area> {
     }
 
     public void importDBToConstructLocalServer(MultipartFile file) {
-        Set<Class<?>> models = getClassesWithAnnotation(ClassLoader.getSystemClassLoader(), Document.class);
-        Set<Class<?>> repositories = getClassesWithAnnotation(ClassLoader.getSystemClassLoader(), Repository.class);
+        Set<Class<?>> models = getClassesWithAnnotation(Document.class,
+                "four.group.jahadi.Models",
+                "four.group.jahadi.Models.Area"
+        );
+        Set<Class<?>> repositories = getClassesWithAnnotation(MyRepository.class,
+                "four.group.jahadi.Repository",
+                "four.group.jahadi.Repository.Area"
+        );
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            objectMapper.registerModule(new JavaTimeModule());
+            objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
             InputStream inputStream = file.getInputStream();
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             AtomicReference<Class> selectedDB = new AtomicReference<>(null);
@@ -559,17 +559,17 @@ public class AreaService extends AbstractService<Area> {
                         if (values != null && values.size() > 0) {
                             saveAllList(values, selectedDB.get(), repositories);
                         }
-                        List<Object> finalValues = values;
+                        String wanted = line.replaceAll("\\*", "");
                         models
                                 .stream()
-                                .filter(aClass ->
-                                        capitalizeFirstChar(aClass.getAnnotation(Document.class).collection())
-                                                .endsWith("." + line.replaceAll("\\*", ""))
-                                )
+                                .filter(aClass -> {
+                                    String className = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, aClass.getAnnotation(Document.class).collection());
+                                    return className.equals(wanted);
+                                })
                                 .findFirst().ifPresent(aClass -> {
                                     System.out.println("Find model: " + aClass.getAnnotation(Document.class).collection());
                                     selectedDB.set(aClass);
-                                    removeAll(finalValues, selectedDB.get(), repositories);
+                                    removeAll(selectedDB.get(), repositories);
                                 });
 
                         values = new ArrayList<>();

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
+@MyRepository(model = "DrugBookmark")
 public interface DrugBookmarkRepository extends MongoRepository<DrugBookmark, ObjectId>, FilterableRepository<DrugBookmark> {
   @Query(value = "{userId: ?0}")
   List<DrugBookmark> findByUserId(ObjectId userId);

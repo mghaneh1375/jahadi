@@ -5,7 +5,6 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import four.group.jahadi.Service.Area.PatientServiceInArea;
-import four.group.jahadi.Service.UserService;
 
 import java.io.IOException;
 

@@ -3,6 +3,7 @@ package four.group.jahadi.Repository.Area;
 import four.group.jahadi.Models.Area.PatientsInArea;
 import four.group.jahadi.Models.PatientDrug;
 import four.group.jahadi.Repository.FilterableRepository;
+import four.group.jahadi.Repository.MyRepository;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
+@MyRepository(model = "PatientDrug")
 public interface PatientsDrugRepository extends MongoRepository<PatientDrug, ObjectId>, FilterableRepository<PatientsInArea> {
 
     @Aggregation(pipeline = {

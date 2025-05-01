@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
+@MyRepository(model = "State")
 public interface StateRepository extends MongoRepository<State, ObjectId>, FilterableRepository<State> {
 
     @Query(value = "{'countryId': ?0}")

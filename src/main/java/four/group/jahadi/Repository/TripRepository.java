@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
+@MyRepository(model = "Trip")
 public interface TripRepository extends MongoRepository<Trip, ObjectId>, FilterableRepository<Trip> {
 
     @Query(value = "{ $and: [{'groupsWithAccess.groupId': ?0}, {'startAt': {$lte: ?1}}, {'endAt': {$gte: ?1}}] }", fields = "{'name': 1, 'areas.name': 1, 'areas._id': 1}")
@@ -24,15 +25,6 @@ public interface TripRepository extends MongoRepository<Trip, ObjectId>, Filtera
 
     @Query(value = "{'groupsWithAccess.groupId': ?0, 'areas.id': ?1}")
     Optional<Trip> findByGroupIdAndAreaId(ObjectId groupId, ObjectId areaId);
-
-    @Query(value = "{$and: [{'groupsWithAccess': { $elemMatch: {'groupId': ?0, 'writeAccess': true} }}, {'areas.id': ?1}]}", exists = true)
-    boolean existByGroupIdAndAreaId(ObjectId groupId, ObjectId areaId);
-
-    @Query(value = "{'projectId': ?0}")
-    List<Trip> findTripByProjectId(ObjectId projectId);
-
-    @Query(value = "{'projectId': ?0, '_id': ?1}")
-    Optional<Trip> findTripByProjectIdAndId(ObjectId projectId, ObjectId id);
 
     @Query(value = "{$and: [{'startAt': {$lte: ?0}}, {'endAt': {$gte: ?0}}]  }")
     List<Trip> findActives(LocalDateTime curr);
@@ -57,9 +49,6 @@ public interface TripRepository extends MongoRepository<Trip, ObjectId>, Filtera
 
     @Query(value = "{$and: [{'groupsWithAccess.groupId': ?0}]  }", fields = "{'_id': 1, 'name': 1}")
     List<Trip> findDigestTripInfoProjectsByGroupId(ObjectId groupId);
-
-    @Query(value = "{$and: [{'areas': {$elemMatch: { 'id': ?2, $or: [{'endAt': {$exists: false}}, {'endAt': {$gte: ?0}}] } } }, {'groupsWithAccess': { $elemMatch: {'groupId': ?1, 'writeAccess': true} }} ] }", fields = "{'name': 1, 'areas.name': 1, 'areas.id': 1}")
-    Optional<Trip> findActiveAreaByGroupIdAndAreaIdAndWriteAccess(LocalDateTime curr, ObjectId groupId, ObjectId areaId);
 
     @Query(value = "{$and: [{'endAt': {$exists: true}}, {'endAt': {$gte: ?0}}]  }", fields = "{'projectId': false, 'areas.members': false, 'createdAt': false}")
     List<Trip> findActivesOrNotStartedProjects(LocalDateTime curr);

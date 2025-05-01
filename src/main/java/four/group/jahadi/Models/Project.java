@@ -19,7 +19,7 @@ import static four.group.jahadi.Utility.Utility.*;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Document("project")
+@Document(collection = "project")
 @Builder
 public class Project extends Model {
 

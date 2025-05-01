@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
+@MyRepository(model = "DrugLogs")
 public interface DrugLogRepository extends MongoRepository<DrugLog, ObjectId>, FilterableRepository<DrugLog> {
 
   @Query(value = "{$and :["

@@ -12,10 +12,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
+@MyRepository(model = "Drug")
 public interface DrugRepository extends MongoRepository<Drug, ObjectId>, FilterableRepository<Drug> {
-
-    @Query(value = "{_id: {$in: ?0}, groupId: ?1}")
-    List<Drug> findAllByIdsAndGroupId(List<ObjectId> ids, ObjectId groupId);
 
     @Query(value = "{ _id: {$in: ?0}}", fields = "{ 'name': 1, 'howToUse': 1, 'description': 1 }")
     List<Drug> findByIds(List<ObjectId> ids);

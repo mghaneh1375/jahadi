@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import static four.group.jahadi.Utility.Utility.printNullableField;
 
@@ -11,6 +12,7 @@ import static four.group.jahadi.Utility.Utility.printNullableField;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Document(collection = "country")
 public class Country extends Model {
     private String name;
 
