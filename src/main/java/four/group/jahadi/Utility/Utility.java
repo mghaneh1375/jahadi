@@ -42,16 +42,6 @@ public class Utility {
     private static final SecureRandom rnd = new SecureRandom();
     private static final Random random = new Random();
 
-    public static String convertDateToSimpleJalali(Date date) {
-        String[] splited = simpleDateFormat.format(date).split("-");
-        return JalaliCalendar.gregorianToJalali(new JalaliCalendar.YearMonthDate(splited[0], splited[1], splited[2])).format("/");
-    }
-    public static String convertUTCDateToJalali(Date date) {
-        String[] dateTime = dateTimeFormatter.format(convertToUTCInstant(date)).split(" ");
-        String[] splited = dateTime[0].split("-");
-        return JalaliCalendar.gregorianToJalali(new JalaliCalendar.YearMonthDate(splited[0], splited[1], splited[2])).format("/") + " - " + dateTime[1];
-    }
-
     public static String convertUTCDateToJalali(LocalDateTime date) {
         String[] dateTime = dateTimeFormatter.format(date).split(" ");
         String[] splited = dateTime[0].split("-");
@@ -367,7 +357,7 @@ public class Utility {
 
     public static String printNullableDate(LocalDateTime obj) {
         if (obj == null) return null;
-        return "\"" + obj.format(dateTimeFormatter) + "\"";
+        return "\"" + obj.toString() + "\"";
     }
 
     public static String toStringOfList(List<?> objects) {
