@@ -5,7 +5,6 @@ import four.group.jahadi.Models.Area.Area;
 import four.group.jahadi.Models.*;
 import four.group.jahadi.Repository.*;
 import four.group.jahadi.Service.Area.AreaService;
-import four.group.jahadi.Utility.Utility;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,11 +13,10 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static four.group.jahadi.Utility.Utility.getCurrDate;
+import static four.group.jahadi.Utility.Utility.getCurrLocalDateTime;
 
 @Service
 public class TripService extends AbstractService<Trip> {
@@ -131,7 +129,7 @@ public class TripService extends AbstractService<Trip> {
 
         try {
             trips = tripRepository.findActivesOrNotStartedProjectsByGroupId(
-                    Utility.getCurrLocalDateTime(), groupId
+                    getCurrLocalDateTime(), groupId
             );
         } catch (Exception x) {
             x.printStackTrace();
@@ -158,7 +156,7 @@ public class TripService extends AbstractService<Trip> {
 
     public ResponseEntity<List<Group>> getGroupsWhichHasActiveTrip() {
 
-        List<Trip> activeTrips = tripRepository.findActives(Utility.getCurrLocalDateTime());
+        List<Trip> activeTrips = tripRepository.findActives(getCurrLocalDateTime());
 
         List<Group> groups = groupRepository.findByIdsIn(findFromTripGroupIds(activeTrips));
         groups.forEach(x -> x.setAreas(new ArrayList<>()));

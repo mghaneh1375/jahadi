@@ -5,42 +5,22 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.modelmapper.convention.NameTransformers;
 
-import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-
-import static four.group.jahadi.Utility.StaticValues.DEV_MODE;
 
 public class Utility {
     private static final SimpleDateFormat sdfSSSXXX;
     public static final ZoneId tehranZoneId = ZoneId.of("Asia/Tehran");
-    private static final SimpleDateFormat simpleDateFormat;
     private static final DateTimeFormatter dateTimeFormatter;
 
     static {
         sdfSSSXXX = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
         sdfSSSXXX.setTimeZone(TimeZone.getTimeZone("UTC"));
-        simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
                 .withZone(ZoneOffset.UTC);
-    }
-
-    private static final String AB = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-    private static final SecureRandom rnd = new SecureRandom();
-    private static final Random random = new Random();
-
-    public static String convertDateToSimpleJalali(Date date) {
-        String[] splited = simpleDateFormat.format(date).split("-");
-        return JalaliCalendar.gregorianToJalali(new JalaliCalendar.YearMonthDate(splited[0], splited[1], splited[2])).format("/");
-    }
-    public static String convertUTCDateToJalali(Date date) {
-        String[] dateTime = dateTimeFormatter.format(convertToUTCInstant(date)).split(" ");
-        String[] splited = dateTime[0].split("-");
-        return JalaliCalendar.gregorianToJalali(new JalaliCalendar.YearMonthDate(splited[0], splited[1], splited[2])).format("/") + " - " + dateTime[1];
     }
 
     public static String convertUTCDateToJalali(LocalDateTime date) {
@@ -146,44 +126,13 @@ public class Utility {
 
     }
 
-    public static int randInt() {
-
-        if (DEV_MODE)
-            return 111111;
-
-        int r = 0;
-        for (int i = 0; i < 6; i++) {
-            int x = random.nextInt(10);
-
-            while (x == 0)
-                x = random.nextInt(10);
-
-            r += x * Math.pow(10, i);
-        }
-
-        return r;
-    }
-
-    public static String randomString(int len) {
-        StringBuilder sb = new StringBuilder(len);
-        for (int i = 0; i < len; i++)
-            sb.append(AB.charAt(rnd.nextInt(AB.length())));
-        return sb.toString();
-    }
-
-    public static Date getCurrDate() {
-        Date date = new Date();
+    public static LocalDateTime getLocalDateTime(Date date) {
         date.setHours(0);
         date.setMinutes(0);
         date.setSeconds(0);
-        return date;
-    }
-
-    public static Date getDate(Date date) {
-        date.setHours(0);
-        date.setMinutes(0);
-        date.setSeconds(0);
-        return date;
+        return Instant.ofEpochMilli(date.getTime())
+                .atZone(tehranZoneId)
+                .toLocalDateTime();
     }
 
     public static String printNullableField(Object obj) {
@@ -192,32 +141,6 @@ public class Utility {
 
     public static String printNullableInteger(Integer obj) {
         return obj == null ? null : String.format("%d", obj);
-    }
-
-    public static boolean isUtcAfter(Date dateToCheck, Date referenceDate) {
-        Instant utcInstantToCheck = convertToUTCInstant(dateToCheck);
-        Instant utcReferenceInstant = convertToInstant(referenceDate);
-        return utcInstantToCheck.isAfter(utcReferenceInstant);
-    }
-
-    public static boolean isUtcBefore(Date dateToCheck, Date referenceDate) {
-        Instant utcInstantToCheck = convertToUTCInstant(dateToCheck);
-        Instant utcReferenceInstant = convertToInstant(referenceDate);
-        return utcInstantToCheck.isBefore(utcReferenceInstant);
-    }
-
-    public static Instant convertToInstant(Date date) {
-        Instant instant = date.toInstant();
-        ZonedDateTime tehranTime = instant.atZone(tehranZoneId);
-        ZonedDateTime utcTime = tehranTime.withZoneSameLocal(ZoneOffset.UTC);
-        return utcTime.toInstant();
-    }
-
-    public static Instant convertToUTCInstant(Date date) {
-        Instant instant = date.toInstant();
-        ZonedDateTime tehranTime = instant.atZone(tehranZoneId);
-        ZonedDateTime utcTime = tehranTime.withZoneSameInstant(ZoneOffset.UTC);
-        return utcTime.toInstant();
     }
 
     public static String printNullableDate(Date obj) {
@@ -271,6 +194,15 @@ public class Utility {
         return sb.append("}").toString();
     }
 
+    public static LocalDateTime getCurrLocalDateTime() {
+        Date date = new Date();
+        date.setHours(0);
+        date.setMinutes(0);
+        date.setSeconds(0);
+        return Instant.ofEpochMilli(date.getTime())
+                .atZone(tehranZoneId)
+                .toLocalDateTime();
+    }
     private static final ModelMapper modelMapper;
 
     static {
@@ -278,12 +210,6 @@ public class Utility {
         modelMapper.getConfiguration()
                 .setSourceNameTransformer(NameTransformers.JAVABEANS_MUTATOR)
                 .setMatchingStrategy(MatchingStrategies.STRICT);
-    }
-
-    public static <D, T> List<D> mapAll(final Collection<T> entityList, Class<D> outCLass) {
-        return entityList.stream()
-                .map(entity -> modelMapper.map(entity, outCLass))
-                .collect(Collectors.toList());
     }
 
     public static <S, D> D map(final S source, D destination) {
