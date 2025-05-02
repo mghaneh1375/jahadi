@@ -1,5 +1,6 @@
 package four.group.jahadi.DTO;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import four.group.jahadi.Enums.Drug.DrugLocation;
 import four.group.jahadi.Enums.Drug.DrugType;
 import four.group.jahadi.Validator.ValidatedDrug;
@@ -26,6 +27,7 @@ public class DrugData {
     private String producer;
 
     @NotNull
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime expireAt;
 
     @NotNull

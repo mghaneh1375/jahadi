@@ -58,7 +58,7 @@ public class RegionDrugAPIRoutes extends Router {
             @PathVariable @ObjectIdConstraint ObjectId drugId,
             @PathVariable @NotNull @Min(0) @Max(1000000) int amount
     ) {
-        TokenInfo tokenInfo = getTokenInfo(request);
+        TokenInfo tokenInfo = getFullTokenInfo(request);
         drugServiceInArea.returnDrug(
                 drugId, amount,
                 tokenInfo.getGroupId(), areaId,
