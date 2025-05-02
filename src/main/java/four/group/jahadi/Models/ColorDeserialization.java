@@ -10,6 +10,7 @@ import java.io.IOException;
 public class ColorDeserialization extends JsonDeserializer<Color> {
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public Color deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
 
         if(jsonParser == null) return null;

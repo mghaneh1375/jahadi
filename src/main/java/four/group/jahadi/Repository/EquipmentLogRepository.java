@@ -7,4 +7,4 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 @MyRepository(model = "EquipmentLogs")
-public interface EquipmentLogRepository extends MongoRepository<EquipmentLog, ObjectId>, FilterableRepository<EquipmentLog> { }
+public interface EquipmentLogRepository extends MongoRepository<EquipmentLog, ObjectId> { }

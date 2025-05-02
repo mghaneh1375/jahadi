@@ -32,10 +32,12 @@ public class DateValidator implements
     }
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public void initialize(DateConstraint constraintAnnotation) {
     }
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public boolean isValid(String s, ConstraintValidatorContext constraintValidatorContext) {
         return pattern.matcher(Utility.convertPersianDigits(s)).matches();
     }

@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 
 public class DateSerialization extends JsonSerializer<LocalDateTime> {
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public void serialize(LocalDateTime date, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
         jsonGenerator.writeString(Utility.convertUTCDateToJalali(date));
     }

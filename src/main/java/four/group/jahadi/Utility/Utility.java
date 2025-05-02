@@ -10,6 +10,7 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 public class Utility {
     private static final SimpleDateFormat sdfSSSXXX;
@@ -228,4 +229,12 @@ public class Utility {
         put("توان بخشی", "icon-disability");
         put("پاراکلینیک", "icon-injection-1");
     }};
+
+    public static String snakeToCamel(String str) {
+        return str.contains("_")
+                ? str.substring(0, str.indexOf("_")) +
+                Arrays.stream(str.substring(str.indexOf("_") + 1).split("_"))
+                        .map(s -> Character.toUpperCase(s.charAt(0)) + s.substring(1)).collect(Collectors.joining())
+                : str;
+    }
 }

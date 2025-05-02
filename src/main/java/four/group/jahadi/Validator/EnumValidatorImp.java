@@ -10,11 +10,13 @@ public class EnumValidatorImp implements ConstraintValidator<EnumValidator, Stri
     List<String> valueList = null;
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public boolean isValid(String value, ConstraintValidatorContext context) {
         return valueList.contains(value.toUpperCase());
     }
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public void initialize(EnumValidator constraintAnnotation) {
         valueList = new ArrayList<>();
         Class<? extends Enum<?>> enumClass = constraintAnnotation.enumClazz();

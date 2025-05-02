@@ -37,6 +37,7 @@ public class PatientExperiment extends Model {
     String moduleName;
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public String toString() {
         return "{" +
                 "\"doctorId\":" + printNullableField(doctorId) +

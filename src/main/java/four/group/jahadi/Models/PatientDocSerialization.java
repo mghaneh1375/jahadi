@@ -13,6 +13,7 @@ import static four.group.jahadi.Utility.StaticValues.SERVER_ADDR;
 public class PatientDocSerialization extends JsonSerializer<String> {
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public void serialize(String filename, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
         jsonGenerator.writeString(filename == null ? null : SERVER_ADDR + PatientServiceInArea.UPLOAD_FOLDER + "/" + filename);
     }

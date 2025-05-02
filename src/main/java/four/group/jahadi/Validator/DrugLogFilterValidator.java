@@ -10,11 +10,13 @@ import javax.validation.ConstraintValidatorContext;
 public class DrugLogFilterValidator implements ConstraintValidator<ValidatedDrugLogFilter, DrugLogFilter> {
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public void initialize(ValidatedDrugLogFilter constraintAnnotation) {
         ConstraintValidator.super.initialize(constraintAnnotation);
     }
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public boolean isValid(DrugLogFilter value, ConstraintValidatorContext context) {
 
         boolean isErrored = false;

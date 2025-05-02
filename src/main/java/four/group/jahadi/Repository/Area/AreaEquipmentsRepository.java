@@ -2,7 +2,6 @@ package four.group.jahadi.Repository.Area;
 
 import four.group.jahadi.Models.Area.AreaEquipments;
 import four.group.jahadi.Models.Area.JoinedAreaEquipments;
-import four.group.jahadi.Repository.FilterableRepository;
 import four.group.jahadi.Repository.MyRepository;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.Aggregation;
@@ -14,7 +13,7 @@ import java.util.List;
 
 @Repository
 @MyRepository(model = "EquipmentsInArea")
-public interface AreaEquipmentsRepository extends MongoRepository<AreaEquipments, ObjectId>, FilterableRepository<AreaEquipments> {
+public interface AreaEquipmentsRepository extends MongoRepository<AreaEquipments, ObjectId> {
 
     @Query(value = "{areaId: ?0}")
     List<AreaEquipments> findByArea(ObjectId areaId);

@@ -48,6 +48,7 @@ public class TableQuestion extends Question {
     private Boolean required;
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public String toString() {
         return "{" +
                 "\"id\":" + printNullableField(this.getId()) +

@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class JahadgarDrugService extends AbstractService<DrugBookmark> {
+public class JahadgarDrugService {
     @Autowired
     private DrugBookmarkRepository drugBookmarkRepository;
     @Autowired
@@ -24,7 +24,6 @@ public class JahadgarDrugService extends AbstractService<DrugBookmark> {
     @Autowired
     private DrugRepository drugRepository;
 
-    @Override
     public ResponseEntity<List<DrugBookmark>> list(Object... filters) {
         ObjectId userId = (ObjectId) filters[0];
         List<DrugBookmark> bookmarkList = drugBookmarkRepository.findByUserId(userId);
@@ -60,7 +59,6 @@ public class JahadgarDrugService extends AbstractService<DrugBookmark> {
         return new ResponseEntity<>(drugBookmark, HttpStatus.OK);
     }
 
-    @Override
     public ResponseEntity<DrugBookmark> findById(ObjectId id, Object... params) {
         return null;
     }

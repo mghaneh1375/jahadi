@@ -16,6 +16,7 @@ public class Experiment extends Model {
     private Boolean visibility;
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public String toString() {
         return "{" +
                 "\"id\":" + printNullableField(this.getId()) +

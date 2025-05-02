@@ -39,6 +39,7 @@ public class Note extends Model {
     private ObjectId userId;
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public String toString() {
         return "{" +
                 "\"id\":" + printNullableField(this.getId()) +

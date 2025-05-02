@@ -15,11 +15,13 @@ public class CheckCodeRequestValidator implements ConstraintValidator<ValidatedC
     ModelMapper modelMapper;
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public void initialize(ValidatedCheckCodeRequest constraintAnnotation) {
         ConstraintValidator.super.initialize(constraintAnnotation);
     }
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public boolean isValid(CheckCodeRequest value, ConstraintValidatorContext context) {
 
         boolean isErrored = false;

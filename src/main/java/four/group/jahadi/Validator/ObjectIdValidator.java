@@ -11,11 +11,13 @@ public class ObjectIdValidator implements
 
 
     @Override
+    @four.group.jahadi.Utility.KeepMethodName
     public void initialize(ObjectIdConstraint constraintAnnotation) {
 
     }
 
     @Override
+    @four.group.jahadi.Utility.KeepMethodName
     public boolean isValid(ObjectId o, ConstraintValidatorContext constraintValidatorContext) {
         return ObjectId.isValid(o.toString());
     }

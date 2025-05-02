@@ -16,10 +16,12 @@ public class PhoneValidator implements
     }
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public void initialize(PhoneConstraint constraintAnnotation) {
     }
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public boolean isValid(String in, ConstraintValidatorContext constraintValidatorContext) {
         return phonePattern.matcher(Utility.convertPersianDigits(in)).matches();
     }

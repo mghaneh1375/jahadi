@@ -19,7 +19,6 @@ import static four.group.jahadi.Utility.Utility.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Document(collection = "trip")
-@Builder
 public class Trip extends Model {
 
     private String name;
@@ -27,7 +26,6 @@ public class Trip extends Model {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Integer no;
 
-    @Builder.Default
     private List<Area> areas = List.of();
 
     @Field("project_id")
@@ -62,6 +60,7 @@ public class Trip extends Model {
     private String project;
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public String toString() {
         return "{" +
                 "\"id\":" + printNullableField(this.getId()) +

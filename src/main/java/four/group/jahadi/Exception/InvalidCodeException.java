@@ -7,6 +7,7 @@ public class InvalidCodeException extends RuntimeException {
     public InvalidCodeException() {}
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public String getMessage() {
         return "کد وارد شده نامعتبر است";
     }

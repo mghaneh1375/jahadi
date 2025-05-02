@@ -25,6 +25,7 @@ public class TrainForm {
     private String description;
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public String toString() {
         return "{" +
                 "\"height\":" + height +

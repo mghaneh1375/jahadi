@@ -16,10 +16,12 @@ public class LinkValidator implements
     }
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public void initialize(LinkConstraint constraintAnnotation) {
     }
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public boolean isValid(String s, ConstraintValidatorContext constraintValidatorContext) {
         return pattern.matcher(s).matches();
     }

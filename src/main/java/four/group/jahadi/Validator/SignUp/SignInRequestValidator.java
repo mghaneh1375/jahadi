@@ -10,11 +10,13 @@ import javax.validation.ConstraintValidatorContext;
 public class SignInRequestValidator implements ConstraintValidator<ValidatedSignInRequest, SignInData> {
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public void initialize(ValidatedSignInRequest constraintAnnotation) {
         ConstraintValidator.super.initialize(constraintAnnotation);
     }
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public boolean isValid(SignInData value, ConstraintValidatorContext context) {
 
         boolean isErrored = false;

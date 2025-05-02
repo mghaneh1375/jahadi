@@ -10,7 +10,7 @@ import java.util.List;
 
 @Repository
 @MyRepository(model = "DrugLogs")
-public interface DrugLogRepository extends MongoRepository<DrugLog, ObjectId>, FilterableRepository<DrugLog> {
+public interface DrugLogRepository extends MongoRepository<DrugLog, ObjectId> {
 
   @Query(value = "{$and :["
             + "?#{ [0] == null ? { $where : 'true'} : { 'drug_id': [0] } },"

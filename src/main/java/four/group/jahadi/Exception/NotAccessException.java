@@ -7,6 +7,7 @@ public class NotAccessException extends RuntimeException {
     public NotAccessException() {}
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public String getMessage() {
         return "شما اجازه دسترسی به این امکان را ندارید";
     }

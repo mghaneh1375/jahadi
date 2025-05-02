@@ -16,14 +16,13 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
-public class EquipmentService extends AbstractService<Equipment> {
+public class EquipmentService {
 
     @Autowired
     private EquipmentRepository equipmentRepository;
     @Autowired
     private WareHouseAccessForGroupRepository wareHouseAccessForGroupRepository;
 
-    @Override
     public ResponseEntity<List<Equipment>> list(Object... filters) {
         ObjectId groupId = (ObjectId) filters[0];
         try {
@@ -55,7 +54,6 @@ public class EquipmentService extends AbstractService<Equipment> {
         }
     }
 
-    @Override
     public ResponseEntity<Equipment> findById(ObjectId id, Object... params) {
         return null;
     }

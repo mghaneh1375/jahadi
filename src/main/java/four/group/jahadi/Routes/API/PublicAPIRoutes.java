@@ -110,7 +110,7 @@ public class PublicAPIRoutes {
     @Operation(summary = "ایمپورت کردن کل دیتابیس")
     public void importDBToConstructLocalServer(
             HttpServletRequest request,
-            @RequestBody @NotNull MultipartFile file
+            @RequestBody MultipartFile file
     ) {
         areaService.importDBToConstructLocalServer(file);
     }

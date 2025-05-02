@@ -57,6 +57,7 @@ public class PatientReferral extends Model {
     private String moduleTabName;
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public String toString() {
         return "{" +
                 "\"id\":" + printNullableField(this.getId()) +

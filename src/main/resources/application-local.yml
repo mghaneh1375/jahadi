@@ -36,6 +36,9 @@ token:
     key:
       custom: 'D/RG6sq9~=payYb8df:@h'
 app:
+  package-scan:
+    model: 'four.group.jahadi.Models,four.group.jahadi.Models.Area'
+    repository: 'four.group.jahadi.Repository,four.group.jahadi.Repository.Area'
   security:
     level: '07022fc1b04d76ca568553c0411ce2547be5cf8acacd4e63c0daa5277129d8b3'
     dev: 'KJ1AZh+tkKQ9JA6XkeBuZ0gQRRVilnRYb6Xp1FmXWA=='

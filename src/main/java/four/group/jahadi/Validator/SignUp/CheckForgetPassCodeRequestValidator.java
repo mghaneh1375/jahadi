@@ -17,11 +17,13 @@ public class CheckForgetPassCodeRequestValidator implements
     ModelMapper modelMapper;
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public void initialize(ValidatedCheckForgetPassCodeRequest constraintAnnotation) {
         ConstraintValidator.super.initialize(constraintAnnotation);
     }
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public boolean isValid(CheckForgetPassCodeRequest value, ConstraintValidatorContext context) {
 
         boolean isErrored = false;

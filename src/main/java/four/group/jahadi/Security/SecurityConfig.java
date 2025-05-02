@@ -52,6 +52,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     };
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     protected void configure(HttpSecurity http) throws Exception {
 
         http = http.csrf().disable();
@@ -91,6 +92,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     @Bean
     public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManagerBean();

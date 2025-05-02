@@ -15,6 +15,7 @@ import java.io.IOException;
 public class CorsFilter implements Filter {
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
 
         final HttpServletResponse response = (HttpServletResponse) res;
@@ -59,11 +60,13 @@ public class CorsFilter implements Filter {
     }
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public void destroy() {
         //
     }
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public void init(FilterConfig config) throws ServletException {
     }
 }

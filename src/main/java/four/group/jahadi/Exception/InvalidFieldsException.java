@@ -11,6 +11,7 @@ public class InvalidFieldsException extends RuntimeException {
     }
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public String getMessage() {
         return message;
     }

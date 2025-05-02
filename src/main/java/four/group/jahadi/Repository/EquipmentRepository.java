@@ -13,7 +13,7 @@ import java.util.List;
 
 @Repository
 @MyRepository(model = "Equipment")
-public interface EquipmentRepository extends MongoRepository<Equipment, ObjectId>, FilterableRepository<Equipment> {
+public interface EquipmentRepository extends MongoRepository<Equipment, ObjectId> {
 
     @Query(value = "{ _id: {$in: ?0}}")
     List<Equipment> findFullInfoByIds(List<ObjectId> ids);

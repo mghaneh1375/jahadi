@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 import static four.group.jahadi.Utility.Utility.getCurrLocalDateTime;
 
 @Service
-public class TripService extends AbstractService<Trip> {
+public class TripService {
 
     @Autowired
     private TripRepository tripRepository;
@@ -35,7 +35,6 @@ public class TripService extends AbstractService<Trip> {
 
     // 1- groupId
     // 2- status
-    @Override
     public ResponseEntity<List<Trip>> list(Object... filters) {
         List<List<Object>> filtersList = new ArrayList<>();
         if (filters[0] != null) {
@@ -88,10 +87,11 @@ public class TripService extends AbstractService<Trip> {
             }
         }
 
-        List<Trip> trips = tripRepository.findAllWithFilter(
-                Trip.class,
-                FilteringFactory.abstractParseFromParams(filtersList, Trip.class)
-        );
+//        List<Trip> trips = tripRepository.findAllWithFilter(
+//                Trip.class,
+//                FilteringFactory.abstractParseFromParams(filtersList, Trip.class)
+//        );
+        List<Trip> trips = tripRepository.findAll();
         List<Group> groups = groupRepository.findByIdsIn(findFromTripGroupIds(trips));
 
         trips.forEach(trip -> {
@@ -149,7 +149,6 @@ public class TripService extends AbstractService<Trip> {
         return new ResponseEntity<>(trips, HttpStatus.OK);
     }
 
-    @Override
     public ResponseEntity<Trip> findById(ObjectId id, Object... params) {
         return null;
     }

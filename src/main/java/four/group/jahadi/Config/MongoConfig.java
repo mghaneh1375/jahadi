@@ -44,6 +44,7 @@ public class MongoConfig extends AbstractMongoClientConfiguration {
     @WritingConverter
     public class LocalDateTimeWriter implements Converter<LocalDateTime, Date> {
         @Override
+        @four.group.jahadi.Utility.KeepMethodName
         public Date convert(LocalDateTime source) {
             ZonedDateTime tehranTime = source.atZone(tehranZoneId);
             ZonedDateTime utcTime = tehranTime.withZoneSameLocal(ZoneOffset.UTC);
@@ -54,6 +55,7 @@ public class MongoConfig extends AbstractMongoClientConfiguration {
     @ReadingConverter
     public class LocalDateTimeReader implements Converter<Date, LocalDateTime> {
         @Override
+        @four.group.jahadi.Utility.KeepMethodName
         public LocalDateTime convert(Date source) {
             Instant instant = source.toInstant();
             ZonedDateTime tehranTime = instant.atZone(tehranZoneId);
@@ -74,6 +76,7 @@ public class MongoConfig extends AbstractMongoClientConfiguration {
 
 
     @Override
+    @four.group.jahadi.Utility.KeepMethodName
     protected String getDatabaseName() {
         return databaseName;
     }

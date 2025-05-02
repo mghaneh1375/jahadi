@@ -12,14 +12,13 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class WareHouseAccessService extends AbstractService<WareHouseAccessForGroupJoinWithUser> {
+public class WareHouseAccessService {
 
     @Autowired
     private WareHouseAccessForGroupRepository wareHouseAccessForGroupRepository;
     @Autowired
     private UserRepository userRepository;
 
-    @Override
     public ResponseEntity<List<WareHouseAccessForGroupJoinWithUser>> list(Object... filters) {
         ObjectId groupId = (ObjectId) filters[0];
         return new ResponseEntity<>(
@@ -28,7 +27,6 @@ public class WareHouseAccessService extends AbstractService<WareHouseAccessForGr
         );
     }
 
-    @Override
     public ResponseEntity<WareHouseAccessForGroupJoinWithUser> findById(ObjectId id, Object... params) {
         return null;
     }

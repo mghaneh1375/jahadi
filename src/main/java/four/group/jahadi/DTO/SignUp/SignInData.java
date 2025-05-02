@@ -11,6 +11,7 @@ public class SignInData {
     private String password;
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public boolean equals(Object o) {
 
         if(o instanceof SignInData) {

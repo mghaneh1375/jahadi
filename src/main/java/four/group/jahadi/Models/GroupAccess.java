@@ -26,6 +26,7 @@ public class GroupAccess {
     private Group group;
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public String toString() {
         return "{" +
                 "\"groupId\":" + printNullableField(groupId) +

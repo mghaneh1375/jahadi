@@ -10,7 +10,7 @@ import java.util.Optional;
 
 @Repository
 @MyRepository(model = "Country")
-public interface CountryRepository extends MongoRepository<Country, ObjectId>, FilterableRepository<Country> {
+public interface CountryRepository extends MongoRepository<Country, ObjectId> {
     @Query(value = "{'name': ?0}")
     Optional<Country> findByName(String name);
 }

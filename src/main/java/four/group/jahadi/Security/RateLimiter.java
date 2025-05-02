@@ -30,11 +30,13 @@ public class RateLimiter implements Filter {
     }
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public void init(FilterConfig filterConfig) throws ServletException {
 
     }
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
 
         HttpServletResponse httpServletResponse = (HttpServletResponse) servletResponse;
@@ -76,6 +78,7 @@ public class RateLimiter implements Filter {
     }
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public void destroy() {
 
     }

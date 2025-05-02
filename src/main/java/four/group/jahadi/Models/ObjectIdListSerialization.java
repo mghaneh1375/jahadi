@@ -13,6 +13,7 @@ import java.util.List;
 public class ObjectIdListSerialization extends JsonSerializer<List<ObjectId>> {
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public void serialize(List<ObjectId> objectIds, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) {
 
         if(objectIds == null || objectIds.size() == 0) {

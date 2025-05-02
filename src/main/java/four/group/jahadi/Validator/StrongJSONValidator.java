@@ -20,6 +20,7 @@ public class StrongJSONValidator implements
     private Class[] optionalValueListType = null;
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public void initialize(StrongJSONConstraint constraintAnnotation) {
         valueList = constraintAnnotation.params();
         valueListType = constraintAnnotation.paramsType();
@@ -28,6 +29,7 @@ public class StrongJSONValidator implements
     }
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public boolean isValid(String s, ConstraintValidatorContext constraintValidatorContext) {
 
         if (valueList.length == 0 && (s == null || s.isEmpty()))

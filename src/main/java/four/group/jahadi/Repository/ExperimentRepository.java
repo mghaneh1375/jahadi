@@ -10,7 +10,7 @@ import java.util.List;
 
 @Repository
 @MyRepository(model = "Experiment")
-public interface ExperimentRepository extends MongoRepository<Experiment, ObjectId>, FilterableRepository<Experiment> {
+public interface ExperimentRepository extends MongoRepository<Experiment, ObjectId> {
 
     @Query(value = "{visbility: true}", fields = "{createdAt: 0}")
     List<Experiment> justVisible();

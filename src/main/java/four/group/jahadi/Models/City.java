@@ -25,6 +25,7 @@ public class City extends Model {
     private ObjectId stateId;
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public String toString() {
         return "{" +
                 "\"id\":" + printNullableField(this.getId()) +

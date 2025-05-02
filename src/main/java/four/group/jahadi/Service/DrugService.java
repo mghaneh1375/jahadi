@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 
 
 @Service
-public class DrugService extends AbstractService<Drug> {
+public class DrugService {
 
     @Autowired
     private DrugRepository drugRepository;
@@ -30,7 +30,6 @@ public class DrugService extends AbstractService<Drug> {
     @Autowired
     private WareHouseAccessForGroupRepository wareHouseAccessForGroupRepository;
 
-    @Override
     public ResponseEntity<List<Drug>> list(Object... filters) {
         ObjectId groupId = (ObjectId) filters[0];
         try {
@@ -58,7 +57,6 @@ public class DrugService extends AbstractService<Drug> {
         }
     }
 
-    @Override
     public ResponseEntity<Drug> findById(ObjectId id, Object... params) {
         return new ResponseEntity<>(
                 drugRepository.findById(id).orElseThrow(InvalidIdException::new),

@@ -10,6 +10,7 @@ import java.io.IOException;
 public class UserDigestSerialization extends JsonSerializer<User> {
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public void serialize(User user, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
         jsonGenerator.writeStartObject();
         jsonGenerator.writeStringField("id", user.getId().toString());

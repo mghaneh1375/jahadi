@@ -12,10 +12,12 @@ public class JustNumberValidator implements ConstraintValidator<JustNumeric, Str
 
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public void initialize(JustNumeric constraintAnnotation) {
     }
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public boolean isValid(String in, ConstraintValidatorContext constraintValidatorContext) {
         if(in == null) return true;
         return pattern.matcher(Utility.convertPersianDigits(in)).matches();

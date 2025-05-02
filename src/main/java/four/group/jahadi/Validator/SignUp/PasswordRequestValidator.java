@@ -9,11 +9,13 @@ import javax.validation.ConstraintValidatorContext;
 public class PasswordRequestValidator implements ConstraintValidator<ValidatedPasswordRequest, PasswordData> {
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public void initialize(ValidatedPasswordRequest constraintAnnotation) {
         ConstraintValidator.super.initialize(constraintAnnotation);
     }
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public boolean isValid(PasswordData value, ConstraintValidatorContext context) {
 
         boolean isErrored = false;

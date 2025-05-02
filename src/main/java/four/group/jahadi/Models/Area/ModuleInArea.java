@@ -1,6 +1,5 @@
 package four.group.jahadi.Models.Area;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -25,7 +24,6 @@ import static four.group.jahadi.Utility.Utility.toStringOfList;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class ModuleInArea {
 
     @Id
@@ -46,7 +44,6 @@ public class ModuleInArea {
     private String moduleTabName;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @Builder.Default
     private List<ObjectId> members = new ArrayList<>();
 
     @Transient
@@ -72,10 +69,10 @@ public class ModuleInArea {
     private Boolean hasSecretaryAccess;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @Builder.Default
     private List<ObjectId> secretaries = new ArrayList<>();
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public String toString() {
         return "{" +
                 "\"id\":" + printNullableField(id) +

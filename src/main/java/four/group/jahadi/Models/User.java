@@ -22,7 +22,6 @@ import static four.group.jahadi.Utility.Utility.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Document(collection = "user")
-@Builder
 public class User extends Model {
 
     private String name;
@@ -476,6 +475,7 @@ public class User extends Model {
     private boolean movementHelpEquipments = false;
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public String toString() {
         return "{" +
                 "\"id\":" + printNullableField(this.getId()) +

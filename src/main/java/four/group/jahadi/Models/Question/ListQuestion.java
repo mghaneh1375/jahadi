@@ -19,6 +19,7 @@ public class ListQuestion extends Question {
     private List<Question> questions;
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public String toString() {
         return "{" +
                 "\"id\":" + printNullableField(this.getId()) +

@@ -51,6 +51,7 @@ public abstract class Question implements Serializable {
     }
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public String toString() {
         return "{" +
                 "\"id\":" + printNullableField(id) +

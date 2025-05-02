@@ -7,6 +7,7 @@ public class BadRequestException extends RuntimeException {
     public BadRequestException() {}
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public String getMessage() {
         return "درخواست شما نامعتبر است";
     }

@@ -14,7 +14,7 @@ import java.util.Optional;
 @Repository
 @MyRepository(model = "WareHouseAccessForGroup")
 public interface WareHouseAccessForGroupRepository extends
-        MongoRepository<WareHouseAccessForGroup, ObjectId>, FilterableRepository<WareHouseAccessForGroup> {
+        MongoRepository<WareHouseAccessForGroup, ObjectId> {
 
     @Query(value = "{groupId: ?0, hasAccessForDrug: true, userId: ?1}", exists = true)
     boolean existsDrugAccessByGroupIdAndUserId(ObjectId groupId, ObjectId userId);

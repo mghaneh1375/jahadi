@@ -34,6 +34,7 @@ public class PresenceList extends Model {
     private LocalDateTime exit;
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public String toString() {
         return "{" +
                 "\"areaId\":\"" + areaId +

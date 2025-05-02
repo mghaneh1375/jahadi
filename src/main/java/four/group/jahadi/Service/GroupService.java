@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 
 
 @Service
-public class GroupService extends AbstractService<Group> {
+public class GroupService {
 
     @Autowired
     private GroupRepository groupRepository;
@@ -41,7 +41,6 @@ public class GroupService extends AbstractService<Group> {
         groups.forEach(x -> x.setUser(users.stream().filter(itr -> x.getOwner().equals(itr.getId())).findFirst().orElse(null)));
     }
 
-    @Override
     public ResponseEntity<List<Group>> list(Object ... filters) {
 
         List<Group> groups = filters[0] == null ? groupRepository.findAll() :

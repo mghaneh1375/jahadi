@@ -19,7 +19,6 @@ import static four.group.jahadi.Utility.Utility.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Document(collection = "equipment")
-@Builder
 public class Equipment extends Model {
     @Field("equipment_type")
     private EquipmentType equipmentType;
@@ -62,6 +61,7 @@ public class Equipment extends Model {
     private String propertyId;
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public String toString() {
         return "{" +
                 "\"id\":" + printNullableField(this.getId()) +

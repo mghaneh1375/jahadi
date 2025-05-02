@@ -14,6 +14,7 @@ import static four.group.jahadi.Utility.StaticValues.SERVER_ADDR;
 public class ListOfUsersSerialization extends JsonSerializer<List<User>> {
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public void serialize(List<User> users, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
 
         jsonGenerator.writeStartArray();

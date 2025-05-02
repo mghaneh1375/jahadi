@@ -31,6 +31,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     }
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
         isAuth(httpServletRequest);
         filterChain.doFilter(httpServletRequest, httpServletResponse);

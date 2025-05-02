@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 
 
 @Service
-public class ProjectService extends AbstractService<Project> {
+public class ProjectService {
 
     @Autowired
     private ProjectRepository projectRepository;
@@ -36,7 +36,6 @@ public class ProjectService extends AbstractService<Project> {
     // filters:
     // 1- name
     // 2- status
-    @Override
     public ResponseEntity<List<Project>> list(Object... filters) {
 
         List<List<Object>> filtersList = new ArrayList<>();
@@ -92,9 +91,10 @@ public class ProjectService extends AbstractService<Project> {
             });
         }
 
-        List<Project> projects = projectRepository.findAllWithFilter(Project.class,
-                FilteringFactory.abstractParseFromParams(filtersList, Project.class)
-        );
+//        List<Project> projects = projectRepository.findAllWithFilter(Project.class,
+//                FilteringFactory.abstractParseFromParams(filtersList, Project.class)
+//        );
+        List<Project> projects = projectRepository.findAll();
 
         projects.forEach(x -> x.setGroups(new ArrayList<>()));
 

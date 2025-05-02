@@ -18,12 +18,11 @@ import static four.group.jahadi.Utility.StaticValues.JSON_NOT_ACCESS;
 import static four.group.jahadi.Utility.StaticValues.JSON_OK;
 
 @Service
-public class NoteService extends AbstractService<Note> {
+public class NoteService {
 
     @Autowired
     NoteRepository noteRepository;
 
-    @Override
     public ResponseEntity<List<Note>> list(Object... filters) {
         return new ResponseEntity<>(
                 noteRepository.findByUserId((ObjectId) filters[0]),
@@ -59,7 +58,6 @@ public class NoteService extends AbstractService<Note> {
         return new ResponseEntity<>(note, HttpStatus.OK);
     }
 
-    @Override
     public ResponseEntity<Note> findById(ObjectId id, Object ... params) {
 
         Note note = noteRepository.findById(id).orElseThrow(InvalidIdException::new);

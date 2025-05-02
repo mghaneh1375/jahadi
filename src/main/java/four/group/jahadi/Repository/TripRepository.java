@@ -12,7 +12,7 @@ import java.util.Optional;
 
 @Repository
 @MyRepository(model = "Trip")
-public interface TripRepository extends MongoRepository<Trip, ObjectId>, FilterableRepository<Trip> {
+public interface TripRepository extends MongoRepository<Trip, ObjectId> {
 
     @Query(value = "{ $and: [{'groupsWithAccess.groupId': ?0}, {'startAt': {$lte: ?1}}, {'endAt': {$gte: ?1}}] }", fields = "{'name': 1, 'areas.name': 1, 'areas._id': 1}")
     List<Trip> findActivesByGroupId(ObjectId groupId, LocalDateTime curr);

@@ -21,10 +21,12 @@ public class TimeValidator implements
     }
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public void initialize(TimeConstraint constraintAnnotation) {
     }
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public boolean isValid(String s, ConstraintValidatorContext constraintValidatorContext) {
 
         if (s.length() == 4)

@@ -54,6 +54,7 @@ public class Project extends Model {
     private List<ObjectId> tripIds;
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public String toString() {
         return "{" +
                 "\"id\":" + printNullableField(this.getId()) +

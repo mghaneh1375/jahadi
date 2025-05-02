@@ -22,13 +22,11 @@ import static four.group.jahadi.Utility.Utility.printNullableField;
 @NoArgsConstructor
 @AllArgsConstructor
 @Document(collection = "group")
-@Builder
 public class Group extends ModelWithUser {
 
     @Indexed(unique=true)
     private String name;
 
-    @Builder.Default
     @JsonSerialize(using = ColorSerialization.class)
     private Color color = Color.BLUE;
 
@@ -40,7 +38,6 @@ public class Group extends ModelWithUser {
     private String pic;
 
     @Field("is_active")
-    @Builder.Default
     @JsonProperty("isActive")
     private boolean isActive = true;
 
@@ -53,6 +50,7 @@ public class Group extends ModelWithUser {
     private Integer tripsCount;
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public String toString() {
         return "{" +
                 "\"name\":" + printNullableField(name) +

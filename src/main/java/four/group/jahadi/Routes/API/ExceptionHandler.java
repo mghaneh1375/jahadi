@@ -27,13 +27,14 @@ import static four.group.jahadi.Utility.Utility.printException;
 public class ExceptionHandler extends ResponseEntityExceptionHandler {
 
     @Override
+    @four.group.jahadi.Utility.KeepMethodName
     protected ResponseEntity<Object> handleHttpMediaTypeNotSupported(HttpMediaTypeNotSupportedException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
         List<MediaType> mediaTypes = ex.getSupportedMediaTypes();
 
         if (!CollectionUtils.isEmpty(mediaTypes)) {
             headers.setAccept(mediaTypes);
             if (request instanceof ServletWebRequest) {
-                ServletWebRequest servletWebRequest = (ServletWebRequest)request;
+                ServletWebRequest servletWebRequest = (ServletWebRequest) request;
                 if (HttpMethod.PATCH.equals(servletWebRequest.getHttpMethod())) {
                     headers.setAcceptPatch(mediaTypes);
                 }
@@ -71,6 +72,7 @@ public class ExceptionHandler extends ResponseEntityExceptionHandler {
 
 
     @Override
+    @four.group.jahadi.Utility.KeepMethodName
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
             MethodArgumentNotValidException ex,
             HttpHeaders headers,
@@ -89,8 +91,7 @@ public class ExceptionHandler extends ResponseEntityExceptionHandler {
 
         try {
             errMsg = new JSONObject(errors.toString());
-        }
-        catch (Exception x) {
+        } catch (Exception x) {
             String[] tmp = errors.toString().split(":");
             errMsg = new JSONObject().put(tmp[0], tmp[1]);
         }
@@ -104,6 +105,7 @@ public class ExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @Override
+    @four.group.jahadi.Utility.KeepMethodName
     protected ResponseEntity<Object> handleMissingServletRequestParameter(
             MissingServletRequestParameterException ex, HttpHeaders headers,
             HttpStatus status, WebRequest request) {
@@ -119,11 +121,12 @@ public class ExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @Override
+    @four.group.jahadi.Utility.KeepMethodName
     protected ResponseEntity<Object> handleMissingPathVariable(
             MissingPathVariableException ex, HttpHeaders headers,
             HttpStatus status, WebRequest request) {
 
-        String error = ex.getVariableName()+ " parameter is missing";
+        String error = ex.getVariableName() + " parameter is missing";
         headers.add("Content-Type", "application/json");
 
         return new ResponseEntity<>(
@@ -133,7 +136,7 @@ public class ExceptionHandler extends ResponseEntityExceptionHandler {
         );
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler({ MethodArgumentTypeMismatchException.class })
+    @org.springframework.web.bind.annotation.ExceptionHandler({MethodArgumentTypeMismatchException.class})
     public ResponseEntity<Object> handleMethodArgumentTypeMismatch(
             MethodArgumentTypeMismatchException ex) {
 
@@ -149,6 +152,7 @@ public class ExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @Override
+    @four.group.jahadi.Utility.KeepMethodName
     protected ResponseEntity<Object> handleHttpRequestMethodNotSupported(
             HttpRequestMethodNotSupportedException ex,
             HttpHeaders headers,
@@ -167,6 +171,7 @@ public class ExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @Override
+    @four.group.jahadi.Utility.KeepMethodName
     protected ResponseEntity<Object> handleNoHandlerFoundException(
             NoHandlerFoundException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
 
@@ -175,20 +180,20 @@ public class ExceptionHandler extends ResponseEntityExceptionHandler {
                 new HttpHeaders(), HttpStatus.NOT_FOUND);
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler({ Exception.class })
+    @org.springframework.web.bind.annotation.ExceptionHandler({Exception.class})
     public ResponseEntity<Object> handleAll(Exception ex) {
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-Type", "application/json");
 
-        if(ex != null && ex.getStackTrace().length > 0 && ex.getStackTrace()[0].toString().contains("beanvalidation"))
+        if (ex != null && ex.getStackTrace().length > 0 && ex.getStackTrace()[0].toString().contains("beanvalidation"))
             return new ResponseEntity<>(
                     new JSONObject().put("status", "nok").put("msg", ex.getLocalizedMessage()).toString(),
                     headers,
                     HttpStatus.OK
             );
 
-        if(ex != null && ex.getMessage() != null &&
+        if (ex != null && ex.getMessage() != null &&
                 (
                         ex.getMessage().equals("Account not complete") ||
                                 ex.getMessage().equals("Account not activated") ||
@@ -204,7 +209,7 @@ public class ExceptionHandler extends ResponseEntityExceptionHandler {
         }
 
 
-        if(ex != null) {
+        if (ex != null) {
 
 //            if(ex.getMessage() != null &&
 //                    !ex.getMessage().contains("Invalid json"))

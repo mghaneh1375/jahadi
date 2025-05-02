@@ -7,6 +7,7 @@ import java.lang.reflect.InvocationTargetException;
 public class NullAwareBeanUtilsBean extends BeanUtilsBean {
 
     @Override
+@KeepMethodName
     public void copyProperty(Object dest, String name, Object value)
             throws IllegalAccessException, InvocationTargetException {
         if(value==null)return;

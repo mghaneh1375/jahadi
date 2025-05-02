@@ -63,6 +63,7 @@ public class Drug extends Model {
     private String shelfNo;
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public String toString() {
         return "{" +
                 "\"id\":" + printNullableField(this.getId()) +

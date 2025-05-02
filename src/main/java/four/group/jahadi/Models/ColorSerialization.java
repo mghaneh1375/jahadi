@@ -11,6 +11,7 @@ import java.io.IOException;
 public class ColorSerialization extends JsonSerializer<Color> {
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public void serialize(Color color, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
         jsonGenerator.writeString(color == null ? null : color.getName().toLowerCase());
     }

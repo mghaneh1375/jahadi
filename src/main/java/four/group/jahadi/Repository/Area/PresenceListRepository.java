@@ -1,7 +1,6 @@
 package four.group.jahadi.Repository.Area;
 
 import four.group.jahadi.Models.PresenceList;
-import four.group.jahadi.Repository.FilterableRepository;
 import four.group.jahadi.Repository.MyRepository;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -12,7 +11,7 @@ import java.util.List;
 
 @Repository
 @MyRepository(model = "PresenceList")
-public interface PresenceListRepository extends MongoRepository<PresenceList, ObjectId>, FilterableRepository<PresenceList> {
+public interface PresenceListRepository extends MongoRepository<PresenceList, ObjectId> {
 
     @Query(value = "{area_id: ?0}")
     List<PresenceList> findByAreaId(ObjectId areaId);

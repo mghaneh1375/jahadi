@@ -4,8 +4,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.google.common.base.CaseFormat;
-import four.group.jahadi.DTO.Area.AreaData;
 import four.group.jahadi.DTO.Area.AreaDigest;
 import four.group.jahadi.DTO.UpdatePresenceList;
 import four.group.jahadi.Enums.Sex;
@@ -26,6 +24,7 @@ import four.group.jahadi.Service.*;
 import four.group.jahadi.Utility.Utility;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.http.ContentDisposition;
@@ -44,7 +43,6 @@ import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -52,9 +50,10 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static four.group.jahadi.Service.Area.AreaUtils.findArea;
+import static four.group.jahadi.Utility.Utility.snakeToCamel;
 
 @Service
-public class AreaService extends AbstractService<Area> {
+public class AreaService {
     @Autowired
     private TripRepository tripRepository;
     @Autowired
@@ -86,48 +85,11 @@ public class AreaService extends AbstractService<Area> {
     @Autowired
     private ExportUtils exportUtils;
 
-    @Override
-    public ResponseEntity<List<Area>> list(Object... filters) {
-        return null;
-    }
+    @Value("${app.package-scan.model}")
+    private String modelPackages;
 
-    public ResponseEntity<List<Area>> store(List<AreaData> areas, Object... params) {
-
-        boolean hasAdminAccess = (boolean) params[0];
-        ObjectId tripId = (ObjectId) params[1];
-        Object groupId = params[2];
-
-        Trip trip = tripRepository.findById(tripId).orElseThrow(InvalidIdException::new);
-
-        if (!hasAdminAccess && trip.getGroupsWithAccess().stream().noneMatch(groupAccess ->
-                groupAccess.getWriteAccess() && groupAccess.getGroupId().equals(groupId))
-        )
-            throw new NotAccessException();
-
-        List<Area> areaModels = new ArrayList<>();
-        for (AreaData dto : areas) {
-            Area area = dto.convertToArea();
-            User owner = userRepository.findById(area.getOwnerId()).orElseThrow(InvalidIdException::new);
-
-            if (!hasAdminAccess && !Objects.deepEquals(owner.getGroupId(), groupId))
-                throw new NotAccessException();
-
-            if (trip.getAreas().stream().anyMatch(area1 -> area1.getName().equals(area.getName())))
-                throw new InvalidFieldsException("منطقه ای با نام مشابه موجود است");
-
-            areaModels.add(area);
-        }
-
-        trip.getAreas().addAll(areaModels);
-        tripRepository.save(trip);
-
-        return new ResponseEntity<>(areaModels, HttpStatus.OK);
-    }
-
-    @Override
-    public ResponseEntity<Area> findById(ObjectId id, Object... params) {
-        return null;
-    }
+    @Value("${app.package-scan.repository}")
+    private String repositoryPackages;
 
     public ResponseEntity<List<Trip>> myCartableList(ObjectId userId, boolean isForOwner) {
 
@@ -452,10 +414,16 @@ public class AreaService extends AbstractService<Area> {
 
     public static Set<Class<?>> findAllClassesUsingClassLoader(String... packageNames) {
         Set<Class<?>> output = new HashSet<>();
+        System.out.println(packageNames.length);
         for (int i = 0; i < packageNames.length; i++) {
             String packageName = packageNames[i];
+            System.out.println(packageName);
             InputStream stream = ClassLoader.getSystemClassLoader()
                     .getResourceAsStream(packageName.replaceAll("[.]", "/"));
+            if(stream == null) {
+                System.out.println("Stream is null");
+                continue;
+            }
             BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
             output.addAll(
                     reader.lines()
@@ -463,6 +431,7 @@ public class AreaService extends AbstractService<Area> {
                             .map(line -> getClass(line, packageName))
                             .collect(Collectors.toSet())
             );
+            System.out.println("Output len is " + output.size());
         }
 
         return output;
@@ -483,7 +452,7 @@ public class AreaService extends AbstractService<Area> {
             Set<Class<?>> repositories
     ) {
         System.out.println("Saving data for " + selectedDB.getAnnotation(Document.class).collection());
-        String className = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, selectedDB.getAnnotation(Document.class).collection());
+        String className = snakeToCamel(selectedDB.getAnnotation(Document.class).collection());
 
         repositories
                 .stream()
@@ -503,12 +472,12 @@ public class AreaService extends AbstractService<Area> {
     }
 
     private void removeAll(
-            Class selectedDB, Set<Class<?>> repositories
+            Class<?> selectedDB, Set<Class<?>> repositories
     ) {
-        String[] split = selectedDB.getName().split("\\.");
+        String className = snakeToCamel(selectedDB.getAnnotation(Document.class).collection());
         repositories
                 .stream()
-                .filter(aClass -> aClass.getAnnotation(MyRepository.class).model().equalsIgnoreCase(split[split.length - 1]))
+                .filter(aClass -> aClass.getAnnotation(MyRepository.class).model().equalsIgnoreCase(className))
                 .findFirst().ifPresent(aClass -> {
                     BeanFetcher fetcher = new BeanFetcher(applicationContext);
                     Object bean = fetcher.getBeanByClass(aClass);
@@ -522,22 +491,17 @@ public class AreaService extends AbstractService<Area> {
                 });
     }
 
-    public static String capitalizeFirstChar(String input) {
-        if (input == null || input.isEmpty()) {
-            return input;
-        }
-        return input.substring(0, 1).toUpperCase() + input.substring(1);
-    }
-
     public void importDBToConstructLocalServer(MultipartFile file) {
+        System.out.println(modelPackages);
+        System.out.println(repositoryPackages);
         Set<Class<?>> models = getClassesWithAnnotation(Document.class,
-                "four.group.jahadi.Models",
-                "four.group.jahadi.Models.Area"
+                modelPackages.split(",")
         );
+        System.out.println(models.size());
         Set<Class<?>> repositories = getClassesWithAnnotation(MyRepository.class,
-                "four.group.jahadi.Repository",
-                "four.group.jahadi.Repository.Area"
+                repositoryPackages.split(",")
         );
+        System.out.println(repositories.size());
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -562,10 +526,9 @@ public class AreaService extends AbstractService<Area> {
                         String wanted = line.replaceAll("\\*", "");
                         models
                                 .stream()
-                                .filter(aClass -> {
-                                    String className = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, aClass.getAnnotation(Document.class).collection());
-                                    return className.equals(wanted);
-                                })
+                                .filter(aClass ->
+                                        snakeToCamel(aClass.getAnnotation(Document.class).collection()).equalsIgnoreCase(wanted)
+                                )
                                 .findFirst().ifPresent(aClass -> {
                                     System.out.println("Find model: " + aClass.getAnnotation(Document.class).collection());
                                     selectedDB.set(aClass);

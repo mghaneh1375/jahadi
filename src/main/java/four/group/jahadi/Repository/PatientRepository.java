@@ -13,7 +13,7 @@ import java.util.Optional;
 
 @Repository
 @MyRepository(model = "Patient")
-public interface PatientRepository extends MongoRepository<Patient, ObjectId>, FilterableRepository<Patient> {
+public interface PatientRepository extends MongoRepository<Patient, ObjectId> {
 
     @Query(value = "{identifier: ?0, identifierType: ?1}", count = true)
     Integer countByIdentifierAndIdentifierType(String identifier, IdentifierType identifierType);

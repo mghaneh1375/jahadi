@@ -13,7 +13,6 @@ import static four.group.jahadi.Utility.Utility.printNullableField;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class ExperimentInArea extends Model {
 
     private String title;
@@ -22,6 +21,7 @@ public class ExperimentInArea extends Model {
     private ObjectId experimentId;
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public String toString() {
         return "{" +
                 "\"id\":" + printNullableField(this.getId()) +

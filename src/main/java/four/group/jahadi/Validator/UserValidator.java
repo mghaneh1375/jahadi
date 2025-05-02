@@ -12,11 +12,13 @@ import javax.validation.ConstraintValidatorContext;
 public class UserValidator implements ConstraintValidator<ValidatedUser, UserData> {
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public void initialize(ValidatedUser constraintAnnotation) {
         ConstraintValidator.super.initialize(constraintAnnotation);
     }
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public boolean isValid(UserData value, ConstraintValidatorContext context) {
 
         boolean isErrored = false;

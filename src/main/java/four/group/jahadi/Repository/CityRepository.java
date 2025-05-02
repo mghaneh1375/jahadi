@@ -10,7 +10,7 @@ import java.util.List;
 
 @Repository
 @MyRepository(model = "City")
-public interface CityRepository extends MongoRepository<City, ObjectId>, FilterableRepository<City> {
+public interface CityRepository extends MongoRepository<City, ObjectId> {
 
     @Query(value = "{'stateId': ?0}")
     List<City> findByStateId(ObjectId stateId);

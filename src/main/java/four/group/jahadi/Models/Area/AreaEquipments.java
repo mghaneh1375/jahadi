@@ -21,7 +21,6 @@ import static four.group.jahadi.Utility.Utility.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Document(collection = "equipments_in_area")
-@Builder
 public class AreaEquipments extends Model {
 
     @Field("equipment_name")
@@ -47,6 +46,7 @@ public class AreaEquipments extends Model {
     private Integer reminder;
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public String toString() {
         return "{" +
                 "\"id\":" + printNullableField(this.getId()) +

@@ -9,11 +9,13 @@ import javax.validation.ConstraintValidatorContext;
 public class NoteValidator implements ConstraintValidator<ValidatedNote, NoteData> {
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public void initialize(ValidatedNote constraintAnnotation) {
         ConstraintValidator.super.initialize(constraintAnnotation);
     }
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public boolean isValid(NoteData value, ConstraintValidatorContext context) {
 
         boolean isErrored = false;

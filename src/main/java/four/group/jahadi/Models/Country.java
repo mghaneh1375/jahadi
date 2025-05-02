@@ -17,6 +17,7 @@ public class Country extends Model {
     private String name;
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public String toString() {
         return "{" +
                 "\"id\":" + printNullableField(this.getId()) +

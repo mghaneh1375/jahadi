@@ -11,6 +11,7 @@ public class NotActivateAccountException extends Exception {
     }
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public String getMessage() {
         return message;
     }

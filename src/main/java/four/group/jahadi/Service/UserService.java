@@ -35,7 +35,7 @@ import static four.group.jahadi.Utility.StaticValues.DEV_MODE;
 
 
 @Service
-public class UserService extends AbstractService<User> {
+public class UserService {
 
     private static final ArrayList<Cache> cachedToken = new ArrayList<>();
     public final static String PICS_FOLDER = "userPics";
@@ -55,7 +55,6 @@ public class UserService extends AbstractService<User> {
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
-    @Override
     public ResponseEntity<List<User>> list(Object... filters) {
 
         List<User> users = userRepository.findAll(
@@ -92,7 +91,6 @@ public class UserService extends AbstractService<User> {
         );
     }
 
-    @Override
     public ResponseEntity<User> findById(ObjectId id, Object... params) {
 
         if (id == null)

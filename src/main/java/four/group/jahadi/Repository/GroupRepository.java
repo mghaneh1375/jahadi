@@ -10,7 +10,7 @@ import java.util.List;
 
 @Repository
 @MyRepository(model = "Group")
-public interface GroupRepository extends MongoRepository<Group, ObjectId>, FilterableRepository<Group> {
+public interface GroupRepository extends MongoRepository<Group, ObjectId> {
 
     @Query(value = "{name:{$regex:?0,$options:'i'}}")
     List<Group> findLikeName(String name);

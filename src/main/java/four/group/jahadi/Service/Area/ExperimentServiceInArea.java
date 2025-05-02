@@ -4,12 +4,10 @@ import four.group.jahadi.DTO.ModuleForms.ExperimentalFormDTO;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Exception.NotAccessException;
 import four.group.jahadi.Models.Area.*;
-import four.group.jahadi.Models.Experiment;
 import four.group.jahadi.Models.Module;
 import four.group.jahadi.Models.Trip;
 import four.group.jahadi.Models.User;
 import four.group.jahadi.Repository.Area.PatientsInAreaRepository;
-import four.group.jahadi.Repository.ExperimentRepository;
 import four.group.jahadi.Repository.ModuleRepository;
 import four.group.jahadi.Repository.TripRepository;
 import four.group.jahadi.Repository.UserRepository;
@@ -28,9 +26,6 @@ import static four.group.jahadi.Service.Area.AreaUtils.findStartedArea;
 
 @Service
 public class ExperimentServiceInArea {
-
-    @Autowired
-    private ExperimentRepository experimentRepository;
     @Autowired
     private PatientsInAreaRepository patientsInAreaRepository;
     @Autowired
@@ -253,56 +248,6 @@ public class ExperimentServiceInArea {
                 foundArea.getExperiments(),
                 HttpStatus.OK
         );
-    }
-
-    public void addAllToExperimentsList(ObjectId userId, ObjectId areaId, List<ObjectId> ids) {
-
-        Trip wantedTrip = tripRepository.findByAreaIdAndOwnerId(areaId, userId)
-                .orElseThrow(NotAccessException::new);
-
-        Iterable<Experiment> experimentsIter = experimentRepository.findAllById(ids);
-        List<ExperimentInArea> experiments = new ArrayList<>();
-
-        while (experimentsIter.iterator().hasNext()) {
-
-            Experiment experiment = experimentsIter.iterator().next();
-
-            if (!experiment.getVisibility())
-                throw new NotAccessException();
-
-            experiments.add(
-                    ExperimentInArea
-                            .builder()
-                            .title(experiment.getTitle())
-                            .experimentId(experiment.getId())
-                            .build()
-            );
-        }
-
-        if (experiments.size() != ids.size())
-            throw new RuntimeException("ids are incorrect");
-
-        Area foundArea = wantedTrip
-                .getAreas().stream().filter(area -> area.getId().equals(areaId))
-                .findFirst().orElseThrow(RuntimeException::new);
-
-        foundArea.getExperiments().addAll(experiments);
-        tripRepository.save(wantedTrip);
-    }
-
-    public void removeAllFromExperimentsList(ObjectId userId, ObjectId areaId, List<ObjectId> ids) {
-
-        Trip wantedTrip = tripRepository.findByAreaIdAndOwnerId(areaId, userId)
-                .orElseThrow(NotAccessException::new);
-
-        Area foundArea = wantedTrip
-                .getAreas().stream().filter(area -> area.getId().equals(areaId))
-                .findFirst().orElseThrow(RuntimeException::new);
-
-        foundArea.getExperiments()
-                .removeIf(experimentInArea -> ids.contains(experimentInArea.getId()));
-
-        tripRepository.save(wantedTrip);
     }
 
 }

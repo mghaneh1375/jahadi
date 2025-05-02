@@ -56,6 +56,7 @@ public class Patient extends Model {
     private String patientNo;
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public String toString() {
         return "{" +
                 "\"id\":" + printNullableField(this.getId()) +
@@ -75,6 +76,7 @@ public class Patient extends Model {
     }
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -83,6 +85,7 @@ public class Patient extends Model {
     }
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public int hashCode() {
         return Objects.hash(name, fatherName, sex, birthDate, phone, identifier, identifierType, insurance, ageType, job, patientNo);
     }

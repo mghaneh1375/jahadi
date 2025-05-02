@@ -43,6 +43,7 @@ public class PatientAnswer {
     private String additionalUploadedFile;
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public String toString() {
         return "{" +
                 "\"questionId\":" + printNullableField(questionId) +

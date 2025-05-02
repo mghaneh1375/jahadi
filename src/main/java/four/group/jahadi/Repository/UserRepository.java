@@ -14,7 +14,7 @@ import java.util.Optional;
 
 @Repository
 @MyRepository(model = "User")
-public interface UserRepository extends MongoRepository<User, ObjectId>, FilterableRepository<User> {
+public interface UserRepository extends MongoRepository<User, ObjectId> {
 
     @Query(value = "{'accesses': ?0, 'status':  'ACTIVE', 'removeAt': null}", count = true)
     Integer countUsersByAccess(String access);

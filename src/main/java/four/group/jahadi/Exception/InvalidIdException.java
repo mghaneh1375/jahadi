@@ -7,6 +7,7 @@ public class InvalidIdException extends RuntimeException {
     public InvalidIdException() {}
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public String getMessage() {
         return "شناسه وارد شده نامعتبر است";
     }

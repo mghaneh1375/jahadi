@@ -3,7 +3,6 @@ package four.group.jahadi.Repository.Area;
 import four.group.jahadi.Models.Area.PatientJoinArea;
 import four.group.jahadi.Models.Patient;
 import four.group.jahadi.Models.Area.PatientsInArea;
-import four.group.jahadi.Repository.FilterableRepository;
 import four.group.jahadi.Repository.MyRepository;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.Aggregation;
@@ -16,7 +15,7 @@ import java.util.Optional;
 
 @Repository
 @MyRepository(model = "PatientsInArea")
-public interface PatientsInAreaRepository extends MongoRepository<PatientsInArea, ObjectId>, FilterableRepository<PatientsInArea> {
+public interface PatientsInAreaRepository extends MongoRepository<PatientsInArea, ObjectId> {
 
     @Query(value = "{areaId: ?0}", count = true)
     Integer countByAreaId(ObjectId areaId);

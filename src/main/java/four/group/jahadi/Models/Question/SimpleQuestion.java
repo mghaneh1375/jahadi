@@ -55,6 +55,7 @@ public class SimpleQuestion extends Question {
     }
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public String toString() {
         return "{" +
                 "\"id\":" + printNullableField(this.getId()) +

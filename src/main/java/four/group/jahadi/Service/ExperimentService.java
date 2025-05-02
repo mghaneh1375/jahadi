@@ -11,12 +11,11 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class ExperimentService extends AbstractService<Experiment> {
+public class ExperimentService {
 
     @Autowired
     private ExperimentRepository experimentRepository;
 
-    @Override
     public ResponseEntity<List<Experiment>> list(Object... filters) {
 
         List<Experiment> experiments;
@@ -32,7 +31,6 @@ public class ExperimentService extends AbstractService<Experiment> {
         );
     }
 
-    @Override
     public ResponseEntity<Experiment> findById(ObjectId id, Object... params) {
         return null;
     }

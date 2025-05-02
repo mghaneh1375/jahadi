@@ -13,6 +13,7 @@ import static four.group.jahadi.Utility.StaticValues.SERVER_ADDR;
 public class PicSerialization extends JsonSerializer<String> {
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public void serialize(String pic, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
         jsonGenerator.writeString(pic == null ? null : SERVER_ADDR + UserService.PICS_FOLDER + "/" + pic);
     }

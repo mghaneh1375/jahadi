@@ -13,6 +13,7 @@ import static four.group.jahadi.Utility.StaticValues.SERVER_ADDR;
 public class OwnerSerialization extends JsonSerializer<User> {
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public void serialize(User user, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
         jsonGenerator.writeStartObject();
         jsonGenerator.writeStringField("id", user.getId().toString());

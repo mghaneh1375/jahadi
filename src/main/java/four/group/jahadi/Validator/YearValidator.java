@@ -12,10 +12,12 @@ public class YearValidator implements ConstraintValidator<Year, String> {
 
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public void initialize(Year constraintAnnotation) {
     }
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public boolean isValid(String in, ConstraintValidatorContext constraintValidatorContext) {
         if(in == null) return true;
         return pattern.matcher(Utility.convertPersianDigits(in)).matches();

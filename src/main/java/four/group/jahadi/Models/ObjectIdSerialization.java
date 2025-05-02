@@ -11,6 +11,7 @@ import java.io.IOException;
 public class ObjectIdSerialization extends JsonSerializer<ObjectId> {
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public void serialize(ObjectId objectId, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
         jsonGenerator.writeString(objectId.toString());
     }

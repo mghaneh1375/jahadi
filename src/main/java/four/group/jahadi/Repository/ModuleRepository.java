@@ -10,7 +10,7 @@ import java.util.List;
 
 @Repository
 @MyRepository(model = "Module")
-public interface ModuleRepository extends MongoRepository<Module, ObjectId>, FilterableRepository<Module> {
+public interface ModuleRepository extends MongoRepository<Module, ObjectId> {
 
     @Query(value = "{}", fields = "{'id': 1, 'name': 1}")
     List<Module> findAllDigests();

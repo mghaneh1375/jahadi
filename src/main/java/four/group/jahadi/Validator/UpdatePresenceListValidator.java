@@ -9,11 +9,13 @@ import javax.validation.ConstraintValidatorContext;
 public class UpdatePresenceListValidator implements ConstraintValidator<ValidatedUpdatePresenceList, UpdatePresenceList> {
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public void initialize(ValidatedUpdatePresenceList constraintAnnotation) {
         ConstraintValidator.super.initialize(constraintAnnotation);
     }
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public boolean isValid(UpdatePresenceList value, ConstraintValidatorContext context) {
 
         boolean isErrored = false;

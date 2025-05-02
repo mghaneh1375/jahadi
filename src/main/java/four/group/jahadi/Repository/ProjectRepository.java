@@ -10,7 +10,7 @@ import java.util.List;
 
 @Repository
 @MyRepository(model = "Project")
-public interface ProjectRepository extends MongoRepository<Project, ObjectId>, FilterableRepository<Project> {
+public interface ProjectRepository extends MongoRepository<Project, ObjectId> {
 
     @Query(value = "{'group_ids': {$in: ?0}}")
     List<Project> findByOwner(List<ObjectId> owner);

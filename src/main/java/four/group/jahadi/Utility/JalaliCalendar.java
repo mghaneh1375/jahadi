@@ -348,6 +348,7 @@ public class JalaliCalendar extends Calendar {
     }
 
     @Override
+@KeepMethodName
     protected void computeTime() {
 
         if (!isTimeSet && !isTimeSeted) {
@@ -510,6 +511,7 @@ public class JalaliCalendar extends Calendar {
     }
 
     @Override
+@KeepMethodName
     protected void computeFields() {
         boolean temp = isTimeSet;
         if (!areFieldsSet) {
@@ -569,6 +571,7 @@ public class JalaliCalendar extends Calendar {
     }
 
     @Override
+@KeepMethodName
     public void add(int field, int amount) {
 
         if (field == MONTH) {
@@ -613,11 +616,13 @@ public class JalaliCalendar extends Calendar {
     }
 
     @Override
+@KeepMethodName
     public void roll(int field, boolean up) {
         roll(field, up ? +1 : -1);
     }
 
     @Override
+@KeepMethodName
     public void roll(int field, int amount) {
         if (amount == 0) {
             return;
@@ -787,21 +792,25 @@ public class JalaliCalendar extends Calendar {
     }
 
     @Override
+@KeepMethodName
     public int getMinimum(int field) {
         return MIN_VALUES[field];
     }
 
     @Override
+@KeepMethodName
     public int getMaximum(int field) {
         return MAX_VALUES[field];
     }
 
     @Override
+@KeepMethodName
     public int getGreatestMinimum(int field) {
         return MIN_VALUES[field];
     }
 
     @Override
+@KeepMethodName
     public int getLeastMaximum(int field) {
         return LEAST_MAX_VALUES[field];
     }

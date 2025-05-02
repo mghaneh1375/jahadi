@@ -14,12 +14,14 @@ public class JSONValidator implements
     private String[] optionalValueList = null;
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public void initialize(JSONConstraint constraintAnnotation) {
         valueList = constraintAnnotation.params();
         optionalValueList = constraintAnnotation.optionals();
     }
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public boolean isValid(String s, ConstraintValidatorContext constraintValidatorContext) {
 
         if(valueList.length == 0 && (s == null || s.isEmpty()))

@@ -19,7 +19,6 @@ import static four.group.jahadi.Utility.Utility.printNullableField;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class SubModule {
 
     @Id
@@ -39,7 +38,6 @@ public class SubModule {
     private String postAction;
 
     @Field("is_referral")
-    @Builder.Default
     @JsonProperty("isReferral")
     private boolean isReferral = false;
 
@@ -60,6 +58,7 @@ public class SubModule {
     private Boolean hasPatientForm;
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public String toString() {
         return "{" +
                 "\"id\":" + printNullableField(id) +

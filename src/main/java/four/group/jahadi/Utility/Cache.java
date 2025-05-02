@@ -25,6 +25,7 @@ public class Cache {
     }
 
     @Override
+@KeepMethodName
     public boolean equals(Object o) {
 
         if(o == null || key == null)

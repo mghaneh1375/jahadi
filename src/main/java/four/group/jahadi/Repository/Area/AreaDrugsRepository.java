@@ -2,7 +2,6 @@ package four.group.jahadi.Repository.Area;
 
 import four.group.jahadi.Models.Area.AreaDrugs;
 import four.group.jahadi.Models.Area.JoinedAreaDrugs;
-import four.group.jahadi.Repository.FilterableRepository;
 import four.group.jahadi.Repository.MyRepository;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.Aggregation;
@@ -15,7 +14,7 @@ import java.util.Optional;
 
 @Repository
 @MyRepository(model = "DrugsInArea")
-public interface AreaDrugsRepository extends MongoRepository<AreaDrugs, ObjectId>, FilterableRepository<AreaDrugs> {
+public interface AreaDrugsRepository extends MongoRepository<AreaDrugs, ObjectId> {
 
     @Query(value = "{areaId: ?0, drugId: ?1}")
     Optional<AreaDrugs> findByAreaIdAndDrugId(ObjectId areaId, ObjectId drugId);

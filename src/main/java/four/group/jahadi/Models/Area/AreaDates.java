@@ -23,6 +23,7 @@ public class AreaDates {
     private LocalDateTime end;
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public String toString() {
         return "{" +
                 "\"start\":" + printNullableDate(start) +

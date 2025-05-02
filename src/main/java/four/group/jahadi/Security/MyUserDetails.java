@@ -33,6 +33,7 @@ public class MyUserDetails implements UserDetailsService {
     }
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public UserDetails loadUserByUsername(String token) throws UsernameNotFoundException {
         try {
             Claims claims = Jwts.parser().setSigningKey(getSharedKeyBytes()).parseClaimsJws(token).getBody();

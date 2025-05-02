@@ -197,7 +197,8 @@
                     <injar>${project.build.finalName}.jar</injar>
                     <outjar>${project.build.finalName}-obfuscated.jar</outjar>
                     <libs>
-                        <lib>${java.home}/lib/jrt-fs.jar</lib>
+<!--                        <lib>${java.home}/lib/jrt-fs.jar</lib>-->
+                        <lib>${java.home}/jmods/java.base.jmod</lib>
                     </libs>
                 </configuration>
             </plugin>

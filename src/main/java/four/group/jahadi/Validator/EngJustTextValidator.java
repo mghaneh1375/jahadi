@@ -11,10 +11,12 @@ public class EngJustTextValidator implements
     private static final Pattern pattern = Pattern.compile(regex);
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public void initialize(EngJustTextConstraint constraintAnnotation) {
     }
 
     @Override
+@four.group.jahadi.Utility.KeepMethodName
     public boolean isValid(String s, ConstraintValidatorContext constraintValidatorContext) {
         return pattern.matcher(s.replace(" ", "")).matches();
     }
