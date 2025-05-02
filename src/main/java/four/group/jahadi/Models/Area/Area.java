@@ -132,7 +132,7 @@ public class Area {
     private Boolean finished = false;
 
     @Override
-@four.group.jahadi.Utility.KeepMethodName
+    @four.group.jahadi.Utility.KeepMethodName
     public String toString() {
         return "{" +
                 "\"id\":" + printNullableField(id) +

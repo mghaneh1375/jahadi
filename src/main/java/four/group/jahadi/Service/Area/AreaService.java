@@ -22,6 +22,8 @@ import four.group.jahadi.Repository.Area.PresenceListRepository;
 import four.group.jahadi.Repository.*;
 import four.group.jahadi.Service.*;
 import four.group.jahadi.Utility.Utility;
+import io.github.classgraph.ClassGraph;
+import io.github.classgraph.ScanResult;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -398,17 +400,31 @@ public class AreaService {
             String... packageNames
     ) {
         Set<Class<?>> annotatedClasses = new HashSet<>();
-        try {
-            Set<Class<?>> allClasses = findAllClassesUsingClassLoader(packageNames);
-            for (Class<?> clazz : allClasses) {
-                if (clazz.isAnnotationPresent(annotation)) {
-                    annotatedClasses.add(clazz);
-                }
+        for (int i = 0; i < packageNames.length; i++) {
+            try {
+                ScanResult scanResult = new ClassGraph()
+                        .enableAllInfo()
+                        .acceptPackages(packageNames[i])
+                        .scan();
+                annotatedClasses.addAll(
+                        scanResult.getClassesWithAnnotation(annotation.getName())
+                                .loadClasses()
+                );
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+            catch (Exception ignore) {}
         }
 
+//        try {
+//            Set<Class<?>> allClasses = findAllClassesUsingClassLoader(packageNames);
+//            for (Class<?> clazz : allClasses) {
+//                if (clazz.isAnnotationPresent(annotation)) {
+//                    annotatedClasses.add(clazz);
+//                }
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//
         return annotatedClasses;
     }
 
@@ -541,6 +557,8 @@ public class AreaService {
                     if (selectedDB.get() == null)
                         continue;
 
+                    System.out.println("line is " + line);
+                    System.out.println(objectMapper.readValue(line, selectedDB.get()));
                     values.add(objectMapper.readValue(line, selectedDB.get()));
                 } catch (Exception x) {
                     x.printStackTrace();

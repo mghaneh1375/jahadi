@@ -20,6 +20,7 @@ public class PatientAnswer {
     @Field("question_id")
     @JsonSerialize(using = ObjectIdSerialization.class)
     private ObjectId questionId;
+    @Field("answer")
     private Object answer;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @Field("uploaded_file")
