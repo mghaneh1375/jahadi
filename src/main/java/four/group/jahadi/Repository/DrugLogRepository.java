@@ -22,4 +22,7 @@ public interface DrugLogRepository extends MongoRepository<DrugLog, ObjectId> {
 )
   List<DrugLog> findByFilters(ObjectId drugId, Long startAt, Long endAt, Boolean justPositives, Boolean justNegatives);
 
+  @Query(value = "{drugId: {$in: ?0}}")
+  List<DrugLog> findAllByDrugsId(List<ObjectId> ids);
+
 }

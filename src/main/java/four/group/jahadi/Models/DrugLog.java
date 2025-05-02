@@ -4,10 +4,8 @@ import lombok.*;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
-import org.springframework.data.mongodb.core.mapping.MongoId;
 
-import javax.persistence.Id;
-import java.util.List;
+import static four.group.jahadi.Utility.Utility.*;
 
 @Getter
 @Setter
@@ -25,4 +23,17 @@ public class DrugLog extends Model {
     private ObjectId areaId;
     private Integer amount;
     private String desc;
+
+    @Override
+    public String toString() {
+        return "{" +
+                "\"id\":" + printNullableField(this.getId()) +
+                ", \"createdAt\":" + printNullableDate(this.getCreatedAt()) +
+                ", \"drugId\":" + printNullableField(drugId) +
+                ", \"userId\":" + printNullableField(userId) +
+                ", \"areaId\":" + printNullableField(areaId) +
+                ", \"amount\":" + printNullableInteger(amount) +
+                ", \"desc\":" + printNullableField(desc) +
+                "}\n";
+    }
 }

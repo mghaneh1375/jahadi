@@ -10,6 +10,9 @@ import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.LocalDateTime;
 
+import static four.group.jahadi.Utility.Utility.printNullableDate;
+import static four.group.jahadi.Utility.Utility.printNullableField;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -34,13 +37,15 @@ public class PresenceList extends Model {
     private LocalDateTime exit;
 
     @Override
-@four.group.jahadi.Utility.KeepMethodName
+    @four.group.jahadi.Utility.KeepMethodName
     public String toString() {
         return "{" +
-                "\"areaId\":\"" + areaId +
-                "\", \"userId\":\"" + userId +
-                "\", \"entrance\":" + entrance.toString() +
-                "\", \"exit\":" + exit.toString() +
+                "\"id\":" + printNullableField(this.getId()) +
+                ", \"createdAt\":" + printNullableDate(this.getCreatedAt()) +
+                ", \"areaId\":" + printNullableField(areaId) +
+                " \"userId\":" + printNullableField(userId) +
+                " \"entrance\":" + printNullableDate(entrance) +
+                " \"exit\":" + printNullableDate(exit) +
                 "}\n";
     }
 }

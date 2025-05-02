@@ -69,6 +69,8 @@ public class AreaService {
     @Autowired
     private CountryRepository countryRepository;
     @Autowired
+    private NoteRepository noteRepository;
+    @Autowired
     private AreaPresenceService areaPresenceService;
     @Autowired
     private WareHouseAccessForGroupRepository wareHouseAccessForGroupRepository;
@@ -380,14 +382,52 @@ public class AreaService {
                     ContentDisposition.builder("attachment").filename("export.json").build().toString()
             );
 
+            List<ObjectId> neededUsersId = new ArrayList<>();
+            neededUsersId.addAll(foundArea.getMembers());
+            neededUsersId.add(foundArea.getOwnerId());
+
             // no need for export activation table
-            exportUtils.exportCommon(outputStream);
-            exportUtils.exportUsers(foundArea, outputStream);
+            exportUtils.exportCommon(outputStream, neededUsersId);
+            exportUtils.exportUsers(foundArea, outputStream, neededUsersId);
             exportUtils.exportTrip(trip, areaId, outputStream);
             exportUtils.exportGroups(trip, outputStream);
             exportUtils.exportDrugs(foundArea, outputStream);
             exportUtils.exportEquipments(foundArea, outputStream);
             exportUtils.exportPatients(outputStream);
+            response.setStatus(HttpStatus.OK.value());
+            response.flushBuffer();
+        } catch (Exception x) {
+            x.printStackTrace();
+        }
+    }
+
+    public void exportArea(
+            ObjectId areaId, ObjectId userId,
+            HttpServletResponse response
+    ) {
+        Trip trip = tripRepository.findByAreaIdAndOwnerId(areaId, userId).orElseThrow(InvalidIdException::new);
+        Area foundArea = findArea(trip, areaId, userId);
+
+        try {
+            ServletOutputStream outputStream = response.getOutputStream();
+            response.setContentType("application/octet-stream");
+            response.setHeader(
+                    HttpHeaders.CONTENT_DISPOSITION,
+                    ContentDisposition.builder("attachment").filename("export.json").build().toString()
+            );
+
+            List<ObjectId> neededUsersId = new ArrayList<>();
+            neededUsersId.addAll(foundArea.getMembers());
+            neededUsersId.add(foundArea.getOwnerId());
+
+            // no need for export activation table
+            ioService.export(noteRepository.findByUsersIdIn(neededUsersId), outputStream, "Note");
+
+            exportUtils.exportTrip2(trip, areaId, outputStream);
+            exportUtils.exportDrugs2(foundArea, outputStream);
+            exportUtils.exportEquipments(foundArea, outputStream);
+            exportUtils.exportPatients(outputStream);
+
             response.setStatus(HttpStatus.OK.value());
             response.flushBuffer();
         } catch (Exception x) {

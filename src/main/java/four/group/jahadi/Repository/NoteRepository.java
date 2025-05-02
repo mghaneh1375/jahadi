@@ -15,4 +15,6 @@ public interface NoteRepository extends MongoRepository<Note, ObjectId> {
     @Query(value = "{user_id: ?0}", fields = "{'id': 1, 'title': 1, 'updatedAt': 1, 'description': 1}")
     List<Note> findByUserId(ObjectId userId);
 
+    @Query(value = "{user_id: {$in: ?0}}")
+    List<Note> findByUsersIdIn(List<ObjectId> userId);
 }
