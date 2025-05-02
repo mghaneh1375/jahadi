@@ -89,7 +89,7 @@ public class EquipmentServiceInArea {
         List<AreaEquipments> equipments = new ArrayList<>();
         HashMap<ObjectId, Integer> updates = new HashMap<>();
         areaEquipmentsRepository.findIdsByAreaIdAndIds(areaId, ids)
-                .forEach(areaEquipments -> updates.put(areaEquipments.getId(), 0));
+                .forEach(areaEquipments -> updates.put(areaEquipments.getEquipmentId(), 0));
 
         List<EquipmentLog> equipmentLogs = new ArrayList<>();
         final String msg = "اختصاص به منطقه " + foundArea.getName() + " در اردو " + trip.getName() + " توسط " + username;
