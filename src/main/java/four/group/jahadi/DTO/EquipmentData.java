@@ -1,5 +1,6 @@
 package four.group.jahadi.DTO;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import four.group.jahadi.Enums.EquipmentHealthStatus;
 import four.group.jahadi.Enums.EquipmentType;
 import four.group.jahadi.Validator.ValidatedEquipment;
@@ -29,8 +30,11 @@ public class EquipmentData {
     @Max(value = 100000, message = "مقدار موجودی باید حداکثر 100000 باشد")
     private Integer available;
     @NotNull
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime buyAt;
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime usedAt;
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime guaranteeExpireAt;
     @NotNull
     private EquipmentHealthStatus healthStatus;

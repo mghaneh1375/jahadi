@@ -1,5 +1,6 @@
 package four.group.jahadi.DTO;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,5 +27,6 @@ public class PaymentsToPatientDAO {
     @Min(value = 0, message = "مبلغ واریزی باید حداقل 0 باشد")
     private Integer amount;
     @NonNull
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime date;
 }

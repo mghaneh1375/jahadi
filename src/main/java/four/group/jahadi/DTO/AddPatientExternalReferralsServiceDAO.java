@@ -1,5 +1,6 @@
 package four.group.jahadi.DTO;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -39,6 +40,7 @@ public class AddPatientExternalReferralsServiceDAO {
     @Min(value = 0, message = "مقدار هزینه کسر شده توسط مرکز درمان باید مثبت باشد")
     private Long hospitalCost;
     @NotNull
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime date;
     @NotNull
     @Size(min = 3, max = 500, message = "محل خدمت باید حداقل 3 و حداکثر 500 کاراکتر باشد")

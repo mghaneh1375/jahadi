@@ -44,11 +44,11 @@ public class JahadgarEquipmentAPIRoutes extends Router {
             @PathVariable @ObjectIdConstraint ObjectId areaId,
             @RequestBody @Valid ValidList<AreaEquipmentsData> dataValidList
     ) {
-        TokenInfo tokenInfo = getTokenInfo(request);
+        TokenInfo tokenInfo = getFullTokenInfo(request);
         equipmentServiceInArea.addAllEquipmentsToArea(
                 tokenInfo.getUserId(), tokenInfo.getGroupId(),
                 tokenInfo.getUsername(), areaId, dataValidList,
-                false
+                tokenInfo.getAccesses().contains(Access.GROUP)
         );
     }
 
