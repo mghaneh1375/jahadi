@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -89,7 +90,7 @@ public class EquipmentServiceInArea {
         List<AreaEquipments> equipments = new ArrayList<>();
         HashMap<ObjectId, Integer> updates = new HashMap<>();
         areaEquipmentsRepository.findIdsByAreaIdAndIds(areaId, ids)
-                .forEach(areaEquipments -> updates.put(areaEquipments.getEquipmentId(), 0));
+                .forEach(areaEquipment -> updates.put(areaEquipment.getEquipmentId(), 0));
 
         List<EquipmentLog> equipmentLogs = new ArrayList<>();
         final String msg = "اختصاص به منطقه " + foundArea.getName() + " در اردو " + trip.getName() + " توسط " + username;
@@ -131,13 +132,14 @@ public class EquipmentServiceInArea {
                     });
         }
 
-        if (equipments.size() != dtoList.size())
+        if (equipments.size() + updates.size() != dtoList.size())
             throw new RuntimeException("ids are incorrect");
 
-        Iterable<AreaEquipments> equipmentsInAreaList = areaEquipmentsRepository.findAllById(updates.keySet());
+        Iterable<AreaEquipments> equipmentsInAreaList = areaEquipmentsRepository.findAllByAreaIdAndEquipmentId(areaId, updates.keySet());
         List<AreaEquipments> tmp = new ArrayList<>();
-        while (equipmentsInAreaList.iterator().hasNext()) {
-            AreaEquipments next = equipmentsInAreaList.iterator().next();
+        Iterator<AreaEquipments> iterator = equipmentsInAreaList.iterator();
+        while (iterator.hasNext()) {
+            AreaEquipments next = iterator.next();
             next.setReminder(updates.get(next.getEquipmentId()) + next.getReminder());
             next.setTotalCount(updates.get(next.getEquipmentId()) + next.getTotalCount());
             next.setUpdatedAt(LocalDateTime.now());

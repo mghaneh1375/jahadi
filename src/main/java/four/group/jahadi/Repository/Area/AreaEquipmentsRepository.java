@@ -11,14 +11,15 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface AreaEquipmentsRepository extends MongoRepository<AreaEquipments, ObjectId>, FilterableRepository<AreaEquipments> {
 
-    @Query(value = "{areaId: ?0, equipmentId: ?1}")
-    Optional<AreaEquipments> findByAreaIdAndEquipmentId(ObjectId areaId, ObjectId equipmentId);
+    @Query(value = "{areaId: ?0, equipmentId: {$in: ?1}}")
+    List<AreaEquipments> findAllByAreaIdAndEquipmentId(ObjectId areaId, Set<ObjectId> equipmentIds);
 
-    @Query(value = "{areaId: ?0, equipmentId: {$in: ?1}}", fields = "{_id: 1}")
+    @Query(value = "{areaId: ?0, equipmentId: {$in: ?1}}", fields = "{_id: 1, equipmentId: 1}")
     List<AreaEquipments> findIdsByAreaIdAndIds(ObjectId areaId, List<ObjectId> ids);
 
     @Query(value = "{areaId: ?0}")
