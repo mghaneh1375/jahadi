@@ -32,8 +32,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static four.group.jahadi.Utility.Utility.datePattern;
-import static four.group.jahadi.Utility.Utility.getLocalDateTime;
+import static four.group.jahadi.Utility.Utility.*;
 
 
 @Service
@@ -203,16 +202,24 @@ public class DrugService extends AbstractService<Drug, DrugData> {
         Drug drug = new Drug();
 
         for (int i = 1; i <= row.getLastCellNum(); i++) {
-            Object value;
             if (row.getCell(i) == null || row.getCell(i).getCellType() == CellType.BLANK)
                 continue;
 
-            try {
-                value = row.getCell(i).getStringCellValue();
-            } catch (Exception x) {
-                value = row.getCell(i).getNumericCellValue();
-                if (i == 10 || i == 11)
-                    value = value.toString().replace(".0", "");
+            Object value;
+            switch (row.getCell(i).getCellType()) {
+                case NUMERIC:
+                    if (isCellDateFormatted(row.getCell(i))) {
+                        value = row.getCell(i).getDateCellValue();
+                    } else {
+                        value = row.getCell(i).getNumericCellValue();
+                        if (i == 10 || i == 11)
+                            value = value.toString().replace(".0", "");
+                    }
+                    break;
+                case STRING:
+                default:
+                    value = row.getCell(i).getStringCellValue();
+                    break;
             }
 
             switch (i) {
@@ -230,9 +237,7 @@ public class DrugService extends AbstractService<Drug, DrugData> {
                     drug.setDose(value.toString());
                     break;
                 case 4:
-                    if (!datePattern.matcher(value.toString()).matches())
-                        throw new InvalidFieldsException("فرمت تاریخ انقضا نامعتبر است.");
-                    drug.setExpireAt(getLocalDateTime(Utility.convertJalaliToGregorianDate(value.toString())));
+                    drug.setExpireAt(getExcelDate(value, "فرمت تاریخ انقضا نامعتبر است."));
                     break;
                 case 5:
                     validateString(value.toString(), "شرکت سازنده", 2, 100);

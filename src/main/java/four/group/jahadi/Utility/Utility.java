@@ -1,10 +1,14 @@
 package four.group.jahadi.Utility;
 
+import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Kavenegar.KavenegarApi;
 import four.group.jahadi.Kavenegar.excepctions.ApiException;
 import four.group.jahadi.Kavenegar.excepctions.HttpException;
 import four.group.jahadi.Kavenegar.models.SendResult;
 import four.group.jahadi.Validator.PhoneValidator;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CellType;
 import org.json.JSONObject;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
@@ -20,6 +24,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static four.group.jahadi.Utility.StaticValues.DEV_MODE;
+import static org.apache.poi.ss.usermodel.DateUtil.isADateFormat;
+import static org.apache.poi.ss.usermodel.DateUtil.isValidExcelDate;
 
 public class Utility {
     private static final SimpleDateFormat sdfSSSXXX;
@@ -35,8 +41,55 @@ public class Utility {
                 .withZone(ZoneOffset.UTC);
     }
 
+    public static LocalDateTime getExcelDate(Object value, String exceptionMessage) {
+        if (!(value instanceof Date) &&
+                !datePattern.matcher(value.toString()).matches() &&
+                !gregorianDatePattern.matcher(value.toString()).matches()
+        )
+            throw new InvalidFieldsException(exceptionMessage);
+
+        if (value instanceof Date)
+            return getLocalDateTime((Date) value);
+
+        if (datePattern.matcher(value.toString()).matches())
+            return getLocalDateTime(Utility.convertJalaliToGregorianDate(value.toString()));
+
+        return LocalDateTime.parse(value.toString() + "T00:00:00")
+                .atZone(tehranZoneId).toLocalDateTime();
+    }
+
+    public static boolean isCellDateFormatted(Cell cell) {
+        if (cell == null) {
+            return false;
+        }
+
+        boolean bDate = false;
+
+        double d = 0;
+
+        if (cell.getCellType() == CellType.NUMERIC) {
+            d = cell.getNumericCellValue();
+            bDate = isValidExcelDate(d);
+        }
+
+        if (bDate) {
+            CellStyle style = cell.getCellStyle();
+            if (style == null)
+                return false;
+            int i = style.getDataFormat();
+            String f = style.getDataFormatString();
+            return isADateFormat(i, f);
+        }
+
+        return false;
+    }
+
     public static final Pattern datePattern = Pattern.compile(
             "^[1-4]\\d{3}-((0[1-6]-((3[0-1])|([1-2][0-9])|(0[1-9])))|((1[0-2]|(0[7-9]))-(30|([1-2][0-9])|(0[1-9]))))$"
+    );
+
+    public static final Pattern gregorianDatePattern = Pattern.compile(
+            "^((?:19|20)\\d\\d)-(0?[1-9]|1[012])-(0?[1-9]|[12][0-9]|3[01])$"
     );
     private static final String AB = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
     private static final SecureRandom rnd = new SecureRandom();
@@ -91,7 +144,7 @@ public class Utility {
     public static JSONObject convertPersian(JSONObject jsonObject) {
 
         for (String key : jsonObject.keySet()) {
-            if(key.toLowerCase().contains("password") ||
+            if (key.toLowerCase().contains("password") ||
                     key.equalsIgnoreCase("code") ||
                     key.equals("NID")
             )
@@ -100,7 +153,7 @@ public class Utility {
                 jsonObject.put(key, Integer.parseInt(Utility.convertPersianDigits(jsonObject.getInt(key) + "")));
             else if (jsonObject.get(key) instanceof String) {
                 String str = Utility.convertPersianDigits(jsonObject.getString(key));
-                if(str.charAt(0) == '0' ||
+                if (str.charAt(0) == '0' ||
                         key.equalsIgnoreCase("phone") ||
                         key.equalsIgnoreCase("tel") ||
                         key.equals("NID")
@@ -175,8 +228,7 @@ public class Utility {
                 return arrayNationalCode[0] == temp;
             else
                 return arrayNationalCode[0] == 11 - temp;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             return false;
         }
     }
@@ -208,6 +260,7 @@ public class Utility {
 
         return r;
     }
+
     public static int randIntForGroupCode() {
 
         int r = 0;
@@ -234,12 +287,12 @@ public class Utility {
                                   String token2, String token3,
                                   String template
     ) {
-        if(DEV_MODE)
+        if (DEV_MODE)
             return true;
 
         receptor = convertPersianDigits(receptor);
 
-        if(!PhoneValidator.isValid(receptor)) {
+        if (!PhoneValidator.isValid(receptor)) {
             System.out.println("not valid phone num");
             return false;
         }
@@ -361,7 +414,7 @@ public class Utility {
     }
 
     public static String toStringOfList(List<?> objects) {
-        if(objects == null) return "[]";
+        if (objects == null) return "[]";
         StringBuilder sb = new StringBuilder("[");
         for (int i = 0; i < objects.size(); i++) {
             sb.append("\"").append(objects.get(i).toString()).append("\"");
@@ -374,11 +427,11 @@ public class Utility {
     }
 
     public static String toStringOfPairValue(List<PairValue> pairValues) {
-        if(pairValues == null || pairValues.size() == 0) return "[]";
+        if (pairValues == null || pairValues.size() == 0) return "[]";
         StringBuilder sb = new StringBuilder("[");
         for (int i = 0; i < pairValues.size(); i++) {
             PairValue pairValue = pairValues.get(i);
-            if(pairValue.getKey() == null || pairValue.getValue() == null)
+            if (pairValue.getKey() == null || pairValue.getValue() == null)
                 continue;
             sb.append(String.format("{\"key\":\"%s\", \"value\":\"%s\"}", pairValue.getKey().toString(), pairValue.getValue().toString()));
             if (i < pairValues.size() - 1)
@@ -388,13 +441,13 @@ public class Utility {
     }
 
     public static String toStringOfHasMap(HashMap<?, Integer> hashMap) {
-        if(hashMap == null) return "{}";
+        if (hashMap == null) return "{}";
         StringBuilder sb = new StringBuilder("{");
         AtomicInteger i = new AtomicInteger(0);
         final int size = hashMap.keySet().size();
         hashMap.keySet().forEach(s -> {
             sb.append(String.format("\"%s\":%d", s.toString(), hashMap.get(s)));
-            if(i.get() < size - 1)
+            if (i.get() < size - 1)
                 sb.append(", ");
             i.getAndIncrement();
         });
@@ -420,6 +473,7 @@ public class Utility {
         modelMapper.map(source, destination);
         return destination;
     }
+
     public static <D, T> D map(final T entity, Class<D> outClass) {
         return modelMapper.map(entity, outClass);
     }

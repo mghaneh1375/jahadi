@@ -11,6 +11,7 @@ import four.group.jahadi.Models.Equipment;
 import four.group.jahadi.Repository.EquipmentRepository;
 import four.group.jahadi.Repository.WareHouseAccessForGroupRepository;
 import four.group.jahadi.Utility.Utility;
+import lombok.Data;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -26,10 +27,10 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
-import static four.group.jahadi.Utility.Utility.datePattern;
-import static four.group.jahadi.Utility.Utility.getLocalDateTime;
+import static four.group.jahadi.Utility.Utility.*;
 
 @Service
 public class EquipmentService extends AbstractService<Equipment, EquipmentData> {
@@ -151,16 +152,24 @@ public class EquipmentService extends AbstractService<Equipment, EquipmentData> 
         Equipment equipment = new Equipment();
 
         for (int i = 1; i <= row.getLastCellNum(); i++) {
-            Object value;
             if (row.getCell(i) == null || row.getCell(i).getCellType() == CellType.BLANK)
                 continue;
 
-            try {
-                value = row.getCell(i).getStringCellValue();
-            } catch (Exception x) {
-                value = row.getCell(i).getNumericCellValue();
-                if (i == 7 || i == 8)
-                    value = value.toString().replace(".0", "");
+            Object value;
+            switch (row.getCell(i).getCellType()) {
+                case NUMERIC:
+                    if (isCellDateFormatted(row.getCell(i))) {
+                        value = row.getCell(i).getDateCellValue();
+                    } else {
+                        value = row.getCell(i).getNumericCellValue();
+                        if (i == 7 || i == 8)
+                            value = value.toString().replace(".0", "");
+                    }
+                    break;
+                case STRING:
+                default:
+                    value = row.getCell(i).getStringCellValue();
+                    break;
             }
 
             switch (i) {
@@ -186,9 +195,7 @@ public class EquipmentService extends AbstractService<Equipment, EquipmentData> 
                     equipment.setAvailable(((Number) value).intValue());
                     break;
                 case 5:
-                    if (!datePattern.matcher(value.toString()).matches())
-                        throw new InvalidFieldsException("فرمت تاریخ خرید نامعتبر است.");
-                    equipment.setBuyAt(getLocalDateTime(Utility.convertJalaliToGregorianDate(value.toString())));
+                    equipment.setBuyAt(getExcelDate(value, "فرمت تاریخ خرید نامعتبر است."));
                     break;
                 case 6:
                     equipment.setHealthStatus(
@@ -220,14 +227,10 @@ public class EquipmentService extends AbstractService<Equipment, EquipmentData> 
                     }
                     break;
                 case 12:
-                    if (!datePattern.matcher(value.toString()).matches())
-                        throw new InvalidFieldsException("فرمت تاریخ انقضای گارانتی نامعتبر است.");
-                    equipment.setGuaranteeExpireAt(getLocalDateTime(Utility.convertJalaliToGregorianDate(value.toString())));
+                    equipment.setGuaranteeExpireAt(getExcelDate(value, "فرمت تاریخ انقضای گارانتی نامعتبر است."));
                     break;
                 case 13:
-                    if (!datePattern.matcher(value.toString()).matches())
-                        throw new InvalidFieldsException("فرمت تاریخ استفاده نامعتبر است.");
-                    equipment.setUsedAt(getLocalDateTime(Utility.convertJalaliToGregorianDate(value.toString())));
+                    equipment.setUsedAt(getExcelDate(value, "فرمت تاریخ استفاده نامعتبر است."));
                     break;
             }
         }
