@@ -52,16 +52,16 @@ public class JahadiApplication {
 
     @Autowired
     private ApplicationContext context;
-//    public static String ENCRYPTION_KEY;
+    public static String ENCRYPTION_KEY;
 
-    public static String ENCRYPTION_KEY = "|)q,xeI3w4g@WtH[`7>}f6vN$Q3iY)[P";
+//    public static String ENCRYPTION_KEY = "|)q,xeI3w4g@WtH[`7>}f6vN$Q3iY)[P";
 
     public static void main(String[] args) {
         TimeZone.setDefault(TimeZone.getTimeZone("Iran"));
-//        if (!"SECURE_WRAPPER".equals(System.getenv("APP_SAFE_START"))) {
-//            System.err.println("Must be started via launch.sh");
-//            System.exit(1);
-//        }
+        if (!"SECURE_WRAPPER".equals(System.getenv("APP_SAFE_START"))) {
+            System.err.println("Must be started via launch.sh");
+            System.exit(1);
+        }
 //        TimeZone.setDefault(TimeZone.getTimeZone("Iran"));
 //        new Thread(new Jobs()).start();
 //        ENCRYPTION_KEY = System.getProperty("encryptionPassword");
