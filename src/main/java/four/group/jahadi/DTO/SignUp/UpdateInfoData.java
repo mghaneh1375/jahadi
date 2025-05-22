@@ -102,12 +102,12 @@ public class UpdateInfoData {
     private TripRadius tripRadius;
 
     
-    @Size(min = 2, max = 100)
-    private String lodgmentOther;
-
-    
-    @Size(min = 2, max = 100)
-    private String groupRegistrationPlaceOther;
+//    @Size(min = 2, max = 100)
+//    private String lodgmentOther;
+//
+//
+//    @Size(min = 2, max = 100)
+//    private String groupRegistrationPlaceOther;
 
     
     @Size(min = 3, max = 200)

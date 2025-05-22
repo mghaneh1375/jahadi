@@ -87,37 +87,37 @@ public class SignUpFormStep2ForGroupsValidator implements ConstraintValidator<Va
             isErrored = true;
         }
 
-        if(value.getLodgment() != null &&
-                Objects.equals(value.getLodgment(), Lodgment.OTHER) &&
-                value.getLodgmentOther() == null
-        )  {
-            errs.put("lodgment", "لطفا محل استقرار گروه را وارد نمایید");
-            isErrored = true;
-        }
+//        if(value.getLodgment() != null &&
+//                Objects.equals(value.getLodgment(), Lodgment.OTHER) &&
+//                value.getLodgmentOther() == null
+//        )  {
+//            errs.put("lodgment", "لطفا محل استقرار گروه را وارد نمایید");
+//            isErrored = true;
+//        }
 
-        if(value.getLodgment() != null &&
-                !Objects.equals(value.getLodgment(), Lodgment.OTHER) &&
-                value.getLodgmentOther() != null
-        )  {
-            errs.put("lodgment", "محل استقرار گروه نامعتبر است");
-            isErrored = true;
-        }
+//        if(value.getLodgment() != null &&
+//                !Objects.equals(value.getLodgment(), Lodgment.OTHER) &&
+//                value.getLodgmentOther() != null
+//        )  {
+//            errs.put("lodgment", "محل استقرار گروه نامعتبر است");
+//            isErrored = true;
+//        }
 
-        if(value.getGroupRegistrationPlace() != null &&
-                Objects.equals(value.getGroupRegistrationPlace(), GroupRegistrationPlace.OTHER) &&
-                value.getGroupRegistrationPlaceOther() == null
-        ) {
-            errs.put("groupRegistrationPlace", "لطفا محل ثبت گروه را وارد نمایید");
-            isErrored = true;
-        }
-
-        if(value.getGroupRegistrationPlace() != null &&
-                !Objects.equals(value.getGroupRegistrationPlace(), GroupRegistrationPlace.OTHER) &&
-                value.getGroupRegistrationPlaceOther() != null
-        ) {
-            errs.put("groupRegistrationPlace", "محل ثبت گروه نامعتبر است");
-            isErrored = true;
-        }
+//        if(value.getGroupRegistrationPlace() != null &&
+//                Objects.equals(value.getGroupRegistrationPlace(), GroupRegistrationPlace.OTHER) &&
+//                value.getGroupRegistrationPlaceOther() == null
+//        ) {
+//            errs.put("groupRegistrationPlace", "لطفا محل ثبت گروه را وارد نمایید");
+//            isErrored = true;
+//        }
+//
+//        if(value.getGroupRegistrationPlace() != null &&
+//                !Objects.equals(value.getGroupRegistrationPlace(), GroupRegistrationPlace.OTHER) &&
+//                value.getGroupRegistrationPlaceOther() != null
+//        ) {
+//            errs.put("groupRegistrationPlace", "محل ثبت گروه نامعتبر است");
+//            isErrored = true;
+//        }
 
         if(value.getTripFrequency() == null) {
             errs.put("tripFrequency", "لطفا بسامد برگزاری اردوها را وارد نمایید");

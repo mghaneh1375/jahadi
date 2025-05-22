@@ -69,7 +69,7 @@ public interface UserRepository extends MongoRepository<User, ObjectId>, Filtera
             + "]}", fields = "{'id': 1, 'created_at': 1, 'name': 1, 'nid': 1, 'phone': 1, 'sex': 1, " +
             "'group_name': 1, 'status': 1, 'accesses': 1, 'field': 1, 'blood_type': 1, 'university': 1, " +
             "'father_name': 1, 'birth_day': 1, 'abilities': 1, 'nearby_rel': 1, 'nearby_name': 1, 'nearby_phone': 1, " +
-            "'allergies': 1, 'diseases': 1, 'group_id': 1, 'tel': 1, 'lodgment': 1, 'university_year': 1, 'lodgment_other': 1}")
+            "'allergies': 1, 'diseases': 1, 'group_id': 1, 'tel': 1, 'lodgment': 1, 'university_year': 1}")
     List<User> findAll(AccountStatus status, Access access, String name,
                        String NID, String phone, Sex sex, String groupName,
                        ObjectId groupId, Boolean justGroupRequests);

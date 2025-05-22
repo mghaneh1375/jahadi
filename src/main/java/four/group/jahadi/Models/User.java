@@ -212,13 +212,13 @@ public class User extends Model {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private GroupRegistrationPlace groupRegistrationPlace;
 
-    @Field("lodgment_other")
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String lodgmentOther;
-
-    @Field("group_registration_place_other")
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String groupRegistrationPlaceOther;
+//    @Field("lodgment_other")
+//    @JsonInclude(JsonInclude.Include.NON_NULL)
+//    private String lodgmentOther;
+//
+//    @Field("group_registration_place_other")
+//    @JsonInclude(JsonInclude.Include.NON_NULL)
+//    private String groupRegistrationPlaceOther;
 
     @Field("trip_frequency")
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -524,8 +524,8 @@ public class User extends Model {
                 ", \"platform\":" + printNullableField(platform) +
                 ", \"lodgment\":" + printNullableField(lodgment) +
                 ", \"groupRegistrationPlace\":" + printNullableField(groupRegistrationPlace) +
-                ", \"lodgmentOther\":" + printNullableField(lodgmentOther) +
-                ", \"groupRegistrationPlaceOther\":" + printNullableField(groupRegistrationPlaceOther) +
+//                ", \"lodgmentOther\":" + printNullableField(lodgmentOther) +
+//                ", \"groupRegistrationPlaceOther\":" + printNullableField(groupRegistrationPlaceOther) +
                 ", \"tripFrequency\":" + printNullableField(tripFrequency) +
                 ", \"tripRadius\":" + printNullableField(tripRadius) +
                 ", \"address\":" + printNullableField(address) +
