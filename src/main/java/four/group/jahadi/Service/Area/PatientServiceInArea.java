@@ -54,16 +54,15 @@ public class PatientServiceInArea {
     TripRepository tripRepository;
 
     public ResponseEntity<List<PatientJoinArea>> getPatients(ObjectId userId, ObjectId areaId) {
-
         //todo: check finalize
-
         Trip trip = tripRepository.findActiveByAreaIdAndDispatcherId(areaId, userId, Utility.getCurrLocalDateTime())
                 .orElseThrow(NotAccessException::new);
 
         findStartedArea(trip, areaId);
-
+        List<PatientJoinArea> list = patientsInAreaRepository.findPatientsByAreaId(areaId);
+        list.sort(Comparator.comparing(PatientJoinArea::getCreatedAt, Comparator.reverseOrder()));
         return new ResponseEntity<>(
-                patientsInAreaRepository.findPatientsByAreaId(areaId),
+                list,
                 HttpStatus.OK
         );
     }
