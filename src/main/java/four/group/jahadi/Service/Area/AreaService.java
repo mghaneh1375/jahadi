@@ -347,8 +347,8 @@ public class AreaService extends AbstractService<Area, AreaData> {
         Trip trip = tripRepository.findByAreaIdAndOwnerId(areaId, userId)
                 .orElseThrow(NotAccessException::new);
 
-        LocalDateTime start = getLocalDateTime(new Date(dto.getStartAt()));
-        LocalDateTime end = getLastLocalDateTime(new Date(dto.getEndAt()));
+        LocalDateTime start = getLocalDateTime(new Date((long)dto.getStartAt()));
+        LocalDateTime end = getLastLocalDateTime(new Date((long)dto.getEndAt()));
 
         if (trip.getStartAt().isAfter(start))
             throw new InvalidFieldsException("زمان آغاز باید بعد از " + Utility.convertUTCDateToJalali(trip.getStartAt()) + " باشد");
