@@ -18,7 +18,7 @@ public class SightGharbal {
         SubModule subModule = SubModule
                 .builder()
                 .id(new ObjectId())
-                .name("غربال بینایی")
+                .name("غربالگری بینایی")
                 .referTo(moduleIds.get("اتاق بینایی"))
                 .isReferral(true)
                 .questions(
@@ -60,7 +60,7 @@ public class SightGharbal {
                                         .id(new ObjectId())
                                         .required(false)
                                         .questionType(QuestionType.TABLE)
-                                        .title("غربال بینایی")
+                                        .title("غربالگری بینایی")
                                         .headers(List.of("VA/CC", "D"))
                                         .cellLabel("/ 10")
                                         .firstColumn(List.of("OD", "OS"))
@@ -72,7 +72,7 @@ public class SightGharbal {
                                         .required(false)
                                         .id(new ObjectId())
                                         .questionType(QuestionType.TABLE)
-                                        .title("غربال بینایی")
+                                        .title("غربالگری بینایی")
                                         .headers(List.of("VA/SC", "D"))
                                         .cellLabel("/ 10")
                                         .firstColumn(List.of("OD", "OS"))
@@ -85,7 +85,7 @@ public class SightGharbal {
 
         return Module
                 .builder()
-                .name("غربال دوم بینایی")
+                .name("غربالگری دوم بینایی")
                 .icon("icon-disability")
                 .tabName("توان بخشی")
                 .subModules(List.of(subModule))

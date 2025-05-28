@@ -90,15 +90,15 @@ public class General {
                                         .answerType(AnswerType.NUMBER)
 //                                        .canWriteDesc(true)
                                         .build(),
-                                SimpleQuestion
-                                        .builder()
-                                        .id(new ObjectId())
-                                        .questionType(QuestionType.SIMPLE)
-                                        .required(false)
-                                        .question("فشار خون (BP)")
-                                        .answerType(AnswerType.NUMBER)
-//                                        .canWriteDesc(true)
-                                        .build(),
+//                                SimpleQuestion
+//                                        .builder()
+//                                        .id(new ObjectId())
+//                                        .questionType(QuestionType.SIMPLE)
+//                                        .required(false)
+//                                        .question("فشار خون (BP)")
+//                                        .answerType(AnswerType.NUMBER)
+////                                        .canWriteDesc(true)
+//                                        .build(),
                                 SimpleQuestion
                                         .builder()
                                         .id(new ObjectId())

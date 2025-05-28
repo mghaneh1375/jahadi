@@ -208,16 +208,18 @@ public class DrugServiceInArea {
     }
 
     public ResponseEntity<List<JoinedAreaDrugs>> list(
-            ObjectId groupId, ObjectId areaId, ObjectId userId
+            ObjectId groupId, ObjectId areaId, ObjectId userId,
+            String name, String drugType,
+            LocalDateTime fromExpireAt, LocalDateTime endExpireAt
     ) {
         if (userId != null)
             jahadgarDrugService.checkAccessToWareHouse(groupId, userId);
 
-        tripRepository.findByGroupIdAndAreaId(groupId, areaId)
+        tripRepository.findByGroupIdAndAreaId(new ObjectId("678d2b8f369b201837aac474"), areaId)
                 .orElseThrow(NotAccessException::new);
 
         return new ResponseEntity<>(
-                areaDrugsRepository.findDigestByAreaId(areaId),
+                areaDrugsRepository.findDigestByAreaId(areaId, name, drugType, fromExpireAt, endExpireAt),
                 HttpStatus.OK
         );
     }
@@ -365,8 +367,8 @@ public class DrugServiceInArea {
 
         if (!patientDrug.getAreaId().equals(areaId))
             throw new InvalidIdException();
-        if (patientDrug.getSuggestCount() < data.getAmount())
-            throw new RuntimeException("تعداد تحویل می تواند حداکثر " + patientDrug.getSuggestCount() + " باشد");
+//        if (patientDrug.getSuggestCount() < data.getAmount())
+//            throw new RuntimeException("تعداد تحویل می تواند حداکثر " + patientDrug.getSuggestCount() + " باشد");
         if (patientDrug.isDedicated() && !patientDrug.getGiverId().equals(userId))
             throw new RuntimeException("این تجویز قبلا توسط مسئول داروخانه دیگری تحویل شده است");
 

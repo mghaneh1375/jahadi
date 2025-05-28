@@ -17,7 +17,7 @@ public class Audiologists {
         return SubModule
                 .builder()
                 .id(new ObjectId())
-                .name("غربال شنوایی")
+                .name("غربالگری شنوایی")
                 .referTo(referToOid)
                 .isReferral(true)
                 .questions(
@@ -84,7 +84,7 @@ public class Audiologists {
                                                         .builder()
                                                         .id(new ObjectId())
                                                         .questionType(QuestionType.SIMPLE)
-                                                        .question("احساس کم شنوایی (زیر 40 سال)")
+                                                        .question("احساس کم شنوایی")
                                                         .answerType(AnswerType.TICK)
                                                         .required(false)
                                                         .build(),
@@ -100,7 +100,7 @@ public class Audiologists {
                                                         .builder()
                                                         .id(new ObjectId())
                                                         .questionType(QuestionType.SIMPLE)
-                                                        .question("دارای احساس گرفتگی گوش (با پزشک چک شود)")
+                                                        .question("دارای احساس گرفتگی گوش")
                                                         .answerType(AnswerType.TICK)
                                                         .required(false)
                                                         .build()
@@ -134,7 +134,7 @@ public class Audiologists {
                                                         .builder()
                                                         .id(new ObjectId())
                                                         .questionType(QuestionType.SIMPLE)
-                                                        .question("احساس وزوز یا سکوت کشیدن در گوش")
+                                                        .question("احساس وزوز یا سوت کشیدن در گوش")
                                                         .answerType(AnswerType.TICK)
                                                         .required(false)
                                                         .build(),
@@ -142,7 +142,7 @@ public class Audiologists {
                                                         .builder()
                                                         .id(new ObjectId())
                                                         .questionType(QuestionType.SIMPLE)
-                                                        .question("سرگیجه دورانی (با پزشک چک شود)")
+                                                        .question("سرگیجه دورانی")
                                                         .answerType(AnswerType.TICK)
                                                         .required(false)
                                                         .build(),
@@ -150,7 +150,7 @@ public class Audiologists {
                                                         .builder()
                                                         .id(new ObjectId())
                                                         .questionType(QuestionType.SIMPLE)
-                                                        .question("تروما یا دردگوش (با پزشک چک شود)")
+                                                        .question("تروما یا دردگوش")
                                                         .answerType(AnswerType.TICK)
                                                         .required(false)
                                                         .build(),
@@ -158,7 +158,7 @@ public class Audiologists {
                                                         .builder()
                                                         .id(new ObjectId())
                                                         .questionType(QuestionType.SIMPLE)
-                                                        .question("ترشح از گوش (با پزشک چک شود)")
+                                                        .question("ترشح از گوش")
                                                         .answerType(AnswerType.TICK)
                                                         .required(false)
                                                         .build(),

@@ -71,7 +71,7 @@ public class DoctorSeeder {
                                                                 CheckListGroupQuestion
                                                                         .builder()
                                                                         .id(new ObjectId())
-                                                                        .sectionTitle("غربال روان(سلامت)")
+                                                                        .sectionTitle("غربالگری روان(سلامت)")
                                                                         .options(
                                                                                 Arrays.stream(HaveOrNot.values()).map(haveOrNot ->
                                                                                         new PairValue(haveOrNot.name(), haveOrNot.getFaTranslate())

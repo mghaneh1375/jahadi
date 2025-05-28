@@ -21,7 +21,7 @@ public class ExperimentAnswer {
                                 .builder()
                                 .id(new ObjectId())
                                 .questionType(QuestionType.GROUP)
-                                .sectionTitle("ارجاع به خارج")
+                                .sectionTitle("ارجاع به مراکز درمانی")
                                 .questions(List.of(
                                         SimpleQuestion
                                                 .builder()

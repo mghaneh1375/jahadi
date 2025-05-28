@@ -13,7 +13,7 @@ public class ExternalReferral {
         return SubModule
                 .builder()
                 .id(new ObjectId())
-                .name("ارجاع به خارج")
+                .name("ارجاع به مراکز درمانی")
                 .questions(
                         List.of(
                                 SimpleQuestion

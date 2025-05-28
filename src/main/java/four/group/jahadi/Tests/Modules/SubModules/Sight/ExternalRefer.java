@@ -13,7 +13,7 @@ public class ExternalRefer {
         return SubModule
                 .builder()
                 .id(new ObjectId())
-                .name("ارجاع به خارج متخصصان چشم")
+                .name("ارجاع به مراکز درمانی متخصصان چشم")
                 .questions(
                         List.of(
                                 SimpleQuestion

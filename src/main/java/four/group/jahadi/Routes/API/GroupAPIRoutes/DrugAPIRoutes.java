@@ -12,6 +12,7 @@ import four.group.jahadi.Models.TokenInfo;
 import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Service.Area.DrugServiceInArea;
 import four.group.jahadi.Service.DrugService;
+import four.group.jahadi.Utility.Utility;
 import four.group.jahadi.Validator.ObjectIdConstraint;
 import io.swagger.v3.oas.annotations.Operation;
 import org.bson.types.ObjectId;
@@ -111,12 +112,19 @@ public class DrugAPIRoutes extends Router {
     @Operation(summary = "گرفتن داروهای موجود در منطقه توسط مسئول انبار داروخانه و یا مسئول گروه")
     public ResponseEntity<List<JoinedAreaDrugs>> list(
             HttpServletRequest request,
-            @PathVariable @ObjectIdConstraint ObjectId areaId
+            @PathVariable @ObjectIdConstraint ObjectId areaId,
+            @RequestParam(required = false, name = "name") String name,
+            @RequestParam(required = false, name = "drugType") String drugType,
+            @RequestParam(required = false, name = "fromExpireAt") String fromExpireAt,
+            @RequestParam(required = false, name = "toExpireAt") String toExpireAt
     ) {
         TokenInfo fullTokenInfo = getFullTokenInfo(request);
         return drugServiceInArea.list(
                 fullTokenInfo.getGroupId(), areaId,
-                fullTokenInfo.getAccesses().contains(Access.GROUP) ? null : fullTokenInfo.getUserId()
+                fullTokenInfo.getAccesses().contains(Access.GROUP) ? null : fullTokenInfo.getUserId(),
+                name, drugType,
+                fromExpireAt == null ? null : Utility.getLastLocalDateTime(Utility.convertJalaliToGregorianDate(fromExpireAt)),
+                toExpireAt == null ? null : Utility.getLastLocalDateTime(Utility.convertJalaliToGregorianDate(toExpireAt))
         );
     }
 }

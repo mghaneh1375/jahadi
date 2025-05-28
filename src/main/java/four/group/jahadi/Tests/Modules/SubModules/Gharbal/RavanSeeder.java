@@ -28,7 +28,7 @@ public class RavanSeeder {
         return SubModule
                 .builder()
                 .id(new ObjectId())
-                .name("غربال روان")
+                .name("غربالگری روان")
                 .referTo(referToOid)
                 .isReferral(true)
                 .questions(List.of(

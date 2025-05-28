@@ -49,7 +49,7 @@ public class PatientExternalReferralsService {
 
 
     private PairValue getExternalReferralsSubModulesId() {
-        List<Module> externalReferralModules = moduleRepository.findAllBySubModuleName("ارجاع به خارج");
+        List<Module> externalReferralModules = moduleRepository.findAllBySubModuleName("ارجاع به مراکز درمانی");
         if (externalReferralModules.size() == 0)
             throw new RuntimeException("خطای ناشناخته");
         List<ObjectId> moduleIds = externalReferralModules
@@ -61,7 +61,7 @@ public class PatientExternalReferralsService {
                 .map(module -> module
                         .getSubModules()
                         .stream()
-                        .filter(subModule -> subModule.getName().equalsIgnoreCase("ارجاع به خارج"))
+                        .filter(subModule -> subModule.getName().equalsIgnoreCase("ارجاع به مراکز درمانی"))
                         .map(SubModule::getId)
                         .collect(Collectors.toList()))
                 .flatMap(List::stream)
@@ -71,7 +71,7 @@ public class PatientExternalReferralsService {
     }
 
     private PairValue getExternalReferralsSubModules() {
-        List<Module> externalReferralModules = moduleRepository.findAllBySubModuleName("ارجاع به خارج");
+        List<Module> externalReferralModules = moduleRepository.findAllBySubModuleName("ارجاع به مراکز درمانی");
         if (externalReferralModules.size() == 0)
             throw new RuntimeException("خطای ناشناخته");
         List<ObjectId> moduleIds = externalReferralModules
@@ -83,7 +83,7 @@ public class PatientExternalReferralsService {
                 .map(module -> module
                         .getSubModules()
                         .stream()
-                        .filter(subModule -> subModule.getName().equalsIgnoreCase("ارجاع به خارج"))
+                        .filter(subModule -> subModule.getName().equalsIgnoreCase("ارجاع به مراکز درمانی"))
                         .collect(Collectors.toList()))
                 .flatMap(List::stream)
                 .collect(Collectors.toList());

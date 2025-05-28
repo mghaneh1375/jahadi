@@ -3,7 +3,7 @@ package four.group.jahadi.Enums.Module;
 public enum WomenServicePlus {
     SUPER_EXAMINATION("معاینه سرپرست"),
     VAGINAL_EXAMINATION("معاینه واژینال"),
-    PUP_SMEAR("Pup smear"),
+    PUP_SMEAR("Papsmear"),
     BIOPSY("Biopsy");
 
     String faTranslate;

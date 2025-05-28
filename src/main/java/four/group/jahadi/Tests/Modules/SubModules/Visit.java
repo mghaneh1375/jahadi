@@ -20,7 +20,7 @@ public class Visit {
                                 .id(new ObjectId())
                                 .questionType(QuestionType.SIMPLE)
                                 .question("توضیحات")
-                                .required(false)
+                                .required(true)
                                 .answerType(AnswerType.LONG_TEXT)
                                 .build()
 //                        SimpleQuestion

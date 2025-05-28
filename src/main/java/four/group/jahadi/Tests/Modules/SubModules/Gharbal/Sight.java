@@ -17,7 +17,7 @@ public class Sight {
         return SubModule
                 .builder()
                 .id(new ObjectId())
-                .name("غربال بینایی")
+                .name("غربالگری بینایی")
                 .referTo(referToOid)
                 .isReferral(true)
                 .questions(
@@ -142,7 +142,15 @@ public class Sight {
                                                         .builder()
                                                         .id(new ObjectId())
                                                         .questionType(QuestionType.SIMPLE)
-                                                        .question("تاری دید (شغل و سن مهم) => پرسیدن و شدت تاری دید")
+                                                        .question("تاری دید نزدیک => پرسیدن و شدت تاری دید")
+                                                        .answerType(AnswerType.TICK)
+                                                        .required(false)
+                                                        .build(),
+                                                SimpleQuestion
+                                                        .builder()
+                                                        .id(new ObjectId())
+                                                        .questionType(QuestionType.SIMPLE)
+                                                        .question("تاری دید دور")
                                                         .answerType(AnswerType.TICK)
                                                         .required(false)
                                                         .build(),
@@ -158,7 +166,7 @@ public class Sight {
                                                         .builder()
                                                         .id(new ObjectId())
                                                         .questionType(QuestionType.SIMPLE)
-                                                        .question("قرمزی چشم، اشک ریزش (با پزشک چک شود)")
+                                                        .question("قرمزی چشم، اشک ریزش، سوزش و خارش (با پزشک چک شود)")
                                                         .answerType(AnswerType.TICK)
                                                         .required(false)
                                                         .build(),
@@ -167,6 +175,22 @@ public class Sight {
                                                         .id(new ObjectId())
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("درد چشمی (با پزشک چک شود)")
+                                                        .answerType(AnswerType.TICK)
+                                                        .required(false)
+                                                        .build(),
+                                                SimpleQuestion
+                                                        .builder()
+                                                        .id(new ObjectId())
+                                                        .questionType(QuestionType.SIMPLE)
+                                                        .question("جسم خارجی در چشم")
+                                                        .answerType(AnswerType.TICK)
+                                                        .required(false)
+                                                        .build(),
+                                                SimpleQuestion
+                                                        .builder()
+                                                        .id(new ObjectId())
+                                                        .questionType(QuestionType.SIMPLE)
+                                                        .question("تروما به چشم")
                                                         .answerType(AnswerType.TICK)
                                                         .required(false)
                                                         .build()

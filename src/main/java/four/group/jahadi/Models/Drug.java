@@ -35,6 +35,7 @@ public class Drug extends Model {
     @Field("drug_type")
     private DrugType drugType;
     @Field("expire_at")
+    @JsonSerialize(using = DateSerialization.class)
     private LocalDateTime expireAt;
     private String dose;
     private String name;

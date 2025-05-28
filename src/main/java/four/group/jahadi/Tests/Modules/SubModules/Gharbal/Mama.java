@@ -16,7 +16,7 @@ public class Mama {
         return SubModule
                 .builder()
                 .id(new ObjectId())
-                .name("غربال مامایی")
+                .name("غربالگری مامایی")
                 .referTo(referToOid)
                 .isReferral(true)
                 .questions(List.of(
@@ -82,7 +82,7 @@ public class Mama {
                                                 .builder()
                                                 .id(new ObjectId())
                                                 .questionType(QuestionType.SIMPLE)
-                                                .question("منارک و اختلالات بلوغ زودرس و دیررس - سن یائسگی")
+                                                .question("بلوغ زودرس یا دیررس")
                                                 .answerType(AnswerType.TICK)
                                                 .required(false)
                                                 .build(),
@@ -90,7 +90,7 @@ public class Mama {
                                                 .builder()
                                                 .id(new ObjectId())
                                                 .questionType(QuestionType.SIMPLE)
-                                                .question("نظم قاعدگی و بررسی الیگومنوره یا پلی منوره")
+                                                .question("بی نظمی قاعدگی")
                                                 .answerType(AnswerType.TICK)
                                                 .required(false)
                                                 .build(),
@@ -116,7 +116,7 @@ public class Mama {
                                 .builder()
                                 .id(new ObjectId())
                                 .questionType(QuestionType.CHECK_LIST)
-                                .sectionTitle("حاملگی")
+                                .sectionTitle("بارداری")
                                 .options(List.of(
                                         new PairValue(
                                                 YesOrNo.YES.name(),
@@ -132,7 +132,7 @@ public class Mama {
                                                 .builder()
                                                 .id(new ObjectId())
                                                 .questionType(QuestionType.SIMPLE)
-                                                .question("مطمئن بودن از حاملگی (اگر مشکلی ندارد و تحت نظر است نیاز به ارجاع ندارد)")
+                                                .question("مطمئن بودن از بارداری")
                                                 .answerType(AnswerType.TICK)
                                                 .required(false)
                                                 .build(),
@@ -140,7 +140,7 @@ public class Mama {
                                                 .builder()
                                                 .id(new ObjectId())
                                                 .questionType(QuestionType.SIMPLE)
-                                                .question("مطمئن نبودن از حاملگی")
+                                                .question("مشکوک به بارداری")
                                                 .answerType(AnswerType.TICK)
                                                 .required(false)
                                                 .build(),
@@ -149,6 +149,30 @@ public class Mama {
                                                 .id(new ObjectId())
                                                 .questionType(QuestionType.SIMPLE)
                                                 .question("ناباروری یا نیاز به آموزش")
+                                                .answerType(AnswerType.TICK)
+                                                .required(false)
+                                                .build(),
+                                        SimpleQuestion
+                                                .builder()
+                                                .id(new ObjectId())
+                                                .questionType(QuestionType.SIMPLE)
+                                                .question("اشکال در باروری")
+                                                .answerType(AnswerType.TICK)
+                                                .required(false)
+                                                .build(),
+                                        SimpleQuestion
+                                                .builder()
+                                                .id(new ObjectId())
+                                                .questionType(QuestionType.SIMPLE)
+                                                .question("خونریزی و لکه بینی")
+                                                .answerType(AnswerType.TICK)
+                                                .required(false)
+                                                .build(),
+                                        SimpleQuestion
+                                                .builder()
+                                                .id(new ObjectId())
+                                                .questionType(QuestionType.SIMPLE)
+                                                .question("تروما به شکم یا غیره")
                                                 .answerType(AnswerType.TICK)
                                                 .required(false)
                                                 .build()
@@ -174,7 +198,7 @@ public class Mama {
                                                 .builder()
                                                 .id(new ObjectId())
                                                 .questionType(QuestionType.SIMPLE)
-                                                .question("درد لگن")
+                                                .question("درد لگن (حین و بعد رابطه)")
                                                 .answerType(AnswerType.TICK)
                                                 .required(false)
                                                 .build(),
@@ -182,7 +206,7 @@ public class Mama {
                                                 .builder()
                                                 .id(new ObjectId())
                                                 .questionType(QuestionType.SIMPLE)
-                                                .question("ترشحات غیرعادی(رنگ، بو، حجم)")
+                                                .question("ترشحات غیرعادی از نظر (رنگ، بو و حجم)")
                                                 .answerType(AnswerType.TICK)
                                                 .required(false)
                                                 .build(),
@@ -214,7 +238,7 @@ public class Mama {
                                                 .builder()
                                                 .id(new ObjectId())
                                                 .questionType(QuestionType.SIMPLE)
-                                                .question("آزمایش یا سنوگرافی دارای مشکل خاص (با پزشک چک شود)")
+                                                .question("آزمایش یا سنوگرافی دارای مشکل خاص")
                                                 .answerType(AnswerType.TICK)
                                                 .required(false)
                                                 .build()

@@ -17,14 +17,14 @@ public class WomenServicePlusSeeder {
         return SubModule
                 .builder()
                 .id(new ObjectId())
-                .name("خدمات پلاس")
+                .name("خدمات تخصصی زنان")
                 .questions(
                         List.of(
                                 CheckListGroupQuestion
                                         .builder()
                                         .id(new ObjectId())
                                         .questionType(QuestionType.CHECK_LIST)
-                                        .sectionTitle("خدمات پلاس")
+                                        .sectionTitle("غربالگری سرطان پستان")
                                         .options(
                                                 Arrays.stream(four.group.jahadi.Enums.Module.DoneOrNot.values())
                                                         .map(itr -> new PairValue(
@@ -41,7 +41,6 @@ public class WomenServicePlusSeeder {
                                                                         .id(new ObjectId())
                                                                         .questionType(QuestionType.SIMPLE)
                                                                         .question(itr.getFaTranslate())
-                                                                        .canWriteDesc(true)
                                                                         .answerType(AnswerType.TICK)
                                                                         .required(false)
                                                                         .build()
@@ -50,7 +49,6 @@ public class WomenServicePlusSeeder {
                                         .canWriteReport(true)
                                         .canWriteReason(true)
                                         .canWriteSampleInfoDesc(true)
-                                        .canUploadFile(true)
                                         .build()
                         )
                 )

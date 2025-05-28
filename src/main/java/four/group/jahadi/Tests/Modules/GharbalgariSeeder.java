@@ -21,7 +21,7 @@ public class GharbalgariSeeder {
                         .subModules(
                                 List.of(
                                         General.make(moduleIds.get("پزشک عمومی")),
-                                        Sight.make(moduleIds.get("غربال دوم بینایی")),
+                                        Sight.make(moduleIds.get("غربالگری دوم بینایی")),
                                         Audiologists.make(moduleIds.get("شنوایی")),
                                         Mama.make(moduleIds.get("متخصص زنان"))
                                 )

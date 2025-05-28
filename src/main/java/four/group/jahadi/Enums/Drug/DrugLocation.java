@@ -1,7 +1,7 @@
 package four.group.jahadi.Enums.Drug;
 
 public enum DrugLocation {
-    SMALL, LARGE;
+    MAIN, FUNCTIONAL;
 
     public String getName() {
         return name().toLowerCase();

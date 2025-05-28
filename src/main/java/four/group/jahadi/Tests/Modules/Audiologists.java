@@ -51,7 +51,7 @@ public class Audiologists {
                                         .required(false)
                                         .title("اطلاعات")
                                         .questionType(QuestionType.TABLE)
-                                        .headers(List.of("Frequency", "500", "1000", "2000", "3000", "4000", "6000", "8000"))
+                                        .headers(List.of("Frequency", "250", "500", "750", "1000", "1500", "2000", "3000", "4000", "6000", "8000"))
                                         .firstColumn(List.of("TH (right)", "TH (left)"))
                                         .rowsCount(2)
                                         .answerType(AnswerType.NUMBER)
@@ -137,7 +137,7 @@ public class Audiologists {
                                         .builder()
                                         .id(new ObjectId())
                                         .questionType(QuestionType.GROUP)
-                                        .sectionTitle("تشخیص شنوایی سنج")
+                                        .sectionTitle("تشخیص شنوایی شناس")
                                         .questions(
                                                 List.of(
                                                         SimpleQuestion

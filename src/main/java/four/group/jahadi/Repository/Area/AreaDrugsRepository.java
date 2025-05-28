@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,6 +46,33 @@ public interface AreaDrugsRepository extends MongoRepository<AreaDrugs, ObjectId
             "{$unset: 'drug_name'}"
     })
     List<JoinedAreaDrugs> findDigestByAreaId(ObjectId areaId);
+
+    @Aggregation(pipeline = {
+            "{$match: {areaId: ?0}}",
+            "{$lookup: {from: 'drug', localField: 'drug_id', foreignField: '_id', as: 'drugInfo', pipeline: [{$match: {$expr: {$and: [" +
+                    "?#{ [1] == null ? { } : { $regexMatch: { input: '$name', regex: [1], options:'i'} } }," +
+                    "?#{ [2] == null ? { } : { $regexMatch: { input: '$drug_type', regex: [2], options:'i'} } }," +
+                    "{$gte: [ '$expire_at', { $ifNull: [ ?3, -Infinity ] } ]}," +
+                    "{$lte: [ '$expire_at', { $ifNull: [ ?4, Infinity ] } ]}," +
+            "]}}}]}}",
+            "{$unset: 'drugInfo.created_at'}",
+            "{$unset: 'drugInfo.user_id'}",
+            "{$unset: 'drugInfo.group_id'}",
+            "{$unset: 'drugInfo.price'}",
+            "{$unset: 'drugInfo.available'}",
+            "{$unset: 'drugInfo.available_pack'}",
+            "{$unset: 'drugInfo.location'}",
+            "{$unset: 'drugInfo.box_no'}",
+            "{$unset: 'drugInfo.shelf_no'}",
+            "{$unwind: '$drugInfo'}",
+            "{$unset: 'area_id'}",
+            "{$unset: 'drug_id'}",
+            "{$unset: 'drug_name'}"
+    })
+    List<JoinedAreaDrugs> findDigestByAreaId(
+            ObjectId areaId, String name, String drugType,
+            LocalDateTime fromExpireAt, LocalDateTime endExpireAt
+    );
 
     @Query(value = "{areaId: ?0, drugId: {$in: ?1}}", fields = "{drugId: 1}")
     List<AreaDrugs> findDrugIdsByAreaIdAndDrugIds(ObjectId areaId, List<ObjectId> ids);
