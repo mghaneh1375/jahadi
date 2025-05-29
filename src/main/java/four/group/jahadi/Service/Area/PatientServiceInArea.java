@@ -855,7 +855,7 @@ public class PatientServiceInArea {
             } else {
                 switch (a.getAnswerType()) {
                     case NUMBER:
-                        if (!(data.getAnswer() instanceof Number))
+                        if (!(data.getAnswer() instanceof Number) && !Utility.isNumeric(data.getAnswer().toString()))
                             throw new RuntimeException("پاسخ به سوال " + data.getQuestionId().toString() + " باید عدد باشد");
                         break;
                     case TICK:
