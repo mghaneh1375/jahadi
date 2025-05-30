@@ -527,7 +527,7 @@ public class PatientServiceInArea {
     public void setPatientInsuranceStatus(
             ObjectId userId, ObjectId areaId, ObjectId patientId, Insurance insuranceStatus
     ) {
-        Trip trip = tripRepository.findActiveByAreaIdAndTrainerId(areaId, userId, Utility.getCurrLocalDateTime())
+        Trip trip = tripRepository.findActiveByAreaIdAndInsurancerId(areaId, userId, Utility.getCurrLocalDateTime())
                 .orElseThrow(NotAccessException::new);
 
         Area foundArea = findStartedArea(trip, areaId);
