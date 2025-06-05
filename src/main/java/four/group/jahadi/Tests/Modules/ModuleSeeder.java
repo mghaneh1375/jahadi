@@ -24,7 +24,7 @@ public class ModuleSeeder {
     private static ModuleRepository moduleRepository;
     private static final List<Module> newItems = new ArrayList<>();
 
-    private static void addModule(Module module) {
+    public static void addModule(Module module) {
         Module sameModuleItr = moduleRepository.findByName(module.getName());
         ObjectId moduleId = module.getId();
         if(sameModuleItr != null) {
@@ -49,8 +49,11 @@ public class ModuleSeeder {
         for(Module module : ExpertiseSeeder.seed())
             addModule(module);
 
-        for (Module module : EmpowermentSeeder.seed())
+        for (Module module : EmpowermentSeeder.seed()) {
+            if(module.getName().equals("اتاق بینایی"))
+                continue;
             addModule(module);
+        }
 
         for (Module module : GharbalgariSeeder.seed())
             addModule(module);
