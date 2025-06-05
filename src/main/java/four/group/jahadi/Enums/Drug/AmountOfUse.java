@@ -27,6 +27,7 @@ public enum AmountOfUse {
     HALF_PAST_SEVEN_CC_SYRUP("هفت و نیم سی سی syrup/susp"),
     TEN_CC_SYRUP("10 سی سی syrup/susp (یک قاشق غذاخوری)"),
     FIFTEEN_CC_SYRUP("15 سی سی syrup/susp (یک قاشق سوپ خوری)"),
+    ACCORDING_TO_INSTRUCTION("طبق دستور پزشک")
     ;
 
     String faTranslate;

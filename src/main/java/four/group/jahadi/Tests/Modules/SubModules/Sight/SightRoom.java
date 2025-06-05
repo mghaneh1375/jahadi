@@ -30,16 +30,9 @@ public class SightRoom {
                                 SimpleQuestion
                                         .builder()
                                         .id(new ObjectId())
-                                        .question("ADD")
-                                        .questionType(QuestionType.SIMPLE)
-                                        .answerType(AnswerType.NUMBER)
-                                        .required(false)
-                                        .build(),
-                                CheckListGroupQuestion
-                                        .builder()
-                                        .id(new ObjectId())
+                                        .question("عینک مطالعه")
                                         .questionType(QuestionType.CHECK_LIST)
-                                        .sectionTitle("عینک تحویلی")
+                                        .answerType(AnswerType.TICK)
                                         .options(
                                                 Arrays.stream(four.group.jahadi.Enums.Module.ShouldGive.values())
                                                         .map(itr -> new PairValue(
@@ -48,22 +41,45 @@ public class SightRoom {
                                                         ))
                                                         .collect(Collectors.toList())
                                         )
+                                        .required(false)
+                                        .build(),
+                                SimpleQuestion
+                                        .builder()
+                                        .id(new ObjectId())
+                                        .question("ADD")
+                                        .questionType(QuestionType.SIMPLE)
+                                        .answerType(AnswerType.NUMBER)
+                                        .required(false)
+                                        .build(),
+                                SimpleQuestion
+                                        .builder()
+                                        .id(new ObjectId())
+                                        .question("عینک آفتابی")
+                                        .questionType(QuestionType.CHECK_LIST)
+                                        .answerType(AnswerType.TICK)
+                                        .options(
+                                                Arrays.stream(four.group.jahadi.Enums.Module.ShouldGive.values())
+                                                        .map(itr -> new PairValue(
+                                                                itr.name(),
+                                                                itr.getFaTranslate()
+                                                        ))
+                                                        .collect(Collectors.toList())
+                                        )
+                                        .required(false)
+                                        .build(),
+                                GroupQuestion
+                                        .builder()
+                                        .id(new ObjectId())
+                                        .questionType(QuestionType.GROUP)
+                                        .sectionTitle("عینک ساختنی")
                                         .questions(
                                                 List.of(
                                                         SimpleQuestion
                                                                 .builder()
                                                                 .id(new ObjectId())
-                                                                .question("عینک طبی")
+                                                                .question("نام تجویز کننده")
                                                                 .questionType(QuestionType.SIMPLE)
-                                                                .answerType(AnswerType.TICK)
-                                                                .required(false)
-                                                                .build(),
-                                                        SimpleQuestion
-                                                                .builder()
-                                                                .id(new ObjectId())
-                                                                .question("عینک آفتابی")
-                                                                .questionType(QuestionType.SIMPLE)
-                                                                .answerType(AnswerType.TICK)
+                                                                .answerType(AnswerType.TEXT)
                                                                 .required(false)
                                                                 .build()
                                                 )
@@ -73,7 +89,7 @@ public class SightRoom {
                                         .builder()
                                         .id(new ObjectId())
                                         .questionType(QuestionType.GROUP)
-                                        .sectionTitle("عینک ساختنی")
+                                        .sectionTitle("دور")
                                         .questions(
                                                 List.of(
                                                         TableQuestion
@@ -86,15 +102,41 @@ public class SightRoom {
                                                                 .rowsCount(2)
                                                                 .answerType(AnswerType.DOUBLE)
                                                                 .build(),
+                                                        SimpleQuestion
+                                                                .builder()
+                                                                .id(new ObjectId())
+                                                                .question("PD")
+                                                                .questionType(QuestionType.SIMPLE)
+                                                                .answerType(AnswerType.NUMBER)
+                                                                .required(false)
+                                                                .build()
+                                                )
+                                        )
+                                        .build(),
+                                GroupQuestion
+                                        .builder()
+                                        .id(new ObjectId())
+                                        .questionType(QuestionType.GROUP)
+                                        .sectionTitle("نزدیک")
+                                        .questions(
+                                                List.of(
                                                         TableQuestion
                                                                 .builder()
                                                                 .id(new ObjectId())
                                                                 .required(false)
                                                                 .questionType(QuestionType.TABLE)
-                                                                .headers(List.of("PD", "NPD"))
-                                                                .rowsCount(1)
-                                                                .cellLabel("(mm)")
+                                                                .headers(List.of("...", "+/-", "SPH", "CYL", "VA"))
+                                                                .firstColumn(List.of("OD", "OS"))
+                                                                .rowsCount(2)
                                                                 .answerType(AnswerType.DOUBLE)
+                                                                .build(),
+                                                        SimpleQuestion
+                                                                .builder()
+                                                                .id(new ObjectId())
+                                                                .question("NPD")
+                                                                .questionType(QuestionType.SIMPLE)
+                                                                .answerType(AnswerType.NUMBER)
+                                                                .required(false)
                                                                 .build()
                                                 )
                                         )

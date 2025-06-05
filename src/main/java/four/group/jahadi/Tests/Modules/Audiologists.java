@@ -49,22 +49,54 @@ public class Audiologists {
                                         .builder()
                                         .id(new ObjectId())
                                         .required(false)
-                                        .title("اطلاعات")
+                                        .title("اودیومتری")
                                         .questionType(QuestionType.TABLE)
                                         .headers(List.of("Frequency", "250", "500", "750", "1000", "1500", "2000", "3000", "4000", "6000", "8000"))
                                         .firstColumn(List.of("TH (right)", "TH (left)"))
                                         .rowsCount(2)
                                         .answerType(AnswerType.NUMBER)
                                         .build(),
-                                TableQuestion
+                                GroupQuestion
                                         .builder()
                                         .id(new ObjectId())
-                                        .required(false)
-                                        .questionType(QuestionType.TABLE)
-                                        .headers(List.of("R", "L"))
-                                        .title("اطلاعات")
-                                        .rowsCount(1)
-                                        .answerType(AnswerType.NUMBER)
+                                        .questionType(QuestionType.GROUP)
+                                        .sectionTitle("تیمپانومتری")
+                                        .questions(
+                                                List.of(
+                                                        SimpleQuestion
+                                                                .builder()
+                                                                .id(new ObjectId())
+                                                                .required(false)
+                                                                .question("R")
+                                                                .answerType(AnswerType.SELECT)
+                                                                .questionType(QuestionType.SIMPLE)
+                                                                .options(
+                                                                        Arrays.stream(
+                                                                                four.group.jahadi.Enums.Timpanometry.values()).map(
+                                                                                item -> new PairValue(
+                                                                                        item.name(),
+                                                                                        item.getFaTranslate()
+                                                                                )).collect(Collectors.toList())
+                                                                )
+                                                                .build(),
+                                                        SimpleQuestion
+                                                                .builder()
+                                                                .id(new ObjectId())
+                                                                .required(false)
+                                                                .question("L")
+                                                                .answerType(AnswerType.SELECT)
+                                                                .questionType(QuestionType.SIMPLE)
+                                                                .options(
+                                                                        Arrays.stream(
+                                                                                four.group.jahadi.Enums.Timpanometry.values()).map(
+                                                                                item -> new PairValue(
+                                                                                        item.name(),
+                                                                                        item.getFaTranslate()
+                                                                                )).collect(Collectors.toList())
+                                                                )
+                                                                .build()
+                                                )
+                                        )
                                         .build()
                         )
                 )
