@@ -13,6 +13,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static four.group.jahadi.Tests.Modules.ModuleSeeder.moduleIds;
+
 public class PsychologySeeder {
     public static Module seed() {
         return Module
@@ -26,6 +28,7 @@ public class PsychologySeeder {
                                 SubModule
                                         .builder()
                                         .id(new ObjectId())
+                                        .referTo(moduleIds.get("متخصص روان"))
                                         .name("خدمات روان شناس")
                                         .questions(
                                                 List.of(

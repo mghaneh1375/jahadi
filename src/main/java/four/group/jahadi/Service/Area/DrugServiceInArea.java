@@ -215,7 +215,7 @@ public class DrugServiceInArea {
         if (userId != null)
             jahadgarDrugService.checkAccessToWareHouse(groupId, userId);
 
-        tripRepository.findByGroupIdAndAreaId(new ObjectId("678d2b8f369b201837aac474"), areaId)
+        tripRepository.findByGroupIdAndAreaId(groupId, areaId)
                 .orElseThrow(NotAccessException::new);
 
         return new ResponseEntity<>(
