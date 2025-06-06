@@ -1051,7 +1051,7 @@ public class PatientServiceInArea {
         if (optionalPatientReferral.isEmpty() ||
                 optionalPatientReferral.get().getForms() == null
         )
-            throw new RuntimeException("فرمی برای این ماژول ثبت نشده است");
+            throw new InvalidFieldsException("فرمی برای این ماژول ثبت نشده است");
 
         ObjectId finalWantedSubModuleId = wantedSubModuleId;
         PatientForm wantedPatientForm =
