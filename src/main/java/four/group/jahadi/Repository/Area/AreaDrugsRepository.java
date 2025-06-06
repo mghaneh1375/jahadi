@@ -52,9 +52,84 @@ public interface AreaDrugsRepository extends MongoRepository<AreaDrugs, ObjectId
             "{$lookup: {from: 'drug', localField: 'drug_id', foreignField: '_id', as: 'drugInfo', pipeline: [{$match: {$expr: {$and: [" +
                     "?#{ [1] == null ? { } : { $regexMatch: { input: '$name', regex: [1], options:'i'} } }," +
                     "?#{ [2] == null ? { } : { $regexMatch: { input: '$drug_type', regex: [2], options:'i'} } }," +
+            "]}}}]}}",
+            "{$unset: 'drugInfo.created_at'}",
+            "{$unset: 'drugInfo.user_id'}",
+            "{$unset: 'drugInfo.group_id'}",
+            "{$unset: 'drugInfo.price'}",
+            "{$unset: 'drugInfo.available'}",
+            "{$unset: 'drugInfo.available_pack'}",
+            "{$unset: 'drugInfo.location'}",
+            "{$unset: 'drugInfo.box_no'}",
+            "{$unset: 'drugInfo.shelf_no'}",
+            "{$unwind: '$drugInfo'}",
+            "{$unset: 'area_id'}",
+            "{$unset: 'drug_id'}",
+            "{$unset: 'drug_name'}"
+    })
+    List<JoinedAreaDrugs> findDigestByAreaId(
+            ObjectId areaId, String name, String drugType
+    );
+
+    @Aggregation(pipeline = {
+            "{$match: {areaId: ?0}}",
+            "{$lookup: {from: 'drug', localField: 'drug_id', foreignField: '_id', as: 'drugInfo', pipeline: [{$match: {$expr: {$and: [" +
+                    "?#{ [1] == null ? { } : { $regexMatch: { input: '$name', regex: [1], options:'i'} } }," +
+                    "?#{ [2] == null ? { } : { $regexMatch: { input: '$drug_type', regex: [2], options:'i'} } }," +
+                    "{$lte: [ '$expire_at', { $ifNull: [ ?3, Infinity ] } ]}," +
+                    "]}}}]}}",
+            "{$unset: 'drugInfo.created_at'}",
+            "{$unset: 'drugInfo.user_id'}",
+            "{$unset: 'drugInfo.group_id'}",
+            "{$unset: 'drugInfo.price'}",
+            "{$unset: 'drugInfo.available'}",
+            "{$unset: 'drugInfo.available_pack'}",
+            "{$unset: 'drugInfo.location'}",
+            "{$unset: 'drugInfo.box_no'}",
+            "{$unset: 'drugInfo.shelf_no'}",
+            "{$unwind: '$drugInfo'}",
+            "{$unset: 'area_id'}",
+            "{$unset: 'drug_id'}",
+            "{$unset: 'drug_name'}"
+    })
+    List<JoinedAreaDrugs> findDigestByAreaIdEndExpireAt(
+            ObjectId areaId, String name, String drugType,
+            LocalDateTime endExpireAt
+    );
+    @Aggregation(pipeline = {
+            "{$match: {areaId: ?0}}",
+            "{$lookup: {from: 'drug', localField: 'drug_id', foreignField: '_id', as: 'drugInfo', pipeline: [{$match: {$expr: {$and: [" +
+                    "?#{ [1] == null ? { } : { $regexMatch: { input: '$name', regex: [1], options:'i'} } }," +
+                    "?#{ [2] == null ? { } : { $regexMatch: { input: '$drug_type', regex: [2], options:'i'} } }," +
+                    "{$gte: [ '$expire_at', { $ifNull: [ ?3, -Infinity ] } ]}," +
+                    "]}}}]}}",
+            "{$unset: 'drugInfo.created_at'}",
+            "{$unset: 'drugInfo.user_id'}",
+            "{$unset: 'drugInfo.group_id'}",
+            "{$unset: 'drugInfo.price'}",
+            "{$unset: 'drugInfo.available'}",
+            "{$unset: 'drugInfo.available_pack'}",
+            "{$unset: 'drugInfo.location'}",
+            "{$unset: 'drugInfo.box_no'}",
+            "{$unset: 'drugInfo.shelf_no'}",
+            "{$unwind: '$drugInfo'}",
+            "{$unset: 'area_id'}",
+            "{$unset: 'drug_id'}",
+            "{$unset: 'drug_name'}"
+    })
+    List<JoinedAreaDrugs> findDigestByAreaIdStartExpireAt(
+            ObjectId areaId, String name, String drugType,
+            LocalDateTime fromExpireAt
+    );
+
+    @Aggregation(pipeline = {
+            "{$match: {areaId: ?0}}",
+            "{$lookup: {from: 'drug', localField: 'drug_id', foreignField: '_id', as: 'drugInfo', pipeline: [{$match: {$expr: {$and: [" +
+                    "?#{ [1] == null ? { } : { $regexMatch: { input: '$name', regex: [1], options:'i'} } }," +
+                    "?#{ [2] == null ? { } : { $regexMatch: { input: '$drug_type', regex: [2], options:'i'} } }," +
                     "{$gte: [ '$expire_at', { $ifNull: [ ?3, -Infinity ] } ]}," +
                     "{$lte: [ '$expire_at', { $ifNull: [ ?4, Infinity ] } ]}," +
-            "]}}}]}}",
+                    "]}}}]}}",
             "{$unset: 'drugInfo.created_at'}",
             "{$unset: 'drugInfo.user_id'}",
             "{$unset: 'drugInfo.group_id'}",

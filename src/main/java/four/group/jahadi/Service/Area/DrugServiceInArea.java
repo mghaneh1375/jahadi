@@ -219,7 +219,13 @@ public class DrugServiceInArea {
                 .orElseThrow(NotAccessException::new);
 
         return new ResponseEntity<>(
-                areaDrugsRepository.findDigestByAreaId(areaId, name, drugType, fromExpireAt, endExpireAt),
+                fromExpireAt == null && endExpireAt == null ?
+                        areaDrugsRepository.findDigestByAreaId(areaId, name, drugType) :
+                        fromExpireAt != null && endExpireAt != null ?
+                                areaDrugsRepository.findDigestByAreaId(areaId, name, drugType, fromExpireAt, endExpireAt) :
+                                fromExpireAt != null ?
+                                        areaDrugsRepository.findDigestByAreaIdStartExpireAt(areaId, name, drugType, fromExpireAt) :
+                                        areaDrugsRepository.findDigestByAreaIdStartExpireAt(areaId, name, drugType, endExpireAt),
                 HttpStatus.OK
         );
     }
