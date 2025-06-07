@@ -703,7 +703,11 @@ public class PatientServiceInArea {
                                     .required(tableQuestion.getRequired())
                                     .questionType(QuestionType.TABLE)
                                     .rows(tableQuestion.getRowsCount())
-                                    .cols(tableQuestion.getHeaders().size())
+                                    .cols(
+                                            tableQuestion.getFirstColumn() != null && tableQuestion.getFirstColumn().size() > 0
+                                                    ? tableQuestion.getHeaders().size() - 1
+                                                    : tableQuestion.getHeaders().size()
+                                    )
                                     .answerType(tableQuestion.getAnswerType())
                                     .build()
                     );
