@@ -234,7 +234,7 @@ public class ReportServiceInArea {
                                                             cellIdxTable.set(cellIdx.get());
                                                             if (tableQuestion.getFirstColumn() != null)
                                                                 finalR.createCell(cellIdxTable.getAndIncrement()).setCellValue(tableQuestion.getFirstColumn().get(i));
-                                                            Arrays.stream(patientAnswer1.get().getAnswer().toString().split("___")).skip((long) i * tableQuestion.getHeaders().size()).limit(tableQuestion.getHeaders().size()).forEach(s -> {
+                                                            Arrays.stream(patientAnswer1.get().getAnswer().toString().split("__")).skip((long) i * tableQuestion.getHeaders().size()).limit(tableQuestion.getHeaders().size()).forEach(s -> {
                                                                         finalR.createCell(cellIdxTable.getAndIncrement()).setCellValue(s);
                                                                     }
                                                             );
