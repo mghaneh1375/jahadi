@@ -196,22 +196,37 @@ public class RegionModuleAPIRoutes extends Router {
         moduleServiceInArea.removeMemberFromSecretaries(getId(request), areaId, moduleIdInArea, userId);
     }
 
-    @GetMapping(path = "getModuleReport/{areaId}/{moduleId}")
+    @GetMapping(path = "getAreaModuleReport/{areaId}/{moduleId}")
     public void getModuleReport(
             HttpServletRequest request,
             HttpServletResponse response,
             @PathVariable @ObjectIdConstraint ObjectId areaId,
             @PathVariable @ObjectIdConstraint ObjectId moduleId
     ) {
-        reportServiceInArea.moduleReport(getId(request), areaId, moduleId, response);
+        TokenInfo fullTokenInfo = getFullTokenInfo(request);
+        reportServiceInArea.getAreaReport(
+                fullTokenInfo.getAccesses().contains(Access.GROUP)
+                        ? fullTokenInfo.getGroupId()
+                        : fullTokenInfo.getUserId()
+                , fullTokenInfo.getAccesses().contains(Access.GROUP),
+                areaId, moduleId, response
+        );
     }
 
     @GetMapping(path = "getAreaReport/{areaId}")
+    @Operation(summary = "گرفتن گزارش کل منطقه توسط مسئول منطقه یا مسئول گروه")
     public void getModuleReport(
             HttpServletRequest request,
             HttpServletResponse response,
             @PathVariable @ObjectIdConstraint ObjectId areaId
     ) {
-        reportServiceInArea.getAreaReport(getId(request), areaId, response);
+        TokenInfo fullTokenInfo = getFullTokenInfo(request);
+        reportServiceInArea.getAreaReport(
+                fullTokenInfo.getAccesses().contains(Access.GROUP)
+                        ? fullTokenInfo.getGroupId()
+                        : fullTokenInfo.getUserId()
+                , fullTokenInfo.getAccesses().contains(Access.GROUP),
+                areaId, null, response
+        );
     }
 }
