@@ -25,7 +25,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -71,17 +70,6 @@ public class EquipmentServiceInArea {
         doReturnAllEquipments(
                 userId, username, areaId,
                 foundArea.getName(), p.getValue().toString()
-        );
-    }
-
-    public void returnAllEquipmentsByAdmin(
-            ObjectId userId, String username,
-            ObjectId areaId, String areaName,
-            String tripName
-    ) {
-        doReturnAllEquipments(
-                userId, username, areaId,
-                areaName, tripName
         );
     }
 

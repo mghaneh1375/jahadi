@@ -30,23 +30,23 @@ public class DrugBookmark extends Model {
     @Field("user_id")
     private ObjectId userId;
     @Field("how_to_use")
-    private HowToUse howToUses;
+    private HowToUse howToUse;
     @Field("amount_of_use")
-    private AmountOfUse amountOfUses;
+    private AmountOfUse amountOfUse;
     @Field("use_time")
-    private UseTime useTimes;
+    private UseTime useTime;
 
     @Transient
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
-    private String howToUsesFa;
+    private String howToUseFa;
 
     @Transient
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
-    private String amountOfUsesFa;
+    private String amountOfUseFa;
 
     @Transient
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
-    private String useTimesFa;
+    private String useTimeFa;
 
     @Override
 @four.group.jahadi.Utility.KeepMethodName
@@ -57,9 +57,9 @@ public class DrugBookmark extends Model {
                 ", \"drugName\":" + printNullableField(drugName) +
                 ", \"drugId\":" + printNullableField(drugId) +
                 ", \"userId\":" + printNullableField(userId) +
-                ", \"howToUses\":" + printNullableField(howToUses) +
-                ", \"amountOfUses\":" + printNullableField(amountOfUses) +
-                ", \"useTimes\":" + printNullableField(useTimes) +
+                ", \"howToUse\":" + printNullableField(howToUse) +
+                ", \"amountOfUse\":" + printNullableField(amountOfUse) +
+                ", \"useTime\":" + printNullableField(useTime) +
                 "}\n";
     }
 }

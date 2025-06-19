@@ -28,12 +28,12 @@ public class JahadgarDrugService {
         ObjectId userId = (ObjectId) filters[0];
         List<DrugBookmark> bookmarkList = drugBookmarkRepository.findByUserId(userId);
         bookmarkList.forEach(drugBookmark -> {
-            if(drugBookmark.getHowToUses() != null)
-                drugBookmark.setHowToUsesFa(drugBookmark.getHowToUses().getFaTranslate());
-            if(drugBookmark.getAmountOfUses() != null)
-                drugBookmark.setAmountOfUsesFa(drugBookmark.getAmountOfUses().getFaTranslate());
-            if(drugBookmark.getUseTimes() != null)
-                drugBookmark.setUseTimesFa(drugBookmark.getUseTimes().getFaTranslate());
+            if(drugBookmark.getHowToUse() != null)
+                drugBookmark.setHowToUseFa(drugBookmark.getHowToUse().getFaTranslate());
+            if(drugBookmark.getAmountOfUse() != null)
+                drugBookmark.setAmountOfUseFa(drugBookmark.getAmountOfUse().getFaTranslate());
+            if(drugBookmark.getUseTime() != null)
+                drugBookmark.setUseTimeFa(drugBookmark.getUseTime().getFaTranslate());
         });
         return new ResponseEntity<>(bookmarkList, HttpStatus.OK);
     }
@@ -51,9 +51,9 @@ public class JahadgarDrugService {
                         .drugName(drug.getName())
                         .drugId(drugId)
                         .userId(userId)
-                        .amountOfUses(dto.getAmountOfUses())
-                        .howToUses(dto.getHowToUses())
-                        .useTimes(dto.getUseTimes())
+                        .amountOfUse(dto.getAmountOfUses())
+                        .howToUse(dto.getHowToUses())
+                        .useTime(dto.getUseTimes())
                         .build()
         );
         return new ResponseEntity<>(drugBookmark, HttpStatus.OK);

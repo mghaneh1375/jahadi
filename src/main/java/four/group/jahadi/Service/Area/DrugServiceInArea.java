@@ -15,6 +15,7 @@ import four.group.jahadi.Repository.Area.AreaDrugsRepository;
 import four.group.jahadi.Repository.Area.PatientsDrugRepository;
 import four.group.jahadi.Repository.Area.PatientsInAreaRepository;
 import four.group.jahadi.Repository.*;
+import four.group.jahadi.Service.JahadgarDrugService;
 import four.group.jahadi.Utility.PairValue;
 import four.group.jahadi.Utility.Utility;
 import org.bson.types.ObjectId;
@@ -33,6 +34,8 @@ import java.util.stream.Collectors;
 public class DrugServiceInArea {
 
     private final static Integer PAGE_SIZE = 20;
+    @Autowired
+    private JahadgarDrugService jahadgarDrugService;
     @Autowired
     private DrugRepository drugRepository;
     @Autowired
@@ -59,7 +62,30 @@ public class DrugServiceInArea {
                 .orElseThrow(NotAccessException::new);
 
         return new ResponseEntity<>(
-                areaDrugsRepository.findDigestByAreaId(areaId),
+                areaDrugsRepository.findDigestByAreaId(areaId, null, null, null, null),
+                HttpStatus.OK
+        );
+    }
+
+    public ResponseEntity<List<JoinedAreaDrugs>> list(
+            ObjectId groupId, ObjectId areaId, ObjectId userId,
+            String name, String drugType,
+            LocalDateTime fromExpireAt, LocalDateTime endExpireAt
+    ) {
+        if (userId != null)
+            jahadgarDrugService.checkAccessToWareHouse(groupId, userId);
+
+        tripRepository.findByGroupIdAndAreaId(groupId, areaId)
+                .orElseThrow(NotAccessException::new);
+
+        return new ResponseEntity<>(
+                fromExpireAt == null && endExpireAt == null ?
+                        areaDrugsRepository.findDigestByAreaId(areaId, name, drugType) :
+                        fromExpireAt != null && endExpireAt != null ?
+                                areaDrugsRepository.findDigestByAreaId(areaId, name, drugType, fromExpireAt, endExpireAt) :
+                                fromExpireAt != null ?
+                                        areaDrugsRepository.findDigestByAreaIdStartExpireAt(areaId, name, drugType, fromExpireAt) :
+                                        areaDrugsRepository.findDigestByAreaIdStartExpireAt(areaId, name, drugType, endExpireAt),
                 HttpStatus.OK
         );
     }
@@ -207,8 +233,8 @@ public class DrugServiceInArea {
 
         if (!patientDrug.getAreaId().equals(areaId))
             throw new InvalidIdException();
-        if (patientDrug.getSuggestCount() < data.getAmount())
-            throw new RuntimeException("تعداد تحویل می تواند حداکثر " + patientDrug.getSuggestCount() + " باشد");
+//        if (patientDrug.getSuggestCount() < data.getAmount())
+//            throw new RuntimeException("تعداد تحویل می تواند حداکثر " + patientDrug.getSuggestCount() + " باشد");
         if (patientDrug.isDedicated() && !patientDrug.getGiverId().equals(userId))
             throw new RuntimeException("این تجویز قبلا توسط مسئول داروخانه دیگری تحویل شده است");
 

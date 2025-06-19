@@ -3,9 +3,7 @@ package four.group.jahadi.Service.Area;
 import four.group.jahadi.Enums.Module.QuestionType;
 import four.group.jahadi.Exception.NotAccessException;
 import four.group.jahadi.Models.*;
-import four.group.jahadi.Models.Area.Area;
-import four.group.jahadi.Models.Area.PatientAnswer;
-import four.group.jahadi.Models.Area.PatientsInArea;
+import four.group.jahadi.Models.Area.*;
 import four.group.jahadi.Models.Module;
 import four.group.jahadi.Models.Question.*;
 import four.group.jahadi.Repository.Area.PatientsInAreaRepository;
@@ -15,10 +13,8 @@ import four.group.jahadi.Repository.TripRepository;
 import four.group.jahadi.Repository.UserRepository;
 import four.group.jahadi.Service.ExcelService;
 import four.group.jahadi.Utility.Utility;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,10 +27,12 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static four.group.jahadi.Service.Area.AreaUtils.findArea;
 import static four.group.jahadi.Service.Area.AreaUtils.findModule;
+import static four.group.jahadi.Service.ExcelService.isMergedCell;
 
 @Service
 public class ReportServiceInArea {
@@ -56,7 +54,6 @@ public class ReportServiceInArea {
             ObjectId userId, ObjectId areaId,
             ObjectId moduleId, HttpServletResponse response
     ) {
-
         Trip wantedTrip = tripRepository.findByAreaIdAndOwnerId(areaId, userId)
                 .orElseThrow(NotAccessException::new);
 
@@ -126,9 +123,9 @@ public class ReportServiceInArea {
         module.getSubModules().forEach(subModule -> {
                     Sheet sheet = workbook.getSheetAt(idx.getAndIncrement());
                     maxRows.add(excelService.writeHeader(sheet, subModule));
-                    for(int i = 0; i < sheet.getRow(0).getLastCellNum(); i++) {
-                        CellRangeAddress mergedCell = excelService.isMergedCell(0, i, sheet);
-                        if(mergedCell == null)
+                    for (int i = 0; i < sheet.getRow(0).getLastCellNum(); i++) {
+                        CellRangeAddress mergedCell = isMergedCell(0, i, sheet);
+                        if (mergedCell == null)
                             sheet.setColumnWidth(i, 18 * 255);
                         else {
                             mergedCell.forEach(cellAddress -> sheet.setColumnWidth(cellAddress.getColumn(), 18 * 255));
@@ -234,15 +231,12 @@ public class ReportServiceInArea {
                                                             cellIdxTable.set(cellIdx.get());
                                                             if (tableQuestion.getFirstColumn() != null)
                                                                 finalR.createCell(cellIdxTable.getAndIncrement()).setCellValue(tableQuestion.getFirstColumn().get(i));
-                                                            Arrays.stream(patientAnswer1.get().getAnswer().toString().split("___")).skip((long) i * tableQuestion.getHeaders().size()).limit(tableQuestion.getHeaders().size()).forEach(s -> {
+                                                            Arrays.stream(patientAnswer1.get().getAnswer().toString().split("__")).skip((long) i * tableQuestion.getHeaders().size()).limit(tableQuestion.getHeaders().size()).forEach(s -> {
                                                                         finalR.createCell(cellIdxTable.getAndIncrement()).setCellValue(s);
                                                                     }
                                                             );
                                                         }
-                                                        cellIdx.set(tableQuestion.getFirstColumn() == null
-                                                                ? cellIdx.get() + tableQuestion.getHeaders().size()
-                                                                : cellIdx.get() + tableQuestion.getHeaders().size() + 1
-                                                        );
+                                                        cellIdx.set(cellIdx.get() + tableQuestion.getHeaders().size());
                                                     } else
                                                         row.createCell(cellIdx.getAndIncrement()).setCellValue(patientAnswer1.get().getAnswer().toString());
 
@@ -261,6 +255,236 @@ public class ReportServiceInArea {
                             });
                 });
                 sheetIdx.getAndIncrement();
+            });
+        }
+
+        response.setContentType("application/vnd.ms-excel");
+        response.setHeader(
+                HttpHeaders.CONTENT_DISPOSITION,
+                ContentDisposition.builder("attachment").filename("module.xlsx").build().toString()
+        );
+        try {
+            ServletOutputStream outputStream = response.getOutputStream();
+            workbook.write(outputStream);
+            response.setStatus(HttpStatus.OK.value());
+            response.flushBuffer();
+        } catch (Exception e) {
+            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
+    }
+
+    public void getModuleReport(
+            ObjectId areaId, Module module,
+            Sheet sheet
+    ) {
+        ObjectId moduleId = module.getId();
+        HashMap<ObjectId, List<Question>> subModulesQuestions = new HashMap<>();
+        AtomicInteger incRowStep = new AtomicInteger(1);
+
+        module.getSubModules()
+                .forEach(subModule -> {
+                    subModulesQuestions.put(subModule.getId(), new ArrayList<>());
+                    subModule
+                            .getQuestions()
+                            .forEach(question -> {
+                                if (question.getQuestionType().equals(QuestionType.TABLE))
+                                    return;
+                                if (question.getQuestionType().equals(QuestionType.GROUP)) {
+                                    ((GroupQuestion) question).getQuestions()
+                                            .stream().filter(question1 -> !question1.getQuestionType().equals(QuestionType.TABLE))
+                                            .forEach(question1 -> {
+                                                subModulesQuestions.get(subModule.getId()).add(question1);
+                                            });
+                                    return;
+                                }
+                                if (question.getQuestionType().equals(QuestionType.CHECK_LIST) &&
+                                        question instanceof CheckListGroupQuestion
+                                ) {
+                                    CheckListGroupQuestion q = (CheckListGroupQuestion) question;
+                                    q.getQuestions()
+                                            .forEach(question1 -> {
+                                                question1.setOptions(q.getOptions());
+                                                subModulesQuestions.get(subModule.getId()).add(question1);
+                                            });
+                                    return;
+                                }
+                                subModulesQuestions.get(subModule.getId()).add(question);
+                            });
+                    subModule
+                            .getQuestions()
+                            .forEach(question -> {
+                                if (!question.getQuestionType().equals(QuestionType.TABLE) &&
+                                        !question.getQuestionType().equals(QuestionType.GROUP)
+                                )
+                                    return;
+                                if (question.getQuestionType().equals(QuestionType.GROUP)) {
+                                    ((GroupQuestion) question).getQuestions()
+                                            .stream().filter(question1 -> question1.getQuestionType().equals(QuestionType.TABLE))
+                                            .forEach(question1 -> {
+                                                if (((TableQuestion) question1).getFirstColumn() != null)
+                                                    incRowStep.set(Math.max(((TableQuestion) question1).getFirstColumn().size(), incRowStep.get()));
+                                                subModulesQuestions.get(subModule.getId()).add(question1);
+                                            });
+                                    return;
+                                }
+                                subModulesQuestions.get(subModule.getId()).add(question);
+                            });
+                });
+
+        List<ObjectId> subModuleIds = module.getSubModules().stream().map(SubModule::getId)
+                .collect(Collectors.toList());
+
+        excelService.writeCommonHeader(sheet);
+        Row row = sheet.getRow(0);
+        Workbook wb = row.getSheet().getWorkbook();
+
+        CellStyle parentCellStyle = wb.createCellStyle();
+        parentCellStyle.setAlignment(HorizontalAlignment.CENTER);
+        Font font = wb.createFont();
+        font.setFontHeight((short) 300);
+        font.setColor(HSSFColor.HSSFColorPredefined.BLACK.getIndex());
+        font.setBold(true);
+        parentCellStyle.setFont(font);
+
+        int startIdx = 4;
+        int maxRowIdx = 1;
+        HashMap<ObjectId, HashMap<ObjectId, Integer>> questionsColIdx = new HashMap<>();
+        HashMap<ObjectId, Integer> startIndicesHistory = new HashMap<>();
+        for (int z = 0; z < module.getSubModules().size(); z++) {
+            SubModule subModule = module.getSubModules().get(z);
+//            if(!subModule.getId().toString().equals("6841f4ce9f06e166a2210f36") &&
+//                    !subModule.getId().toString().equals("6841f4ce9f06e166a2210f43") &&
+//                    !subModule.getId().toString().equals("6841f4ce9f06e166a2210f56") &&
+//                    !subModule.getId().toString().equals("6841f4ce9f06e166a2210f66"))
+//                return;
+//            if (!subModule.getId().toString().equals("6841f4ce9f06e166a2210f05") &&
+//                    !subModule.getId().toString().equals("6841f4ce9f06e166a2210f11")
+//            )
+//                return;
+
+            startIndicesHistory.put(subModule.getId(), startIdx);
+            questionsColIdx.put(subModule.getId(), new HashMap<>());
+
+            short[] output = excelService.writeSubModuleFirstHeader(
+                    sheet, parentCellStyle, subModule, startIdx, maxRowIdx,
+                    questionsColIdx.get(subModule.getId())
+            );
+            maxRowIdx = output[0];
+            short lastCellNum = output[1];
+            for (int i = startIdx; i < lastCellNum; i++) {
+                CellRangeAddress mergedCell = isMergedCell(1, i, sheet);
+                if (mergedCell == null)
+                    sheet.setColumnWidth(i, 18 * 255);
+                else
+                    mergedCell.forEach(cellAddress -> sheet.setColumnWidth(cellAddress.getColumn(), 18 * 255));
+            }
+            startIdx = lastCellNum;
+        }
+
+        if (maxRowIdx > 1) {
+            for (int i = 2; i <= maxRowIdx; i++)
+                sheet.createRow(i);
+            for (int i = 4; i < sheet.getRow(1).getLastCellNum(); i++) {
+                CellRangeAddress mergedCell = isMergedCell(1, i, sheet);
+                if (mergedCell == null) {
+                    sheet.addMergedRegion(
+                            new CellRangeAddress(
+                                    1, maxRowIdx,
+                                    i, i
+                            )
+                    );
+                }
+            }
+        }
+
+        for (int i = 0; i < 4; i++) {
+            sheet.addMergedRegion(
+                    new CellRangeAddress(
+                            0, maxRowIdx, i, i
+                    )
+            );
+        }
+        for (int z = 0; z < module.getSubModules().size(); z++) {
+            SubModule subModule = module.getSubModules().get(z);
+            excelService.writeSubModuleSecondHeader(
+                    sheet, subModule, startIndicesHistory.get(subModule.getId())
+            );
+        }
+
+        List<PatientsInArea> patients = patientsInAreaRepository.findByAreaIdAndModuleId(areaId, moduleId);
+        if (patients.size() == 0)
+            return;
+
+        Set<ObjectId> patientIds = new HashSet<>();
+        Set<ObjectId> doctorIds = new HashSet<>();
+        patients.forEach(patientsInArea -> {
+            patientIds.add(patientsInArea.getPatientId());
+            patientsInArea.getReferrals().forEach(patientReferral -> {
+                if (patientReferral.getForms() == null)
+                    return;
+                patientReferral
+                        .getForms()
+                        .forEach(patientForm -> doctorIds.add(patientForm.getDoctorId()));
+            });
+        });
+
+        List<Patient> patientsInfo = patientRepository.findExcelInfoByIdIn(new ArrayList<>(patientIds));
+        List<User> doctors = userRepository.findJustNameByIdsIn(new ArrayList<>(doctorIds));
+
+        HashMap<ObjectId, Row> patientsRow = new HashMap<>();
+        subModuleIds.forEach(subModuleId -> {
+//            if (
+//                !subModuleId.toString().equals("6841f4ce9f06e166a2210f36") &&
+//                !subModuleId.toString().equals("6841f4ce9f06e166a2210f43") &&
+//                !subModuleId.toString().equals("6841f4ce9f06e166a2210f56") &&
+//                !subModuleId.toString().equals("6841f4ce9f06e166a2210f66")
+////                    !subModuleId.toString().equals("6841f4ce9f06e166a2210f05") &&
+////                    !subModuleId.toString().equals("6841f4ce9f06e166a2210f11")
+//            )
+//                return;
+
+            ReportUtil.addPatientRowForSpecificSubModule(
+                    startIndicesHistory.get(subModuleId),
+                    patients,
+                    patientsInfo,
+                    sheet,
+                    patientsRow,
+                    doctors,
+                    incRowStep.get(),
+                    moduleId,
+                    subModuleId,
+                    subModulesQuestions.get(subModuleId),
+                    questionsColIdx.get(subModuleId)
+            );
+        });
+    }
+
+    public void getAreaReport(
+            ObjectId userId, ObjectId areaId,
+            HttpServletResponse response
+    ) {
+        Trip wantedTrip = tripRepository.findByAreaIdAndOwnerId(areaId, userId)
+                .orElseThrow(NotAccessException::new);
+        Area area = findArea(wantedTrip, areaId, userId);
+
+        Workbook workbook = excelService.createExcel(
+                area.getModules().stream().map(module -> module.getModuleName().replace("/", " "))
+                        .collect(Collectors.toList())
+        );
+
+        for (int z = 0; z < area.getModules().size(); z++) {
+            ModuleInArea areaModule = area.getModules().get(z);
+            ObjectId moduleId = areaModule.getModuleId();
+            moduleRepository.findById(moduleId).ifPresent(module -> {
+                Sheet sheet = null;
+                for (int i = 0; i < area.getModules().size(); i++) {
+                    if (workbook.getSheetAt(i).getSheetName().equals(areaModule.getModuleName().replace("/", " "))) {
+                        sheet = workbook.getSheetAt(i);
+                        break;
+                    }
+                }
+                if (sheet != null)
+                    getModuleReport(areaId, module, sheet);
             });
         }
 

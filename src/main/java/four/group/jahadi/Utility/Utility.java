@@ -10,12 +10,17 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class Utility {
     private static final SimpleDateFormat sdfSSSXXX;
     public static final ZoneId tehranZoneId = ZoneId.of("Asia/Tehran");
     private static final DateTimeFormatter dateTimeFormatter;
+
+    public static final Pattern gregorianDatePattern = Pattern.compile(
+            "^((?:19|20)\\d\\d)-(0?[1-9]|1[012])-(0?[1-9]|[12][0-9]|3[01])$"
+    );
 
     static {
         sdfSSSXXX = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
@@ -56,6 +61,28 @@ public class Utility {
         return new String(chars);
     }
 
+    public static Date convertJalaliToGregorianDate(String jaladiDate) {
+        String[] splited = jaladiDate.split("-");
+        Date date = new Date();
+        JalaliCalendar.YearMonthDate gregorian = JalaliCalendar.jalaliToGregorian(
+                new JalaliCalendar.YearMonthDate(
+                        splited[0], splited[1], splited[2]
+                )
+        );
+        date.setYear(gregorian.getYear() - 1900);
+        date.setMonth(gregorian.getMonth());
+        date.setDate(gregorian.getDate());
+        return date;
+    }
+
+    public static LocalDateTime getLastLocalDateTime(Date date) {
+        date.setHours(23);
+        date.setMinutes(59);
+        date.setSeconds(59);
+        return Instant.ofEpochMilli(date.getTime())
+                .atZone(tehranZoneId)
+                .toLocalDateTime();
+    }
     public static JSONObject convertPersian(JSONObject jsonObject) {
 
         for (String key : jsonObject.keySet()) {

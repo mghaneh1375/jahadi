@@ -8,6 +8,7 @@ import four.group.jahadi.Models.Trip;
 import org.bson.types.ObjectId;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 public class AreaUtils {
 
@@ -47,19 +48,23 @@ public class AreaUtils {
                 .filter(module -> module.getModuleId().equals(moduleId))
                 .findFirst().orElseThrow(InvalidIdException::new);
 
-        if (responsibleId == null && secretaryId == null)
+        if ((responsibleId == null && secretaryId == null) ||
+                Objects.equals(responsibleId, area.getOwnerId()) ||
+                Objects.equals(secretaryId, area.getOwnerId())
+        )
             return moduleInArea;
 
-        if(responsibleId != null && secretaryId != null && !responsibleId.equals(area.getOwnerId()) &&
-                !moduleInArea.getMembers().contains(responsibleId) && !moduleInArea.getSecretaries().contains(secretaryId)
+        if(responsibleId != null && secretaryId != null &&
+                !moduleInArea.getMembers().contains(responsibleId) &&
+                !moduleInArea.getSecretaries().contains(secretaryId)
         )
             throw new NotAccessException();
 
-        if(responsibleId != null && !responsibleId.equals(area.getOwnerId()) &&
-                !moduleInArea.getMembers().contains(responsibleId))
+        boolean findInDoctors = responsibleId != null && moduleInArea.getMembers().contains(responsibleId);
+        if(responsibleId != null && !moduleInArea.getMembers().contains(responsibleId))
             throw new NotAccessException();
 
-        if(secretaryId != null && !moduleInArea.getSecretaries().contains(secretaryId))
+        if(!findInDoctors && secretaryId != null && !moduleInArea.getSecretaries().contains(secretaryId))
             throw new NotAccessException();
 
         return moduleInArea;

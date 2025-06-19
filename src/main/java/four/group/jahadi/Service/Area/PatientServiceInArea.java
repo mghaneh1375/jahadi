@@ -54,16 +54,15 @@ public class PatientServiceInArea {
     TripRepository tripRepository;
 
     public ResponseEntity<List<PatientJoinArea>> getPatients(ObjectId userId, ObjectId areaId) {
-
         //todo: check finalize
-
         Trip trip = tripRepository.findActiveByAreaIdAndDispatcherId(areaId, userId, Utility.getCurrLocalDateTime())
                 .orElseThrow(NotAccessException::new);
 
         findStartedArea(trip, areaId);
-
+        List<PatientJoinArea> list = patientsInAreaRepository.findPatientsByAreaId(areaId);
+        list.sort(Comparator.comparing(PatientJoinArea::getCreatedAt, Comparator.reverseOrder()));
         return new ResponseEntity<>(
-                patientsInAreaRepository.findPatientsByAreaId(areaId),
+                list,
                 HttpStatus.OK
         );
     }
@@ -528,7 +527,7 @@ public class PatientServiceInArea {
     public void setPatientInsuranceStatus(
             ObjectId userId, ObjectId areaId, ObjectId patientId, Insurance insuranceStatus
     ) {
-        Trip trip = tripRepository.findActiveByAreaIdAndTrainerId(areaId, userId, Utility.getCurrLocalDateTime())
+        Trip trip = tripRepository.findActiveByAreaIdAndInsurancerId(areaId, userId, Utility.getCurrLocalDateTime())
                 .orElseThrow(NotAccessException::new);
 
         Area foundArea = findStartedArea(trip, areaId);
@@ -645,7 +644,14 @@ public class PatientServiceInArea {
 
         mandatoryQuestionIds.addAll(
                 questions.stream()
-                        .filter(question -> question.getQuestionType().equals(QuestionType.CHECK_LIST))
+                        .filter(question -> question.getQuestionType().equals(QuestionType.CHECK_LIST) && question instanceof SimpleQuestion && ((SimpleQuestion) question).getRequired())
+                        .map(question -> question.getId())
+                        .collect(Collectors.toList())
+        );
+
+        mandatoryQuestionIds.addAll(
+                questions.stream()
+                        .filter(question -> question.getQuestionType().equals(QuestionType.CHECK_LIST) && question instanceof CheckListGroupQuestion)
                         .map(question -> ((CheckListGroupQuestion) question).getQuestions())
                         .flatMap(List::stream)
                         .filter(SimpleQuestion::getRequired)
@@ -704,7 +710,11 @@ public class PatientServiceInArea {
                                     .required(tableQuestion.getRequired())
                                     .questionType(QuestionType.TABLE)
                                     .rows(tableQuestion.getRowsCount())
-                                    .cols(tableQuestion.getHeaders().size())
+                                    .cols(
+                                            tableQuestion.getFirstColumn() != null && tableQuestion.getFirstColumn().size() > 0
+                                                    ? tableQuestion.getHeaders().size() - 1
+                                                    : tableQuestion.getHeaders().size()
+                                    )
                                     .answerType(tableQuestion.getAnswerType())
                                     .build()
                     );
@@ -713,32 +723,52 @@ public class PatientServiceInArea {
         questions.stream()
                 .filter(question -> question.getQuestionType().equals(QuestionType.CHECK_LIST))
                 .forEach(checkListQuestion -> {
-                    CheckListGroupQuestion checkListGroupQuestion = ((CheckListGroupQuestion) checkListQuestion);
-                    List<Object> options = checkListGroupQuestion.getOptions().stream().map(PairValue::getKey).map(Object::toString).collect(Collectors.toList());
+                    if (checkListQuestion instanceof CheckListGroupQuestion) {
+                        CheckListGroupQuestion checkListGroupQuestion = ((CheckListGroupQuestion) checkListQuestion);
+                        List<Object> options = checkListGroupQuestion.getOptions().stream().map(PairValue::getKey).map(Object::toString).collect(Collectors.toList());
 
-                    checkListGroupQuestion.getQuestions()
-                            .forEach(question -> {
-                                A a = A.builder()
-                                        .required(question.getRequired())
-                                        .questionType(QuestionType.CHECK_LIST)
-                                        .answerType(AnswerType.TICK)
-                                        .canWriteDesc(checkListGroupQuestion.getCanWriteDesc())
-                                        .canWriteReason(checkListGroupQuestion.getCanWriteReason())
-                                        .canWriteReport(checkListGroupQuestion.getCanWriteReport())
-                                        .canWriteTime(checkListGroupQuestion.getCanWriteTime())
-                                        .canWriteSampleInfoDesc(checkListGroupQuestion.getCanWriteSampleInfoDesc())
-                                        .canUploadFile(checkListGroupQuestion.getCanUploadFile())
-                                        .options(options)
-                                        .build();
+                        checkListGroupQuestion.getQuestions()
+                                .forEach(question -> {
+                                    A a = A.builder()
+                                            .required(question.getRequired())
+                                            .questionType(QuestionType.CHECK_LIST)
+                                            .answerType(AnswerType.TICK)
+                                            .canWriteDesc(checkListGroupQuestion.getCanWriteDesc())
+                                            .canWriteReason(checkListGroupQuestion.getCanWriteReason())
+                                            .canWriteReport(checkListGroupQuestion.getCanWriteReport())
+                                            .canWriteTime(checkListGroupQuestion.getCanWriteTime())
+                                            .canWriteSampleInfoDesc(checkListGroupQuestion.getCanWriteSampleInfoDesc())
+                                            .canUploadFile(checkListGroupQuestion.getCanUploadFile())
+                                            .options(options)
+                                            .build();
 
-                                if (checkListGroupQuestion.getMarkable()) {
-                                    a.setParentId(checkListGroupQuestion.getId());
-                                    a.setQuestionId(question.getId());
-                                    a.setMarks(checkListGroupQuestion.getMarks());
-                                }
+                                    if (checkListGroupQuestion.getMarkable()) {
+                                        a.setParentId(checkListGroupQuestion.getId());
+                                        a.setQuestionId(question.getId());
+                                        a.setMarks(checkListGroupQuestion.getMarks());
+                                    }
 
-                                allQuestions.put(question.getId(), a);
-                            });
+                                    allQuestions.put(question.getId(), a);
+                                });
+                    }
+                    else if(checkListQuestion instanceof SimpleQuestion) {
+                        SimpleQuestion question = ((SimpleQuestion) checkListQuestion);
+                        List<Object> options = question.getOptions().stream().map(PairValue::getKey).map(Object::toString).collect(Collectors.toList());
+
+                        A a = A.builder()
+                                .required(question.getRequired())
+                                .questionType(QuestionType.CHECK_LIST)
+                                .answerType(AnswerType.TICK)
+                                .canWriteDesc(question.getCanWriteDesc())
+                                .canWriteReason(false)
+                                .canWriteReport(false)
+                                .canWriteTime(false)
+                                .canWriteSampleInfoDesc(false)
+                                .canUploadFile(false)
+                                .options(options)
+                                .build();
+                        allQuestions.put(question.getId(), a);
+                    }
                 });
 
         List<Question> groupQuestions = questions.stream()
@@ -832,7 +862,7 @@ public class PatientServiceInArea {
 
             if (a.getQuestionType().equals(QuestionType.TABLE)) {
 
-                String[] splited = data.getAnswer().toString().split("___");
+                String[] splited = data.getAnswer().toString().split("__");
 
                 if (splited.length != a.getCols() * a.getRows())
                     throw new RuntimeException("پاسخ به سوال " + data.getQuestionId().toString() + " معتبر نیست");
@@ -856,7 +886,7 @@ public class PatientServiceInArea {
             } else {
                 switch (a.getAnswerType()) {
                     case NUMBER:
-                        if (!(data.getAnswer() instanceof Number))
+                        if (!(data.getAnswer() instanceof Number) && !Utility.isNumeric(data.getAnswer().toString()))
                             throw new RuntimeException("پاسخ به سوال " + data.getQuestionId().toString() + " باید عدد باشد");
                         break;
                     case TICK:
@@ -1073,7 +1103,7 @@ public class PatientServiceInArea {
                         PatientAnswer
                                 .builder()
                                 .questionId(key)
-                                .answer("___mark___" + wantedPatientForm.getMark().get(key))
+                                .answer("__mark__" + wantedPatientForm.getMark().get(key))
                                 .build()
                 );
 

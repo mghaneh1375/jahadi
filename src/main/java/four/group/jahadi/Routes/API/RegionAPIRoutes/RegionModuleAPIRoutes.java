@@ -114,4 +114,13 @@ public class RegionModuleAPIRoutes extends Router {
     ) {
         reportServiceInArea.moduleReport(getId(request), areaId, moduleId, response);
     }
+
+    @GetMapping(path = "getAreaReport/{areaId}")
+    public void getModuleReport(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            @PathVariable @ObjectIdConstraint ObjectId areaId
+    ) {
+        reportServiceInArea.getAreaReport(getId(request), areaId, response);
+    }
 }
