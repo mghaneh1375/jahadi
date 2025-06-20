@@ -548,16 +548,12 @@ public class AreaService {
     }
 
     public void importDBToConstructLocalServer(MultipartFile file) {
-        System.out.println(modelPackages);
-        System.out.println(repositoryPackages);
         Set<Class<?>> models = getClassesWithAnnotation(Document.class,
                 modelPackages.split(",")
         );
-        System.out.println(models.size());
         Set<Class<?>> repositories = getClassesWithAnnotation(MyRepository.class,
                 repositoryPackages.split(",")
         );
-        System.out.println(repositories.size());
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -597,7 +593,7 @@ public class AreaService {
                     if (selectedDB.get() == null)
                         continue;
 
-                    System.out.println("line is " + line);
+//                    System.out.println("line is " + line);
                     System.out.println(objectMapper.readValue(line, selectedDB.get()));
                     values.add(objectMapper.readValue(line, selectedDB.get()));
                 } catch (Exception x) {
