@@ -1,8 +1,17 @@
 package four.group.jahadi.Service.Area;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.cfg.MapperConfig;
+import com.fasterxml.jackson.databind.cfg.SerializerFactoryConfig;
+import com.fasterxml.jackson.databind.introspect.AnnotatedClass;
+import com.fasterxml.jackson.databind.jsontype.TypeResolverBuilder;
+import com.fasterxml.jackson.databind.jsontype.impl.StdSubtypeResolver;
+import com.fasterxml.jackson.databind.jsontype.impl.StdTypeResolverBuilder;
+import com.fasterxml.jackson.databind.ser.BeanSerializerFactory;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import four.group.jahadi.DTO.Area.AreaDigest;
 import four.group.jahadi.DTO.UpdatePresenceList;
@@ -14,6 +23,7 @@ import four.group.jahadi.Models.Area.Area;
 import four.group.jahadi.Models.Area.AreaDates;
 import four.group.jahadi.Models.Area.PatientsInArea;
 import four.group.jahadi.Models.Country;
+import four.group.jahadi.Models.Module;
 import four.group.jahadi.Models.Trip;
 import four.group.jahadi.Models.User;
 import four.group.jahadi.Models.UserPresenceList;
@@ -470,10 +480,10 @@ public class AreaService {
 
     public static Set<Class<?>> findAllClassesUsingClassLoader(String... packageNames) {
         Set<Class<?>> output = new HashSet<>();
-        System.out.println(packageNames.length);
+//        System.out.println(packageNames.length);
         for (int i = 0; i < packageNames.length; i++) {
             String packageName = packageNames[i];
-            System.out.println(packageName);
+//            System.out.println(packageName);
             InputStream stream = ClassLoader.getSystemClassLoader()
                     .getResourceAsStream(packageName.replaceAll("[.]", "/"));
             if(stream == null) {
@@ -487,7 +497,7 @@ public class AreaService {
                             .map(line -> getClass(line, packageName))
                             .collect(Collectors.toSet())
             );
-            System.out.println("Output len is " + output.size());
+//            System.out.println("Output len is " + output.size());
         }
 
         return output;
@@ -507,14 +517,14 @@ public class AreaService {
             List<Object> values, Class<?> selectedDB,
             Set<Class<?>> repositories
     ) {
-        System.out.println("Saving data for " + selectedDB.getAnnotation(Document.class).collection());
+//        System.out.println("Saving data for " + selectedDB.getAnnotation(Document.class).collection());
         String className = snakeToCamel(selectedDB.getAnnotation(Document.class).collection());
 
         repositories
                 .stream()
                 .filter(aClass -> aClass.getAnnotation(MyRepository.class).model().equalsIgnoreCase(className))
                 .findFirst().ifPresent(aClass -> {
-                    System.out.println("Repository found: " + aClass.getName());
+//                    System.out.println("Repository found: " + aClass.getName());
                     BeanFetcher fetcher = new BeanFetcher(applicationContext);
                     Object bean = fetcher.getBeanByClass(aClass);
                     try {
@@ -546,7 +556,6 @@ public class AreaService {
                     }
                 });
     }
-
     public void importDBToConstructLocalServer(MultipartFile file) {
         Set<Class<?>> models = getClassesWithAnnotation(Document.class,
                 modelPackages.split(",")
@@ -571,7 +580,7 @@ public class AreaService {
                     if (selectedDB.get() == null && !line.matches("^\\*\\*\\*\\*\\*\\*\\*[a-zA-Z]*\\*\\*\\*\\*\\*\\*\\*$"))
                         continue;
                     if (line.matches("^\\*\\*\\*\\*\\*\\*\\*[a-zA-Z]*\\*\\*\\*\\*\\*\\*\\*$")) {
-                        System.out.println("New Table: " + line);
+//                        System.out.println("New Table: " + line);
                         if (values != null && values.size() > 0) {
                             saveAllList(values, selectedDB.get(), repositories);
                         }
@@ -582,7 +591,7 @@ public class AreaService {
                                         snakeToCamel(aClass.getAnnotation(Document.class).collection()).equalsIgnoreCase(wanted)
                                 )
                                 .findFirst().ifPresent(aClass -> {
-                                    System.out.println("Find model: " + aClass.getAnnotation(Document.class).collection());
+//                                    System.out.println("Find model: " + aClass.getAnnotation(Document.class).collection());
                                     selectedDB.set(aClass);
                                     removeAll(selectedDB.get(), repositories);
                                 });
@@ -592,9 +601,8 @@ public class AreaService {
                     }
                     if (selectedDB.get() == null)
                         continue;
-
 //                    System.out.println("line is " + line);
-                    System.out.println(objectMapper.readValue(line, selectedDB.get()));
+//                    System.out.println(objectMapper.readValue(line, selectedDB.get()));
                     values.add(objectMapper.readValue(line, selectedDB.get()));
                 } catch (Exception x) {
                     x.printStackTrace();

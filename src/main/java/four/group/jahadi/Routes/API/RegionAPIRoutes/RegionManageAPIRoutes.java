@@ -156,16 +156,4 @@ public class RegionManageAPIRoutes extends Router {
                 areaId, getId(request), response
         );
     }
-
-    @GetMapping(value = "exportAllForConfigLocalServer/{areaId}")
-    @Operation(summary = "گرفتن خروجی از کل دیتابیس")
-    public void exportAllForConfigLocalServer(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            @PathVariable @ObjectIdConstraint ObjectId areaId
-    ) {
-        areaService.exportAllForConfigLocalServer(
-                areaId, getId(request), response
-        );
-    }
 }

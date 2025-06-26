@@ -1,6 +1,8 @@
 package four.group.jahadi.Routes.API;
 
 import four.group.jahadi.Models.*;
+import four.group.jahadi.Models.Module;
+import four.group.jahadi.Repository.ModuleRepository;
 import four.group.jahadi.Service.Area.AreaService;
 import four.group.jahadi.Service.CityService;
 import four.group.jahadi.Service.DrugService;
@@ -16,9 +18,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping(value = "/api/public")
@@ -33,6 +34,8 @@ public class PublicAPIRoutes {
     private DrugService drugService;
     @Autowired
     private AreaService areaService;
+    @Autowired
+    private ModuleRepository moduleRepository;
 
     @GetMapping(value = "getAllAvailableExperiments")
     @ResponseBody
@@ -109,10 +112,18 @@ public class PublicAPIRoutes {
     @ResponseBody
     @Operation(summary = "ایمپورت کردن کل دیتابیس")
     public void importDBToConstructLocalServer(
-            HttpServletRequest request,
             @RequestBody MultipartFile file
     ) {
         areaService.importDBToConstructLocalServer(file);
     }
 
+    @GetMapping(value = "test")
+    @ResponseBody
+    public void test() {
+        Module module = moduleRepository.findById(new ObjectId("66a54a9ae7769906d6fb63bc")).get();
+        module.getSubModules().stream().filter(subModule -> subModule.getId().equals(new ObjectId("6841f4ce9f06e166a2210f05")))
+                .findFirst().ifPresent(subModule -> subModule.getQuestions().stream().filter(question -> question.getId().equals(new ObjectId("6841f4ce9f06e166a2210f06"))).findFirst().ifPresent(question -> {
+                    System.out.println(question);
+                }));
+    }
 }

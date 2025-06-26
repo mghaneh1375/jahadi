@@ -62,13 +62,20 @@ public class ReportServiceInArea {
 
         module.getSubModules()
                 .forEach(subModule -> {
+                    System.out.println("subModule is " + subModule.getName());
+                    System.out.println("questions_size is " + subModule.getQuestions().size());
                     subModulesQuestions.put(subModule.getId(), new ArrayList<>());
                     subModule
                             .getQuestions()
                             .forEach(question -> {
-                                if (question.getQuestionType().equals(QuestionType.TABLE))
+                                System.out.println("---> question type is " + question.getQuestionType());
+                                System.out.println("---> question id is " + question.getId());
+                                if (question.getQuestionType().equals(QuestionType.TABLE)) {
+                                    System.out.println("here1");
                                     return;
+                                }
                                 if (question.getQuestionType().equals(QuestionType.GROUP)) {
+                                    System.out.println("here2");
                                     ((GroupQuestion) question).getQuestions()
                                             .stream().filter(question1 -> !question1.getQuestionType().equals(QuestionType.TABLE))
                                             .forEach(question1 -> {
@@ -79,6 +86,7 @@ public class ReportServiceInArea {
                                 if (question.getQuestionType().equals(QuestionType.CHECK_LIST) &&
                                         question instanceof CheckListGroupQuestion
                                 ) {
+                                    System.out.println("here3");
                                     CheckListGroupQuestion q = (CheckListGroupQuestion) question;
                                     q.getQuestions()
                                             .forEach(question1 -> {
@@ -87,6 +95,7 @@ public class ReportServiceInArea {
                                             });
                                     return;
                                 }
+                                System.out.println("here4");
                                 subModulesQuestions.get(subModule.getId()).add(question);
                             });
                     subModule
@@ -97,6 +106,7 @@ public class ReportServiceInArea {
                                 )
                                     return;
                                 if (question.getQuestionType().equals(QuestionType.GROUP)) {
+                                    System.out.println("here5");
                                     ((GroupQuestion) question).getQuestions()
                                             .stream().filter(question1 -> question1.getQuestionType().equals(QuestionType.TABLE))
                                             .forEach(question1 -> {
@@ -106,6 +116,7 @@ public class ReportServiceInArea {
                                             });
                                     return;
                                 }
+                                System.out.println("here6");
                                 subModulesQuestions.get(subModule.getId()).add(question);
                             });
                 });
@@ -114,6 +125,7 @@ public class ReportServiceInArea {
                 .collect(Collectors.toList());
 
         excelService.writeCommonHeader(sheet);
+        System.out.println("write header successfully");
         Row row = sheet.getRow(0);
         Workbook wb = row.getSheet().getWorkbook();
 
@@ -131,6 +143,7 @@ public class ReportServiceInArea {
         HashMap<ObjectId, Integer> startIndicesHistory = new HashMap<>();
         for (int z = 0; z < module.getSubModules().size(); z++) {
             SubModule subModule = module.getSubModules().get(z);
+            System.out.println("**** sub module is **** " + subModule.getName());
 //            if(!subModule.getId().toString().equals("6841f4ce9f06e166a2210f36") &&
 //                    !subModule.getId().toString().equals("6841f4ce9f06e166a2210f43") &&
 //                    !subModule.getId().toString().equals("6841f4ce9f06e166a2210f56") &&
@@ -148,6 +161,7 @@ public class ReportServiceInArea {
                     sheet, parentCellStyle, subModule, startIdx, maxRowIdx,
                     questionsColIdx.get(subModule.getId())
             );
+            System.out.println("write sub module first header successfully");
             maxRowIdx = output[0];
             short lastCellNum = output[1];
             for (int i = startIdx; i < lastCellNum; i++) {
@@ -183,6 +197,7 @@ public class ReportServiceInArea {
                     )
             );
         }
+        System.out.println("starting SubModuleSecondHeader");
         for (int z = 0; z < module.getSubModules().size(); z++) {
             SubModule subModule = module.getSubModules().get(z);
             excelService.writeSubModuleSecondHeader(
@@ -211,6 +226,7 @@ public class ReportServiceInArea {
         List<User> doctors = userRepository.findJustNameByIdsIn(new ArrayList<>(doctorIds));
 
         HashMap<ObjectId, Row> patientsRow = new HashMap<>();
+        System.out.println("adding patient row");
         subModuleIds.forEach(subModuleId -> {
 //            if (
 //                !subModuleId.toString().equals("6841f4ce9f06e166a2210f36") &&

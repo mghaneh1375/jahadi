@@ -49,6 +49,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/api/user/forgetPassword",
             "/api/user/resetPassword",
             "/api/public/importDBToConstructLocalServer",
+            "/api/public/test",
     };
 
     @Override
