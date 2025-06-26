@@ -36,21 +36,16 @@ public class SimpleQuestion extends Question {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<PairValue> options;
 
-    @Field("dynamic_options")
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String dynamicOptions;
-
     @Builder.Default
     @Field("can_write_desc")
     private Boolean canWriteDesc = false;
 
-    public SimpleQuestion(ObjectId id, QuestionType questionType, Boolean required, String question, AnswerType answerType, List<PairValue> options, String dynamicOptions, Boolean canWriteDesc) {
+    public SimpleQuestion(ObjectId id, QuestionType questionType, Boolean required, String question, AnswerType answerType, List<PairValue> options, Boolean canWriteDesc) {
         super(id, questionType);
         this.required = required;
         this.question = question;
         this.answerType = answerType;
         this.options = options;
-        this.dynamicOptions = dynamicOptions;
         this.canWriteDesc = canWriteDesc;
     }
 
@@ -63,7 +58,6 @@ public class SimpleQuestion extends Question {
                 ", \"question\":" + printNullableField(question) +
                 ", \"answerType\":" + printNullableField(answerType) +
                 ", \"options\":" + toStringOfPairValue(options) +
-                ", \"dynamicOptions\":" + printNullableField(dynamicOptions) +
                 ", \"canWriteDesc\":" + canWriteDesc +
                 '}';
     }

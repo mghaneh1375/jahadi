@@ -2,6 +2,8 @@ package four.group.jahadi.Service.Area;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import four.group.jahadi.DTO.Area.AreaData;
 import four.group.jahadi.DTO.Area.AreaDigest;
 import four.group.jahadi.DTO.Area.UpdateAreaData;
@@ -347,8 +349,8 @@ public class AreaService extends AbstractService<Area, AreaData> {
         Trip trip = tripRepository.findByAreaIdAndOwnerId(areaId, userId)
                 .orElseThrow(NotAccessException::new);
 
-        LocalDateTime start = getLocalDateTime(new Date((long)dto.getStartAt()));
-        LocalDateTime end = getLastLocalDateTime(new Date((long)dto.getEndAt()));
+        LocalDateTime start = getLocalDateTime(new Date((long) dto.getStartAt()));
+        LocalDateTime end = getLastLocalDateTime(new Date((long) dto.getEndAt()));
 
         if (trip.getStartAt().isAfter(start))
             throw new InvalidFieldsException("زمان آغاز باید بعد از " + Utility.convertUTCDateToJalali(trip.getStartAt()) + " باشد");
@@ -550,7 +552,7 @@ public class AreaService extends AbstractService<Area, AreaData> {
                 userId, username, areaId,
                 first.get().getName(), trip.getName()
         );
-        if(needRemove)
+        if (needRemove)
             trip.getAreas().removeIf(area -> area.getId().equals(areaId));
     }
 
@@ -670,10 +672,10 @@ public class AreaService extends AbstractService<Area, AreaData> {
     }
 
     private void removeAll(
-            List<Object> values, Class selectedDB,
+            ObjectId areaId,
+            Class selectedDB,
             Set<Class> repositories
     ) {
-        List<Object> finalValues = values;
         String[] split = selectedDB.getName().split("\\.");
         repositories
                 .stream()
@@ -682,8 +684,8 @@ public class AreaService extends AbstractService<Area, AreaData> {
                     BeanFetcher fetcher = new BeanFetcher(applicationContext);
                     Object bean = fetcher.getBeanByClass(aClass);
                     try {
-                        Method method = aClass.getMethod("deleteAll");
-                        method.invoke(bean);
+                        Method method = aClass.getMethod("deleteByAreaId", ObjectId.class);
+                        method.invoke(bean, areaId);
                     } catch (NoSuchMethodException | InvocationTargetException |
                              IllegalAccessException e) {
                         throw new RuntimeException(e);
@@ -691,14 +693,25 @@ public class AreaService extends AbstractService<Area, AreaData> {
                 });
     }
 
-    public void importDBToConstructLocalServer(MultipartFile file) {
+    public void importAreaDB(
+            ObjectId areaId, ObjectId userId,
+            ObjectId groupId, MultipartFile file
+    ) {
         Set<Class> models = findAllClassesUsingClassLoader("four.group.jahadi.Models");
         models.addAll(findAllClassesUsingClassLoader("four.group.jahadi.Models.Area"));
         Set<Class> repositories = findAllClassesUsingClassLoader("four.group.jahadi.Repository");
         repositories.addAll(findAllClassesUsingClassLoader("four.group.jahadi.Repository.Area"));
+        List<String> allowedModels = new ArrayList<>() {{
+            add("PatientsInArea");
+            add("AreaDrugs");
+            add("AreaEquipments");
+            add("PatientDrug");
+        }};
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            objectMapper.registerModule(new JavaTimeModule());
+            objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
             InputStream inputStream = file.getInputStream();
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             AtomicReference<Class> selectedDB = new AtomicReference<>(null);
@@ -711,18 +724,21 @@ public class AreaService extends AbstractService<Area, AreaData> {
                     if (selectedDB.get() == null && !line.matches("^\\*\\*\\*\\*\\*\\*\\*[a-zA-Z]*\\*\\*\\*\\*\\*\\*\\*$"))
                         continue;
                     if (line.matches("^\\*\\*\\*\\*\\*\\*\\*[a-zA-Z]*\\*\\*\\*\\*\\*\\*\\*$")) {
-                        System.out.println("New Table: " + line);
                         if (values != null && values.size() > 0) {
                             saveAllList(values, selectedDB.get(), repositories);
                         }
-                        List<Object> finalValues = values;
+                        final String docName = line.replaceAll("\\*", "");
+                        if (!allowedModels.contains(docName))
+                            continue;
+
+                        System.out.println("New Table: " + line);
                         models
                                 .stream()
-                                .filter(aClass -> aClass.getName().endsWith("." + line.replaceAll("\\*", "")))
+                                .filter(aClass -> aClass.getName().endsWith("." + docName))
                                 .findFirst().ifPresent(aClass -> {
                                     System.out.println("Find model: " + aClass.getName());
                                     selectedDB.set(aClass);
-                                    removeAll(finalValues, selectedDB.get(), repositories);
+                                    removeAll(areaId, selectedDB.get(), repositories);
                                 });
 
                         values = new ArrayList<>();
@@ -732,8 +748,7 @@ public class AreaService extends AbstractService<Area, AreaData> {
                         continue;
 
                     values.add(objectMapper.readValue(line, selectedDB.get()));
-                }
-                catch (Exception x) {
+                } catch (Exception x) {
                     x.printStackTrace();
                 }
             }
@@ -741,8 +756,7 @@ public class AreaService extends AbstractService<Area, AreaData> {
             if (selectedDB.get() != null && values != null && values.size() > 0) {
                 try {
                     saveAllList(values, selectedDB.get(), repositories);
-                }
-                catch (Exception x) {
+                } catch (Exception x) {
                     x.printStackTrace();
                 }
             }

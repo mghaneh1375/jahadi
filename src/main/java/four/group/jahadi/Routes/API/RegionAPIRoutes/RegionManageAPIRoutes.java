@@ -4,6 +4,7 @@ import four.group.jahadi.DTO.Area.AreaDigest;
 import four.group.jahadi.DTO.Region.RegionRunInfoData;
 import four.group.jahadi.DTO.Region.RegionSendNotifData;
 import four.group.jahadi.DTO.UpdatePresenceList;
+import four.group.jahadi.Enums.Access;
 import four.group.jahadi.Models.Area.AreaDates;
 import four.group.jahadi.Models.TokenInfo;
 import four.group.jahadi.Models.Trip;
@@ -14,13 +15,16 @@ import four.group.jahadi.Validator.ObjectIdConstraint;
 import io.swagger.v3.oas.annotations.Operation;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.List;
 
@@ -184,6 +188,23 @@ public class RegionManageAPIRoutes extends Router {
     ) {
         areaService.exportAllForConfigLocalServer(
                 areaId, getId(request), response
+        );
+    }
+
+    @PutMapping(value = "importAreaDB/{areaId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "افزودن فایل خروجی از اردو در حالت آفلاین")
+    public void importAreaDB(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId,
+            @RequestBody @NotNull MultipartFile multipartFile
+    ) {
+        TokenInfo fullTokenInfo = getFullTokenInfo(request);
+        areaService.importAreaDB(
+                areaId,
+                fullTokenInfo.getAccesses().contains(Access.GROUP)
+                        ? null
+                        : fullTokenInfo.getUserId()
+                , fullTokenInfo.getGroupId(), multipartFile
         );
     }
 }
