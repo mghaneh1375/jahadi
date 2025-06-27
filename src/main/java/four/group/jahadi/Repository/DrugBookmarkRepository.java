@@ -1,7 +1,6 @@
 package four.group.jahadi.Repository;
 
 import four.group.jahadi.Models.DrugBookmark;
-import four.group.jahadi.Models.EquipmentLog;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
@@ -18,4 +17,8 @@ public interface DrugBookmarkRepository extends MongoRepository<DrugBookmark, Ob
 
   @Query(value = "{userId: ?0, drugId: ?1}", delete = true)
   void removeByUserIdAndDrugId(ObjectId userId, ObjectId drugId);
+
+  // use by reflection
+  @Query(value = "{_id: {$in: ?0}}", delete = true)
+  void deleteByIdsIn(List<ObjectId> ids);
 }

@@ -14,9 +14,7 @@ import four.group.jahadi.Enums.Sex;
 import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Exception.NotAccessException;
-import four.group.jahadi.Models.Area.Area;
-import four.group.jahadi.Models.Area.AreaDates;
-import four.group.jahadi.Models.Area.PatientsInArea;
+import four.group.jahadi.Models.Area.*;
 import four.group.jahadi.Models.*;
 import four.group.jahadi.Repository.Area.PatientsInAreaRepository;
 import four.group.jahadi.Repository.Area.PresenceListRepository;
@@ -648,11 +646,10 @@ public class AreaService extends AbstractService<Area, AreaData> {
     }
 
     private void saveAllList(
-            List<Object> values, Class selectedDB,
+            List<Model> values, Class selectedDB,
             Set<Class> repositories
     ) {
         System.out.println("Saving data for " + selectedDB.getName());
-        List<Object> finalValues = values;
         String[] split = selectedDB.getName().split("\\.");
         repositories
                 .stream()
@@ -663,7 +660,7 @@ public class AreaService extends AbstractService<Area, AreaData> {
                     Object bean = fetcher.getBeanByClass(aClass);
                     try {
                         Method method = aClass.getMethod("saveAll", Iterable.class);
-                        method.invoke(bean, finalValues);
+                        method.invoke(bean, values);
                     } catch (NoSuchMethodException | InvocationTargetException |
                              IllegalAccessException e) {
                         throw new RuntimeException(e);
@@ -673,6 +670,7 @@ public class AreaService extends AbstractService<Area, AreaData> {
 
     private void removeAll(
             ObjectId areaId,
+            List<ObjectId> ids,
             Class selectedDB,
             Set<Class> repositories
     ) {
@@ -686,7 +684,17 @@ public class AreaService extends AbstractService<Area, AreaData> {
                     try {
                         Method method = aClass.getMethod("deleteByAreaId", ObjectId.class);
                         method.invoke(bean, areaId);
-                    } catch (NoSuchMethodException | InvocationTargetException |
+                    } catch (NoSuchMethodException exception) {
+                        try {
+                            if (ids != null) {
+                                Method method = aClass.getMethod("deleteByIdsIn", List.class);
+                                method.invoke(bean, ids);
+                            }
+                        }
+                        catch (Exception ex) {
+                            throw new RuntimeException(ex);
+                        }
+                    } catch (InvocationTargetException |
                              IllegalAccessException e) {
                         throw new RuntimeException(e);
                     }
@@ -697,16 +705,32 @@ public class AreaService extends AbstractService<Area, AreaData> {
             ObjectId areaId, ObjectId userId,
             ObjectId groupId, MultipartFile file
     ) {
+        Trip trip = userId == null
+                ? tripRepository.findByGroupIdAndAreaId(groupId, areaId).orElseThrow(InvalidIdException::new)
+                : tripRepository.findByAreaIdAndOwnerId(areaId, userId).orElseThrow(InvalidIdException::new);
+        Area foundArea = findArea(trip, areaId);
+
         Set<Class> models = findAllClassesUsingClassLoader("four.group.jahadi.Models");
         models.addAll(findAllClassesUsingClassLoader("four.group.jahadi.Models.Area"));
         Set<Class> repositories = findAllClassesUsingClassLoader("four.group.jahadi.Repository");
         repositories.addAll(findAllClassesUsingClassLoader("four.group.jahadi.Repository.Area"));
         List<String> allowedModels = new ArrayList<>() {{
-            add("PatientsInArea");
+            add("Note");
+            add("Trip");
+            add("PresenceList");
+            add("DrugBookmark");
             add("AreaDrugs");
             add("AreaEquipments");
+            add("Patient");
             add("PatientDrug");
+            add("PatientsInArea");
         }};
+        List<Class> needIds = new ArrayList<>() {{
+            add(Note.class);
+            add(DrugBookmark.class);
+            add(Patient.class);
+        }};
+
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -715,7 +739,8 @@ public class AreaService extends AbstractService<Area, AreaData> {
             InputStream inputStream = file.getInputStream();
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             AtomicReference<Class> selectedDB = new AtomicReference<>(null);
-            List<Object> values = null;
+            List<Model> values = null;
+
             while (reader.ready()) {
                 try {
                     String line = reader.readLine();
@@ -725,20 +750,40 @@ public class AreaService extends AbstractService<Area, AreaData> {
                         continue;
                     if (line.matches("^\\*\\*\\*\\*\\*\\*\\*[a-zA-Z]*\\*\\*\\*\\*\\*\\*\\*$")) {
                         if (values != null && values.size() > 0) {
-                            saveAllList(values, selectedDB.get(), repositories);
+                            if (selectedDB.get().getName().equals(Trip.class.getName())) {
+                                ((Trip) values.get(0)).getAreas().stream().filter(area -> area.getId().equals(areaId)).findFirst().ifPresent(area -> {
+                                    for (int z = 0; z < trip.getAreas().size(); z++) {
+                                        if (trip.getAreas().get(z).getId().equals(areaId)) {
+                                            trip.getAreas().get(z).setDates(area.getDates());
+                                            break;
+                                        }
+                                    }
+                                    tripRepository.save(trip);
+                                });
+                            } else {
+                                removeAll(
+                                        areaId,
+                                        needIds.contains(selectedDB.get())
+                                                ? values.stream().map(Model::getId).collect(Collectors.toList())
+                                                : null
+                                        ,
+                                        selectedDB.get(),
+                                        repositories
+                                );
+                                saveAllList(values, selectedDB.get(), repositories);
+                            }
                         }
                         final String docName = line.replaceAll("\\*", "");
                         if (!allowedModels.contains(docName))
                             continue;
 
-                        System.out.println("New Table: " + line);
+                        System.out.println("New Table: " + docName);
                         models
                                 .stream()
                                 .filter(aClass -> aClass.getName().endsWith("." + docName))
                                 .findFirst().ifPresent(aClass -> {
                                     System.out.println("Find model: " + aClass.getName());
                                     selectedDB.set(aClass);
-                                    removeAll(areaId, selectedDB.get(), repositories);
                                 });
 
                         values = new ArrayList<>();
@@ -747,7 +792,37 @@ public class AreaService extends AbstractService<Area, AreaData> {
                     if (selectedDB.get() == null)
                         continue;
 
-                    values.add(objectMapper.readValue(line, selectedDB.get()));
+                    Object o = objectMapper.readValue(line, selectedDB.get());
+                    if (!needIds.contains(selectedDB.get())) {
+                        if (
+                                (
+                                        selectedDB.get().getName().equals(PatientsInArea.class.getName()) &&
+                                                !((PatientsInArea) o).getAreaId().equals(areaId)
+                                ) ||
+                                        (
+                                                selectedDB.get().getName().equals(PatientDrug.class.getName()) &&
+                                                        !((PatientDrug) o).getAreaId().equals(areaId)
+                                        ) ||
+                                        (
+                                                selectedDB.get().getName().equals(AreaEquipments.class.getName()) &&
+                                                        !((AreaEquipments) o).getAreaId().equals(areaId)
+                                        ) ||
+                                        (
+                                                selectedDB.get().getName().equals(AreaDrugs.class.getName()) &&
+                                                        !((AreaDrugs) o).getAreaId().equals(areaId)
+                                        ) ||
+                                        (
+                                                selectedDB.get().getName().equals(PresenceList.class.getName()) &&
+                                                        !((PresenceList) o).getAreaId().equals(areaId)
+                                        ) ||
+                                        (
+                                                selectedDB.get().getName().equals(Trip.class.getName()) &&
+                                                        !((Trip) o).getId().equals(trip.getId())
+                                        )
+                        )
+                            continue;
+                    }
+                    values.add((Model) o);
                 } catch (Exception x) {
                     x.printStackTrace();
                 }

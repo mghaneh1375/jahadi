@@ -21,6 +21,10 @@ public interface PatientRepository extends MongoRepository<Patient, ObjectId>, F
     @Query(value = "{_id: {$in: ?0}}")
     List<Patient> findAllByIds(List<ObjectId> ids);
 
+    // use by reflection
+    @Query(value = "{_id: {$in: ?0}}", delete = true)
+    void deleteByIdsIn(List<ObjectId> ids);
+
     @Query(value = "{identifier: ?0, identifierType: ?1}")
     Optional<Patient> findByIdentifierAndIdentifierType(String identifier, IdentifierType identifierType);
 

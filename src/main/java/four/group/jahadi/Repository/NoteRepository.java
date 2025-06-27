@@ -14,4 +14,7 @@ public interface NoteRepository extends MongoRepository<Note, ObjectId>, Filtera
     @Query(value = "{user_id: ?0}", fields = "{'id': 1, 'title': 1, 'updatedAt': 1, 'description': 1}")
     List<Note> findByUserId(ObjectId userId);
 
+    // use by reflection
+    @Query(value = "{_id: {$in: ?0}}", delete = true)
+    void deleteByIdsIn(List<ObjectId> ids);
 }
