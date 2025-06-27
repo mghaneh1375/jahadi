@@ -675,9 +675,12 @@ public class AreaService extends AbstractService<Area, AreaData> {
             Set<Class> repositories
     ) {
         String[] split = selectedDB.getName().split("\\.");
+        String key = split[split.length - 1].equals("PatientDrug")
+                ? "PatientsDrugRepository"
+                : split[split.length - 1] + "Repository";
         repositories
                 .stream()
-                .filter(aClass -> aClass.getName().endsWith("." + split[split.length - 1] + "Repository"))
+                .filter(aClass -> aClass.getName().endsWith("." + key))
                 .findFirst().ifPresent(aClass -> {
                     BeanFetcher fetcher = new BeanFetcher(applicationContext);
                     Object bean = fetcher.getBeanByClass(aClass);
@@ -830,6 +833,15 @@ public class AreaService extends AbstractService<Area, AreaData> {
 
             if (selectedDB.get() != null && values != null && values.size() > 0) {
                 try {
+                    removeAll(
+                            areaId,
+                            needIds.contains(selectedDB.get())
+                                    ? values.stream().map(Model::getId).collect(Collectors.toList())
+                                    : null
+                            ,
+                            selectedDB.get(),
+                            repositories
+                    );
                     saveAllList(values, selectedDB.get(), repositories);
                 } catch (Exception x) {
                     x.printStackTrace();
