@@ -145,14 +145,14 @@ public class RegionManageAPIRoutes extends Router {
 
     // todo finalize area defenition
 
-    @GetMapping(value = "exportTrip/{areaId}")
+    @GetMapping(value = "exportArea/{areaId}")
     @Operation(summary = "گرفتن خروجی از منطقه")
     public void exportTrip(
             HttpServletRequest request,
             HttpServletResponse response,
             @PathVariable @ObjectIdConstraint ObjectId areaId
     ) {
-        areaService.exportTrip(
+        areaService.exportArea(
                 areaId, getId(request), response
         );
     }

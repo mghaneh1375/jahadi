@@ -44,7 +44,6 @@ public class JahadgarDrugService {
         Drug drug = drugRepository.findById(drugId).orElseThrow(
                 InvalidIdException::new
         );
-
         DrugBookmark drugBookmark = drugBookmarkRepository.insert(
                 DrugBookmark
                         .builder()

@@ -3,7 +3,6 @@ package four.group.jahadi.Service.Area;
 import four.group.jahadi.Models.Area.Area;
 import four.group.jahadi.Models.Area.AreaDrugs;
 import four.group.jahadi.Models.Area.AreaEquipments;
-import four.group.jahadi.Models.Equipment;
 import four.group.jahadi.Models.GroupAccess;
 import four.group.jahadi.Models.Trip;
 import four.group.jahadi.Models.User;
@@ -117,18 +116,7 @@ public class ExportUtils {
         }
     }
 
-    public void exportTrip(Trip trip, ObjectId areaId, ServletOutputStream outputStream) {
-        try {
-            ioService.export(Collections.singletonList(projectRepository.findById(trip.getProjectId()).get()), outputStream, "Project");
-            trip.setAreas(trip.getAreas().stream().filter(area -> area.getId().equals(areaId)).collect(Collectors.toList()));
-            ioService.export(Collections.singletonList(trip), outputStream, "Trip");
-        }
-        catch (Exception ignore) {
-            ignore.printStackTrace();
-        }
-    }
-
-    public void exportTrip2(Trip trip, ObjectId areaId, ServletOutputStream outputStream) {
+    public void exportAreaTrip(Trip trip, ObjectId areaId, ServletOutputStream outputStream) {
         try {
             ioService.export(Collections.singletonList(trip), outputStream, "Trip");
             ioService.export(presenceListRepository.findByAreaId(areaId), outputStream, "PresenceList");
@@ -138,18 +126,8 @@ public class ExportUtils {
         }
     }
 
-    public void exportDrugs(Area area, ServletOutputStream outputStream) {
+    public void exportAreaDrugs(Area area, ServletOutputStream outputStream) {
         List<AreaDrugs> drugsInArea = areaDrugsRepository.findByAreaId(area.getId());
-        ioService.export(drugRepository.findFullInfoByIds(drugsInArea.stream().map(AreaDrugs::getDrugId).collect(Collectors.toList())), outputStream, "Drug");
-        ioService.export(drugBookmarkRepository.findByDrugIds(drugsInArea.stream().map(AreaDrugs::getDrugId).collect(Collectors.toList())), outputStream, "DrugBookmark");
-        ioService.export(drugsInArea, outputStream, "DrugsInArea");
-    }
-
-    public void exportDrugs2(Area area, ServletOutputStream outputStream) {
-        List<AreaDrugs> drugsInArea = areaDrugsRepository.findByAreaId(area.getId());
-        // just reminder
-        ioService.export(drugRepository.findFullInfoByIds(drugsInArea.stream().map(AreaDrugs::getDrugId).collect(Collectors.toList())), outputStream, "Drug");
-        ioService.export(drugLogRepository.findAllByDrugsId(drugsInArea.stream().map(AreaDrugs::getDrugId).collect(Collectors.toList())), outputStream, "DrugLogs");
         ioService.export(drugBookmarkRepository.findByDrugIds(drugsInArea.stream().map(AreaDrugs::getDrugId).collect(Collectors.toList())), outputStream, "DrugBookmark");
         ioService.export(drugsInArea, outputStream, "DrugsInArea");
     }
@@ -162,8 +140,6 @@ public class ExportUtils {
 
     public void exportEquipments(Area area, ServletOutputStream outputStream) {
         List<AreaEquipments> equipmentsInArea = areaEquipmentsRepository.findByArea(area.getId());
-        List<Equipment> equipments = equipmentRepository.findFullInfoByIds(equipmentsInArea.stream().map(AreaEquipments::getEquipmentId).collect(Collectors.toList()));
-        ioService.export(equipments, outputStream, "Equipment");
         ioService.export(equipmentsInArea, outputStream, "EquipmentsInArea");
     }
 }

@@ -27,6 +27,7 @@ import four.group.jahadi.Models.Module;
 import four.group.jahadi.Models.Trip;
 import four.group.jahadi.Models.User;
 import four.group.jahadi.Models.UserPresenceList;
+import four.group.jahadi.Repository.Area.AreaDrugsRepository;
 import four.group.jahadi.Repository.Area.PatientsInAreaRepository;
 import four.group.jahadi.Repository.Area.PresenceListRepository;
 import four.group.jahadi.Repository.*;
@@ -92,6 +93,8 @@ public class AreaService {
     private PresenceListRepository presenceListRepository;
     @Autowired
     private DrugRepository drugRepository;
+    @Autowired
+    private AreaDrugsRepository areaDrugsRepository;
     @Autowired
     private IOService ioService;
     @Autowired
@@ -351,66 +354,6 @@ public class AreaService {
         return new ResponseEntity<>(foundArea.getDates(), HttpStatus.OK);
     }
 
-    public void exportTrip(
-            ObjectId areaId, ObjectId userId,
-            HttpServletResponse response
-    ) {
-        Trip trip = tripRepository.findByAreaIdAndOwnerId(areaId, userId).orElseThrow(InvalidIdException::new);
-        Area foundArea = findArea(trip, areaId, userId);
-
-        response.setContentType("application/octet-stream");
-        response.setHeader(
-                HttpHeaders.CONTENT_DISPOSITION,
-                ContentDisposition.builder("attachment").filename("tmp.json").build().toString()
-        );
-        try {
-            ServletOutputStream outputStream = response.getOutputStream();
-            response.setStatus(HttpStatus.OK.value());
-            response.flushBuffer();
-
-            List<PatientsInArea> patientsInArea = patientsInAreaRepository.findByAreaId(areaId);
-            ioService.export(patientsInArea, outputStream, "PatientsInArea");
-            response.setStatus(HttpStatus.OK.value());
-            response.flushBuffer();
-        } catch (Exception e) {
-            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
-        }
-    }
-
-    public void exportAllForConfigLocalServer(
-            ObjectId areaId, ObjectId userId,
-            HttpServletResponse response
-    ) {
-        Trip trip = tripRepository.findByAreaIdAndOwnerId(areaId, userId).orElseThrow(InvalidIdException::new);
-        Area foundArea = findArea(trip, areaId, userId);
-
-        try {
-            ServletOutputStream outputStream = response.getOutputStream();
-            response.setContentType("application/octet-stream");
-            response.setHeader(
-                    HttpHeaders.CONTENT_DISPOSITION,
-                    ContentDisposition.builder("attachment").filename("export.json").build().toString()
-            );
-
-            List<ObjectId> neededUsersId = new ArrayList<>();
-            neededUsersId.addAll(foundArea.getMembers());
-            neededUsersId.add(foundArea.getOwnerId());
-
-            // no need for export activation table
-            exportUtils.exportCommon(outputStream, neededUsersId);
-            exportUtils.exportUsers(foundArea, outputStream, neededUsersId);
-            exportUtils.exportTrip(trip, areaId, outputStream);
-            exportUtils.exportGroups(trip, outputStream);
-            exportUtils.exportDrugs(foundArea, outputStream);
-            exportUtils.exportEquipments(foundArea, outputStream);
-            exportUtils.exportPatients(outputStream);
-            response.setStatus(HttpStatus.OK.value());
-            response.flushBuffer();
-        } catch (Exception x) {
-            x.printStackTrace();
-        }
-    }
-
     public void exportArea(
             ObjectId areaId, ObjectId userId,
             HttpServletResponse response
@@ -430,11 +373,10 @@ public class AreaService {
             neededUsersId.addAll(foundArea.getMembers());
             neededUsersId.add(foundArea.getOwnerId());
 
-            // no need for export activation table
             ioService.export(noteRepository.findByUsersIdIn(neededUsersId), outputStream, "Note");
 
-            exportUtils.exportTrip2(trip, areaId, outputStream);
-            exportUtils.exportDrugs2(foundArea, outputStream);
+            exportUtils.exportAreaTrip(trip, areaId, outputStream);
+            exportUtils.exportAreaDrugs(foundArea, outputStream);
             exportUtils.exportEquipments(foundArea, outputStream);
             exportUtils.exportPatients(outputStream);
 
