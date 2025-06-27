@@ -129,7 +129,7 @@ public class ExportUtils {
     public void exportAreaDrugs(Area area, ServletOutputStream outputStream) {
         List<AreaDrugs> drugsInArea = areaDrugsRepository.findByAreaId(area.getId());
         ioService.export(drugBookmarkRepository.findByDrugIds(drugsInArea.stream().map(AreaDrugs::getDrugId).collect(Collectors.toList())), outputStream, "DrugBookmark");
-        ioService.export(drugsInArea, outputStream, "DrugsInArea");
+        ioService.export(drugsInArea, outputStream, "AreaDrugs");
     }
 
     public void exportPatients(ServletOutputStream outputStream) {
@@ -140,6 +140,6 @@ public class ExportUtils {
 
     public void exportEquipments(Area area, ServletOutputStream outputStream) {
         List<AreaEquipments> equipmentsInArea = areaEquipmentsRepository.findByArea(area.getId());
-        ioService.export(equipmentsInArea, outputStream, "EquipmentsInArea");
+        ioService.export(equipmentsInArea, outputStream, "AreaEquipments");
     }
 }
