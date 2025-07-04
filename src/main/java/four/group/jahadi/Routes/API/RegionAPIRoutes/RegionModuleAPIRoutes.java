@@ -214,7 +214,7 @@ public class RegionModuleAPIRoutes extends Router {
     }
 
     @GetMapping(path = "getAreaReport/{areaId}")
-    @Operation(summary = "گرفتن گزارش کل منطقه توسط مسئول منطقه یا مسئول گروه")
+    @Operation(summary = "گرفتن گزارش کل منطقه توسط مسئول منطقه یا مسئول گروه یا مسئول کل")
     public void getModuleReport(
             HttpServletRequest request,
             HttpServletResponse response,
@@ -222,7 +222,9 @@ public class RegionModuleAPIRoutes extends Router {
     ) {
         TokenInfo fullTokenInfo = getFullTokenInfo(request);
         reportServiceInArea.getAreaReport(
-                fullTokenInfo.getAccesses().contains(Access.GROUP)
+                fullTokenInfo.getAccesses().contains(Access.ADMIN)
+                        ? null
+                        : fullTokenInfo.getAccesses().contains(Access.GROUP)
                         ? fullTokenInfo.getGroupId()
                         : fullTokenInfo.getUserId()
                 , fullTokenInfo.getAccesses().contains(Access.GROUP),

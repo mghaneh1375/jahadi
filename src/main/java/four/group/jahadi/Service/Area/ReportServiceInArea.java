@@ -1,6 +1,7 @@
 package four.group.jahadi.Service.Area;
 
 import four.group.jahadi.Enums.Module.QuestionType;
+import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Exception.NotAccessException;
 import four.group.jahadi.Models.Area.Area;
 import four.group.jahadi.Models.Area.ModuleInArea;
@@ -243,11 +244,13 @@ public class ReportServiceInArea {
             final ObjectId areaId, final ObjectId wantedModuleId,
             HttpServletResponse response
     ) {
-        Trip wantedTrip = isGroupAccess
+        Trip wantedTrip = userId_groupId == null ?
+                tripRepository.findByAreaId(areaId).orElseThrow(InvalidIdException::new)
+                : isGroupAccess
                 ? tripRepository.findByGroupIdAndAreaId(userId_groupId, areaId).orElseThrow(NotAccessException::new)
                 : tripRepository.findByAreaIdAndOwnerId(areaId, userId_groupId).orElseThrow(NotAccessException::new);
 
-        Area area = isGroupAccess
+        Area area = isGroupAccess || userId_groupId == null
                 ? findArea(wantedTrip, areaId)
                 : findArea(wantedTrip, areaId, userId_groupId);
 
@@ -262,7 +265,7 @@ public class ReportServiceInArea {
         for (int z = 0; z < area.getModules().size(); z++) {
             ModuleInArea areaModule = area.getModules().get(z);
             ObjectId moduleId = areaModule.getModuleId();
-            if(wantedModuleId != null && !Objects.equals(wantedModuleId, moduleId))
+            if (wantedModuleId != null && !Objects.equals(wantedModuleId, moduleId))
                 continue;
 
             moduleRepository.findById(moduleId).ifPresent(module -> {
