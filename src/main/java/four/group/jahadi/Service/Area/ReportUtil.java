@@ -10,13 +10,19 @@ import four.group.jahadi.Models.Question.SimpleQuestion;
 import four.group.jahadi.Models.Question.TableQuestion;
 import four.group.jahadi.Models.User;
 import four.group.jahadi.Utility.Utility;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.bson.types.ObjectId;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class ReportUtil {
@@ -206,4 +212,39 @@ public class ReportUtil {
         });
     }
 
+    static void prepareHttpServletResponse(HttpServletResponse response, Workbook workbook) {
+        response.setContentType("application/vnd.ms-excel");
+        response.setHeader(
+                HttpHeaders.CONTENT_DISPOSITION,
+                ContentDisposition.builder("attachment").filename("module.xlsx").build().toString()
+        );
+        try {
+            ServletOutputStream outputStream = response.getOutputStream();
+            workbook.write(outputStream);
+            response.setStatus(HttpStatus.OK.value());
+            response.flushBuffer();
+        } catch (Exception e) {
+            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
+    }
+
+    static Workbook createWorkbook(List<String> headers) {
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet();
+        Row row = sheet.createRow(0);
+        CellStyle parentCellStyle = workbook.createCellStyle();
+        parentCellStyle.setAlignment(HorizontalAlignment.CENTER);
+        Font font = workbook.createFont();
+        font.setColor(HSSFColor.HSSFColorPredefined.RED.getIndex());
+        font.setBold(true);
+        parentCellStyle.setFont(font);
+        AtomicInteger counter = new AtomicInteger(0);
+        headers.forEach(header -> {
+            Cell cell = row.createCell(counter.getAndIncrement());
+            cell.setCellStyle(parentCellStyle);
+            cell.setCellValue(header);
+        });
+
+        return workbook;
+    }
 }

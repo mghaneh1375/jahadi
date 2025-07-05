@@ -205,11 +205,55 @@ public class RegionModuleAPIRoutes extends Router {
     ) {
         TokenInfo fullTokenInfo = getFullTokenInfo(request);
         reportServiceInArea.getAreaReport(
-                fullTokenInfo.getAccesses().contains(Access.GROUP)
+                fullTokenInfo.getAccesses().contains(Access.ADMIN)
+                        ? null
+                        : fullTokenInfo.getAccesses().contains(Access.GROUP)
                         ? fullTokenInfo.getGroupId()
                         : fullTokenInfo.getUserId()
                 , fullTokenInfo.getAccesses().contains(Access.GROUP),
                 areaId, moduleId, response
+        );
+    }
+
+    @GetMapping(path = "getAreaPatientDrugReport/{areaId}")
+    public void getAreaPatientDrugReport(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            @PathVariable @ObjectIdConstraint ObjectId areaId
+    ) {
+        TokenInfo fullTokenInfo = getFullTokenInfo(request);
+        reportServiceInArea.getPatientDrugReport(
+                fullTokenInfo.getAccesses().contains(Access.ADMIN)
+                        ? null
+                        : fullTokenInfo.getAccesses().contains(Access.GROUP)
+                        ? fullTokenInfo.getGroupId()
+                        : fullTokenInfo.getUserId()
+                , fullTokenInfo.getAccesses().contains(Access.GROUP),
+                areaId,
+                null, null,
+                null, null,
+                null, null,
+                null, null,
+                response
+        );
+    }
+
+    @GetMapping(path = "getAreaDrugReport/{areaId}")
+    public void getAreaDrugReport(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            @PathVariable @ObjectIdConstraint ObjectId areaId
+    ) {
+        TokenInfo fullTokenInfo = getFullTokenInfo(request);
+        reportServiceInArea.getAreaDrugReport(
+                fullTokenInfo.getAccesses().contains(Access.ADMIN)
+                        ? null
+                        : fullTokenInfo.getAccesses().contains(Access.GROUP)
+                        ? fullTokenInfo.getGroupId()
+                        : fullTokenInfo.getUserId()
+                , fullTokenInfo.getAccesses().contains(Access.GROUP),
+                areaId,
+                response
         );
     }
 

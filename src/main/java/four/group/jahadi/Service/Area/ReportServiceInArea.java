@@ -1,9 +1,12 @@
 package four.group.jahadi.Service.Area;
 
+import four.group.jahadi.DTO.Area.PatientDrugJoinDto;
+import four.group.jahadi.Enums.Module.DeliveryStatus;
 import four.group.jahadi.Enums.Module.QuestionType;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Exception.NotAccessException;
 import four.group.jahadi.Models.Area.Area;
+import four.group.jahadi.Models.Area.DrugAggregationModel;
 import four.group.jahadi.Models.Area.ModuleInArea;
 import four.group.jahadi.Models.Area.PatientsInArea;
 import four.group.jahadi.Models.Module;
@@ -12,6 +15,7 @@ import four.group.jahadi.Models.Question.CheckListGroupQuestion;
 import four.group.jahadi.Models.Question.GroupQuestion;
 import four.group.jahadi.Models.Question.Question;
 import four.group.jahadi.Models.Question.TableQuestion;
+import four.group.jahadi.Repository.Area.PatientsDrugRepository;
 import four.group.jahadi.Repository.Area.PatientsInAreaRepository;
 import four.group.jahadi.Repository.ModuleRepository;
 import four.group.jahadi.Repository.PatientRepository;
@@ -21,20 +25,19 @@ import four.group.jahadi.Service.ExcelService;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ContentDisposition;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static four.group.jahadi.Service.Area.AreaUtils.findArea;
+import static four.group.jahadi.Service.Area.ReportUtil.prepareHttpServletResponse;
 import static four.group.jahadi.Service.ExcelService.isMergedCell;
 
 @Service
@@ -48,6 +51,8 @@ public class ReportServiceInArea {
     private UserRepository userRepository;
     @Autowired
     private PatientsInAreaRepository patientsInAreaRepository;
+    @Autowired
+    private PatientsDrugRepository patientsDrugRepository;
     @Autowired
     private ExcelService excelService;
     @Autowired
@@ -281,18 +286,120 @@ public class ReportServiceInArea {
             });
         }
 
-        response.setContentType("application/vnd.ms-excel");
-        response.setHeader(
-                HttpHeaders.CONTENT_DISPOSITION,
-                ContentDisposition.builder("attachment").filename("module.xlsx").build().toString()
-        );
-        try {
-            ServletOutputStream outputStream = response.getOutputStream();
-            workbook.write(outputStream);
-            response.setStatus(HttpStatus.OK.value());
-            response.flushBuffer();
-        } catch (Exception e) {
-            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        prepareHttpServletResponse(response, workbook);
+    }
+
+    private final static List<String> patientDrugsReportHeaders =
+            new ArrayList<>() {
+                {
+                    add("نام بیمار");
+                    add("کدملی/اتباع بیمار");
+                    add("نام دارو تجویز شده");
+                    add("تعداد دارو تجویز شده");
+                    add("نوع دارو تجویز شده");
+                    add("دُز دارو تجویز شده");
+                    add("شرکت سازنده دارو تجویز شده");
+                    add("زمان مصرف دارو تجویز شده");
+                    add("مقدار مصرف دارو تجویز شده");
+                    add("نحوه مصرف دارو تجویز شده");
+                    add("توضیحات تجویز");
+                    add("دکتر تجویز کننده");
+                    add("زمان تجویز");
+                    add("نام دارو تحویل شده");
+                    add("تعداد دارو تحویل شده");
+                    add("نام تحویل دهنده");
+                    add("زمان تحویل");
+                    add("توضیح تحویل");
+                }
+            };
+
+    private final static List<String> drugsReportHeaders =
+            new ArrayList<>() {
+                {
+                    add("نام دارو");
+                    add("تعداد کل موجود در اردو");
+                    add("تعداد تجویز شده");
+                    add("تعداد تحویل شده به بیمار");
+                    add("تعداد باقی مانده");
+                }
+            };
+
+    public void getPatientDrugReport(
+            final ObjectId userId_groupId, final boolean isGroupAccess,
+            final ObjectId areaId, ObjectId doctorId,
+            DeliveryStatus deliveryStatus, ObjectId drugId,
+            LocalDateTime startAdviceAt, LocalDateTime endAdviceAt,
+            LocalDateTime startGiveAt, LocalDateTime endGiveAt,
+            ObjectId giverId,
+            HttpServletResponse response
+    ) {
+        Trip wantedTrip = userId_groupId == null ?
+                tripRepository.findByAreaId(areaId).orElseThrow(InvalidIdException::new)
+                : isGroupAccess
+                ? tripRepository.findByGroupIdAndAreaId(userId_groupId, areaId).orElseThrow(NotAccessException::new)
+                : tripRepository.findByAreaIdAndOwnerId(areaId, userId_groupId).orElseThrow(NotAccessException::new);
+
+        if(userId_groupId != null) {
+            if(isGroupAccess) findArea(wantedTrip, areaId);
+            else findArea(wantedTrip, areaId, userId_groupId);
         }
+
+        List<PatientDrugJoinDto> patientsDrugs =
+                patientsDrugRepository.findByFiltersJoinWithDrugAndPatient(
+                                areaId, doctorId,
+                                deliveryStatus == null ? null : Objects.equals(DeliveryStatus.DELIVERED, deliveryStatus),
+                                drugId,
+                                startAdviceAt, endAdviceAt,
+                                startGiveAt, endGiveAt,
+                                giverId, 0, Integer.MAX_VALUE
+                        )
+                        .stream()
+                        .map(PatientDrugJoinDto::mapModelToDto)
+                        .collect(Collectors.toList());
+
+        Workbook workbook = ReportUtil.createWorkbook(patientDrugsReportHeaders);
+
+        AtomicInteger counter = new AtomicInteger(1);
+        Sheet sheet = workbook.getSheetAt(0);
+        patientsDrugs.forEach(patientDrugJoinDto -> {
+            Row r = sheet.createRow(counter.getAndIncrement());
+            patientDrugJoinDto.fillRowExcelFromDto(r);
+        });
+
+        prepareHttpServletResponse(response, workbook);
+    }
+
+    public void getAreaDrugReport(
+            final ObjectId userId_groupId,
+            final boolean isGroupAccess,
+            final ObjectId areaId,
+            HttpServletResponse response
+    ) {
+        Trip wantedTrip = userId_groupId == null ?
+                tripRepository.findByAreaId(areaId).orElseThrow(InvalidIdException::new)
+                : isGroupAccess
+                ? tripRepository.findByGroupIdAndAreaId(userId_groupId, areaId).orElseThrow(NotAccessException::new)
+                : tripRepository.findByAreaIdAndOwnerId(areaId, userId_groupId).orElseThrow(NotAccessException::new);
+
+        if(userId_groupId != null) {
+            if(isGroupAccess) findArea(wantedTrip, areaId);
+            else findArea(wantedTrip, areaId, userId_groupId);
+        }
+
+        List<DrugAggregationModel> info = patientsDrugRepository.findSumOfSuggestPerDrug(areaId);
+        Workbook workbook = ReportUtil.createWorkbook(drugsReportHeaders);
+
+        AtomicInteger counter = new AtomicInteger(1);
+        Sheet sheet = workbook.getSheetAt(0);
+        info.forEach(item -> {
+            Row r = sheet.createRow(counter.getAndIncrement());
+            r.createCell(0).setCellValue(item.getName());
+            r.createCell(1).setCellValue(item.getTotalCount());
+            r.createCell(2).setCellValue(item.getSumSuggestCount());
+            r.createCell(3).setCellValue(item.getSumGiveCount());
+            r.createCell(4).setCellValue(item.getReminder());
+        });
+
+        prepareHttpServletResponse(response, workbook);
     }
 }

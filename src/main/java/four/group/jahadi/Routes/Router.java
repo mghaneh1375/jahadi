@@ -87,7 +87,10 @@ public class Router {
                 return TokenInfo
                         .builder()
                         .userId(new ObjectId(claims.get("id").toString()))
-                        .groupId(new ObjectId(claims.get("groupId").toString()))
+                        .groupId(claims.containsKey("groupId")
+                                ? new ObjectId(claims.get("groupId").toString())
+                                : null
+                        )
                         .username(claims.getSubject())
                         .accesses((Collection<? extends GrantedAuthority>) claims.get("roles", List.class).stream().map(o -> Access.valueOf(((HashMap<?, ?>) o).get("authority").toString())).collect(Collectors.toList()))
                         .build();
