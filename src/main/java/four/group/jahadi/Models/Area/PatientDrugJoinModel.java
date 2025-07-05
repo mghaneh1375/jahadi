@@ -16,5 +16,6 @@ import lombok.Setter;
 public class PatientDrugJoinModel extends PatientDrug {
     private Drug drugInfo;
     private String doctorInfo;
+    private String giverInfo;
     private Patient patientInfo;
 }

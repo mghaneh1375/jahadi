@@ -61,13 +61,14 @@ public interface PatientsDrugRepository extends MongoRepository<PatientDrug, Obj
             "{$lookup: {from: 'drug', localField: 'drug_id', foreignField: '_id', as: 'drugInfo'}}",
             "{$lookup: {from: 'patient', localField: 'patient_id', foreignField: '_id', as: 'patientInfo'}}",
             "{$lookup: {from: 'user', localField: 'doctor_id', foreignField: '_id', as: 'doctorInfo'}}",
-//            "{$lookup: {from: 'user', localField: 'giver_id', foreignField: '_id', as: 'giverInfo'}}",
+            "{$lookup: {from: 'user', localField: 'giver_id', foreignField: '_id', as: 'giverInfo'}}",
             "{$unwind: '$drugInfo'}",
             "{$unwind: '$patientInfo'}",
             "{$unwind: '$doctorInfo'}",
-//            "{$unwind: '$giverInfo'}",
+            "{$unwind: {path: '$giverInfo', preserveNullAndEmptyArrays: true}}",
             "{ $project: {" +
                     "'doctorInfo': '$doctorInfo.name', " +
+                    "'giverInfo': '$giverInfo.name', " +
                     "howToUse: 1, amountOfUse: 1, useTime: 1," +
                     "suggestCount: 1, giveCount: 1, description: 1," +
                     "giveDescription: 1, createdAt: 1, giveAt: 1," +

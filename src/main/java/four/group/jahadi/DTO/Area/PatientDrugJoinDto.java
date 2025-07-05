@@ -52,6 +52,7 @@ public class PatientDrugJoinDto {
                 .howToUse(model.getHowToUse())
                 .suggestAt(model.getCreatedAt())
                 .giveAt(model.getGiveAt())
+                .giverName(model.getGiverInfo())
                 .patientName(model.getPatientInfo().getName())
                 .patientIdentifier(model.getPatientInfo().getIdentifier())
                 .doctorName(model.getDoctorInfo())
