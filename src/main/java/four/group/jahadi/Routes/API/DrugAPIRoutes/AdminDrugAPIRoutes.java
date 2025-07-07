@@ -1,6 +1,5 @@
 package four.group.jahadi.Routes.API.DrugAPIRoutes;
 
-import four.group.jahadi.DTO.DrugData;
 import four.group.jahadi.Models.Drug;
 import four.group.jahadi.Service.DrugService;
 import four.group.jahadi.Validator.ObjectIdConstraint;
@@ -11,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -62,5 +60,10 @@ public class AdminDrugAPIRoutes {
             @RequestBody List<ObjectId> drugs
     ) {
         drugService.setReplacements(drugId, drugs);
+    }
+
+    @GetMapping(value = "fillGroupIdInLogDoc")
+    public void fillGroupIdInLogDoc() {
+        drugService.fillGroupIdInLogDoc();
     }
 }

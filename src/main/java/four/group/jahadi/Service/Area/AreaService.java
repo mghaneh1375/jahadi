@@ -524,7 +524,8 @@ public class AreaService extends AbstractService<Area, AreaData> {
 
     public void remove(
             Trip trip, ObjectId areaId,
-            ObjectId userId, String username, boolean needRemove
+            ObjectId userId, String username,
+            boolean needRemove, ObjectId groupId
     ) {
         Optional<Area> first = trip
                 .getAreas()
@@ -565,7 +566,7 @@ public class AreaService extends AbstractService<Area, AreaData> {
         )
             throw new NotAccessException();
 
-        remove(trip, areaId, userId, username, true);
+        remove(trip, areaId, userId, username, true, groupId);
         tripRepository.save(trip);
     }
 

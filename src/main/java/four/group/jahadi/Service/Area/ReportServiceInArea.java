@@ -286,7 +286,7 @@ public class ReportServiceInArea {
             });
         }
 
-        prepareHttpServletResponse(response, workbook);
+        prepareHttpServletResponse(response, workbook, "moduleReport");
     }
 
     private final static List<String> patientDrugsReportHeaders =
@@ -366,7 +366,7 @@ public class ReportServiceInArea {
             patientDrugJoinDto.fillRowExcelFromDto(r);
         });
 
-        prepareHttpServletResponse(response, workbook);
+        prepareHttpServletResponse(response, workbook, "patientDrugReport");
     }
 
     public void getAreaDrugReport(
@@ -400,6 +400,6 @@ public class ReportServiceInArea {
             r.createCell(4).setCellValue(item.getReminder());
         });
 
-        prepareHttpServletResponse(response, workbook);
+        prepareHttpServletResponse(response, workbook, "areaDrugReport");
     }
 }

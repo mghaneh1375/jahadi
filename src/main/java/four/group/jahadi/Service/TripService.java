@@ -190,24 +190,28 @@ public class TripService extends AbstractService<Trip, TripStepData> {
         return null;
     }
 
-    public void removeTrip(Trip trip, ObjectId userId, String username) {
+    public void removeTrip(
+            Trip trip, ObjectId userId,
+            String username, ObjectId groupId
+    ) {
         if (trip.getStartAt() != null &&
                 Utility.getCurrLocalDateTime().isAfter(trip.getStartAt())
         )
             throw new InvalidFieldsException("اردو آغاز شده و امکان حدف آن وجود ندارد");
 
         if (trip.getAreas() != null)
-            trip.getAreas().forEach(area -> areaService.remove(trip, area.getId(), userId, username, false));
+            trip.getAreas().forEach(area -> areaService.remove(trip, area.getId(), userId, username, false, groupId));
 
         tripRepository.delete(trip);
     }
 
     public void removeTripFromProject(
             ObjectId projectId, ObjectId tripId,
-            ObjectId userId, String username
+            ObjectId userId, String username,
+            ObjectId groupId
     ) {
         Trip trip = tripRepository.findTripByProjectIdAndId(projectId, tripId).orElseThrow(InvalidIdException::new);
-        removeTrip(trip, userId, username);
+        removeTrip(trip, userId, username, groupId);
     }
 
     public void resetGroupAccessesForTrip(ObjectId projectId, ObjectId tripId, List<TripStep1Data> data) {

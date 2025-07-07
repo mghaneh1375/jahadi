@@ -7,10 +7,14 @@ import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Exception.NotAccessException;
 import four.group.jahadi.Models.Drug;
+import four.group.jahadi.Models.DrugJoinModel;
 import four.group.jahadi.Models.DrugLog;
+import four.group.jahadi.Models.DrugLogJoinModel;
 import four.group.jahadi.Repository.DrugLogRepository;
 import four.group.jahadi.Repository.DrugRepository;
+import four.group.jahadi.Repository.GroupRepository;
 import four.group.jahadi.Repository.WareHouseAccessForGroupRepository;
+import four.group.jahadi.Service.Area.ReportUtil;
 import four.group.jahadi.Utility.PairValue;
 import four.group.jahadi.Utility.Utility;
 import org.apache.poi.ss.usermodel.CellType;
@@ -25,11 +29,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static four.group.jahadi.Utility.Utility.*;
@@ -44,6 +51,8 @@ public class DrugService extends AbstractService<Drug, DrugData> {
     private DrugLogRepository drugLogRepository;
     @Autowired
     private WareHouseAccessForGroupRepository wareHouseAccessForGroupRepository;
+    @Autowired
+    private GroupRepository groupRepository;
 
     @Override
     public ResponseEntity<List<Drug>> list(Object... filters) {
@@ -67,8 +76,7 @@ public class DrugService extends AbstractService<Drug, DrugData> {
                     ),
                     HttpStatus.OK
             );
-        }
-        catch (Exception x) {
+        } catch (Exception x) {
             throw new InvalidFieldsException(x.getMessage());
         }
     }
@@ -108,7 +116,7 @@ public class DrugService extends AbstractService<Drug, DrugData> {
         ObjectId userId = (ObjectId) params[0];
         ObjectId groupId = (ObjectId) params[1];
         boolean hasGroupAccess = (boolean) params[2];
-        if(!hasGroupAccess &&
+        if (!hasGroupAccess &&
                 !wareHouseAccessForGroupRepository.existsDrugAccessByGroupIdAndUserId(groupId, userId)
         )
             throw new NotAccessException();
@@ -123,7 +131,8 @@ public class DrugService extends AbstractService<Drug, DrugData> {
                         .userId(userId)
                         .drugId(drug.getId())
                         .amount(drug.getAvailable())
-                        .desc("ایجاد دارو توسط ادمین")
+                        .groupId(groupId)
+                        .desc("ایجاد دارو توسط مسئول گروه")
                         .build()
         );
         return new ResponseEntity<>(drug, HttpStatus.OK);
@@ -134,7 +143,7 @@ public class DrugService extends AbstractService<Drug, DrugData> {
         ObjectId userId = (ObjectId) params[0];
         ObjectId groupId = (ObjectId) params[1];
         boolean hasGroupAccess = (boolean) params[2];
-        if(!hasGroupAccess &&
+        if (!hasGroupAccess &&
                 !wareHouseAccessForGroupRepository.existsDrugAccessByGroupIdAndUserId(groupId, userId)
         )
             throw new NotAccessException();
@@ -148,6 +157,7 @@ public class DrugService extends AbstractService<Drug, DrugData> {
                     .builder()
                     .drugId(drug.getId())
                     .userId(userId)
+                    .groupId(groupId)
                     .amount(drug.getAvailable() - oldAvailable)
                     .desc("ویرایش موجودی دارو توسط مسئول گروه")
                     .build();
@@ -183,7 +193,7 @@ public class DrugService extends AbstractService<Drug, DrugData> {
     }
 
     public void remove(ObjectId id, ObjectId userId, ObjectId groupId, boolean hasGroupAccess) {
-        if(!hasGroupAccess &&
+        if (!hasGroupAccess &&
                 !wareHouseAccessForGroupRepository.existsDrugAccessByGroupIdAndUserId(groupId, userId)
         )
             throw new NotAccessException();
@@ -363,5 +373,81 @@ public class DrugService extends AbstractService<Drug, DrugData> {
                         .collect(Collectors.toList()),
                 HttpStatus.OK
         );
+    }
+
+    private final static List<String> drugLogReportHeaders = new ArrayList<>() {
+        {
+            add("نام دارو");
+            add("دُز دارو");
+            add("نوع دارو");
+            add("تولید کننده دارو");
+            add("مکان دارو");
+            add("شماره قفسه دارو");
+            add("شماره جعبه دارو");
+            add("ورودی/خروجی");
+            add("تعداد");
+            add("گروه");
+            add("کاربر انجام دهنده");
+            add("توضیحات");
+            add("تاریخ");
+        }
+    };
+
+    private final static List<String> drugReportHeaders = new ArrayList<>() {
+        {
+            add("نام گروه");
+            add("نام دارو");
+            add("دُز دارو");
+            add("نوع دارو");
+            add("تولید کننده دارو");
+            add("مکان دارو");
+            add("قیمت دارو");
+            add("شماره قفسه دارو");
+            add("شماره جعبه دارو");
+            add("تاریخ ایجاد");
+        }
+    };
+
+    public void fillGroupIdInLogDoc() {
+        List<DrugLog> logs = drugLogRepository.findByGroupIdIsNull();
+        ObjectId groupId = groupRepository.findAll().get(0).getId();
+        logs.forEach(drugLog -> {
+            Optional<Drug> drugOptional = drugRepository.findById(drugLog.getDrugId());
+            if (drugOptional.isPresent()) {
+                drugLog.setGroupId(
+                        drugOptional.get().getGroupId() == null
+                                ? groupId
+                                : drugOptional.get().getGroupId()
+                );
+            } else
+                drugLog.setGroupId(groupId);
+        });
+        drugLogRepository.saveAll(logs);
+    }
+
+    public void logReport(
+            ObjectId drugId, ObjectId groupId, ObjectId userId, ObjectId areaId,
+            LocalDateTime from, LocalDateTime to,
+            HttpServletResponse response
+    ) {
+        List<DrugLogJoinModel> logs = drugLogRepository.findWithJoin(
+                drugId, userId, areaId, from, to, groupId
+        );
+        Workbook workbook = ReportUtil.createWorkbook(drugLogReportHeaders);
+        Sheet sheet = workbook.getSheetAt(0);
+        AtomicInteger counter = new AtomicInteger(1);
+
+        logs.forEach(log -> log.fillExcelRow(sheet.createRow(counter.getAndIncrement())));
+        ReportUtil.prepareHttpServletResponse(response, workbook, "drugLog");
+    }
+
+    public void report(ObjectId groupId, HttpServletResponse response) {
+        List<DrugJoinModel> drugs = drugRepository.findAllByGroupId(groupId);
+        Workbook workbook = ReportUtil.createWorkbook(drugReportHeaders);
+        Sheet sheet = workbook.getSheetAt(0);
+        AtomicInteger counter = new AtomicInteger(1);
+
+        drugs.forEach(drug -> drug.fillExcelRow(sheet.createRow(counter.getAndIncrement())));
+        ReportUtil.prepareHttpServletResponse(response, workbook, "drugReport");
     }
 }

@@ -135,14 +135,14 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
     }
 
 //    @Transactional
-    public void remove(ObjectId id, ObjectId userId, String username) {
+    public void remove(ObjectId id, ObjectId userId, String username, ObjectId groupId) {
         Project project = projectRepository.findById(id).orElseThrow(InvalidIdException::new);
         if (project.getStartAt().isAfter(Utility.getCurrLocalDateTime()))
             throw new InvalidFieldsException("پروژه آغاز شده و امکان حدف آن وجود ندارد");
 
         tripRepository
                 .findTripByProjectId(project.getId())
-                .forEach(trip -> tripService.removeTrip(trip, userId, username));
+                .forEach(trip -> tripService.removeTrip(trip, userId, username, groupId));
         projectRepository.delete(project);
     }
 

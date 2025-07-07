@@ -121,6 +121,7 @@ public class DrugServiceInArea {
                                         .drugId(drug.getId())
                                         .userId(userId)
                                         .areaId(areaId)
+                                        .groupId(groupId)
                                         .amount(-dto.getTotalCount())
                                         .desc(msg)
                                         .build()
@@ -184,6 +185,7 @@ public class DrugServiceInArea {
                                         .drugId(drug.getId())
                                         .userId(userId)
                                         .areaId(areaId)
+                                        .groupId(groupId)
                                         .amount(areaDrug.getReminder())
                                         .desc(msg)
                                         .build()
@@ -497,12 +499,15 @@ public class DrugServiceInArea {
     //    @Transactional
     public void returnAllDrugs(
             ObjectId userId, String username,
-            ObjectId areaId
+            ObjectId areaId, ObjectId groupId
     ) {
         PairValue p = checkAccess(userId, areaId);
         Area foundArea = (Area) p.getKey();
         String tripName = p.getValue().toString();
-        doReturnAllDrugs(foundArea.getName(), tripName, username, areaId, userId);
+        doReturnAllDrugs(
+                foundArea.getName(), tripName, username,
+                areaId, userId, groupId
+        );
     }
 
     public void returnDrug(
@@ -523,7 +528,7 @@ public class DrugServiceInArea {
                         doReturnDrug(
                                 area.getName(), trip.getName(),
                                 username, areaId, userId,
-                                drugId, amount
+                                drugId, amount, groupId
                         )
                 );
     }
@@ -532,7 +537,7 @@ public class DrugServiceInArea {
             String areaName, String tripName,
             String username, ObjectId areaId,
             ObjectId userId, ObjectId drugId,
-            int amount
+            int amount, ObjectId groupId
     ) {
         AreaDrugs areaDrug = areaDrugsRepository.findByAreaIdAndDrugId(areaId, drugId)
                 .orElseThrow(InvalidIdException::new);
@@ -555,6 +560,7 @@ public class DrugServiceInArea {
                 .drugId(drug.getId())
                 .userId(userId)
                 .areaId(areaId)
+                .groupId(groupId)
                 .amount(amount)
                 .desc(msg)
                 .build());
@@ -565,7 +571,7 @@ public class DrugServiceInArea {
     public void doReturnAllDrugs(
             String areaName, String tripName,
             String username, ObjectId areaId,
-            ObjectId userId
+            ObjectId userId, ObjectId groupId
     ) {
         List<AreaDrugs> areaDrugs = areaDrugsRepository.findAvailableDrugsByAreaId(areaId);
         if (areaDrugs.size() == 0)
@@ -589,6 +595,7 @@ public class DrugServiceInArea {
                                     .drugId(drug.getId())
                                     .userId(userId)
                                     .areaId(areaId)
+                                    .groupId(groupId)
                                     .amount(areaDrugs1.getReminder())
                                     .desc(msg)
                                     .build()
@@ -606,6 +613,6 @@ public class DrugServiceInArea {
             ObjectId userId, String username,
             ObjectId areaId, String areaName, String tripName
     ) {
-        doReturnAllDrugs(areaName, tripName, username, areaId, userId);
+        doReturnAllDrugs(areaName, tripName, username, areaId, userId, null);
     }
 }

@@ -212,11 +212,11 @@ public class ReportUtil {
         });
     }
 
-    static void prepareHttpServletResponse(HttpServletResponse response, Workbook workbook) {
+    public static void prepareHttpServletResponse(HttpServletResponse response, Workbook workbook, String reportName) {
         response.setContentType("application/vnd.ms-excel");
         response.setHeader(
                 HttpHeaders.CONTENT_DISPOSITION,
-                ContentDisposition.builder("attachment").filename("module.xlsx").build().toString()
+                ContentDisposition.builder("attachment").filename(reportName + ".xlsx").build().toString()
         );
         try {
             ServletOutputStream outputStream = response.getOutputStream();
@@ -228,7 +228,7 @@ public class ReportUtil {
         }
     }
 
-    static Workbook createWorkbook(List<String> headers) {
+    public static Workbook createWorkbook(List<String> headers) {
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet();
         Row row = sheet.createRow(0);

@@ -70,7 +70,7 @@ public class ProjectAPIRoutes extends Router {
             @PathVariable @ObjectIdConstraint ObjectId tripId
     ) throws UnAuthException, NotActivateAccountException {
         User user = getUser(request);
-        tripService.removeTripFromProject(projectId, tripId, user.getId(), user.getNid());
+        tripService.removeTripFromProject(projectId, tripId, user.getId(), user.getNid(), null);
     }
 
     @DeleteMapping(value = "/remove/{projectId}")
@@ -80,7 +80,7 @@ public class ProjectAPIRoutes extends Router {
             @PathVariable @ObjectIdConstraint ObjectId projectId
     ) throws UnAuthException, NotActivateAccountException {
         User user = getUser(request);
-        projectService.remove(projectId, user.getId(), user.getNid());
+        projectService.remove(projectId, user.getId(), user.getNid(), null);
     }
 
     @PutMapping(value = "/update/{projectId}")

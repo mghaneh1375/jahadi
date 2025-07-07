@@ -46,7 +46,10 @@ public class RegionDrugAPIRoutes extends Router {
             @PathVariable @ObjectIdConstraint ObjectId areaId
     ) {
         TokenInfo tokenInfo = getTokenInfo(request);
-        drugServiceInArea.returnAllDrugs(tokenInfo.getUserId(), tokenInfo.getUsername(), areaId);
+        drugServiceInArea.returnAllDrugs(
+                tokenInfo.getUserId(), tokenInfo.getUsername(),
+                areaId, tokenInfo.getGroupId()
+        );
     }
 
     @PutMapping(value = "returnDrug/{areaId}/{drugId}/{amount}")

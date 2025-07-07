@@ -4,6 +4,7 @@ import four.group.jahadi.DTO.DrugData;
 import four.group.jahadi.DTO.ErrorRow;
 import four.group.jahadi.Enums.Access;
 import four.group.jahadi.Enums.Drug.DrugType;
+import four.group.jahadi.Exception.NotAccessException;
 import four.group.jahadi.Exception.NotActivateAccountException;
 import four.group.jahadi.Exception.UnAuthException;
 import four.group.jahadi.Models.Area.JoinedAreaDrugs;
@@ -12,6 +13,7 @@ import four.group.jahadi.Models.TokenInfo;
 import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Service.Area.DrugServiceInArea;
 import four.group.jahadi.Service.DrugService;
+import four.group.jahadi.Service.JahadgarDrugService;
 import four.group.jahadi.Utility.Utility;
 import four.group.jahadi.Validator.ObjectIdConstraint;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -36,6 +39,9 @@ public class DrugAPIRoutes extends Router {
 
     @Autowired
     private DrugServiceInArea drugServiceInArea;
+
+    @Autowired
+    private JahadgarDrugService jahadgarDrugService;
 
     @DeleteMapping(value = "remove/{id}")
     public void remove(
@@ -125,6 +131,74 @@ public class DrugAPIRoutes extends Router {
                 name, drugType,
                 fromExpireAt == null ? null : Utility.getLastLocalDateTime(Utility.convertJalaliToGregorianDate(fromExpireAt)),
                 toExpireAt == null ? null : Utility.getLastLocalDateTime(Utility.convertJalaliToGregorianDate(toExpireAt))
+        );
+    }
+
+    @GetMapping(value = "logReport")
+    @Operation(summary = "گرفتن خروجی اکسل از لاگ های پر و خالی شدن انبار دارو")
+    public void logReport(
+            HttpServletRequest request,
+            @RequestParam(name = "drugId", required = false) ObjectId drugId,
+            @RequestParam(name = "groupId", required = false) ObjectId groupId,
+            @RequestParam(name = "userId", required = false) ObjectId userId,
+            @RequestParam(name = "areaId", required = false) ObjectId areaId,
+            @RequestParam(required = false, name = "fromExpireAt") String fromExpireAt,
+            @RequestParam(required = false, name = "toExpireAt") String toExpireAt,
+            HttpServletResponse response
+    ) {
+        TokenInfo fullTokenInfo = getFullTokenInfo(request);
+        if(
+                !fullTokenInfo.getAccesses().contains(Access.GROUP) &&
+                        !fullTokenInfo.getAccesses().contains(Access.ADMIN)
+        ) {
+            ResponseEntity<Boolean> hasAccess = jahadgarDrugService.checkAccessToWareHouse(
+                    fullTokenInfo.getGroupId(),
+                    fullTokenInfo.getUserId()
+            );
+            if(hasAccess == null || hasAccess.getBody() == null ||
+                    !hasAccess.getBody()
+            )
+                throw new NotAccessException();
+        }
+
+        drugService.logReport(
+                drugId,
+                fullTokenInfo.getAccesses().contains(Access.ADMIN)
+                        ? groupId
+                        : fullTokenInfo.getGroupId(),
+                userId, areaId,
+                fromExpireAt == null ? null : Utility.getLastLocalDateTime(Utility.convertJalaliToGregorianDate(fromExpireAt)),
+                toExpireAt == null ? null : Utility.getLastLocalDateTime(Utility.convertJalaliToGregorianDate(toExpireAt)),
+                response
+        );
+    }
+
+    @GetMapping(value = "report")
+    public void report(
+            HttpServletRequest request,
+            @RequestParam(name = "groupId", required = false) ObjectId groupId,
+            HttpServletResponse response
+    ) {
+        TokenInfo fullTokenInfo = getFullTokenInfo(request);
+        if(
+                !fullTokenInfo.getAccesses().contains(Access.GROUP) &&
+                        !fullTokenInfo.getAccesses().contains(Access.ADMIN)
+        ) {
+            ResponseEntity<Boolean> hasAccess = jahadgarDrugService.checkAccessToWareHouse(
+                    fullTokenInfo.getGroupId(),
+                    fullTokenInfo.getUserId()
+            );
+            if(hasAccess == null || hasAccess.getBody() == null ||
+                    !hasAccess.getBody()
+            )
+                throw new NotAccessException();
+        }
+
+        drugService.report(
+                fullTokenInfo.getAccesses().contains(Access.ADMIN)
+                        ? groupId
+                        : fullTokenInfo.getGroupId(),
+                response
         );
     }
 }

@@ -3,7 +3,9 @@ package four.group.jahadi.Repository;
 import four.group.jahadi.Enums.Drug.DrugLocation;
 import four.group.jahadi.Enums.Drug.DrugType;
 import four.group.jahadi.Models.Drug;
+import four.group.jahadi.Models.DrugJoinModel;
 import org.bson.types.ObjectId;
+import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -20,6 +22,15 @@ public interface DrugRepository extends MongoRepository<Drug, ObjectId>, Filtera
 
     @Query(value = "{_id: {$in: ?0}, groupId: ?1}")
     List<Drug> findAllByIdsAndGroupId(List<ObjectId> ids, ObjectId groupId);
+
+    @Aggregation(pipeline = {
+            "{ $match:  {$and :[" +
+                    "?#{ [0] == null ? { '_id': {$exists: true}} : { 'group_id': [0] } }," +
+                    "]}}",
+            "{$lookup: {from: 'group', localField: 'group_id', foreignField: '_id', as: 'groupInfo'}}",
+            "{$unwind: '$groupInfo'}"
+    })
+    List<DrugJoinModel> findAllByGroupId(ObjectId groupId);
 
     @Query(value = "{ _id: {$in: ?0}}", fields = "{ 'name': 1, 'howToUse': 1, 'description': 1 }")
     List<Drug> findByIds(List<ObjectId> ids);
