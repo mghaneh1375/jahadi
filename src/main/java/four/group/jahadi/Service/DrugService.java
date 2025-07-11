@@ -405,6 +405,10 @@ public class DrugService extends AbstractService<Drug, DrugData> {
             add("شماره قفسه دارو");
             add("شماره جعبه دارو");
             add("تاریخ ایجاد");
+            add("تعداد موجود");
+            add("تعداد پک موجود");
+            add("قیمت");
+            add("توضیحات");
         }
     };
 

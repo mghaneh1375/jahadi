@@ -1,6 +1,7 @@
 package four.group.jahadi.Repository.Area;
 
 import four.group.jahadi.Models.Area.PatientJoinArea;
+import four.group.jahadi.Models.Area.PatientJoinForReferrals;
 import four.group.jahadi.Models.Patient;
 import four.group.jahadi.Models.Area.PatientsInArea;
 import four.group.jahadi.Repository.FilterableRepository;
@@ -70,5 +71,12 @@ public interface PatientsInAreaRepository extends MongoRepository<PatientsInArea
 
     @Query(value = "{areaId: ?0, referrals: { $elemMatch: {moduleId: {$in: ?1}, forms: {$exists: true}, 'forms.subModuleId': {$in: ?2}} } }", fields = "{_id: 1, patientId: 1}")
     List<PatientsInArea> findByAreaIdAndModuleIdInAndSubModuleIdIn(ObjectId areaId, List<ObjectId> moduleIds, List<ObjectId> subModuleId);
+
+    @Aggregation(pipeline = {
+            "{$match: {$and: [{areaId: ?0}, {referrals: { $elemMatch: {moduleId: {$in: ?1}, forms: {$exists: true}, 'forms.subModuleId': {$in: ?2}} }}]}}",
+            "{$lookup: {from: 'patient', localField: 'patient_id', foreignField: '_id', as: 'patientInfo'}}",
+            "{$unwind: '$patientInfo'}",
+    })
+    List<PatientJoinForReferrals> findByAreaIdAndModuleIdInAndSubModuleIdInWithJoin(ObjectId areaId, List<ObjectId> moduleIds, List<ObjectId> subModuleId);
 
 }

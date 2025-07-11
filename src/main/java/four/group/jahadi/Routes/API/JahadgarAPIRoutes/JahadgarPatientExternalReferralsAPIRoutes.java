@@ -21,6 +21,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -80,6 +81,26 @@ public class JahadgarPatientExternalReferralsAPIRoutes extends Router {
                 getGroup(request), areaId, patientId
         );
     }
+
+    @GetMapping(value = "report/{areaId}")
+    public void getPatientExternalReferralsReport(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId,
+            HttpServletResponse response
+    ) {
+        TokenInfo fullTokenInfo = getFullTokenInfo(request);
+        patientExternalReferralsService.getPatientExternalReferralsReport(
+                fullTokenInfo.getAccesses().contains(Access.GROUP) ||
+                        fullTokenInfo.getAccesses().contains(Access.ADMIN)
+                        ? null
+                        : fullTokenInfo.getUserId(),
+                fullTokenInfo.getAccesses().contains(Access.ADMIN)
+                        ? null
+                        : getGroup(request), areaId,
+                response
+        );
+    }
+
 
     @PutMapping(value = "setPatientExternalReferralsTrackingStatus")
     @Operation(

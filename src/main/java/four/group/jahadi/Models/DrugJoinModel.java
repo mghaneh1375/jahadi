@@ -19,5 +19,9 @@ public class DrugJoinModel extends Drug {
         row.createCell(7).setCellValue(this.getShelfNo());
         row.createCell(8).setCellValue(this.getBoxNo());
         row.createCell(9).setCellValue(Utility.convertUTCDateToJalali(this.getCreatedAt()));
+        row.createCell(10).setCellValue(this.getAvailable());
+        row.createCell(11).setCellValue(this.getAvailablePack());
+        row.createCell(12).setCellValue(this.getPrice());
+        row.createCell(13).setCellValue(this.getDescription());
     }
 }

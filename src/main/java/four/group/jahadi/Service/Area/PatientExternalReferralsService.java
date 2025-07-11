@@ -8,16 +8,16 @@ import four.group.jahadi.Enums.Module.AnswerType;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Exception.NotAccessException;
 import four.group.jahadi.Models.*;
-import four.group.jahadi.Models.Area.PatientExternalForm;
-import four.group.jahadi.Models.Area.PatientForm;
-import four.group.jahadi.Models.Area.PatientReferral;
-import four.group.jahadi.Models.Area.PatientsInArea;
+import four.group.jahadi.Models.Area.*;
 import four.group.jahadi.Models.Module;
 import four.group.jahadi.Models.Question.SimpleQuestion;
 import four.group.jahadi.Repository.*;
 import four.group.jahadi.Repository.Area.PatientsInAreaRepository;
 import four.group.jahadi.Utility.PairValue;
 import four.group.jahadi.Utility.Utility;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
@@ -25,8 +25,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Service
@@ -56,18 +58,17 @@ public class PatientExternalReferralsService {
                 .stream()
                 .map(Module::getId)
                 .collect(Collectors.toList());
-        List<ObjectId> subModuleIds = externalReferralModules
+        List<SubModule> subModules = externalReferralModules
                 .stream()
                 .map(module -> module
                         .getSubModules()
                         .stream()
                         .filter(subModule -> subModule.getName().equalsIgnoreCase("ارجاع به مراکز درمانی"))
-                        .map(SubModule::getId)
                         .collect(Collectors.toList()))
                 .flatMap(List::stream)
                 .collect(Collectors.toList());
 
-        return new PairValue(moduleIds, subModuleIds);
+        return new PairValue(moduleIds, subModules);
     }
 
     private PairValue getExternalReferralsSubModules() {
@@ -102,7 +103,8 @@ public class PatientExternalReferralsService {
 
         PairValue pairValue = getExternalReferralsSubModulesId();
         List<ObjectId> patientsId = patientsInAreaRepository.findByAreaIdAndModuleIdInAndSubModuleIdIn(
-                        areaId, (List<ObjectId>) pairValue.getKey(), (List<ObjectId>) pairValue.getValue()
+                        areaId, (List<ObjectId>) pairValue.getKey(),
+                        ((List<SubModule>) pairValue.getValue()).stream().map(SubModule::getId).collect(Collectors.toList())
                 )
                 .stream()
                 .map(PatientsInArea::getPatientId)
@@ -161,85 +163,190 @@ public class PatientExternalReferralsService {
                     .getForms()
                     .stream()
                     .filter(patientForm -> subModuleIds.contains(patientForm.getSubModuleId()))
-                    .forEach(patientForm -> {
-                        if (!moduleHashMap.containsKey(patientReferral.getModuleId())) {
-                            moduleRepository
-                                    .findDigestById(patientReferral.getModuleId())
-                                    .ifPresent(module -> moduleHashMap.put(
-                                            patientReferral.getModuleId(), module.getName()
-                                    ));
-                        }
-                        if (patientForm.getDoctorId() != null &&
-                                !doctorsHashMap.containsKey(patientForm.getDoctorId())) {
-                            userRepository
-                                    .findDigestById(patientForm.getDoctorId())
-                                    .ifPresent(user -> doctorsHashMap.put(
-                                            patientForm.getDoctorId(), user.getName()
-                                    ));
-                        }
-
-                        PatientExternalForm form = PatientExternalForm
-                                .builder()
-                                .referredFrom(moduleHashMap.get(patientReferral.getModuleId()))
-                                .createdAt(Utility.convertUTCDateToJalali(patientForm.getCreatedAt()))
-                                .doctor(
-                                        patientForm.getDoctorId() == null || !doctorsHashMap.containsKey(patientForm.getDoctorId())
-                                                ? "" : doctorsHashMap.get(patientForm.getDoctorId())
-                                )
-                                .build();
-
-                        SubModule subModule = subModules
-                                .stream()
-                                .filter(subModule1 -> subModule1.getId().equals(patientForm.getSubModuleId()))
-                                .findFirst()
-                                .get();
-
-                        subModule
-                                .getQuestions()
-                                .stream()
-                                .filter(question -> ((SimpleQuestion) question).getAnswerType().equals(AnswerType.TEXT))
-                                .findFirst()
-                                .ifPresent(question -> {
-                                    patientForm
-                                            .getAnswers()
-                                            .stream()
-                                            .filter(patientAnswer -> patientAnswer.getQuestionId().equals(question.getId()))
-                                            .findFirst()
-                                            .ifPresent(patientAnswer -> form.setReferredTo(patientAnswer.getAnswer().toString()));
-                                });
-
-                        subModule
-                                .getQuestions()
-                                .stream()
-                                .filter(question -> ((SimpleQuestion) question).getAnswerType().equals(AnswerType.LONG_TEXT))
-                                .findFirst()
-                                .ifPresent(question -> {
-                                    patientForm
-                                            .getAnswers()
-                                            .stream()
-                                            .filter(patientAnswer -> patientAnswer.getQuestionId().equals(question.getId()))
-                                            .findFirst()
-                                            .ifPresent(patientAnswer -> form.setReason(patientAnswer.getAnswer().toString()));
-                                });
-
-                        if (form.getReferredTo() == null)
-                            form.setReferredTo("");
-
-                        form.setStatus(
-                                patientForm.getExternalReferralTrackingStatus() == null
-                                        ? "تعیین نشده"
-                                        : patientForm.getExternalReferralTrackingStatus().getFaTranslate());
-
-                        form.setStatusLastModifiedAt(patientForm.getExternalReferralTrackingStatusLastModifiedAt());
-                        form.setFormId(patientForm.getId());
-                        patientExternalForms.add(form);
-                    });
+                    .forEach(patientForm -> patientExternalForms.add(
+                            buildPatientExternalForm(
+                                    patientForm, moduleHashMap,
+                                    doctorsHashMap, patientReferral,
+                                    subModules
+                            )
+                    ));
         });
 
         return new ResponseEntity<>(
                 patientExternalForms,
                 HttpStatus.OK
         );
+    }
+
+    private void fillPatientExternalForm(
+            List<SubModule> subModules,
+            PatientForm patientForm,
+            PatientExternalForm form
+    ) {
+        SubModule subModule = subModules
+                .stream()
+                .filter(subModule1 -> subModule1.getId().equals(patientForm.getSubModuleId()))
+                .findFirst()
+                .get();
+
+        subModule
+                .getQuestions()
+                .stream()
+                .filter(question -> ((SimpleQuestion) question).getAnswerType().equals(AnswerType.TEXT))
+                .findFirst()
+                .ifPresent(question -> {
+                    patientForm
+                            .getAnswers()
+                            .stream()
+                            .filter(patientAnswer -> patientAnswer.getQuestionId().equals(question.getId()))
+                            .findFirst()
+                            .ifPresent(patientAnswer -> form.setReferredTo(patientAnswer.getAnswer().toString()));
+                });
+
+        subModule
+                .getQuestions()
+                .stream()
+                .filter(question -> ((SimpleQuestion) question).getAnswerType().equals(AnswerType.LONG_TEXT))
+                .findFirst()
+                .ifPresent(question -> {
+                    patientForm
+                            .getAnswers()
+                            .stream()
+                            .filter(patientAnswer -> patientAnswer.getQuestionId().equals(question.getId()))
+                            .findFirst()
+                            .ifPresent(patientAnswer -> form.setReason(patientAnswer.getAnswer().toString()));
+                });
+
+        if (form.getReferredTo() == null)
+            form.setReferredTo("");
+    }
+
+    private PatientExternalForm buildPatientExternalForm(
+            PatientForm patientForm,
+            HashMap<ObjectId, String> moduleHashMap,
+            HashMap<ObjectId, String> doctorsHashMap,
+            PatientReferral patientReferral,
+            List<SubModule> subModules
+    ) {
+        if (!moduleHashMap.containsKey(patientReferral.getModuleId())) {
+            moduleRepository
+                    .findDigestById(patientReferral.getModuleId())
+                    .ifPresent(module -> moduleHashMap.put(
+                            patientReferral.getModuleId(), module.getName()
+                    ));
+        }
+        if (patientForm.getDoctorId() != null &&
+                !doctorsHashMap.containsKey(patientForm.getDoctorId())) {
+            userRepository
+                    .findDigestById(patientForm.getDoctorId())
+                    .ifPresent(user -> doctorsHashMap.put(
+                            patientForm.getDoctorId(), user.getName()
+                    ));
+        }
+
+        PatientExternalForm form = PatientExternalForm
+                .builder()
+                .referredFrom(moduleHashMap.get(patientReferral.getModuleId()))
+                .createdAt(Utility.convertUTCDateToJalali(patientForm.getCreatedAt()))
+                .doctor(
+                        patientForm.getDoctorId() == null || !doctorsHashMap.containsKey(patientForm.getDoctorId())
+                                ? "" : doctorsHashMap.get(patientForm.getDoctorId())
+                )
+                .build();
+
+        fillPatientExternalForm(subModules, patientForm, form);
+        form.setStatus(
+                patientForm.getExternalReferralTrackingStatus() == null
+                        ? "تعیین نشده"
+                        : patientForm.getExternalReferralTrackingStatus().getFaTranslate());
+
+        form.setStatusLastModifiedAt(patientForm.getExternalReferralTrackingStatusLastModifiedAt());
+        form.setFormId(patientForm.getId());
+
+        return form;
+    }
+
+    private static final List<String> headers = new ArrayList<>() {
+        {
+            add("نام بیمار");
+            add("شماره همراه بیمار");
+            add("کد بیمار");
+            add("ارجاع از");
+            add("ارجاع به");
+            add("دلیل ارجاع");
+            add("زمان ارجاع");
+            add("دکتر ارجاع دهنده");
+            add("وضعیت پیگیری");
+            add("زمان پیگیری");
+        }
+    };
+
+    public void getPatientExternalReferralsReport(
+            ObjectId userId, ObjectId groupId, ObjectId areaId,
+            HttpServletResponse response
+    ) {
+        if ((userId != null &&
+                !externalReferralAccessForGroupRepository.existsAccessByGroupIdAndUserId(groupId, userId)) ||
+                (
+                        groupId != null && !tripRepository.existByGroupIdAndAreaId(groupId, areaId)
+                )
+        )
+            throw new NotAccessException();
+
+        PairValue pairValue = getExternalReferralsSubModulesId();
+        List<PatientJoinForReferrals> patientsInfo = patientsInAreaRepository.findByAreaIdAndModuleIdInAndSubModuleIdInWithJoin(
+                areaId, (List<ObjectId>) pairValue.getKey(),
+                ((List<SubModule>) pairValue.getValue()).stream().map(SubModule::getId).collect(Collectors.toList())
+        );
+
+        List<ObjectId> moduleIds = (List<ObjectId>) pairValue.getKey();
+        List<SubModule> subModules = (List<SubModule>) pairValue.getValue();
+        HashMap<ObjectId, String> moduleHashMap = new HashMap<>();
+        HashMap<ObjectId, String> doctorsHashMap = new HashMap<>();
+        List<ObjectId> subModuleIds =
+                subModules
+                        .stream()
+                        .map(SubModule::getId)
+                        .collect(Collectors.toList());
+
+        Workbook workbook = ReportUtil.createWorkbook(headers);
+        Sheet sheet = workbook.getSheetAt(0);
+        AtomicInteger rowCounter = new AtomicInteger(1);
+
+        patientsInfo.forEach(patientJoinForReferrals -> {
+            List<PatientReferral> referrals = patientJoinForReferrals
+                    .getReferrals()
+                    .stream()
+                    .filter(patientReferral -> moduleIds.contains(patientReferral.getModuleId()) && patientReferral.getForms() != null && patientReferral.getForms().size() > 0)
+                    .collect(Collectors.toList());
+
+            referrals.forEach(patientReferral -> {
+                Row row = sheet.createRow(rowCounter.getAndIncrement());
+                AtomicInteger colCounter = new AtomicInteger(0);
+                row.createCell(colCounter.getAndIncrement()).setCellValue(patientJoinForReferrals.getPatientInfo().getName());
+                row.createCell(colCounter.getAndIncrement()).setCellValue(patientJoinForReferrals.getPatientInfo().getPhone());
+                row.createCell(colCounter.getAndIncrement()).setCellValue(patientJoinForReferrals.getPatientInfo().getPatientNo());
+
+                patientReferral
+                        .getForms()
+                        .stream()
+                        .filter(patientForm -> subModuleIds.contains(patientForm.getSubModuleId()))
+                        .forEach(patientForm -> {
+                                    buildPatientExternalForm(
+                                            patientForm, moduleHashMap,
+                                            doctorsHashMap, patientReferral,
+                                            subModules
+                                    ).fillExcelRow(row, colCounter);
+                                    externalReferralRepository.findServices(
+                                            patientJoinForReferrals.getPatientInfo().getId(),
+                                            areaId, patientForm.getId()
+                                    ).forEach(externalReferralService -> externalReferralService.fillExcelRow(row, colCounter));
+                                }
+                        );
+            });
+        });
+
+        ReportUtil.prepareHttpServletResponse(response, workbook, "external_referral_report");
     }
 
     private Pair<ObjectId, PatientForm> findPatientForm(

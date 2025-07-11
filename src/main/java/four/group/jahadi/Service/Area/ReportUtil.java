@@ -239,7 +239,13 @@ public class ReportUtil {
         font.setBold(true);
         parentCellStyle.setFont(font);
         AtomicInteger counter = new AtomicInteger(0);
+
         headers.forEach(header -> {
+            if(header.contains("توضیح") || header.contains("شرح"))
+                sheet.setColumnWidth(counter.get(), 256 * 100);
+            else
+                sheet.setColumnWidth(counter.get(), 256 * Math.max(header.length(), 20));
+
             Cell cell = row.createCell(counter.getAndIncrement());
             cell.setCellStyle(parentCellStyle);
             cell.setCellValue(header);
