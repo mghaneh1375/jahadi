@@ -5,6 +5,7 @@ import four.group.jahadi.DTO.Region.RegionRunInfoData;
 import four.group.jahadi.DTO.Region.RegionSendNotifData;
 import four.group.jahadi.DTO.UpdatePresenceList;
 import four.group.jahadi.Enums.Access;
+import four.group.jahadi.Enums.Status;
 import four.group.jahadi.Models.Area.AreaDates;
 import four.group.jahadi.Models.TokenInfo;
 import four.group.jahadi.Models.Trip;
@@ -57,9 +58,12 @@ public class RegionManageAPIRoutes extends Router {
     @GetMapping(value = "getGroupTrips")
     @ResponseBody
     @Operation(summary = "گرفتن لیستی از اردوهایی که متعلق به یک گروه خاص می باشد و هنوز تمام نشده است توسط مسئول انبار یا مسئول ارجاع خارجی")
-    public ResponseEntity<List<AreaDigest>> getGroupTrips(HttpServletRequest request) {
+    public ResponseEntity<List<AreaDigest>> getGroupTrips(
+            HttpServletRequest request,
+            @RequestParam(required = false, name = "tripStatus") Status tripStatus
+    ) {
         TokenInfo tokenInfo = getTokenInfo(request);
-        return areaService.getGroupTrips(tokenInfo.getUserId(), tokenInfo.getGroupId());
+        return areaService.getGroupTrips(tokenInfo.getUserId(), tokenInfo.getGroupId(), tripStatus);
     }
 
     @GetMapping(value = "dashboard/{areaId}")

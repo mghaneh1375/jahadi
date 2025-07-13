@@ -11,6 +11,7 @@ import four.group.jahadi.DTO.Region.RegionRunInfoData;
 import four.group.jahadi.DTO.Region.RegionSendNotifData;
 import four.group.jahadi.DTO.UpdatePresenceList;
 import four.group.jahadi.Enums.Sex;
+import four.group.jahadi.Enums.Status;
 import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Exception.NotAccessException;
@@ -269,7 +270,7 @@ public class AreaService extends AbstractService<Area, AreaData> {
         return new ResponseEntity<>(areaDigests, HttpStatus.OK);
     }
 
-    public ResponseEntity<List<AreaDigest>> getGroupTrips(ObjectId userId, ObjectId groupId) {
+    public ResponseEntity<List<AreaDigest>> getGroupTrips(ObjectId userId, ObjectId groupId, Status tripStatus) {
         if (!wareHouseAccessForGroupRepository.existsAccessByGroupIdAndUserId(groupId, userId) &&
                 !externalReferralAccessForGroupRepository.existsAccessByGroupIdAndUserId(groupId, userId)
         )
@@ -277,7 +278,25 @@ public class AreaService extends AbstractService<Area, AreaData> {
 
         List<Trip> trips = tripRepository.findDigestTripInfoProjectsByGroupId(groupId);
         List<AreaDigest> digests = new ArrayList<>();
+        final LocalDateTime curr = getCurrLocalDateTime();
         trips.forEach(trip -> {
+            if(tripStatus != null) {
+                switch (tripStatus) {
+                    case FINISHED:
+                        if(trip.getEndAt().isAfter(curr))
+                            return;
+                        break;
+                    case NOT_START:
+                        if(trip.getStartAt().isBefore(curr))
+                            return;
+                        break;
+                    case IN_PROGRESS:
+                        if(trip.getEndAt().isBefore(curr) || trip.getStartAt().isAfter(curr))
+                            return;
+                        break;
+                }
+            }
+
             digests.add(
                     AreaDigest
                             .builder()
