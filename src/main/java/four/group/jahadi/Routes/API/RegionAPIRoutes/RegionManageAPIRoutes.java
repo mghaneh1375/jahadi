@@ -62,8 +62,13 @@ public class RegionManageAPIRoutes extends Router {
             HttpServletRequest request,
             @RequestParam(required = false, name = "tripStatus") Status tripStatus
     ) {
-        TokenInfo tokenInfo = getTokenInfo(request);
-        return areaService.getGroupTrips(tokenInfo.getUserId(), tokenInfo.getGroupId(), tripStatus);
+        TokenInfo tokenInfo = getFullTokenInfo(request);
+        return areaService.getGroupTrips(
+                tokenInfo.getAccesses().contains(Access.GROUP)
+                        ? null
+                        : tokenInfo.getUserId()
+                , tokenInfo.getGroupId(), tripStatus
+        );
     }
 
     @GetMapping(value = "dashboard/{areaId}")
