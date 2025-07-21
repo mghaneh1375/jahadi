@@ -19,7 +19,7 @@ public interface TripRepository extends MongoRepository<Trip, ObjectId>, Filtera
     @Query(value = "{ 'groupsWithAccess.groupId': ?0 }", count = true)
     Integer countByGroupId(ObjectId groupId);
 
-    @Query(value = "{'groupsWithAccess.groupId': ?0}", fields = "{'name': 1, 'areas.name': 1, 'projectId': 1, 'groupsWithAccess': 1}")
+    @Query(value = "{'groupsWithAccess.groupId': ?0}", fields = "{'name': 1, 'areas.name': 1, 'areas.id': 1, 'projectId': 1, 'groupsWithAccess': 1}")
     List<Trip> findByGroupId(ObjectId groupId);
 
     @Query(value = "{'groupsWithAccess.groupId': ?0, 'areas.id': ?1}")
