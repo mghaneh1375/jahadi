@@ -26,6 +26,9 @@ public interface PatientsInAreaRepository extends MongoRepository<PatientsInArea
     @Query(value = "{areaId: ?0}")
     List<PatientsInArea> findByAreaId(ObjectId areaId);
 
+    @Query(value = "{patientId: ?0}")
+    List<PatientsInArea> findByPatientId(ObjectId patientId);
+
     @Query(value = "{areaId: ?0, patientId: ?1}", exists = true)
     Boolean existByAreaIdAndPatientId(ObjectId areaId, ObjectId patientId);
 

@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.List;
@@ -358,6 +359,21 @@ public class RegionPatientAPIRoutes extends Router {
     ) {
         return patientServiceInArea.getPatientForm(
                 getId(request), areaId, moduleId, subModuleId, patientId
+        );
+    }
+
+
+    @GetMapping(value = "patientReport/{patientId}")
+    @Operation(
+            summary = "گرفتن فرم بیمار توسط پزشک در یک ماژول خاص در یک منطقه"
+    )
+    public void patientReport(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId patientId,
+            HttpServletResponse response
+    ) {
+        patientServiceInArea.patientReport(
+                patientId,  null, false, null, response
         );
     }
 }

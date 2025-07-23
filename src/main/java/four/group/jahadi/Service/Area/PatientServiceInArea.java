@@ -19,9 +19,12 @@ import four.group.jahadi.Repository.Area.PatientsInAreaRepository;
 import four.group.jahadi.Repository.ModuleRepository;
 import four.group.jahadi.Repository.PatientRepository;
 import four.group.jahadi.Repository.TripRepository;
+import four.group.jahadi.Service.ExcelService;
 import four.group.jahadi.Utility.FileUtils;
 import four.group.jahadi.Utility.PairValue;
 import four.group.jahadi.Utility.Utility;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,12 +32,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static four.group.jahadi.Service.Area.AreaUtils.findModule;
 import static four.group.jahadi.Service.Area.AreaUtils.findStartedArea;
+import static four.group.jahadi.Service.Area.ReportUtil.prepareHttpServletResponse;
 import static four.group.jahadi.Utility.FileUtils.removeFile;
 import static four.group.jahadi.Utility.FileUtils.uploadFile;
 import static four.group.jahadi.Utility.StaticValues.ONE_MB;
@@ -52,6 +58,10 @@ public class PatientServiceInArea {
     PatientRepository patientRepository;
     @Autowired
     TripRepository tripRepository;
+    @Autowired
+    private ExcelService excelService;
+    @Autowired
+    private ReportServiceInArea reportServiceInArea;
 
     public ResponseEntity<List<PatientJoinArea>> getPatients(ObjectId userId, ObjectId areaId) {
         //todo: check finalize
@@ -750,8 +760,7 @@ public class PatientServiceInArea {
 
                                     allQuestions.put(question.getId(), a);
                                 });
-                    }
-                    else if(checkListQuestion instanceof SimpleQuestion) {
+                    } else if (checkListQuestion instanceof SimpleQuestion) {
                         SimpleQuestion question = ((SimpleQuestion) checkListQuestion);
                         List<Object> options = question.getOptions().stream().map(PairValue::getKey).map(Object::toString).collect(Collectors.toList());
 
@@ -1122,5 +1131,55 @@ public class PatientServiceInArea {
                 .orElseThrow(InvalidIdException::new);
 
         patientsInAreaRepository.deleteByAreaIdAndPatientId(areaId, patientId);
+    }
+
+    public void patientReport(
+            ObjectId patientId, ObjectId areaId, Boolean justCurrArea,
+            ObjectId wantedModuleId, HttpServletResponse response
+    ) {
+        Patient patient = patientRepository.findById(patientId).orElseThrow(InvalidIdException::new);
+        List<PatientsInArea> patientForms = null;
+        if (justCurrArea) {
+            Optional<PatientsInArea> form = patientsInAreaRepository.findByAreaIdAndPatientId(areaId, patientId);
+            if (form.isPresent())
+                patientForms = Collections.singletonList(form.get());
+        } else patientForms = patientsInAreaRepository.findByPatientId(patientId);
+
+        HashMap<ObjectId, HashMap<ObjectId, List<PatientForm>>> forms = new HashMap<>();
+        if (patientForms == null) {
+            return;
+        }
+        patientForms.forEach(patientForm -> {
+            patientForm.getReferrals().forEach(patientReferral -> {
+                if (!forms.containsKey(patientReferral.getModuleId())) {
+                    forms.put(
+                            patientReferral.getModuleId(),
+                            new HashMap<>(){{
+                                put(
+                                        patientReferral.getId(),
+                                        patientReferral.getForms()
+                                );
+                            }}
+                    );
+                }
+                else {
+                    forms.get(patientReferral.getModuleId()).put(patientReferral.getId(), patientReferral.getForms());
+                }
+            });
+        });
+
+        List<Module> modules = moduleRepository.findAllById(new ArrayList<>(forms.keySet()));
+        List<String> modulesName = modules.stream()
+                .map(module -> module.getName().replace("/", " "))
+                .collect(Collectors.toList());
+
+        Workbook workbook = excelService.createExcel(modulesName);
+        AtomicBoolean a = new AtomicBoolean(false);
+        for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
+            reportServiceInArea.getPatientReport(
+                    patient, modules.get(i), workbook.getSheetAt(i), forms.get(modules.get(i).getId())
+            );
+        }
+        prepareHttpServletResponse(response, workbook, "patientReport");
     }
 }

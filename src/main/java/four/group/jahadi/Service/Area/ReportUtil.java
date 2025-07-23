@@ -51,6 +51,18 @@ public class ReportUtil {
         return r;
     }
 
+    private static Row createNewPatientRow2(
+            Sheet sheet, Patient wantedPatient,
+            int incRowStep
+    ) {
+        Row r = sheet.createRow(sheet.getLastRowNum() + 1);
+        if (incRowStep > 1) {
+            for (int i = 0; i < 4; i++)
+                mergeCell(sheet, r, i);
+        }
+        return r;
+    }
+
     private static void addDoctorInfoToPatientRow(
             PatientForm patientForm,
             Row patientRow,
@@ -88,8 +100,6 @@ public class ReportUtil {
             HashMap<ObjectId, Integer> questionsColIdx
     ) {
         patients.forEach(patient -> {
-//            if (!patient.getId().toString().equals("684148cb75eaf47cef10d302"))
-//                return;
             Patient wantedPatient = patientsInfo
                     .stream()
                     .filter(patient1 -> patient1.getId().equals(patient.getPatientId()))
@@ -101,7 +111,7 @@ public class ReportUtil {
                     .filter(patientReferral -> patientReferral.getModuleId().equals(moduleId))
                     .forEach(patientReferral -> {
                         PatientForm patientForm = null;
-                        if(patientReferral.getForms() != null) {
+                        if (patientReferral.getForms() != null) {
                             for (int i = 0; i < patientReferral.getForms().size(); i++) {
                                 if (patientReferral.getForms().get(i).getSubModuleId().equals(subModuleId)) {
                                     patientForm = patientReferral.getForms().get(i);
@@ -137,7 +147,7 @@ public class ReportUtil {
                         );
 
                         subModuleQuestions.forEach(question -> {
-                            if(!questionsColIdx.containsKey(question.getId()))
+                            if (!questionsColIdx.containsKey(question.getId()))
                                 return;
 
                             Optional<PatientAnswer> patientAnswer1 = finalPatientForm == null
@@ -175,11 +185,10 @@ public class ReportUtil {
                                         r = sheet.getRow(patientRowNum + i);
 
                                     if (tableQuestion.getFirstColumn() != null) {
-                                        if(i > 0) {
+                                        if (i > 0) {
                                             Cell c = r.createCell(lastCell.get().getColumnIndex());
                                             c.setCellValue(tableQuestion.getFirstColumn().get(i));
-                                        }
-                                        else
+                                        } else
                                             cell.setCellValue(tableQuestion.getFirstColumn().get(i));
                                     }
 
@@ -212,6 +221,128 @@ public class ReportUtil {
         });
     }
 
+    static void addPatientRowForSpecificSubModule(
+            int subModuleStartIdx,
+            Patient wantedPatient,
+            List<PatientForm> forms,
+            Sheet sheet,
+            HashMap<ObjectId, Row> patientsRow,
+            List<User> doctors,
+            final int incRowStep,
+            ObjectId referId,
+            ObjectId subModuleId,
+            List<Question> subModuleQuestions,
+            HashMap<ObjectId, Integer> questionsColIdx
+    ) {
+        AtomicReference<Row> patientRow = new AtomicReference<>();
+
+        PatientForm patientForm = null;
+        if (forms != null) {
+            for (int i = 0; i < forms.size(); i++) {
+                if (forms.get(i).getSubModuleId().equals(subModuleId)) {
+                    patientForm = forms.get(i);
+                    break;
+                }
+            }
+        }
+        if (patientsRow.containsKey(referId))
+            patientRow.set(patientsRow.get(referId));
+        else {
+            Row r = createNewPatientRow2(sheet, wantedPatient, incRowStep);
+            patientsRow.put(referId, r);
+            patientRow.set(r);
+//        patientRow.set(createNewPatientRow2(sheet, wantedPatient, incRowStep));
+        }
+
+        final int patientRowNum = patientRow.get().getRowNum();
+        PatientForm finalPatientForm = patientForm;
+
+        addDoctorInfoToPatientRow(
+                patientForm,
+                patientRow.get(),
+                patientForm == null
+                        ? Optional.empty()
+                        : doctors
+                        .stream()
+                        .filter(user -> Objects.equals(finalPatientForm.getDoctorId(), user.getId()))
+                        .findFirst(),
+                subModuleStartIdx,
+                incRowStep, sheet,
+                patientForm == null || patientForm.getCreatedAt() == null
+                        ? ""
+                        : Utility.convertUTCDateToJalali(patientForm.getCreatedAt())
+        );
+
+        subModuleQuestions.forEach(question -> {
+            if (!questionsColIdx.containsKey(question.getId()))
+                return;
+
+            Optional<PatientAnswer> patientAnswer1 = finalPatientForm == null
+                    ? Optional.empty()
+                    : finalPatientForm.getAnswers()
+                    .stream()
+                    .filter(patientAnswer -> patientAnswer.getQuestionId().equals(question.getId()))
+                    .findFirst();
+
+            Cell cell = patientRow.get().createCell(questionsColIdx.get(question.getId()));
+
+            if (
+                    patientAnswer1.isPresent() &&
+                            (
+                                    question.getQuestionType().equals(QuestionType.SIMPLE) ||
+                                            question.getQuestionType().equals(QuestionType.CHECK_LIST)
+                            ) && ((SimpleQuestion) question).getOptions() != null
+            ) {
+                ((SimpleQuestion) question).getOptions()
+                        .stream()
+                        .filter(pairValue -> pairValue.getKey().equals(
+                                patientAnswer1.get().getAnswer().toString()
+                        )).findFirst().ifPresent(pairValue ->
+                                cell.setCellValue(pairValue.getValue().toString())
+                        );
+            } else if (question.getQuestionType().equals(QuestionType.TABLE)) {
+                TableQuestion tableQuestion = (TableQuestion) question;
+
+                for (int i = 0; i < tableQuestion.getRowsCount(); i++) {
+                    final Row r;
+                    AtomicReference<Cell> lastCell = new AtomicReference<>(cell);
+                    if (sheet.getRow(patientRowNum + i) == null)
+                        r = sheet.createRow(patientRowNum + i);
+                    else
+                        r = sheet.getRow(patientRowNum + i);
+
+                    if (tableQuestion.getFirstColumn() != null) {
+                        if (i > 0) {
+                            Cell c = r.createCell(lastCell.get().getColumnIndex());
+                            c.setCellValue(tableQuestion.getFirstColumn().get(i));
+                        } else
+                            cell.setCellValue(tableQuestion.getFirstColumn().get(i));
+                    }
+
+                    int finalI = i;
+                    int headerSize = tableQuestion.getFirstColumn() != null
+                            ? tableQuestion.getHeaders().size() - 1
+                            : tableQuestion.getHeaders().size();
+
+                    patientAnswer1.ifPresent(patientAnswer -> {
+                        Arrays.stream(patientAnswer.getAnswer().toString().split("__"))
+                                .skip((long) finalI * headerSize)
+                                .limit(headerSize)
+                                .forEach(s -> {
+                                    Cell c = r.createCell(lastCell.get().getColumnIndex() + 1);
+                                    c.setCellValue(s);
+                                    lastCell.set(c);
+                                });
+                    });
+                }
+            } else
+                patientAnswer1.ifPresent(patientAnswer -> cell.setCellValue(patientAnswer.getAnswer().toString()));
+
+            if (incRowStep > 1 && !question.getQuestionType().equals(QuestionType.TABLE))
+                mergeCell(sheet, patientRow.get(), cell.getColumnIndex());
+        });
+    }
+
     public static void prepareHttpServletResponse(HttpServletResponse response, Workbook workbook, String reportName) {
         response.setContentType("application/vnd.ms-excel");
         response.setHeader(
@@ -241,7 +372,7 @@ public class ReportUtil {
         AtomicInteger counter = new AtomicInteger(0);
 
         headers.forEach(header -> {
-            if(header.contains("توضیح") || header.contains("شرح"))
+            if (header.contains("توضیح") || header.contains("شرح"))
                 sheet.setColumnWidth(counter.get(), 256 * 100);
             else
                 sheet.setColumnWidth(counter.get(), 256 * Math.max(header.length(), 20));

@@ -246,10 +246,12 @@ public class AreaService extends AbstractService<Area, AreaData> {
     public ResponseEntity<List<AreaDigest>> getGroupAreas(
             ObjectId tripId, ObjectId userId, ObjectId groupId
     ) {
-        if (!wareHouseAccessForGroupRepository.existsAccessByGroupIdAndUserId(groupId, userId) &&
-                !externalReferralAccessForGroupRepository.existsAccessByGroupIdAndUserId(groupId, userId)
-        )
-            throw new NotAccessException();
+        if(userId != null) {
+            if (!wareHouseAccessForGroupRepository.existsAccessByGroupIdAndUserId(groupId, userId) &&
+                    !externalReferralAccessForGroupRepository.existsAccessByGroupIdAndUserId(groupId, userId)
+            )
+                throw new NotAccessException();
+        }
 
         List<Trip> trips = tripId == null
                 ? tripRepository.findDigestInfoProjectsByGroupId(groupId)

@@ -195,6 +195,19 @@ public class ExcelService {
         sheet.createRow(1);
     }
 
+    public void writeCommonHeader2(Sheet sheet) {
+        Row row = sheet.createRow(0);
+        Workbook wb = row.getSheet().getWorkbook();
+        CellStyle parentCellStyle = wb.createCellStyle();
+        parentCellStyle.setAlignment(HorizontalAlignment.CENTER);
+        Font font = wb.createFont();
+        font.setColor(HSSFColor.HSSFColorPredefined.RED.getIndex());
+        font.setBold(true);
+        parentCellStyle.setFont(font);
+
+        sheet.createRow(1);
+    }
+
     public short[] writeSubModuleFirstHeader(
             Sheet sheet,
             CellStyle parentCellStyle,

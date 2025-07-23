@@ -51,8 +51,14 @@ public class RegionManageAPIRoutes extends Router {
             HttpServletRequest request,
             @RequestParam(value = "tripId", required = false) ObjectId tripId
     ) {
-        TokenInfo tokenInfo = getTokenInfo(request);
-        return areaService.getGroupAreas(tripId, tokenInfo.getUserId(), tokenInfo.getGroupId());
+        TokenInfo tokenInfo = getFullTokenInfo(request);
+        return areaService.getGroupAreas(
+                tripId,
+                tokenInfo.getAccesses().contains(Access.GROUP)
+                        ? null
+                        : tokenInfo.getUserId(),
+                tokenInfo.getGroupId()
+        );
     }
 
     @GetMapping(value = "getGroupTrips")
