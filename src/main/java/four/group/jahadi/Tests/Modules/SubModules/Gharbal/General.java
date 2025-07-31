@@ -35,7 +35,41 @@ public class General {
                                                 new PairValue(
                                                         DiseaseBackground.HAS_NOT_DISEASE_BACKGROUND.name(),
                                                         DiseaseBackground.HAS_NOT_DISEASE_BACKGROUND.getFaTranslate()
-                                                ),
+                                                )
+                                        ))
+                                        .questions(List.of(
+                                                SimpleQuestion
+                                                        .builder()
+                                                        .id(new ObjectId())
+                                                        .questionType(QuestionType.SIMPLE)
+                                                        .question("دیابت ملیتوس (DM)")
+                                                        .answerType(AnswerType.TICK)
+                                                        .required(false)
+                                                        .build(),
+                                                SimpleQuestion
+                                                        .builder()
+                                                        .id(new ObjectId())
+                                                        .questionType(QuestionType.SIMPLE)
+                                                        .question("پرفشاری خون (HTN)")
+                                                        .answerType(AnswerType.TICK)
+                                                        .required(false)
+                                                        .build(),
+                                                SimpleQuestion
+                                                        .builder()
+                                                        .id(new ObjectId())
+                                                        .questionType(QuestionType.SIMPLE)
+                                                        .question("مشکل تیروئید")
+                                                        .answerType(AnswerType.TICK)
+                                                        .required(false)
+                                                        .build()
+                                        ))
+                                        .build(),
+                                CheckListGroupQuestion
+                                        .builder()
+                                        .id(new ObjectId())
+                                        .questionType(QuestionType.CHECK_LIST)
+                                        .sectionTitle("سابقه مصرف دارو")
+                                        .options(List.of(
                                                 new PairValue(
                                                         DrugBackground.HAS_DRUG_BACKGROUND.name(),
                                                         DrugBackground.HAS_DRUG_BACKGROUND.getFaTranslate()
