@@ -146,8 +146,9 @@ public class RegionPatientAPIRoutes extends Router {
     @Operation(
             summary = "گرفتن لبستی از بیماران موجود در منطقه مدنظر توسط مسئول پذیرش"
     )
-    public ResponseEntity<List<PatientJoinArea>> getPatients(HttpServletRequest request,
-                                                             @PathVariable @ObjectIdConstraint ObjectId areaId
+    public ResponseEntity<List<PatientJoinArea>> getPatients(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId
     ) {
         return patientServiceInArea.getPatients(
                 getId(request), areaId
@@ -373,7 +374,7 @@ public class RegionPatientAPIRoutes extends Router {
             HttpServletResponse response
     ) {
         patientServiceInArea.patientReport(
-                patientId,  null, false, null, response
+                patientId, null, false, null, response
         );
     }
 }

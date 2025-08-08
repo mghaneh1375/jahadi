@@ -18,6 +18,8 @@ public interface DrugBookmarkRepository extends MongoRepository<DrugBookmark, Ob
   @Query(value = "{userId: ?0, drugId: ?1}", delete = true)
   void removeByUserIdAndDrugId(ObjectId userId, ObjectId drugId);
 
+  @Query(value = "{userId: ?0, _id: ?1}", delete = true)
+  void removeByUserIdAndId(ObjectId userId, ObjectId id);
   // use by reflection
   @Query(value = "{_id: {$in: ?0}}", delete = true)
   void deleteByIdsIn(List<ObjectId> ids);

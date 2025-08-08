@@ -59,6 +59,7 @@ public class JahadgarDrugService extends AbstractService<DrugBookmark, DrugBookm
                         .amountOfUse(dto.getAmountOfUses())
                         .howToUse(dto.getHowToUses())
                         .useTime(dto.getUseTimes())
+                        .amount(dto.getAmount())
                         .build()
         );
         return new ResponseEntity<>(drugBookmark, HttpStatus.OK);
@@ -69,8 +70,8 @@ public class JahadgarDrugService extends AbstractService<DrugBookmark, DrugBookm
         return null;
     }
 
-    public void remove(ObjectId userId, ObjectId drugId) {
-        drugBookmarkRepository.removeByUserIdAndDrugId(userId, drugId);
+    public void remove(ObjectId userId, ObjectId id) {
+        drugBookmarkRepository.removeByUserIdAndId(userId, id);
     }
 
     public ResponseEntity<Boolean> checkAccessToWareHouse(ObjectId groupId, ObjectId userId) {

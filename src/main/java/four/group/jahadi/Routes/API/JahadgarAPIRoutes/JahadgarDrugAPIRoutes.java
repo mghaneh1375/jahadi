@@ -59,14 +59,14 @@ public class JahadgarDrugAPIRoutes extends Router {
         jahadgarDrugService.store(drugBookmarkData, getId(request), drugId);
     }
 
-    @DeleteMapping(value = "bookmark/{drugId}")
+    @DeleteMapping(value = "bookmark/{id}")
     @ResponseBody
     @Operation(summary = "حذف کردن یک دارو از لیست منتخب های دکتر")
     public void removeFromBookmark(
             HttpServletRequest request,
-            @PathVariable @ObjectIdConstraint ObjectId drugId
+            @PathVariable @ObjectIdConstraint ObjectId id
     ) {
-        jahadgarDrugService.remove(getId(request), drugId);
+        jahadgarDrugService.remove(getId(request), id);
     }
 
     @GetMapping(value = "bookmarks")

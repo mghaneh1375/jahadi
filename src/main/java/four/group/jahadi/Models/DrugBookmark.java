@@ -1,6 +1,7 @@
 package four.group.jahadi.Models;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import four.group.jahadi.Enums.Drug.AmountOfUse;
@@ -28,6 +29,7 @@ public class DrugBookmark extends Model {
     @JsonSerialize(using = ObjectIdSerialization.class)
     private ObjectId drugId;
     @Field("user_id")
+    @JsonIgnore
     private ObjectId userId;
     @Field("how_to_use")
     private HowToUse howToUse;
@@ -35,6 +37,8 @@ public class DrugBookmark extends Model {
     private AmountOfUse amountOfUse;
     @Field("use_time")
     private UseTime useTime;
+    @Field("amount")
+    private Integer amount;
 
     @Transient
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
@@ -59,6 +63,7 @@ public class DrugBookmark extends Model {
                 ", \"howToUse\":" + printNullableField(howToUse) +
                 ", \"amountOfUse\":" + printNullableField(amountOfUse) +
                 ", \"useTime\":" + printNullableField(useTime) +
+                ", \"amount\":" + printNullableField(amount) +
                 "}\n";
     }
 }

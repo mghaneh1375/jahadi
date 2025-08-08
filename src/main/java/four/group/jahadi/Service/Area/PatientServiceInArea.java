@@ -65,7 +65,7 @@ public class PatientServiceInArea {
 
     public ResponseEntity<List<PatientJoinArea>> getPatients(ObjectId userId, ObjectId areaId) {
         //todo: check finalize
-        Trip trip = tripRepository.findActiveByAreaIdAndDispatcherId(areaId, userId, Utility.getCurrLocalDateTime())
+        Trip trip = tripRepository.findActiveByAreaIdAndResponsibleId(areaId, userId, Utility.getCurrLocalDateTime())
                 .orElseThrow(NotAccessException::new);
 
         findStartedArea(trip, areaId);
@@ -112,7 +112,7 @@ public class PatientServiceInArea {
             Boolean justTrained, Boolean justNotTrained
     ) {
 
-        Trip trip = tripRepository.findActiveByAreaIdAndTrainerId(areaId, userId, Utility.getCurrLocalDateTime())
+        Trip trip = tripRepository.findActiveByAreaIdAndResponsibleId(areaId, userId, Utility.getCurrLocalDateTime())
                 .orElseThrow(NotAccessException::new);
 
         findStartedArea(trip, areaId);
@@ -990,7 +990,7 @@ public class PatientServiceInArea {
                 patientAnswer.setSampleInfoDesc(data.getSampleInfoDesc());
 
             if (a.getCanUploadFile() && data.getFileIndex() != null &&
-                    filenames.size() > data.getFileIndex()
+                    data.getFileIndex() != -1 && filenames.size() > data.getFileIndex()
             )
                 patientAnswer.setAdditionalUploadedFile(filenames.get(data.getFileIndex()));
 
