@@ -29,28 +29,28 @@ public class ChildTutorialSeeder {
                                                         SimpleQuestion
                                                                 .builder()
                                                                 .questionType(QuestionType.SIMPLE)
-                                                                .required(true)
+                                                                .required(false)
                                                                 .question("قد")
                                                                 .answerType(AnswerType.NUMBER)
                                                                 .build(),
                                                         SimpleQuestion
                                                                 .builder()
                                                                 .questionType(QuestionType.SIMPLE)
-                                                                .required(true)
+                                                                .required(false)
                                                                 .question("وزن")
                                                                 .answerType(AnswerType.NUMBER)
                                                                 .build(),
                                                         SimpleQuestion
                                                                 .builder()
                                                                 .questionType(QuestionType.SIMPLE)
-                                                                .required(true)
+                                                                .required(false)
                                                                 .question("BMI")
                                                                 .answerType(AnswerType.NUMBER)
                                                                 .build(),
                                                         SimpleQuestion
                                                                 .builder()
                                                                 .questionType(QuestionType.SIMPLE)
-                                                                .required(true)
+                                                                .required(false)
                                                                 .question("شپش")
                                                                 .answerType(AnswerType.SELECT)
                                                                 .options(
@@ -64,7 +64,7 @@ public class ChildTutorialSeeder {
                                                         SimpleQuestion
                                                                 .builder()
                                                                 .questionType(QuestionType.SIMPLE)
-                                                                .required(true)
+                                                                .required(false)
                                                                 .question("بسته فرهنگی")
                                                                 .answerType(AnswerType.TICK)
                                                                 .options(
@@ -83,7 +83,7 @@ public class ChildTutorialSeeder {
                                                         SimpleQuestion
                                                                 .builder()
                                                                 .questionType(QuestionType.SIMPLE)
-                                                                .required(true)
+                                                                .required(false)
                                                                 .question("شامپو")
                                                                 .answerType(AnswerType.TICK)
                                                                 .options(

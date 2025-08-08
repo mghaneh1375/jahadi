@@ -100,14 +100,14 @@ public class SightRoom {
                                                                 .headers(List.of("...", "+/-", "SPH", "CYL", "VA"))
                                                                 .firstColumn(List.of("OD", "OS"))
                                                                 .rowsCount(2)
-                                                                .answerType(AnswerType.DOUBLE)
+                                                                .answerType(AnswerType.TEXT)
                                                                 .build(),
                                                         SimpleQuestion
                                                                 .builder()
                                                                 .id(new ObjectId())
                                                                 .question("PD")
                                                                 .questionType(QuestionType.SIMPLE)
-                                                                .answerType(AnswerType.NUMBER)
+                                                                .answerType(AnswerType.TEXT)
                                                                 .required(false)
                                                                 .build()
                                                 )

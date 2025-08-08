@@ -853,7 +853,7 @@ public class PatientServiceInArea {
         for (PatientFormData data : formData) {
             A a = allQuestions.get(data.getQuestionId());
 
-            if (data.getFileIndex() != null) {
+            if (data.getFileIndex() != null && data.getFileIndex() != -1) {
                 if (!a.getCanUploadFile() && !a.getAnswerType().equals(AnswerType.UPLOAD))
                     throw new RuntimeException("برای سوال " + data.getQuestionId() + " نمی توان فایلی آپلود کرد");
 
@@ -932,7 +932,7 @@ public class PatientServiceInArea {
 
         List<String> filenames = new ArrayList<>();
         for (PatientFormData data : formData) {
-            if (data.getFileIndex() != null) {
+            if (data.getFileIndex() != null && data.getFileIndex() != -1) {
                 String filename = uploadFile(files[data.getFileIndex()], UPLOAD_FOLDER);
                 if (filename == null) {
                     for (String file : filenames)
@@ -944,7 +944,6 @@ public class PatientServiceInArea {
         }
 
         for (PatientFormData data : formData) {
-
             A a = allQuestions.get(data.getQuestionId());
 
             if (
@@ -954,7 +953,8 @@ public class PatientServiceInArea {
                             )
                     ) ||
                             (
-                                    a.getAnswerType().equals(AnswerType.UPLOAD) && data.getFileIndex() == null
+                                    a.getAnswerType().equals(AnswerType.UPLOAD) &&
+                                            (data.getFileIndex() == null || data.getFileIndex() == -1)
                             )
             )
                 continue;
