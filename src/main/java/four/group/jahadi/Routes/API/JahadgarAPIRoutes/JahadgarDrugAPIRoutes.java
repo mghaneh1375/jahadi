@@ -10,6 +10,7 @@ import four.group.jahadi.Enums.Module.DeliveryStatus;
 import four.group.jahadi.Exception.NotAccessException;
 import four.group.jahadi.Exception.NotActivateAccountException;
 import four.group.jahadi.Exception.UnAuthException;
+import four.group.jahadi.Models.Area.JoinedDrugBookmarkWithAreaDto;
 import four.group.jahadi.Models.Drug;
 import four.group.jahadi.Models.DrugBookmark;
 import four.group.jahadi.Models.PatientDrug;
@@ -69,13 +70,14 @@ public class JahadgarDrugAPIRoutes extends Router {
         jahadgarDrugService.remove(getId(request), id);
     }
 
-    @GetMapping(value = "bookmarks")
+    @GetMapping(value = "bookmarks/{areaId}")
     @ResponseBody
     @Operation(summary = "گرفتن لیست داروهای منتخب دکتر")
-    public ResponseEntity<List<DrugBookmark>> bookmarks(
-            HttpServletRequest request
+    public ResponseEntity<List<JoinedDrugBookmarkWithAreaDto>> bookmarks(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId
     ) {
-        return jahadgarDrugService.list(getId(request));
+        return jahadgarDrugService.list(getId(request), areaId);
     }
 
     @PutMapping(value = "addAllToDrugsList/{areaId}")
