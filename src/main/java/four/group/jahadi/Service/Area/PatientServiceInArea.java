@@ -320,18 +320,22 @@ public class PatientServiceInArea {
 
     public void addReferralForPatient(
             ObjectId userId, ObjectId areaId,
-            ObjectId patientId, ObjectId moduleId,
-            String desc
+            ObjectId patientId, ObjectId srcModuleId,
+            ObjectId destModuleId, String desc
     ) {
         Trip trip = tripRepository.findByAreaIdAndResponsibleId(areaId, userId)
                 .orElseThrow(NotAccessException::new);
 
         Area foundArea = findStartedArea(trip, areaId);
-        ModuleInArea moduleInArea = findModule(foundArea, moduleId, userId, null);
-        Module module = moduleRepository.findById(moduleInArea.getModuleId()).orElseThrow(UnknownError::new);
-
-        if (!module.isReferral())
+        ModuleInArea srcModuleInArea = findModule(foundArea, srcModuleId, userId, null);
+        Module srcModule = moduleRepository.findById(srcModuleInArea.getModuleId()).orElseThrow(UnknownError::new);
+        if (!srcModule.isReferral())
             throw new InvalidFieldsException("در این ماژول امکان ارجاع دهی وجود ندارد");
+
+        foundArea
+                .getModules().stream()
+                .filter(moduleIter -> moduleIter.getModuleId().equals(destModuleId))
+                .findFirst().orElseThrow(InvalidIdException::new);
 
         PatientsInArea patientInArea = patientsInAreaRepository.findByAreaIdAndPatientId(areaId, patientId)
                 .orElseThrow(InvalidIdException::new);
@@ -339,7 +343,7 @@ public class PatientServiceInArea {
         patientInArea.setReferrals(
                 doAddReferral(
                         patientInArea.getReferrals(),
-                        moduleId,
+                        destModuleId,
                         true,
                         desc, userId
                 )
