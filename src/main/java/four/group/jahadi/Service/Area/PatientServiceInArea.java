@@ -325,12 +325,16 @@ public class PatientServiceInArea {
     ) {
         Trip trip = tripRepository.findByAreaIdAndResponsibleId(areaId, userId)
                 .orElseThrow(NotAccessException::new);
-
         Area foundArea = findStartedArea(trip, areaId);
-        ModuleInArea srcModuleInArea = findModule(foundArea, srcModuleId, userId, null);
-        Module srcModule = moduleRepository.findById(srcModuleInArea.getModuleId()).orElseThrow(UnknownError::new);
-        if (!srcModule.isReferral())
-            throw new InvalidFieldsException("در این ماژول امکان ارجاع دهی وجود ندارد");
+
+        if(srcModuleId != null) {
+            ModuleInArea srcModuleInArea = findModule(foundArea, srcModuleId, userId, null);
+            Module srcModule = moduleRepository.findById(srcModuleInArea.getModuleId()).orElseThrow(UnknownError::new);
+            if (!srcModule.isReferral())
+                throw new InvalidFieldsException("در این ماژول امکان ارجاع دهی وجود ندارد");
+        }
+        else if(foundArea.getTrainers() == null || !foundArea.getTrainers().contains(userId))
+            throw new NotAccessException();
 
         foundArea
                 .getModules().stream()

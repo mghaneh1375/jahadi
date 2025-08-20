@@ -299,6 +299,22 @@ public class RegionPatientAPIRoutes extends Router {
         );
     }
 
+    @PutMapping(value = "addReferralForPatientByTrainer/{areaId}/{destModuleId}/{patientId}")
+    @Operation(
+            summary = "ارجاع یک بیمار توسط مسئول آموزش به یک ماژول دیگر"
+    )
+    public void addReferralForPatient(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId,
+            @PathVariable @ObjectIdConstraint ObjectId destModuleId,
+            @PathVariable @ObjectIdConstraint ObjectId patientId,
+            @RequestBody(required = false) @Valid PatientReferralData data
+    ) {
+        patientServiceInArea.addReferralForPatient(
+                getId(request), areaId, patientId, null, destModuleId, data != null ? data.getDesc() : null
+        );
+    }
+
     @PutMapping(value = "addReferralForPatientBySubModule/{areaId}/{moduleId}/{subModuleId}/{patientId}")
     @Operation(
             summary = "ارجاع یک بیمار توسط دکتر در یک ساب ماژول که ماژول مقصد توسط سیستم تشخیص داده می شود"
