@@ -135,7 +135,7 @@ public class SightRoom {
                                                                 .id(new ObjectId())
                                                                 .question("NPD")
                                                                 .questionType(QuestionType.SIMPLE)
-                                                                .answerType(AnswerType.NUMBER)
+                                                                .answerType(AnswerType.TEXT)
                                                                 .required(false)
                                                                 .build()
                                                 )

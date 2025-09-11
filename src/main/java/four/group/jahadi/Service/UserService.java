@@ -535,10 +535,10 @@ public class UserService extends AbstractService<User, SignUpData> {
 
             User u = user.get();
 
-//            if (!DEV_MODE) {
-//                if (!passwordEncoder.matches(data.getPassword(), u.getPassword()))
-//                    throw new InvalidFieldsException("نام کاربری و یا رمزعبور اشتباه است.");
-//            }
+            if (!DEV_MODE) {
+                if (!passwordEncoder.matches(data.getPassword(), u.getPassword()))
+                    throw new InvalidFieldsException("نام کاربری و یا رمزعبور اشتباه است.");
+            }
 
             if (!u.getStatus().equals(AccountStatus.ACTIVE))
                 throw new InvalidFieldsException("اکانت شما غیرفعال می باشد.");

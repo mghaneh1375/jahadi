@@ -878,14 +878,11 @@ public class PatientServiceInArea {
                 continue;
 
             if (a.getQuestionType().equals(QuestionType.TABLE)) {
-
-                String[] splited = data.getAnswer().toString().split("__");
-
+                String[] splited = data.getAnswer().toString().split("__", -1);
                 if (splited.length != a.getCols() * a.getRows())
                     throw new RuntimeException("پاسخ به سوال " + data.getQuestionId().toString() + " معتبر نیست");
 
                 for (String split : splited) {
-
                     if (a.getAnswerType().equals(AnswerType.NUMBER) &&
                             !Utility.isNumeric(split)
                     )

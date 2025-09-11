@@ -16,17 +16,17 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class RateLimiter implements Filter {
 
-    private static final int MAX_REQUESTS_PER_SECOND = 600; //or whatever you want it to be
+    private static final int MAX_REQUESTS_PER_SECOND = 6000; //or whatever you want it to be
     private final LoadingCache<String, Integer> requestCountsPerIpAddress;
 
     public RateLimiter(){
         super();
         requestCountsPerIpAddress = CacheBuilder.newBuilder().
-                expireAfterWrite(1, TimeUnit.MINUTES).build(new CacheLoader<String, Integer>() {
-            public Integer load(String key) {
-                return 0;
-            }
-        });
+                expireAfterWrite(1, TimeUnit.MINUTES).build(new CacheLoader<>() {
+                    public Integer load(String key) {
+                        return 0;
+                    }
+                });
     }
 
     @Override

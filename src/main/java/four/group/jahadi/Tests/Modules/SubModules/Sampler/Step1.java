@@ -42,7 +42,7 @@ public class Step1 {
                                                 .builder()
                                                 .id(new ObjectId())
                                                 .questionType(QuestionType.SIMPLE)
-                                                .question("لوله تخت")
+                                                .question("لوله لخته")
                                                 .answerType(AnswerType.TICK)
                                                 .required(false)
                                                 .build(),

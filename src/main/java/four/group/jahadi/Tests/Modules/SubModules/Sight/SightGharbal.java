@@ -65,7 +65,7 @@ public class SightGharbal {
                                         .cellLabel("/ 10")
                                         .firstColumn(List.of("OD", "OS"))
                                         .rowsCount(2)
-                                        .answerType(AnswerType.NUMBER)
+                                        .answerType(AnswerType.TEXT)
                                         .build(),
                                 TableQuestion
                                         .builder()
@@ -77,7 +77,7 @@ public class SightGharbal {
                                         .cellLabel("/ 10")
                                         .firstColumn(List.of("OD", "OS"))
                                         .rowsCount(2)
-                                        .answerType(AnswerType.NUMBER)
+                                        .answerType(AnswerType.TEXT)
                                         .build()
                         )
                 )

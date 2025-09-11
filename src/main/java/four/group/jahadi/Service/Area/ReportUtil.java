@@ -198,7 +198,7 @@ public class ReportUtil {
                                             : tableQuestion.getHeaders().size();
 
                                     patientAnswer1.ifPresent(patientAnswer -> {
-                                        Arrays.stream(patientAnswer.getAnswer().toString().split("__"))
+                                        Arrays.stream(patientAnswer.getAnswer().toString().split("__", -1))
                                                 .skip((long) finalI * headerSize)
                                                 .limit(headerSize)
                                                 .forEach(s -> {
@@ -325,7 +325,7 @@ public class ReportUtil {
                             : tableQuestion.getHeaders().size();
 
                     patientAnswer1.ifPresent(patientAnswer -> {
-                        Arrays.stream(patientAnswer.getAnswer().toString().split("__"))
+                        Arrays.stream(patientAnswer.getAnswer().toString().split("__", -1))
                                 .skip((long) finalI * headerSize)
                                 .limit(headerSize)
                                 .forEach(s -> {

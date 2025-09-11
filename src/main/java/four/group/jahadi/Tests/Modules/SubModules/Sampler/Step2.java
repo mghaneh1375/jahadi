@@ -257,7 +257,7 @@ public class Step2 {
                                         .headers(List.of("Beta HCG", "Result"))
                                         .firstColumn(List.of("Positive", "Indefinite", "Specimen", "Negative"))
                                         .rowsCount(4)
-                                        .answerType(AnswerType.NUMBER)
+                                        .answerType(AnswerType.TEXT)
                                         .build()
                         )
                 )

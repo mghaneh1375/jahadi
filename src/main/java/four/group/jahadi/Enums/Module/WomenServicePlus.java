@@ -1,7 +1,7 @@
 package four.group.jahadi.Enums.Module;
 
 public enum WomenServicePlus {
-    SUPER_EXAMINATION("معاینه سرپرست"),
+    SUPER_EXAMINATION("معاینه برست"),
     VAGINAL_EXAMINATION("معاینه واژینال"),
     PUP_SMEAR("Papsmear"),
     BIOPSY("Biopsy");

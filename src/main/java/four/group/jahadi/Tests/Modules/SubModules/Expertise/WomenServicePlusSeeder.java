@@ -24,7 +24,7 @@ public class WomenServicePlusSeeder {
                                         .builder()
                                         .id(new ObjectId())
                                         .questionType(QuestionType.CHECK_LIST)
-                                        .sectionTitle("غربالگری سرطان پستان")
+                                        .sectionTitle("")
                                         .options(
                                                 Arrays.stream(four.group.jahadi.Enums.Module.DoneOrNot.values())
                                                         .map(itr -> new PairValue(
