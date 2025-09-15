@@ -63,7 +63,7 @@ public class PatientExternalReferralsService {
                 .map(module -> module
                         .getSubModules()
                         .stream()
-                        .filter(subModule -> subModule.getName().equalsIgnoreCase("ارجاع به مراکز درمانی"))
+                        .filter(subModule -> subModule.getName().contains("ارجاع به مراکز درمانی"))
                         .collect(Collectors.toList()))
                 .flatMap(List::stream)
                 .collect(Collectors.toList());
@@ -84,7 +84,7 @@ public class PatientExternalReferralsService {
                 .map(module -> module
                         .getSubModules()
                         .stream()
-                        .filter(subModule -> subModule.getName().equalsIgnoreCase("ارجاع به مراکز درمانی"))
+                        .filter(subModule -> subModule.getName().contains("ارجاع به مراکز درمانی"))
                         .collect(Collectors.toList()))
                 .flatMap(List::stream)
                 .collect(Collectors.toList());

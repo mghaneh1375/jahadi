@@ -333,7 +333,9 @@ public class PatientServiceInArea {
             if (!srcModule.isReferral())
                 throw new InvalidFieldsException("در این ماژول امکان ارجاع دهی وجود ندارد");
         }
-        else if(foundArea.getTrainers() == null || !foundArea.getTrainers().contains(userId))
+        else if(foundArea.getTrainers() == null ||
+                (!foundArea.getTrainers().contains(userId) && !foundArea.getOwnerId().equals(userId))
+        )
             throw new NotAccessException();
 
         foundArea
