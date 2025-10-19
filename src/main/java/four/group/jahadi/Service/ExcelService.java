@@ -1,9 +1,7 @@
 package four.group.jahadi.Service;
 
-import four.group.jahadi.Models.Patient;
 import four.group.jahadi.Models.Question.*;
 import four.group.jahadi.Models.SubModule;
-import four.group.jahadi.Utility.Utility;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;

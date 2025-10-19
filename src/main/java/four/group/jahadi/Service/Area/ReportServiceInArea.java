@@ -1,6 +1,7 @@
 package four.group.jahadi.Service.Area;
 
 import four.group.jahadi.DTO.Area.PatientDrugJoinDto;
+import four.group.jahadi.Enums.AgeType;
 import four.group.jahadi.Enums.Module.DeliveryStatus;
 import four.group.jahadi.Enums.Module.QuestionType;
 import four.group.jahadi.Exception.InvalidIdException;
@@ -27,7 +28,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Period;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -390,6 +393,7 @@ public class ReportServiceInArea {
         font.setColor(HSSFColor.HSSFColorPredefined.RED.getIndex());
         font.setBold(true);
         parentCellStyle.setFont(font);
+        LocalDate curr = LocalDate.now();
 
         String[] headers = new String[] {
                 "نام بیمار", "نام پدر", "سن", "جنسیت",
@@ -405,39 +409,62 @@ public class ReportServiceInArea {
         counter = 1;
         for (PatientsInArea patientsInArea : patients) {
             Patient patient = patientsInArea.getPatient();
-            Row row1 = sheet.createRow(counter);
+            Row row1 = sheet.createRow(counter++);
+            int index = 0;
 
-            Cell c = row1.createCell(0);
+            row1.createCell(index++).setCellValue(patient.getName());
+            row1.createCell(index++).setCellValue(patient.getFatherName());
+            row1.createCell(index++).setCellValue(Period.between(patient.getBirthDate().toLocalDate(), curr).getYears());
+            row1.createCell(index++).setCellValue(patient.getSex().getFaTranslate());
+            row1.createCell(index++).setCellValue(patient.getPhone());
+            row1.createCell(index++).setCellValue(patient.getIdentifier());
+            row1.createCell(index++).setCellValue(patient.getJob());
+            row1.createCell(index++).setCellValue(patient.getPatientNo());
+        }
+    }
+
+    public void getChildTrainReport(List<PatientsInArea> patients, Sheet sheet) {
+        Row row = sheet.createRow(0);
+        Workbook wb = row.getSheet().getWorkbook();
+        CellStyle parentCellStyle = wb.createCellStyle();
+        parentCellStyle.setAlignment(HorizontalAlignment.CENTER);
+        Font font = wb.createFont();
+        font.setColor(HSSFColor.HSSFColorPredefined.RED.getIndex());
+        font.setBold(true);
+        parentCellStyle.setFont(font);
+        LocalDate curr = LocalDate.now();
+
+        String[] headers = new String[] {
+                "نام بیمار", "نام پدر", "جنسیت",
+                "شماره همراه", "شناسه", "شماره پرونده",
+                "قد", "وزن", "BMI", "شپش", "بسته فرهنگی",
+                "شامپو"
+        };
+
+        int counter = 0;
+        for (String header : headers) {
+            Cell c = row.createCell(counter++);
             c.setCellStyle(parentCellStyle);
-            c.setCellValue(patient.getName());
+            c.setCellValue(header);
+        }
+        counter = 1;
+        for (PatientsInArea patientInArea : patients) {
+            Patient patient = patientInArea.getPatient();
+            Row row1 = sheet.createRow(counter++);
+            int index = 0;
 
-            Cell c2 = row1.createCell(1);
-            c2.setCellStyle(parentCellStyle);
-            c2.setCellValue(patient.getFatherName());
-
-            Cell c3 = row1.createCell(2);
-            c3.setCellStyle(parentCellStyle);
-            c3.setCellValue(patient.getBirthDate());
-
-            Cell c4 = row1.createCell(3);
-            c4.setCellStyle(parentCellStyle);
-            c4.setCellValue(patient.getSex().getFaTranslate());
-
-            Cell c5 = row1.createCell(4);
-            c5.setCellStyle(parentCellStyle);
-            c5.setCellValue(patient.getPhone());
-
-            Cell c6 = row1.createCell(5);
-            c6.setCellStyle(parentCellStyle);
-            c6.setCellValue(patient.getIdentifier());
-
-            Cell c7 = row1.createCell(6);
-            c7.setCellStyle(parentCellStyle);
-            c7.setCellValue(patient.getJob());
-
-            Cell c8 = row1.createCell(7);
-            c8.setCellStyle(parentCellStyle);
-            c8.setCellValue(patient.getPatientNo());
+            row1.createCell(index++).setCellValue(patient.getName());
+            row1.createCell(index++).setCellValue(patient.getFatherName());
+            row1.createCell(index++).setCellValue(patient.getSex().getFaTranslate());
+            row1.createCell(index++).setCellValue(patient.getPhone());
+            row1.createCell(index++).setCellValue(patient.getIdentifier());
+            row1.createCell(index++).setCellValue(patient.getPatientNo());
+            row1.createCell(index++).setCellValue(patientInArea.getTrainForm().getHeight());
+            row1.createCell(index++).setCellValue(patientInArea.getTrainForm().getWeight());
+            row1.createCell(index++).setCellValue(patientInArea.getTrainForm().getBMI());
+            row1.createCell(index++).setCellValue(patientInArea.getTrainForm().getShepesh().getFaTranslate());
+            row1.createCell(index++).setCellValue(patientInArea.getTrainForm().getRecvCulturePackage());
+            row1.createCell(index++).setCellValue(patientInArea.getTrainForm().getRecvShampoo());
         }
     }
 
@@ -457,13 +484,13 @@ public class ReportServiceInArea {
                 : findArea(wantedTrip, areaId, userId_groupId);
 
         List<String> staticModules = List.of(
-                "پذیرش", "آموزش کودکان", "آموزش بزرگسالان", "بیمه"
+                "پذیرش", "آموزش کودکان"
         );
 
         Workbook workbook = excelService.createExcel(
                 (
                         wantedModuleId == null
-                                ? Stream.of(staticModules, area.getModules())
+                                ? Stream.of(staticModules, area.getModules()).flatMap(Collection::stream)
                                 : area.getModules().stream().filter(module -> Objects.equals(module.getModuleId(), wantedModuleId))
                 ).map(module -> module instanceof ModuleInArea
                         ? ((ModuleInArea) module).getModuleName().replace("/", " ")
@@ -494,6 +521,15 @@ public class ReportServiceInArea {
                     switch (staticModule) {
                         case "پذیرش":
                             getReceptionReport(patientsInArea, sheet);
+                            break;
+                        case "آموزش کودکان":
+                            getChildTrainReport(
+                                    patientsInArea
+                                            .stream()
+                                            .filter(patient -> patient.getTrainForm() != null && patient.getPatient().getAgeType().equals(AgeType.CHILD))
+                                            .collect(Collectors.toList()),
+                                    sheet
+                            );
                             break;
                     }
                 }
