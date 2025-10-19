@@ -22,7 +22,6 @@ import four.group.jahadi.Service.ExcelService;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,6 +31,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static four.group.jahadi.Service.Area.AreaUtils.findArea;
 import static four.group.jahadi.Service.Area.ReportUtil.prepareHttpServletResponse;
@@ -185,9 +185,9 @@ public class ReportServiceInArea {
             );
         }
 
-        if(patientForms == null) return;
+        if (patientForms == null) return;
         Set<ObjectId> doctorIds = new HashSet<>();
-        if(patientForms != null) {
+        if (patientForms != null) {
             for (ObjectId oId : patientForms.keySet()) {
                 if (patientForms.get(oId) == null)
                     continue;
@@ -201,7 +201,7 @@ public class ReportServiceInArea {
         List<User> doctors = userRepository.findJustNameByIdsIn(new ArrayList<>(doctorIds));
         HashMap<ObjectId, Row> patientsRow = new HashMap<>();
         subModuleIds.forEach(subModuleId -> {
-            for(ObjectId referId : patientForms.keySet()) {
+            for (ObjectId referId : patientForms.keySet()) {
                 ReportUtil.addPatientRowForSpecificSubModule(
                         startIndicesHistory.get(subModuleId),
                         patient,
@@ -348,7 +348,7 @@ public class ReportServiceInArea {
         }
 
         List<PatientsInArea> patients = patientsInAreaRepository.findByAreaIdAndModuleId(areaId, moduleId);
-        if (patients.size() == 0)
+        if (patients.isEmpty())
             return;
 
         Set<ObjectId> patientIds = new HashSet<>();
@@ -395,6 +395,66 @@ public class ReportServiceInArea {
         });
     }
 
+    public void getReceptionReport(List<PatientsInArea> patients, Sheet sheet) {
+        Row row = sheet.createRow(0);
+        Workbook wb = row.getSheet().getWorkbook();
+        CellStyle parentCellStyle = wb.createCellStyle();
+        parentCellStyle.setAlignment(HorizontalAlignment.CENTER);
+        Font font = wb.createFont();
+        font.setColor(HSSFColor.HSSFColorPredefined.RED.getIndex());
+        font.setBold(true);
+        parentCellStyle.setFont(font);
+
+        String[] headers = new String[] {
+                "نام بیمار", "نام پدر", "سن", "جنسیت",
+                "شماره همراه", "شناسه", "شغل", "شماره پرونده"
+        };
+
+        int counter = 0;
+        for (String header : headers) {
+            Cell c = row.createCell(counter++);
+            c.setCellStyle(parentCellStyle);
+            c.setCellValue(header);
+        }
+        counter = 1;
+        for (PatientsInArea patientsInArea : patients) {
+            Patient patient = patientsInArea.getPatient();
+            Row row1 = sheet.createRow(counter);
+
+            Cell c = row1.createCell(0);
+            c.setCellStyle(parentCellStyle);
+            c.setCellValue(patient.getName());
+
+            Cell c2 = row1.createCell(1);
+            c2.setCellStyle(parentCellStyle);
+            c2.setCellValue(patient.getFatherName());
+
+            Cell c3 = row1.createCell(2);
+            c3.setCellStyle(parentCellStyle);
+            c3.setCellValue(patient.getBirthDate());
+
+            Cell c4 = row1.createCell(3);
+            c4.setCellStyle(parentCellStyle);
+            c4.setCellValue(patient.getSex().getFaTranslate());
+
+            Cell c5 = row1.createCell(4);
+            c5.setCellStyle(parentCellStyle);
+            c5.setCellValue(patient.getPhone());
+
+            Cell c6 = row1.createCell(5);
+            c6.setCellStyle(parentCellStyle);
+            c6.setCellValue(patient.getIdentifier());
+
+            Cell c7 = row1.createCell(6);
+            c7.setCellStyle(parentCellStyle);
+            c7.setCellValue(patient.getJob());
+
+            Cell c8 = row1.createCell(7);
+            c8.setCellStyle(parentCellStyle);
+            c8.setCellValue(patient.getPatientNo());
+        }
+    }
+
     public void getAreaReport(
             final ObjectId userId_groupId, final boolean isGroupAccess,
             final ObjectId areaId, final ObjectId wantedModuleId,
@@ -410,13 +470,49 @@ public class ReportServiceInArea {
                 ? findArea(wantedTrip, areaId)
                 : findArea(wantedTrip, areaId, userId_groupId);
 
+        List<String> staticModules = List.of(
+                "پذیرش", "آموزش کودکان", "آموزش بزرگسالان", "بیمه"
+        );
+
         Workbook workbook = excelService.createExcel(
                 (
                         wantedModuleId == null
-                                ? area.getModules().stream()
+                                ? Stream.of(staticModules, area.getModules())
                                 : area.getModules().stream().filter(module -> Objects.equals(module.getModuleId(), wantedModuleId))
-                ).map(module -> module.getModuleName().replace("/", " ")).collect(Collectors.toList())
+                ).map(module -> module instanceof ModuleInArea
+                        ? ((ModuleInArea) module).getModuleName().replace("/", " ")
+                        : module.toString()
+                ).collect(Collectors.toList())
         );
+
+        if(wantedModuleId == null) {
+            List<PatientsInArea> patientsInArea = patientsInAreaRepository.findByAreaId(areaId);
+            List<Patient> patients = patientRepository
+                    .findAllByIds(patientsInArea.stream().map(PatientsInArea::getPatientId).collect(Collectors.toList()));
+
+            patientsInArea.forEach(patientsInArea1 -> patients
+                    .stream()
+                    .filter(patient -> patient.getId().equals(patientsInArea1.getPatientId()))
+                    .findFirst()
+                    .ifPresent(patientsInArea1::setPatient));
+
+            for (String staticModule : staticModules) {
+                Sheet sheet = null;
+                for (int j = 0; j < workbook.getNumberOfSheets(); j++) {
+                    if (workbook.getSheetAt(j).getSheetName().equals(staticModule)) {
+                        sheet = workbook.getSheetAt(j);
+                        break;
+                    }
+                }
+                if (sheet != null) {
+                    switch (staticModule) {
+                        case "پذیرش":
+                            getReceptionReport(patientsInArea, sheet);
+                            break;
+                    }
+                }
+            }
+        }
 
         for (int z = 0; z < area.getModules().size(); z++) {
             ModuleInArea areaModule = area.getModules().get(z);
@@ -490,8 +586,8 @@ public class ReportServiceInArea {
                 ? tripRepository.findByGroupIdAndAreaId(userId_groupId, areaId).orElseThrow(NotAccessException::new)
                 : tripRepository.findByAreaIdAndOwnerId(areaId, userId_groupId).orElseThrow(NotAccessException::new);
 
-        if(userId_groupId != null) {
-            if(isGroupAccess) findArea(wantedTrip, areaId);
+        if (userId_groupId != null) {
+            if (isGroupAccess) findArea(wantedTrip, areaId);
             else findArea(wantedTrip, areaId, userId_groupId);
         }
 
@@ -532,8 +628,8 @@ public class ReportServiceInArea {
                 ? tripRepository.findByGroupIdAndAreaId(userId_groupId, areaId).orElseThrow(NotAccessException::new)
                 : tripRepository.findByAreaIdAndOwnerId(areaId, userId_groupId).orElseThrow(NotAccessException::new);
 
-        if(userId_groupId != null) {
-            if(isGroupAccess) findArea(wantedTrip, areaId);
+        if (userId_groupId != null) {
+            if (isGroupAccess) findArea(wantedTrip, areaId);
             else findArea(wantedTrip, areaId, userId_groupId);
         }
 
