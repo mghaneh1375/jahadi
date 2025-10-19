@@ -4,10 +4,12 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import four.group.jahadi.Models.Model;
 import four.group.jahadi.Models.ObjectIdSerialization;
+import four.group.jahadi.Models.Patient;
 import lombok.*;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.data.annotation.Transient;
 
 import java.util.List;
 
@@ -42,6 +44,9 @@ public class PatientsInArea extends Model {
     @Field("train_form")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private TrainForm trainForm;
+
+    @Transient
+    private Patient patient;
 
     @Override
     public String toString() {
