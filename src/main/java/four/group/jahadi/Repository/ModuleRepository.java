@@ -30,6 +30,6 @@ public interface ModuleRepository extends MongoRepository<Module, ObjectId>, Fil
     @Query(value = "{name: ?0}", fields = "{'id': 1}")
     Module findByName(String name);
 
-    @Query(value = "{subModules.name: { $regex: ?0, $options:'i'}}", fields = "{'id': 1, 'subModules': 1}")
+    @Query(value = "{'subModules.name': { $regex: ?0, $options:'i'}}", fields = "{'id': 1, 'subModules': 1}")
     List<Module> findAllBySubModuleName(String name);
 }

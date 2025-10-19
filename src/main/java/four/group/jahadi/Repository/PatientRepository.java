@@ -31,7 +31,7 @@ public interface PatientRepository extends MongoRepository<Patient, ObjectId>, F
     @Query(value = "{_id: {$in: ?0}}", fields = "{job: 0, phone: 0, fatherName: 0, ageType: 0, createdAt: 0}")
     List<Patient> findPublicInfoByIdIn(List<ObjectId> ids);
 
-    @Query(value = "{_id: {$in: ?0}}", fields = "{name: 1, sex: 1, insurance: 1, ageType: 1}")
+    @Query(value = "{_id: {$in: ?0}}", fields = "{name: 1, phone: 1, patientNo: 1, identifier: 1, birthDate: 1, sex: 1, insurance: 1, ageType: 1}")
     List<Patient> findExcelInfoByIdIn(List<ObjectId> ids);
 
 //    @Aggregation(pipeline = {

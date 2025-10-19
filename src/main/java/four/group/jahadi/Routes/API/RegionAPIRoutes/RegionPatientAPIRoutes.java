@@ -386,7 +386,6 @@ public class RegionPatientAPIRoutes extends Router {
             summary = "گرفتن فرم بیمار توسط پزشک در یک ماژول خاص در یک منطقه"
     )
     public void patientReport(
-            HttpServletRequest request,
             @PathVariable @ObjectIdConstraint ObjectId patientId,
             HttpServletResponse response
     ) {

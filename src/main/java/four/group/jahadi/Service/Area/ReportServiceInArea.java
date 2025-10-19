@@ -22,7 +22,6 @@ import four.group.jahadi.Service.ExcelService;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -59,7 +58,6 @@ public class ReportServiceInArea {
             Patient patient, Module module, Sheet sheet,
             HashMap<ObjectId, List<PatientForm>> patientForms
     ) {
-        ObjectId moduleId = module.getId();
         HashMap<ObjectId, List<Question>> subModulesQuestions = new HashMap<>();
         AtomicInteger incRowStep = new AtomicInteger(1);
 
@@ -118,10 +116,9 @@ public class ReportServiceInArea {
                 .map(SubModule::getId)
                 .collect(Collectors.toList());
 
-        excelService.writeCommonHeader2(sheet);
-        Row row = sheet.getRow(0);
-        Workbook wb = row.getSheet().getWorkbook();
+        excelService.writeCommonHeader(sheet);
 
+        Workbook wb = sheet.getWorkbook();
         CellStyle parentCellStyle = wb.createCellStyle();
         parentCellStyle.setAlignment(HorizontalAlignment.CENTER);
         Font font = wb.createFont();
@@ -130,7 +127,7 @@ public class ReportServiceInArea {
         font.setBold(true);
         parentCellStyle.setFont(font);
 
-        int startIdx = 4;
+        int startIdx = 8;
         int maxRowIdx = 1;
         HashMap<ObjectId, HashMap<ObjectId, Integer>> questionsColIdx = new HashMap<>();
         HashMap<ObjectId, Integer> startIndicesHistory = new HashMap<>();
@@ -158,7 +155,7 @@ public class ReportServiceInArea {
         if (maxRowIdx > 1) {
             for (int i = 2; i <= maxRowIdx; i++)
                 sheet.createRow(i);
-            for (int i = 4; i < sheet.getRow(1).getLastCellNum(); i++) {
+            for (int i = 8; i < sheet.getRow(1).getLastCellNum(); i++) {
                 CellRangeAddress mergedCell = isMergedCell(1, i, sheet);
                 if (mergedCell == null) {
                     sheet.addMergedRegion(
@@ -171,7 +168,7 @@ public class ReportServiceInArea {
             }
         }
 
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 8; i++) {
             sheet.addMergedRegion(
                     new CellRangeAddress(
                             0, maxRowIdx, i, i
@@ -198,8 +195,6 @@ public class ReportServiceInArea {
             }
         }
 
-        List<User> doctors = userRepository.findJustNameByIdsIn(new ArrayList<>(doctorIds));
-        HashMap<ObjectId, Row> patientsRow = new HashMap<>();
         subModuleIds.forEach(subModuleId -> {
             for(ObjectId referId : patientForms.keySet()) {
                 ReportUtil.addPatientRowForSpecificSubModule(
@@ -207,8 +202,8 @@ public class ReportServiceInArea {
                         patient,
                         patientForms.get(referId),
                         sheet,
-                        patientsRow,
-                        doctors,
+                        new HashMap<>(),
+                        userRepository.findJustNameByIdsIn(new ArrayList<>(doctorIds)),
                         incRowStep.get(),
                         referId,
                         subModuleId,
@@ -292,7 +287,7 @@ public class ReportServiceInArea {
         font.setBold(true);
         parentCellStyle.setFont(font);
 
-        int startIdx = 4;
+        int startIdx = 8;
         int maxRowIdx = 1;
         HashMap<ObjectId, HashMap<ObjectId, Integer>> questionsColIdx = new HashMap<>();
         HashMap<ObjectId, Integer> startIndicesHistory = new HashMap<>();
@@ -320,7 +315,7 @@ public class ReportServiceInArea {
         if (maxRowIdx > 1) {
             for (int i = 2; i <= maxRowIdx; i++)
                 sheet.createRow(i);
-            for (int i = 4; i < sheet.getRow(1).getLastCellNum(); i++) {
+            for (int i = 8; i < sheet.getRow(1).getLastCellNum(); i++) {
                 CellRangeAddress mergedCell = isMergedCell(1, i, sheet);
                 if (mergedCell == null) {
                     sheet.addMergedRegion(
@@ -333,7 +328,7 @@ public class ReportServiceInArea {
             }
         }
 
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 8; i++) {
             sheet.addMergedRegion(
                     new CellRangeAddress(
                             0, maxRowIdx, i, i
@@ -369,16 +364,6 @@ public class ReportServiceInArea {
 
         HashMap<ObjectId, Row> patientsRow = new HashMap<>();
         subModuleIds.forEach(subModuleId -> {
-//            if (
-//                !subModuleId.toString().equals("6841f4ce9f06e166a2210f36") &&
-//                !subModuleId.toString().equals("6841f4ce9f06e166a2210f43") &&
-//                !subModuleId.toString().equals("6841f4ce9f06e166a2210f56") &&
-//                !subModuleId.toString().equals("6841f4ce9f06e166a2210f66")
-////                    !subModuleId.toString().equals("6841f4ce9f06e166a2210f05") &&
-////                    !subModuleId.toString().equals("6841f4ce9f06e166a2210f11")
-//            )
-//                return;
-
             ReportUtil.addPatientRowForSpecificSubModule(
                     startIndicesHistory.get(subModuleId),
                     patients,

@@ -1,7 +1,9 @@
 package four.group.jahadi.Service;
 
+import four.group.jahadi.Models.Patient;
 import four.group.jahadi.Models.Question.*;
 import four.group.jahadi.Models.SubModule;
+import four.group.jahadi.Utility.Utility;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -9,6 +11,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -179,32 +182,23 @@ public class ExcelService {
         font.setColor(HSSFColor.HSSFColorPredefined.RED.getIndex());
         font.setBold(true);
         parentCellStyle.setFont(font);
+        List<String> titles = new ArrayList<>() {{
+            add("نام بیمار");
+            add("شماره همراه");
+            add("کدملی");
+            add("شماره پرونده");
+            add("تاریخ تولد");
+            add("بیمه");
+            add("سن");
+            add("جنسیت");
+        }};
 
-        Cell c0 = row.createCell(0);
-        c0.setCellStyle(parentCellStyle);
-        c0.setCellValue("نام بیمار");
-        Cell c1 = row.createCell(1);
-        c1.setCellStyle(parentCellStyle);
-        c1.setCellValue("بیمه");
-        Cell c2 = row.createCell(2);
-        c2.setCellStyle(parentCellStyle);
-        c2.setCellValue("سن");
-        Cell c3 = row.createCell(3);
-        c3.setCellStyle(parentCellStyle);
-        c3.setCellValue("جنسیت");
-        sheet.createRow(1);
-    }
-
-    public void writeCommonHeader2(Sheet sheet) {
-        Row row = sheet.createRow(0);
-        Workbook wb = row.getSheet().getWorkbook();
-        CellStyle parentCellStyle = wb.createCellStyle();
-        parentCellStyle.setAlignment(HorizontalAlignment.CENTER);
-        Font font = wb.createFont();
-        font.setColor(HSSFColor.HSSFColorPredefined.RED.getIndex());
-        font.setBold(true);
-        parentCellStyle.setFont(font);
-
+        AtomicInteger counter = new AtomicInteger();
+        titles.forEach(s -> {
+            Cell c0 = row.createCell(counter.get());
+            c0.setCellStyle(parentCellStyle);
+            c0.setCellValue(s);
+        });
         sheet.createRow(1);
     }
 

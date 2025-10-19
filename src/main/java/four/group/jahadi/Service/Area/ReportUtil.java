@@ -40,24 +40,16 @@ public class ReportUtil {
     ) {
         Row r = sheet.createRow(sheet.getLastRowNum() + 1);
         r.createCell(0).setCellValue(wantedPatient.getName());
-        r.createCell(1).setCellValue(wantedPatient.getInsurance().getFaTranslate());
-        r.createCell(2).setCellValue(wantedPatient.getAgeType().getFaTranslate());
-        r.createCell(3).setCellValue(wantedPatient.getSex().getFaTranslate());
+        r.createCell(1).setCellValue(wantedPatient.getPhone());
+        r.createCell(2).setCellValue(wantedPatient.getIdentifier());
+        r.createCell(3).setCellValue(wantedPatient.getPatientNo());
+        r.createCell(4).setCellValue(wantedPatient.getBirthDate() == null ? "" : Utility.convertUTCDateToJalali(wantedPatient.getBirthDate()));
+        r.createCell(5).setCellValue(wantedPatient.getInsurance().getFaTranslate());
+        r.createCell(6).setCellValue(wantedPatient.getAgeType().getFaTranslate());
+        r.createCell(7).setCellValue(wantedPatient.getSex().getFaTranslate());
 
         if (incRowStep > 1) {
-            for (int i = 0; i < 4; i++)
-                mergeCell(sheet, r, i);
-        }
-        return r;
-    }
-
-    private static Row createNewPatientRow2(
-            Sheet sheet, Patient wantedPatient,
-            int incRowStep
-    ) {
-        Row r = sheet.createRow(sheet.getLastRowNum() + 1);
-        if (incRowStep > 1) {
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < 8; i++)
                 mergeCell(sheet, r, i);
         }
         return r;
@@ -248,10 +240,9 @@ public class ReportUtil {
         if (patientsRow.containsKey(referId))
             patientRow.set(patientsRow.get(referId));
         else {
-            Row r = createNewPatientRow2(sheet, wantedPatient, incRowStep);
+            Row r = createNewPatientRow(sheet, wantedPatient, incRowStep);
             patientsRow.put(referId, r);
             patientRow.set(r);
-//        patientRow.set(createNewPatientRow2(sheet, wantedPatient, incRowStep));
         }
 
         final int patientRowNum = patientRow.get().getRowNum();
