@@ -89,7 +89,8 @@ public class ReportUtil {
             ObjectId moduleId,
             ObjectId subModuleId,
             List<Question> subModuleQuestions,
-            HashMap<ObjectId, Integer> questionsColIdx
+            HashMap<ObjectId, Integer> questionsColIdx,
+            HashMap<ObjectId, ObjectId> pp
     ) {
         patients.forEach(patient -> {
             Patient wantedPatient = patientsInfo
@@ -117,6 +118,7 @@ public class ReportUtil {
                             Row r = createNewPatientRow(sheet, wantedPatient, incRowStep);
                             patientsRow.put(patientReferral.getId(), r);
                             patientRow.set(r);
+                            pp.put(patient.getPatientId(), patientReferral.getId());
                         }
 
                         final int patientRowNum = patientRow.get().getRowNum();

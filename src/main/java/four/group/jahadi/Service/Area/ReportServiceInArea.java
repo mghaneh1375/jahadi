@@ -367,6 +367,8 @@ public class ReportServiceInArea {
         List<User> doctors = userRepository.findJustNameByIdsIn(new ArrayList<>(doctorIds));
 
         HashMap<ObjectId, Row> patientsRow = new HashMap<>();
+        HashMap<ObjectId, ObjectId> pp = new HashMap<>();
+
         subModuleIds.forEach(subModuleId -> {
             ReportUtil.addPatientRowForSpecificSubModule(
                     startIndicesHistory.get(subModuleId),
@@ -379,9 +381,25 @@ public class ReportServiceInArea {
                     moduleId,
                     subModuleId,
                     subModulesQuestions.get(subModuleId),
-                    questionsColIdx.get(subModuleId)
+                    questionsColIdx.get(subModuleId),
+                    pp
             );
         });
+
+        List<PatientDrugJoinModel> drugs = patientsDrugRepository.findByFiltersJoinWithDrug(areaId, moduleId);
+        patientsRow.forEach((refId, row1) -> {
+            drugs
+                    .stream()
+                    .filter(model -> pp.containsKey(model.getPatientId()) && pp.get(model.getPatientId()).equals(refId))
+                    .findFirst()
+                    .ifPresent(model -> {
+                        int lastCellNo = row1.getLastCellNum();
+                        row1.createCell(++lastCellNo).setCellValue(model.getDrugInfo().getName());
+                        row1.createCell(++lastCellNo).setCellValue(model.getDrugInfo().getDose());
+                        row1.createCell(++lastCellNo).setCellValue(model.getHowToUse().getFaTranslate());
+                    });
+        });
+
     }
 
     public void getReceptionReport(List<PatientsInArea> patients, Sheet sheet) {
