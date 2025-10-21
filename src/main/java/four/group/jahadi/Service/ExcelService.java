@@ -193,7 +193,7 @@ public class ExcelService {
 
         AtomicInteger counter = new AtomicInteger();
         titles.forEach(s -> {
-            Cell c0 = row.createCell(counter.get());
+            Cell c0 = row.createCell(counter.getAndIncrement());
             c0.setCellStyle(parentCellStyle);
             c0.setCellValue(s);
         });
