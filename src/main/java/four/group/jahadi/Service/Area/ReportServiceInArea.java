@@ -306,6 +306,7 @@ public class ReportServiceInArea {
             );
             maxRowIdx = output[0];
             short lastCellNum = output[1];
+
             for (int i = startIdx; i < lastCellNum; i++) {
                 CellRangeAddress mergedCell = isMergedCell(1, i, sheet);
                 if (mergedCell == null)
@@ -314,6 +315,32 @@ public class ReportServiceInArea {
                     mergedCell.forEach(cellAddress -> sheet.setColumnWidth(cellAddress.getColumn(), 18 * 255));
             }
             startIdx = lastCellNum;
+        }
+
+        Row firstRow = sheet.getRow(1);
+        String[] drugCols = new String[] {
+                "نام دارو تجویز شده",
+                "دُز دارو تجویز شده",
+                "تعداد دارو تجویز شده",
+                "تعداد دارو تحویل شده",
+                "تحویل دهنده دارو",
+                "توضیح تجویز دارو"
+        };
+
+        Row moduleHeaderRow = sheet.getRow(0);
+        Cell cell1 = moduleHeaderRow.createCell(startIdx);
+        cell1.setCellStyle(parentCellStyle);
+        cell1.setCellValue("داروخانه");
+        sheet.addMergedRegion(
+                new CellRangeAddress(
+                        0, 0,
+                        startIdx, startIdx + drugCols.length
+                )
+        );
+
+        for (String drugCol : drugCols) {
+            firstRow.createCell(startIdx).setCellValue(drugCol);
+            sheet.setColumnWidth(startIdx++, 18 * 255);
         }
 
         if (maxRowIdx > 1) {
@@ -394,9 +421,12 @@ public class ReportServiceInArea {
                     .findFirst()
                     .ifPresent(model -> {
                         int lastCellNo = row1.getLastCellNum();
-                        row1.createCell(++lastCellNo).setCellValue(model.getDrugInfo().getName());
-                        row1.createCell(++lastCellNo).setCellValue(model.getDrugInfo().getDose());
-                        row1.createCell(++lastCellNo).setCellValue(model.getHowToUse().getFaTranslate());
+                        row1.createCell(lastCellNo++).setCellValue(model.getDrugInfo().getName());
+                        row1.createCell(lastCellNo).setCellValue(model.getDrugInfo().getDose());
+                        row1.createCell(++lastCellNo).setCellValue(model.getSuggestCount());
+                        row1.createCell(++lastCellNo).setCellValue(model.getGiveCount() == null ? 0 : model.getGiveCount());
+                        row1.createCell(++lastCellNo).setCellValue(model.getGiverInfo() == null ? "" : model.getGiverInfo());
+                        row1.createCell(++lastCellNo).setCellValue(model.getDescription());
                     });
         });
 
@@ -562,7 +592,7 @@ public class ReportServiceInArea {
 
             moduleRepository.findById(moduleId).ifPresent(module -> {
                 Sheet sheet = null;
-                for (int i = 0; i < area.getModules().size(); i++) {
+                for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
                     if (workbook.getSheetAt(i).getSheetName().equals(areaModule.getModuleName().replace("/", " "))) {
                         sheet = workbook.getSheetAt(i);
                         break;

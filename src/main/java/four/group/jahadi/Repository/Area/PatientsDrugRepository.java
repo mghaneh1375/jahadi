@@ -99,13 +99,10 @@ public interface PatientsDrugRepository extends MongoRepository<PatientDrug, Obj
             "{$unwind: {path: '$giverInfo', preserveNullAndEmptyArrays: true}}",
             "{ $project: {" +
                     "'giverInfo': '$giverInfo.name', " +
-                    "howToUse: 1, amountOfUse: 1, useTime: 1," +
                     "suggestCount: 1, giveCount: 1, description: 1," +
-                    "giveDescription: 1, createdAt: 1, giveAt: 1, patientId: 1, " +
+                    "patientId: 1, " +
                     "'drugInfo.name': 1, " +
                     "'drugInfo.dose': 1, " +
-                    "'drugInfo.producer': 1, " +
-                    "'drugInfo.drugType': 1, " +
                     "} }",
     })
     List<PatientDrugJoinModel> findByFiltersJoinWithDrug(
