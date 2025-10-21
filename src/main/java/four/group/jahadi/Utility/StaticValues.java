@@ -21,7 +21,7 @@ public class StaticValues {
 
     public final static int ONE_MB = 1024 * 1024;
 
-    public final static Boolean DEV_MODE = true;
+    public final static Boolean DEV_MODE = false;
 
     public static final BasicDBObject JUST_ID = new BasicDBObject("_id", 1);
 
