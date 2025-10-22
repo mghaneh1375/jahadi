@@ -1,5 +1,7 @@
 package four.group.jahadi.DTO.SignUp;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import four.group.jahadi.DTO.PersianNumberDeserializer;
 import four.group.jahadi.Enums.GroupRegistrationPlace;
 import four.group.jahadi.Enums.Lodgment;
 import four.group.jahadi.Enums.TripFrequency;
@@ -29,6 +31,7 @@ public class SignUpStep2ForGroupData {
     private String establishYear;
 
     @JustNumeric
+    @JsonDeserialize(using = PersianNumberDeserializer.class)
     private String atlasCode;
 
     @Positive
@@ -77,6 +80,7 @@ public class SignUpStep2ForGroupData {
     private String address;
 
     @JustNumeric
+    @JsonDeserialize(using = PersianNumberDeserializer.class)
     private String tel;
 
 }

@@ -1,5 +1,7 @@
 package four.group.jahadi.DTO.SignUp;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import four.group.jahadi.DTO.PersianNumberDeserializer;
 import four.group.jahadi.Enums.Sex;
 import four.group.jahadi.Validator.JustNumeric;
 import four.group.jahadi.Validator.SignUp.ValidatedSignUpFormStep1ForGroup;
@@ -41,12 +43,15 @@ public class SignUpStep1ForGroupData {
     private String university;
 
     @JustNumeric
+    @JsonDeserialize(using = PersianNumberDeserializer.class)
     private String nid;
 
     @JustNumeric
+    @JsonDeserialize(using = PersianNumberDeserializer.class)
     private String cid;
 
     @JustNumeric
+    @JsonDeserialize(using = PersianNumberDeserializer.class)
     private String phone;
 
     private Sex sex;

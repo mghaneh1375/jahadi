@@ -1,5 +1,7 @@
 package four.group.jahadi.DTO.SignUp;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import four.group.jahadi.DTO.PersianNumberDeserializer;
 import four.group.jahadi.Validator.JustNumeric;
 import four.group.jahadi.Validator.SignUp.ValidatedSignUpFormStep3;
 import lombok.AllArgsConstructor;
@@ -23,6 +25,7 @@ public class SignUpStep3Data {
     private String nearbyRel;
 
     @JustNumeric
+    @JsonDeserialize(using = PersianNumberDeserializer.class)
     private String nearbyPhone;
 
 

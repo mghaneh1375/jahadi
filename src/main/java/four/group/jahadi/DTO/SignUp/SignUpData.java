@@ -1,5 +1,7 @@
 package four.group.jahadi.DTO.SignUp;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import four.group.jahadi.DTO.PersianNumberDeserializer;
 import four.group.jahadi.Enums.BloodType;
 import four.group.jahadi.Enums.Sex;
 import four.group.jahadi.Validator.JustNumeric;
@@ -20,6 +22,7 @@ import javax.validation.constraints.Size;
 public class SignUpData {
 
     @JustNumeric
+    @JsonDeserialize(using = PersianNumberDeserializer.class)
     private String phone;
 
     private String abilities;
@@ -34,6 +37,7 @@ public class SignUpData {
     private String nearbyRel;
 
     @JustNumeric
+    @JsonDeserialize(using = PersianNumberDeserializer.class)
     private String nearbyPhone;
 
     private Integer groupCode;

@@ -1,5 +1,7 @@
 package four.group.jahadi.DTO.Patient;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import four.group.jahadi.DTO.PersianNumberDeserializer;
 import four.group.jahadi.Enums.AgeType;
 import four.group.jahadi.Enums.IdentifierType;
 import four.group.jahadi.Enums.Insurance;
@@ -30,10 +32,12 @@ public class PatientData {
     private long birthDate;
 
     @JustNumeric
+    @JsonDeserialize(using = PersianNumberDeserializer.class)
     private String phone;
 
     @JustNumeric
     @Size(min = 7, max = 13, message = IDENTIFIER_ERR)
+    @JsonDeserialize(using = PersianNumberDeserializer.class)
     private String identifier;
 
     private IdentifierType identifierType;
@@ -44,5 +48,6 @@ public class PatientData {
     private String job;
 
     @Size(min = 5, max = 20, message = PATIENT_NO_ERR)
+    @JsonDeserialize(using = PersianNumberDeserializer.class)
     private String patientNo;
 }

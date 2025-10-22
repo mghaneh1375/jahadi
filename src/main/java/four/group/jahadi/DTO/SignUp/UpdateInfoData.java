@@ -1,5 +1,7 @@
 package four.group.jahadi.DTO.SignUp;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import four.group.jahadi.DTO.PersianNumberDeserializer;
 import four.group.jahadi.Enums.*;
 import four.group.jahadi.Validator.JustNumeric;
 import four.group.jahadi.Validator.Positive;
@@ -32,6 +34,7 @@ public class UpdateInfoData {
     private String nearbyRel;
     
     @JustNumeric
+    @JsonDeserialize(using = PersianNumberDeserializer.class)
     private String nearbyPhone;
     
     @Size(min = 3, max = 50)
@@ -55,6 +58,7 @@ public class UpdateInfoData {
     private String endManageYear;
 
     @JustNumeric
+    @JsonDeserialize(using = PersianNumberDeserializer.class)
     private String nid;
     private Sex sex;
 
@@ -63,6 +67,7 @@ public class UpdateInfoData {
     private String establishYear;
     
     @JustNumeric
+    @JsonDeserialize(using = PersianNumberDeserializer.class)
     private String atlasCode;
 
     @Positive
@@ -115,6 +120,7 @@ public class UpdateInfoData {
 
     
     @JustNumeric
+    @JsonDeserialize(using = PersianNumberDeserializer.class)
     @Size(min = 5, max = 11)
     private String tel;
 
