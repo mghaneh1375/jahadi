@@ -20,6 +20,7 @@ import four.group.jahadi.Repository.PatientRepository;
 import four.group.jahadi.Repository.TripRepository;
 import four.group.jahadi.Repository.UserRepository;
 import four.group.jahadi.Service.ExcelService;
+import four.group.jahadi.Utility.Utility;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -444,7 +445,7 @@ public class ReportServiceInArea {
         LocalDate curr = LocalDate.now();
 
         String[] headers = new String[] {
-                "نام بیمار", "نام پدر", "سن", "جنسیت",
+                "نام بیمار", "نام پدر", "سن", "تاریخ تولد", "جنسیت",
                 "شماره همراه", "شناسه", "شغل", "شماره پرونده"
         };
 
@@ -462,6 +463,7 @@ public class ReportServiceInArea {
 
             row1.createCell(index++).setCellValue(patient.getName());
             row1.createCell(index++).setCellValue(patient.getFatherName());
+            row1.createCell(index++).setCellValue(Utility.convertUTCDateToJalali(patient.getBirthDate()));
             row1.createCell(index++).setCellValue(Period.between(patient.getBirthDate().toLocalDate(), curr).getYears());
             row1.createCell(index++).setCellValue(patient.getSex().getFaTranslate());
             row1.createCell(index++).setCellValue(patient.getPhone());
