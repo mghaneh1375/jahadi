@@ -7,7 +7,7 @@ import org.json.JSONObject;
 
 public class StaticValues {
 
-    public final static String SERVER_ADDR = "http://statics.echeck.ir/";
+    public final static String SERVER_ADDR = "https://statics.asar.app/";
 //    public final static String SERVER_ADDR = "http://192.168.219.29/";
 
     public final static int SMS_RESEND_SEC = 300;
