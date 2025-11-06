@@ -6,6 +6,6 @@ import lombok.Data;
 @Builder
 @Data
 public class ErrorRow {
-    private Integer rowIndex;
+    private Object rowIndex;
     private String errorMsg;
 }

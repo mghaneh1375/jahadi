@@ -3,8 +3,10 @@ package four.group.jahadi.Service.Area;
 import four.group.jahadi.DTO.Area.AdviceDrugData;
 import four.group.jahadi.DTO.Area.AreaDrugsData;
 import four.group.jahadi.DTO.Area.GiveDrugData;
+import four.group.jahadi.DTO.ErrorRow;
 import four.group.jahadi.DTO.Patient.PatientAdvices;
 import four.group.jahadi.Enums.Module.DeliveryStatus;
+import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Exception.NotAccessException;
 import four.group.jahadi.Models.Area.Area;
@@ -19,14 +21,23 @@ import four.group.jahadi.Repository.*;
 import four.group.jahadi.Service.JahadgarDrugService;
 import four.group.jahadi.Utility.PairValue;
 import four.group.jahadi.Utility.Utility;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -143,6 +154,163 @@ public class DrugServiceInArea {
         drugLogRepository.saveAll(drugLogs);
         areaDrugsRepository.insert(drugs);
         areaDrugsRepository.saveAll(drugsInAreaList);
+    }
+
+    private HashMap<String, Integer> calcValidRows(
+            List<Row> rows,
+            List<ErrorRow> errors
+    ) {
+        HashMap<String, Integer> output = new HashMap<>();
+        for (Row row : rows) {
+            try {
+                if (
+                        row.getCell(0) == null ||
+                                row.getCell(0).getCellType() == CellType.BLANK ||
+                                row.getCell(1) == null ||
+                                row.getCell(1).getCellType() == CellType.BLANK
+                )
+                    continue;
+
+                String key = row.getCell(0).getCellType().equals(CellType.NUMERIC)
+                        ? (row.getCell(0).getNumericCellValue() + "").replace(".0", "")
+                        : row.getCell(0).getStringCellValue();
+                int value;
+
+                if (row.getCell(1).getCellType().equals(CellType.NUMERIC))
+                    value = (int) row.getCell(1).getNumericCellValue();
+                else
+                    value = Integer.parseInt(row.getCell(1).getStringCellValue());
+
+                output.put(
+                        key, output.getOrDefault(key, 0) + value
+                );
+            } catch (Exception ex) {
+                errors.add(
+                        ErrorRow
+                                .builder()
+                                .rowIndex(row.getRowNum())
+                                .errorMsg(ex.getMessage())
+                                .build()
+                );
+            }
+        }
+
+        return output;
+    }
+
+    public void addBatchDrugsToList(
+            ObjectId userId, ObjectId groupId,
+            String username, ObjectId areaId,
+            MultipartFile file, boolean isGroupOwner
+    ) {
+        if (file == null)
+            throw new InvalidFieldsException("لطفا فایل را بارگذاری نمایید");
+
+        Trip trip = tripRepository.findActiveAreaByGroupIdAndAreaIdAndWriteAccess(
+                        Utility.getCurrLocalDateTime(), groupId, areaId
+                ).orElseThrow(NotAccessException::new);
+        Area foundArea = trip.getAreas().stream()
+                .filter(area -> area.getId().equals(areaId))
+                .findFirst().get();
+
+        try {
+            Workbook workbook = new XSSFWorkbook(file.getInputStream());
+            Sheet sheet = workbook.getSheetAt(0);
+            List<ErrorRow> errorRows = new ArrayList<>();
+            List<Row> rows = new ArrayList<>();
+            for (int i = 1; i <= sheet.getLastRowNum(); i++)
+                rows.add(sheet.getRow(i));
+
+            HashMap<String, Integer> data = calcValidRows(rows, errorRows);
+            List<Drug> drugs = drugRepository.findIdsByCodes(data.keySet(), groupId);
+            List<ObjectId> ids = new ArrayList<>();
+            List<AreaDrugsData> areaDrugsDataList = drugs
+                    .stream()
+                    .map(drug -> {
+                        ids.add(drug.getId());
+                        AreaDrugsData areaDrugsData = new AreaDrugsData();
+                        areaDrugsData.setDrugId(drug.getId());
+                        areaDrugsData.setTotalCount(data.get(drug.getCode()));
+                        return areaDrugsData;
+                    }).collect(Collectors.toList());
+
+            if (!isGroupOwner &&
+                    !wareHouseAccessForGroupRepository.existsDrugAccessByGroupIdAndUserId(
+                            groupId, userId
+                    )
+            )
+                throw new NotAccessException();
+
+            List<AreaDrugs> areaDrugs = new ArrayList<>();
+            List<ObjectId> existDrugs = areaDrugsRepository
+                    .findDrugIdsByAreaIdAndDrugIds(areaId, ids)
+                    .stream().map(AreaDrugs::getDrugId)
+                    .collect(Collectors.toList());
+
+            HashMap<ObjectId, Integer> updates = new HashMap<>();
+            existDrugs.forEach(objectId -> updates.put(objectId, 0));
+
+            List<DrugLog> drugLogs = new ArrayList<>();
+            final String msg = "اختصاص به منطقه " + foundArea.getName() + " در اردو " + trip.getName() + " توسط " + username;
+
+            for (Drug drug : drugs) {
+                areaDrugsDataList.stream()
+                        .filter(areaDrugsData -> areaDrugsData.getDrugId().equals(drug.getId()))
+                        .findFirst().ifPresent(dto -> {
+                            if (drug.getAvailable() < dto.getTotalCount())
+                                errorRows.add(
+                                        ErrorRow
+                                                .builder()
+                                                .rowIndex(drug.getCode())
+                                                .errorMsg("داروی " + drug.getName() + "ظرفیت این دارو کمتر از مقدار درخواستی شما می باشد")
+                                                .build()
+                                );
+
+                            if (existDrugs.contains(drug.getId()))
+                                updates.put(drug.getId(), updates.get(drug.getId()) + dto.getTotalCount());
+                            else {
+                                areaDrugs.add(
+                                        AreaDrugs
+                                                .builder()
+                                                .drugName(drug.getName())
+                                                .drugId(drug.getId())
+                                                .areaId(areaId)
+                                                .totalCount(dto.getTotalCount())
+                                                .reminder(dto.getTotalCount())
+                                                .updatedAt(LocalDateTime.now())
+                                                .build()
+                                );
+                            }
+
+                            drug.setAvailable(drug.getAvailable() - dto.getTotalCount());
+                            drugLogs.add(
+                                    DrugLog
+                                            .builder()
+                                            .drugId(drug.getId())
+                                            .userId(userId)
+                                            .areaId(areaId)
+                                            .groupId(groupId)
+                                            .amount(-dto.getTotalCount())
+                                            .desc(msg)
+                                            .build()
+                            );
+                        });
+            }
+
+            List<AreaDrugs> drugsInAreaList = areaDrugsRepository.findByAreaIdAndDrugIds(
+                    areaId, new ArrayList<>(updates.keySet())
+            );
+            drugsInAreaList.forEach(next -> {
+                next.setReminder(updates.get(next.getDrugId()) + next.getReminder());
+                next.setTotalCount(updates.get(next.getDrugId()) + next.getTotalCount());
+                next.setUpdatedAt(LocalDateTime.now());
+            });
+
+            drugRepository.saveAll(drugs);
+            drugLogRepository.saveAll(drugLogs);
+            areaDrugsRepository.insert(areaDrugs);
+            areaDrugsRepository.saveAll(drugsInAreaList);
+        } catch (Exception x) {}
     }
 
     //    @Transactional

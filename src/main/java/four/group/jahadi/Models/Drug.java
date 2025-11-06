@@ -39,6 +39,7 @@ public class Drug extends Model {
     private LocalDateTime expireAt;
     private String dose;
     private String name;
+    private String code;
     private String producer;
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     private Integer price;

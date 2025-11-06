@@ -15,8 +15,8 @@ import static four.group.jahadi.Utility.StaticValues.DEV_MODE;
 public class FileUtils {
 
     public final static String uploadDir = "/var/www/statics/";
-    public final static String uploadDir_dev = "/var/www/statics/";
-//    public final static String uploadDir_dev = "./src/main/resources/assets/";
+//    public final static String uploadDir_dev = "/var/www/statics/";
+    public final static String uploadDir_dev = "./src/main/resources/assets/";
 
     public static String uploadFile(MultipartFile file, String folder) {
 

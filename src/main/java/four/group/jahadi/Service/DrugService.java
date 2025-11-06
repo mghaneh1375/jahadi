@@ -16,7 +16,6 @@ import four.group.jahadi.Repository.GroupRepository;
 import four.group.jahadi.Repository.WareHouseAccessForGroupRepository;
 import four.group.jahadi.Service.Area.ReportUtil;
 import four.group.jahadi.Utility.PairValue;
-import four.group.jahadi.Utility.Utility;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -39,7 +38,8 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import static four.group.jahadi.Utility.Utility.*;
+import static four.group.jahadi.Utility.Utility.getExcelDate;
+import static four.group.jahadi.Utility.Utility.isCellDateFormatted;
 
 
 @Service
@@ -182,6 +182,7 @@ public class DrugService extends AbstractService<Drug, DrugData> {
         drug.setLocation(drugData.getLocation());
         drug.setShelfNo(drugData.getShelfNo());
         drug.setBoxNo(drugData.getBoxNo());
+        drug.setCode(drugData.getCode());
 //        drug.setHowToUses(drugData.getHowToUses());
 //        drug.setAmountOfUses(drugData.getAmountOfUses());
 //        drug.setUseTimes(drugData.getUseTimes());
@@ -207,7 +208,7 @@ public class DrugService extends AbstractService<Drug, DrugData> {
     // EXCEL FORMAT
     // A: index, B: drugType, C: name, D: dose, E: expireAt,
     // F: producer, G: available, H: availablePack, I: price,
-    // J: location, K: boxNo, L: shelfNo
+    // J: location, K: boxNo, L: shelfNo, M: code
     private Drug isRowValid(Row row) {
         Drug drug = new Drug();
 
@@ -290,6 +291,10 @@ public class DrugService extends AbstractService<Drug, DrugData> {
                     validateString(value.toString(), "شماره قفسه", 1, 100);
                     drug.setShelfNo(value.toString());
                     break;
+                case 12:
+                    validateString(value.toString(), "کد دارو", 3, 50);
+                    drug.setCode(value.toString());
+                    break;
             }
         }
 
@@ -303,7 +308,8 @@ public class DrugService extends AbstractService<Drug, DrugData> {
                 drug.getPrice() == null ||
                 drug.getShelfNo() == null ||
                 drug.getBoxNo() == null ||
-                drug.getLocation() == null
+                drug.getLocation() == null ||
+                drug.getCode() == null
         )
             throw new InvalidFieldsException("لطفا تمام موارد را وارد نمایید");
 
@@ -397,6 +403,7 @@ public class DrugService extends AbstractService<Drug, DrugData> {
         {
             add("نام گروه");
             add("نام دارو");
+            add("کد دارو");
             add("دُز دارو");
             add("نوع دارو");
             add("تولید کننده دارو");

@@ -12,7 +12,6 @@ import four.group.jahadi.Exception.NotActivateAccountException;
 import four.group.jahadi.Exception.UnAuthException;
 import four.group.jahadi.Models.Area.JoinedDrugBookmarkWithAreaDto;
 import four.group.jahadi.Models.Drug;
-import four.group.jahadi.Models.DrugBookmark;
 import four.group.jahadi.Models.PatientDrug;
 import four.group.jahadi.Models.TokenInfo;
 import four.group.jahadi.Repository.UserRepository;
@@ -25,12 +24,15 @@ import four.group.jahadi.Validator.ObjectIdConstraint;
 import io.swagger.v3.oas.annotations.Operation;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -92,6 +94,21 @@ public class JahadgarDrugAPIRoutes extends Router {
         drugServiceInArea.addAllToDrugsList(
                 tokenInfo.getUserId(), tokenInfo.getGroupId(), tokenInfo.getUsername(),
                 areaId, drugsData, tokenInfo.getAccesses().contains(Access.GROUP)
+        );
+    }
+
+    @PutMapping(value = "addBatchDrugsToList/{areaId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @ResponseBody
+    @Operation(summary = "افزودن دسته ای دارو با فایل اکسل به منطقه توسط مسئول انبار دارو گروه یا مسئول گروه")
+    public void addBatchDrugsToList(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId,
+            @RequestBody @NotNull MultipartFile file
+    ) {
+        TokenInfo tokenInfo = getFullTokenInfo(request);
+        drugServiceInArea.addBatchDrugsToList(
+                tokenInfo.getUserId(), tokenInfo.getGroupId(), tokenInfo.getUsername(),
+                areaId, file, tokenInfo.getAccesses().contains(Access.GROUP)
         );
     }
 
@@ -167,6 +184,7 @@ public class JahadgarDrugAPIRoutes extends Router {
                 pageNo
         );
     }
+
     @PutMapping(value = "giveDrugToPatient/{areaId}/{adviceId}")
     @Operation(summary = "تحویل دارو تجویز شده به کاربر", description = "فیلد drugId اختیاری است و درصورتی که مسئول تحویل بخواهد دارویی به غیر از دارو تجویز شده به بیمار تحویل دهد آن را پر می کند. توضیح هم اختیاری است")
     public void giveDrugToPatient(
@@ -209,12 +227,12 @@ public class JahadgarDrugAPIRoutes extends Router {
             @RequestParam(required = false, name = "shelfNo") String shelfNo
     ) throws UnAuthException, NotActivateAccountException {
         TokenInfo fullTokenInfo = getFullTokenInfo(request);
-        if(!fullTokenInfo.getAccesses().contains(Access.GROUP)) {
+        if (!fullTokenInfo.getAccesses().contains(Access.GROUP)) {
             ResponseEntity<Boolean> hasAccess = jahadgarDrugService.checkAccessToWareHouse(
                     fullTokenInfo.getGroupId(),
                     fullTokenInfo.getUserId()
             );
-            if(hasAccess == null || hasAccess.getBody() == null ||
+            if (hasAccess == null || hasAccess.getBody() == null ||
                     !hasAccess.getBody()
             )
                 throw new NotAccessException();

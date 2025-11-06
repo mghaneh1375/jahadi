@@ -27,6 +27,9 @@ public abstract class AbstractService <T, D> {
 
     void validateString(String val, String key, int min, int max) {
         if (val == null || val.length() < min || val.length() > max)
-            throw new InvalidFieldsException(key + " باید حداقل 2 کاراکتر و حداکثر 100 کاراکتر باشد");
+            throw new InvalidFieldsException(String.format(
+                    "%s باید حداقل %d کاراکتر و حداکثر %d کاراکتر باشد",
+                    key, min, max
+            ));
     }
 }

@@ -59,12 +59,10 @@ public class Utility {
     }
 
     public static boolean isCellDateFormatted(Cell cell) {
-        if (cell == null) {
+        if (cell == null)
             return false;
-        }
 
         boolean bDate = false;
-
         double d = 0;
 
         if (cell.getCellType() == CellType.NUMERIC) {

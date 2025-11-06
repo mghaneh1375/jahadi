@@ -13,6 +13,7 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface DrugRepository extends MongoRepository<Drug, ObjectId>, FilterableRepository<Drug> {
@@ -61,13 +62,9 @@ public interface DrugRepository extends MongoRepository<Drug, ObjectId>, Filtera
             String boxNo, String shelfNo
     );
 
-    @Query(value = "{_id: {$exists: true}}", fields = "{ 'name': 1, '_id': 1, 'price': 1, 'visibility': 1, 'available': 1, 'priority': 1 }", sort = "{'priority': 1}")
-    List<Drug> findAllDigests();
+    @Query(value = "{ code: {$in: ?0}, groupId: ?1}")
+    List<Drug> findIdsByCodes(Set<String> codes, ObjectId groupId);
 
-    @Query(value = "{ name: { $regex: ?0, $options:'i'}, visibility: true }", fields = "{ 'name': 1, '_id': 1 }", sort = "{'priority': 1}")
-    List<Drug> findLikeNameAndVisible(String name);
-
-    @Query(value = "{ visibility: true }", fields = "{ 'name': 1, '_id': 1 }", sort = "{'priority': 1}")
-    List<Drug> findVisibleDigests();
-
+    @Query(value = "{ code: { $exists: false } }")
+    List<Drug> findAllByCodeNotExist();
 }

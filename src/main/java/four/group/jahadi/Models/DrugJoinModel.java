@@ -9,19 +9,21 @@ public class DrugJoinModel extends Drug {
     private Group groupInfo;
 
     public void fillExcelRow(Row row) {
-        row.createCell(0).setCellValue(this.groupInfo.getName());
-        row.createCell(1).setCellValue(this.getName());
-        row.createCell(2).setCellValue(this.getDose());
-        row.createCell(3).setCellValue(this.getDrugType().getName());
-        row.createCell(4).setCellValue(this.getProducer());
-        row.createCell(5).setCellValue(this.getLocation().getFaTranslate());
-        row.createCell(6).setCellValue(this.getPrice());
-        row.createCell(7).setCellValue(this.getShelfNo());
-        row.createCell(8).setCellValue(this.getBoxNo());
-        row.createCell(9).setCellValue(Utility.convertUTCDateToJalali(this.getCreatedAt()));
-        row.createCell(10).setCellValue(this.getAvailable());
-        row.createCell(11).setCellValue(this.getAvailablePack());
-        row.createCell(12).setCellValue(this.getPrice());
-        row.createCell(13).setCellValue(this.getDescription());
+        int i = 0;
+        row.createCell(i++).setCellValue(this.groupInfo.getName());
+        row.createCell(i++).setCellValue(this.getName());
+        row.createCell(i++).setCellValue(this.getCode());
+        row.createCell(i++).setCellValue(this.getDose());
+        row.createCell(i++).setCellValue(this.getDrugType().getName());
+        row.createCell(i++).setCellValue(this.getProducer());
+        row.createCell(i++).setCellValue(this.getLocation().getFaTranslate());
+        row.createCell(i++).setCellValue(this.getPrice());
+        row.createCell(i++).setCellValue(this.getShelfNo());
+        row.createCell(i++).setCellValue(this.getBoxNo());
+        row.createCell(i++).setCellValue(Utility.convertUTCDateToJalali(this.getCreatedAt()));
+        row.createCell(i++).setCellValue(this.getAvailable());
+        row.createCell(i++).setCellValue(this.getAvailablePack());
+        row.createCell(i++).setCellValue(this.getPrice());
+        row.createCell(i++).setCellValue(this.getDescription());
     }
 }

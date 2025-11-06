@@ -31,6 +31,10 @@ public class DrugData {
     private LocalDateTime expireAt;
 
     @NotNull
+    @Size(min = 3, max = 50, message = "کد دارو باید حداقل 3 کاراکتر و حداکثر 50 کاراکتر باشد")
+    private String code;
+
+    @NotNull
     private DrugLocation location;
 
     @NotNull

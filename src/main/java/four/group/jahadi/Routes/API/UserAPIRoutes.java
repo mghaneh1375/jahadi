@@ -10,7 +10,6 @@ import four.group.jahadi.Models.User;
 import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Security.JwtTokenFilter;
 import four.group.jahadi.Service.UserService;
-import four.group.jahadi.Tests.Seeder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -33,9 +32,6 @@ public class UserAPIRoutes extends Router {
 
     @Autowired
     UserService userService;
-
-    @Autowired
-    Seeder seeder;
 
     //    @PostMapping(value = "store")
 //    @ResponseBody
@@ -203,15 +199,5 @@ public class UserAPIRoutes extends Router {
     @ResponseBody
     public ResponseEntity<User> info(HttpServletRequest request) {
         return userService.info(getId(request));
-    }
-
-    @GetMapping(value = "seed")
-    public void seed() {
-        seeder.seed();
-    }
-
-    @GetMapping(value = "moduleSeeder")
-    public void moduleSeeder() {
-        seeder.moduleSeeder();
     }
 }
