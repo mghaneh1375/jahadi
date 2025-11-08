@@ -198,7 +198,7 @@ public class DrugServiceInArea {
         return output;
     }
 
-    public void addBatchDrugsToList(
+    public ResponseEntity<List<ErrorRow>> addBatchDrugsToList(
             ObjectId userId, ObjectId groupId,
             String username, ObjectId areaId,
             MultipartFile file, boolean isGroupOwner
@@ -212,11 +212,10 @@ public class DrugServiceInArea {
         Area foundArea = trip.getAreas().stream()
                 .filter(area -> area.getId().equals(areaId))
                 .findFirst().get();
-
+        List<ErrorRow> errorRows = new ArrayList<>();
         try {
             Workbook workbook = new XSSFWorkbook(file.getInputStream());
             Sheet sheet = workbook.getSheetAt(0);
-            List<ErrorRow> errorRows = new ArrayList<>();
             List<Row> rows = new ArrayList<>();
             for (int i = 1; i <= sheet.getLastRowNum(); i++)
                 rows.add(sheet.getRow(i));
@@ -257,7 +256,7 @@ public class DrugServiceInArea {
                 areaDrugsDataList.stream()
                         .filter(areaDrugsData -> areaDrugsData.getDrugId().equals(drug.getId()))
                         .findFirst().ifPresent(dto -> {
-                            if (drug.getAvailable() < dto.getTotalCount())
+                            if (drug.getAvailable() < dto.getTotalCount()) {
                                 errorRows.add(
                                         ErrorRow
                                                 .builder()
@@ -265,6 +264,8 @@ public class DrugServiceInArea {
                                                 .errorMsg("داروی " + drug.getName() + "ظرفیت این دارو کمتر از مقدار درخواستی شما می باشد")
                                                 .build()
                                 );
+                                return;
+                            }
 
                             if (existDrugs.contains(drug.getId()))
                                 updates.put(drug.getId(), updates.get(drug.getId()) + dto.getTotalCount());
@@ -311,6 +312,8 @@ public class DrugServiceInArea {
             areaDrugsRepository.insert(areaDrugs);
             areaDrugsRepository.saveAll(drugsInAreaList);
         } catch (Exception x) {}
+
+        return ResponseEntity.ok(errorRows);
     }
 
     //    @Transactional

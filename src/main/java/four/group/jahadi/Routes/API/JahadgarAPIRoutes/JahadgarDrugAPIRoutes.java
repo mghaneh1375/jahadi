@@ -4,6 +4,7 @@ import four.group.jahadi.DTO.Area.AdviceDrugData;
 import four.group.jahadi.DTO.Area.AreaDrugsData;
 import four.group.jahadi.DTO.Area.GiveDrugData;
 import four.group.jahadi.DTO.DrugBookmarkData;
+import four.group.jahadi.DTO.ErrorRow;
 import four.group.jahadi.DTO.Patient.PatientAdvices;
 import four.group.jahadi.Enums.Access;
 import four.group.jahadi.Enums.Module.DeliveryStatus;
@@ -100,13 +101,13 @@ public class JahadgarDrugAPIRoutes extends Router {
     @PutMapping(value = "addBatchDrugsToList/{areaId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseBody
     @Operation(summary = "افزودن دسته ای دارو با فایل اکسل به منطقه توسط مسئول انبار دارو گروه یا مسئول گروه")
-    public void addBatchDrugsToList(
+    public ResponseEntity<List<ErrorRow>> addBatchDrugsToList(
             HttpServletRequest request,
             @PathVariable @ObjectIdConstraint ObjectId areaId,
             @RequestBody @NotNull MultipartFile file
     ) {
         TokenInfo tokenInfo = getFullTokenInfo(request);
-        drugServiceInArea.addBatchDrugsToList(
+        return drugServiceInArea.addBatchDrugsToList(
                 tokenInfo.getUserId(), tokenInfo.getGroupId(), tokenInfo.getUsername(),
                 areaId, file, tokenInfo.getAccesses().contains(Access.GROUP)
         );
