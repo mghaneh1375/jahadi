@@ -61,4 +61,6 @@ public interface DrugLogRepository extends MongoRepository<DrugLog, ObjectId>, F
           LocalDateTime from, LocalDateTime end, ObjectId groupId
   );
 
+  @Query(value = "{drugId: {$in: ?0}}", delete = true)
+  void deleteAllByDrugIdIn(List<ObjectId> ids);
 }

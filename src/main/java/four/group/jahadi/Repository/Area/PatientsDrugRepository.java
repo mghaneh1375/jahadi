@@ -3,6 +3,7 @@ package four.group.jahadi.Repository.Area;
 import four.group.jahadi.Models.Area.DrugAggregationModel;
 import four.group.jahadi.Models.Area.PatientDrugJoinModel;
 import four.group.jahadi.Models.Area.PatientsInArea;
+import four.group.jahadi.Models.Drug;
 import four.group.jahadi.Models.PatientDrug;
 import four.group.jahadi.Repository.FilterableRepository;
 import org.bson.types.ObjectId;
@@ -136,5 +137,8 @@ public interface PatientsDrugRepository extends MongoRepository<PatientDrug, Obj
 
     @Query(value = "{_id: ?0, doctorId: ?1, dedicated: false}", delete = true)
     Optional<PatientDrug> deleteUnDedicatedPatientDrugByIdAAndDoctorId(ObjectId id, ObjectId doctorId);
+
+    @Query(value = "{$or: [{drugId: {$in: ?0}}, {givenDrugId: {$in: ?0}}]}", fields = "{drugId: 1, givenDrugId: 1}")
+    List<PatientDrug> findAllByDrugIdIsInOrGivenDrugIdIn(List<ObjectId> ids);
 
 }

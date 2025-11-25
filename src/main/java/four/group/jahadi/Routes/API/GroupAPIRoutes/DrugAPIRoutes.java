@@ -19,6 +19,7 @@ import four.group.jahadi.Validator.ObjectIdConstraint;
 import io.swagger.v3.oas.annotations.Operation;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -200,5 +201,11 @@ public class DrugAPIRoutes extends Router {
                         : fullTokenInfo.getGroupId(),
                 response
         );
+    }
+
+    @GetMapping("removeRedundants")
+    @ResponseStatus(HttpStatus.OK)
+    public void removeRedundants() {
+        drugService.removeRedundants();
     }
 }

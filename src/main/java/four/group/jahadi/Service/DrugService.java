@@ -6,14 +6,9 @@ import four.group.jahadi.Enums.Drug.*;
 import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Exception.NotAccessException;
-import four.group.jahadi.Models.Drug;
-import four.group.jahadi.Models.DrugJoinModel;
-import four.group.jahadi.Models.DrugLog;
-import four.group.jahadi.Models.DrugLogJoinModel;
-import four.group.jahadi.Repository.DrugLogRepository;
-import four.group.jahadi.Repository.DrugRepository;
-import four.group.jahadi.Repository.GroupRepository;
-import four.group.jahadi.Repository.WareHouseAccessForGroupRepository;
+import four.group.jahadi.Models.*;
+import four.group.jahadi.Repository.*;
+import four.group.jahadi.Repository.Area.PatientsDrugRepository;
 import four.group.jahadi.Service.Area.ReportUtil;
 import four.group.jahadi.Utility.PairValue;
 import org.apache.poi.ss.usermodel.CellType;
@@ -31,10 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -50,9 +42,15 @@ public class DrugService extends AbstractService<Drug, DrugData> {
     @Autowired
     private DrugLogRepository drugLogRepository;
     @Autowired
+    private DrugBookmarkRepository drugBookmarkRepository;
+    @Autowired
     private WareHouseAccessForGroupRepository wareHouseAccessForGroupRepository;
     @Autowired
     private GroupRepository groupRepository;
+    @Autowired
+    private DrugsInAreaRepository drugsInAreaRepository;
+    @Autowired
+    private PatientsDrugRepository patientsDrugRepository;
 
     @Override
     public ResponseEntity<List<Drug>> list(Object... filters) {
@@ -460,5 +458,34 @@ public class DrugService extends AbstractService<Drug, DrugData> {
 
         drugs.forEach(drug -> drug.fillExcelRow(sheet.createRow(counter.getAndIncrement())));
         ReportUtil.prepareHttpServletResponse(response, workbook, "drugReport");
+    }
+
+    public void removeRedundants() {
+        List<ObjectId> ids =
+                drugRepository.findAll()
+                        .stream()
+                        .map(Drug::getId)
+                        .collect(Collectors.toList());
+
+        System.out.println(ids.size());
+        Set<ObjectId> used = new HashSet<>();
+        patientsDrugRepository.findAllByDrugIdIsInOrGivenDrugIdIn(
+                ids
+        ).forEach(patientDrug -> {
+            if(patientDrug.getDrugId() != null)
+                used.add(patientDrug.getDrugId());
+            if(patientDrug.getGivenDrugId() != null)
+                used.add(patientDrug.getGivenDrugId());
+        });
+        System.out.println(used.size());
+        List<ObjectId> notUsed = ids
+                .stream()
+                .filter(objectId -> !used.contains(objectId))
+                .collect(Collectors.toList());
+
+        drugRepository.deleteAllById(notUsed);
+        drugLogRepository.deleteAllByDrugIdIn(notUsed);
+        drugBookmarkRepository.deleteAllByDrugIdIn(notUsed);
+        drugsInAreaRepository.deleteAllByDrugIdIn(notUsed);
     }
 }
