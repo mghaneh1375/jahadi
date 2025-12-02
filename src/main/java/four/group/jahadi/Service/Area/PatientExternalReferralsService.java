@@ -269,8 +269,12 @@ public class PatientExternalReferralsService {
     private static final List<String> headers = new ArrayList<>() {
         {
             add("نام بیمار");
+            add("کد ملی بیمار");
             add("شماره همراه بیمار");
             add("کد بیمار");
+            add("نوع بیمه");
+            add("نام پدر");
+            add("تاریخ تولد");
             add("ارجاع از");
             add("ارجاع به");
             add("دلیل ارجاع");
@@ -324,8 +328,16 @@ public class PatientExternalReferralsService {
                 Row row = sheet.createRow(rowCounter.getAndIncrement());
                 AtomicInteger colCounter = new AtomicInteger(0);
                 row.createCell(colCounter.getAndIncrement()).setCellValue(patientJoinForReferrals.getPatientInfo().getName());
+                row.createCell(colCounter.getAndIncrement()).setCellValue(patientJoinForReferrals.getPatientInfo().getIdentifier());
                 row.createCell(colCounter.getAndIncrement()).setCellValue(patientJoinForReferrals.getPatientInfo().getPhone());
                 row.createCell(colCounter.getAndIncrement()).setCellValue(patientJoinForReferrals.getPatientInfo().getPatientNo());
+                row.createCell(colCounter.getAndIncrement()).setCellValue(patientJoinForReferrals.getPatientInfo().getInsurance().getFaTranslate());
+                row.createCell(colCounter.getAndIncrement()).setCellValue(patientJoinForReferrals.getPatientInfo().getFatherName());
+                row.createCell(colCounter.getAndIncrement()).setCellValue(
+                        patientJoinForReferrals.getPatientInfo().getBirthDate() == null
+                        ? ""
+                        : Utility.convertUTCDateToJalali(patientJoinForReferrals.getPatientInfo().getBirthDate())
+                );
 
                 patientReferral
                         .getForms()
