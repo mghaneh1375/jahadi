@@ -109,6 +109,12 @@ public class Utility {
         return JalaliCalendar.gregorianToJalali(new JalaliCalendar.YearMonthDate(splited[0], splited[1], splited[2])).format("/") + " - " + dateTime[1];
     }
 
+    public static String convertUTCDateToJalaliDate(LocalDateTime date) {
+        String[] dateTime = dateTimeFormatter.format(date).split(" ");
+        String[] splited = dateTime[0].split("-");
+        return JalaliCalendar.gregorianToJalali(new JalaliCalendar.YearMonthDate(splited[0], splited[1], splited[2])).format("/");
+    }
+
     public static Date convertJalaliToGregorianDate(String jaladiDate) {
         String[] splited = jaladiDate.split("-");
         Date date = new Date();
@@ -460,29 +466,5 @@ public class Utility {
             i.getAndIncrement();
         });
         return sb.append("}").toString();
-    }
-
-    private static final ModelMapper modelMapper;
-
-    static {
-        modelMapper = new ModelMapper();
-        modelMapper.getConfiguration()
-                .setSourceNameTransformer(NameTransformers.JAVABEANS_MUTATOR)
-                .setMatchingStrategy(MatchingStrategies.STRICT);
-    }
-
-    public static <D, T> List<D> mapAll(final Collection<T> entityList, Class<D> outCLass) {
-        return entityList.stream()
-                .map(entity -> modelMapper.map(entity, outCLass))
-                .collect(Collectors.toList());
-    }
-
-    public static <S, D> D map(final S source, D destination) {
-        modelMapper.map(source, destination);
-        return destination;
-    }
-
-    public static <D, T> D map(final T entity, Class<D> outClass) {
-        return modelMapper.map(entity, outClass);
     }
 }

@@ -12,4 +12,7 @@ import java.util.List;
 public interface DrugsInAreaRepository extends MongoRepository<AreaDrugs, ObjectId>, FilterableRepository<AreaDrugs> {
   @Query(value = "{drugId: {$in: ?0}}", delete = true)
   void deleteAllByDrugIdIn(List<ObjectId> ids);
+
+  @Query(value = "{drugId: {$in: ?0}}", count = true)
+  Integer countByDrugIdIn(List<ObjectId> ids);
 }

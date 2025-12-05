@@ -1,5 +1,6 @@
 package four.group.jahadi.Models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -14,6 +15,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 import static four.group.jahadi.Utility.Utility.*;
@@ -35,7 +37,7 @@ public class Drug extends Model {
     @Field("drug_type")
     private DrugType drugType;
     @Field("expire_at")
-    @JsonSerialize(using = DateSerialization.class)
+    @JsonSerialize(using = JustDateSerialization.class)
     private LocalDateTime expireAt;
     private String dose;
     private String name;
@@ -63,6 +65,10 @@ public class Drug extends Model {
     @Field("shelf_no")
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     private String shelfNo;
+
+    @Field("deleted_at")
+    @JsonIgnore
+    private Date deletedAt;
 
     @Override
     public String toString() {

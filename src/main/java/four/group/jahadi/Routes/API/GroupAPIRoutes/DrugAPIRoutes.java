@@ -2,6 +2,7 @@ package four.group.jahadi.Routes.API.GroupAPIRoutes;
 
 import four.group.jahadi.DTO.DrugData;
 import four.group.jahadi.DTO.ErrorRow;
+import four.group.jahadi.DTO.ObjectIdList;
 import four.group.jahadi.Enums.Access;
 import four.group.jahadi.Enums.Drug.DrugType;
 import four.group.jahadi.Exception.NotAccessException;
@@ -16,6 +17,7 @@ import four.group.jahadi.Service.DrugService;
 import four.group.jahadi.Service.JahadgarDrugService;
 import four.group.jahadi.Utility.Utility;
 import four.group.jahadi.Validator.ObjectIdConstraint;
+import four.group.jahadi.Validator.ValidatedUpdatePresenceList;
 import io.swagger.v3.oas.annotations.Operation;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @RestController
@@ -52,6 +55,42 @@ public class DrugAPIRoutes extends Router {
         TokenInfo fullTokenInfo = getFullTokenInfo(request);
         drugService.remove(
                 id, fullTokenInfo.getUserId(), fullTokenInfo.getGroupId(),
+                fullTokenInfo.getAccesses().contains(Access.GROUP)
+        );
+    }
+
+//    @DeleteMapping(value = "removeAll")
+//    public void removeAll(
+//            HttpServletRequest request,
+//            @RequestBody @Valid ObjectIdList list
+//    ) {
+//        TokenInfo fullTokenInfo = getFullTokenInfo(request);
+//        drugService.remove(
+//                id, fullTokenInfo.getUserId(), fullTokenInfo.getGroupId(),
+//                fullTokenInfo.getAccesses().contains(Access.GROUP)
+//        );
+//    }
+
+    @DeleteMapping(value = "archive/{id}")
+    public void archive(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId id
+    ) {
+        TokenInfo fullTokenInfo = getFullTokenInfo(request);
+        drugService.archive(
+                id, fullTokenInfo.getUserId(), fullTokenInfo.getGroupId(),
+                fullTokenInfo.getAccesses().contains(Access.GROUP)
+        );
+    }
+
+    @DeleteMapping(value = "archiveAll")
+    public void archive(
+            HttpServletRequest request,
+            @RequestBody @Valid ObjectIdList list
+    ) {
+        TokenInfo fullTokenInfo = getFullTokenInfo(request);
+        drugService.archiveAll(
+                list.getIds(), fullTokenInfo.getUserId(), fullTokenInfo.getGroupId(),
                 fullTokenInfo.getAccesses().contains(Access.GROUP)
         );
     }
@@ -109,7 +148,7 @@ public class DrugAPIRoutes extends Router {
     public ResponseEntity<List<ErrorRow>> batchStore(
             HttpServletRequest request,
             @RequestBody MultipartFile file
-    ) throws UnAuthException, NotActivateAccountException {
+    ) {
         TokenInfo tokenInfo = getTokenInfo(request);
         return drugService.batchStore(file, tokenInfo.getUserId(), tokenInfo.getGroupId());
     }

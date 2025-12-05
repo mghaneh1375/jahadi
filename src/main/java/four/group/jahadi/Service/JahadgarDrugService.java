@@ -25,11 +25,6 @@ public class JahadgarDrugService extends AbstractService<DrugBookmark, DrugBookm
     @Autowired
     private DrugRepository drugRepository;
 
-    @Override
-    public ResponseEntity<List<DrugBookmark>> list(Object... filters) {
-        return null;
-    }
-
     public ResponseEntity<List<JoinedDrugBookmarkWithAreaDto>> list(ObjectId userId, ObjectId areaId) {
         List<JoinedDrugBookmarkWithAreaDto> bookmarkList = drugBookmarkRepository.findByUserIdAndAreaId(userId, areaId);
         bookmarkList.forEach(drugBookmark -> {

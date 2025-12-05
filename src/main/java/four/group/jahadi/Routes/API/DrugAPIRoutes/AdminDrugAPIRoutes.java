@@ -45,11 +45,7 @@ public class AdminDrugAPIRoutes {
     @ResponseBody
     @Operation(summary = "گرفتن اطلاعات مختصر داروها و یا سرچ در داروها برای ادمین", description="پارامتر نام دارو که میتواند بخشی از نام دارو هم باشد اختیاری و برای سرچ کردن است که باید حداقل سه کاراکتر باشد")
     public ResponseEntity<List<Drug>> list(@RequestParam(required=false, value="name") String name) {
-        
-        if(name != null && name.length() > 2)
-            return drugService.list(true, name);
-        
-        return drugService.list(true);
+        return drugService.search(name != null && name.length() > 2 ? name : null);
     }
 
     @GetMapping(value = "setDrugReplacements/{drugId}")

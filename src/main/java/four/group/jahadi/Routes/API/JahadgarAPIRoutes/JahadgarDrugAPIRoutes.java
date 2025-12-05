@@ -25,6 +25,7 @@ import four.group.jahadi.Validator.ObjectIdConstraint;
 import io.swagger.v3.oas.annotations.Operation;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -33,6 +34,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
@@ -215,8 +217,10 @@ public class JahadgarDrugAPIRoutes extends Router {
     @GetMapping(value = "list")
     @ResponseBody
     @Operation(summary = "گرفتن لیست داروها توسط مسئول گروه یا مسئول انبار")
-    public ResponseEntity<List<Drug>> list(
+    public ResponseEntity<PageImpl<Drug>> list(
             HttpServletRequest request,
+            @RequestParam(name = "pageIndex") @NotNull @Min(0) Integer pageIndex,
+            @RequestParam(name = "pageSize") @NotNull @Min(5) Integer pageSize,
             @RequestParam(required = false, name = "name") String name,
             @RequestParam(required = false, name = "minAvailableCount") Integer minAvailableCount,
             @RequestParam(required = false, name = "maxAvailableCount") Integer maxAvailableCount,
@@ -238,11 +242,12 @@ public class JahadgarDrugAPIRoutes extends Router {
             )
                 throw new NotAccessException();
         }
-        return drugService.list(
+        return drugService.paginateList(
                 fullTokenInfo.getGroupId(),
                 name, minAvailableCount, maxAvailableCount,
                 drugLocation, drugType, fromExpireAt, toExpireAt,
-                boxNo, shelfNo
+                boxNo, shelfNo,
+                pageIndex, pageSize
         );
     }
 

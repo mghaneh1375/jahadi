@@ -6,9 +6,12 @@ import four.group.jahadi.Enums.Drug.*;
 import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Exception.NotAccessException;
-import four.group.jahadi.Models.*;
-import four.group.jahadi.Repository.*;
+import four.group.jahadi.Models.Drug;
+import four.group.jahadi.Models.DrugJoinModel;
+import four.group.jahadi.Models.DrugLog;
+import four.group.jahadi.Models.DrugLogJoinModel;
 import four.group.jahadi.Repository.Area.PatientsDrugRepository;
+import four.group.jahadi.Repository.*;
 import four.group.jahadi.Service.Area.ReportUtil;
 import four.group.jahadi.Utility.PairValue;
 import org.apache.poi.ss.usermodel.CellType;
@@ -18,6 +21,12 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -51,9 +60,27 @@ public class DrugService extends AbstractService<Drug, DrugData> {
     private DrugsInAreaRepository drugsInAreaRepository;
     @Autowired
     private PatientsDrugRepository patientsDrugRepository;
+    @Autowired
+    MongoTemplate mongoTemplate;
+
+    public ResponseEntity<List<Drug>> search(String name) {
+        try {
+            return new ResponseEntity<>(
+                    drugRepository.findByFilters(
+                            null, name, null, null,
+                            null, null, null, null,
+                            null, null, Pageable.ofSize(Integer.MAX_VALUE).withPage(0)
+                    ),
+                    HttpStatus.OK
+            );
+        } catch (Exception x) {
+            throw new InvalidFieldsException(x.getMessage());
+        }
+    }
+
 
     @Override
-    public ResponseEntity<List<Drug>> list(Object... filters) {
+    public ResponseEntity<PageImpl<Drug>> paginateList(Object... filters) {
         ObjectId groupId = (ObjectId) filters[0];
         try {
             String name = filters.length > 1 ? (String) filters[1] : null;
@@ -65,13 +92,24 @@ public class DrugService extends AbstractService<Drug, DrugData> {
             LocalDateTime toExpireAt = filters.length > 7 ? (LocalDateTime) filters[7] : null;
             String boxNo = filters.length > 8 ? (String) filters[8] : null;
             String shelfNo = filters.length > 9 ? (String) filters[9] : null;
+            Integer pageIndex = (Integer) filters[10];
+            Integer pageSize = (Integer) filters[11];
+            Pageable pageable = Pageable.ofSize(pageSize).withPage(pageIndex);
+
+            List<Drug> drugs = drugRepository.findByFilters(
+                    groupId, name, minAvailableCount, maxAvailableCount,
+                    drugLocation, drugType, fromExpireAt, toExpireAt,
+                    boxNo, shelfNo, pageable
+            );
+            long total = drugRepository.countWithFilters(
+                    groupId, name, minAvailableCount, maxAvailableCount,
+                    drugLocation, drugType, fromExpireAt, toExpireAt,
+                    boxNo, shelfNo
+            );
+            PageImpl<Drug> drugPage = new PageImpl<>(drugs, pageable, total);
 
             return new ResponseEntity<>(
-                    drugRepository.findByFilters(
-                            groupId, name, minAvailableCount, maxAvailableCount,
-                            drugLocation, drugType, fromExpireAt, toExpireAt,
-                            boxNo, shelfNo
-                    ),
+                    drugPage,
                     HttpStatus.OK
             );
         } catch (Exception x) {
@@ -191,17 +229,70 @@ public class DrugService extends AbstractService<Drug, DrugData> {
         return drug;
     }
 
-    public void remove(ObjectId id, ObjectId userId, ObjectId groupId, boolean hasGroupAccess) {
+    public void remove(
+            ObjectId id, ObjectId userId,
+            ObjectId groupId, boolean hasGroupAccess
+    ) {
         if (!hasGroupAccess &&
                 !wareHouseAccessForGroupRepository.existsDrugAccessByGroupIdAndUserId(groupId, userId)
         )
             throw new NotAccessException();
-        //todo: check usage in trips
+
+        if (drugsInAreaRepository.countByDrugIdIn(Collections.singletonList(id)) > 0)
+            throw new InvalidFieldsException("به دلیل تجویز دارو، امکان حذف این دارو وجود ندارد. لطفا آن را آرشیو کنید");
+
         drugRepository.delete(
                 drugRepository.findByIdAndGroupId(id, groupId)
                         .orElseThrow(InvalidIdException::new)
         );
     }
+
+    public void archive(
+            ObjectId id, ObjectId userId,
+            ObjectId groupId, boolean hasGroupAccess
+    ) {
+        if (!hasGroupAccess &&
+                !wareHouseAccessForGroupRepository.existsDrugAccessByGroupIdAndUserId(groupId, userId)
+        )
+            throw new NotAccessException();
+
+        Query query = new Query(Criteria.where("_id").is(id));
+        query.addCriteria(Criteria.where("group_id").is(groupId));
+        Update update = new Update().set("deleted_at", new Date());
+
+        mongoTemplate.updateFirst(query, update, Drug.class);
+    }
+
+    public void archiveAll(
+            List<ObjectId> ids, ObjectId userId,
+            ObjectId groupId, boolean hasGroupAccess
+    ) {
+        if (!hasGroupAccess &&
+                !wareHouseAccessForGroupRepository.existsDrugAccessByGroupIdAndUserId(groupId, userId)
+        )
+            throw new NotAccessException();
+
+        Query query = new Query(Criteria.where("_id").in(ids));
+        query.addCriteria(Criteria.where("group_id").is(groupId));
+        Update update = new Update().set("deleted_at", new Date());
+
+        mongoTemplate.updateMulti(query, update, Drug.class);
+    }
+//    public void removeAll(
+//            List<ObjectId> id, ObjectId userId,
+//            ObjectId groupId, boolean hasGroupAccess
+//    ) {
+//        if (!hasGroupAccess &&
+//                !wareHouseAccessForGroupRepository.existsDrugAccessByGroupIdAndUserId(groupId, userId)
+//        )
+//            throw new NotAccessException();
+//
+//
+//        drugRepository.delete(
+//                drugRepository.findByIdAndGroupId(id, groupId)
+//                        .orElseThrow(InvalidIdException::new)
+//        );
+//    }
 
     // EXCEL FORMAT
     // A: index, B: drugType, C: name, D: dose, E: expireAt,
@@ -472,9 +563,9 @@ public class DrugService extends AbstractService<Drug, DrugData> {
         patientsDrugRepository.findAllByDrugIdIsInOrGivenDrugIdIn(
                 ids
         ).forEach(patientDrug -> {
-            if(patientDrug.getDrugId() != null)
+            if (patientDrug.getDrugId() != null)
                 used.add(patientDrug.getDrugId());
-            if(patientDrug.getGivenDrugId() != null)
+            if (patientDrug.getGivenDrugId() != null)
                 used.add(patientDrug.getGivenDrugId());
         });
         System.out.println(used.size());
