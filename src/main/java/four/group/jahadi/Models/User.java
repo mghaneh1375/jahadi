@@ -69,6 +69,10 @@ public class User extends Model {
     @Transient
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     private AccountStatus groupStatus;
+
+    @Transient
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    private List<String> areaTripAccesses;
     
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String abilities;

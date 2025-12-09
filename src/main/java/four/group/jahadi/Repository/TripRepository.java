@@ -92,7 +92,10 @@ public interface TripRepository extends MongoRepository<Trip, ObjectId>, Filtera
     @Query(value = "{$and: [{'endAt': {$gte: ?0}}, {'areas.members': ?1}]  }", exists = true)
     Boolean existNotFinishedByResponsibleId(LocalDateTime curr, ObjectId userId);
 
-    @Query(value = "{'areas': {$elemMatch: {'id': ?0, 'ownerId': ?1}} }", fields = "{'areas.members': true, 'areas.id': true, 'areas.ownerId': 1}")
+    @Query(
+            value = "{'areas': {$elemMatch: {'id': ?0, 'ownerId': ?1}} }",
+            fields = "{'areas.members': true, 'areas.id': true, 'areas.ownerId': 1, 'areas.modules': 1, 'areas.trainers': 1, 'areas.insurancers': 1, 'areas.pharmacyManagers': 1, 'areas.equipmentManagers': 1, 'areas.laboratoryManager': 1}"
+    )
     Optional<Trip> getMembersByAreaIdAndOwnerId(ObjectId areaId, ObjectId areaOwnerId);
 
     @Query(value = "{'areas': {$elemMatch: {'id': ?0} } }")
