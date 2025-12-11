@@ -367,6 +367,7 @@ public class ReportServiceInArea {
                     )
             );
         }
+
         for (int z = 0; z < module.getSubModules().size(); z++) {
             SubModule subModule = module.getSubModules().get(z);
             excelService.writeSubModuleSecondHeader(

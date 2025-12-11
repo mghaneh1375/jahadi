@@ -205,6 +205,15 @@ public class UserService extends AbstractService<User, SignUpData> {
         return sendSMS(user, true);
     }
 
+    public ResponseEntity<HashMap<String, Object>> checkPhone(PersonSignUpCheckPhoneData dto) {
+        if (userRepository.countByPhone(dto.getPhone()) > 0)
+            throw new InvalidFieldsException("شماره همراه وارد شده در سیستم موجود است");
+
+        User user = new User();
+        user.setPhone(dto.getPhone());
+
+        return sendSMS(user, false);
+    }
     public void checkGroup(SignUpStep3Data dto) {
         if (groupRepository.countByCode(dto.getGroupCode()) == 0)
             throw new InvalidFieldsException("کد گروه نامعتبر است");
@@ -278,6 +287,7 @@ public class UserService extends AbstractService<User, SignUpData> {
         return sendSMS(user, false);
     }
 
+    synchronized
     private ResponseEntity<HashMap<String, Object>> sendSMS(User user, boolean storeUserDoc) {
 
         PairValue existTokenP = existSMS(user.getPhone());
@@ -310,8 +320,12 @@ public class UserService extends AbstractService<User, SignUpData> {
             if (storeUserDoc) {
                 activation.setUser(user);
                 activation.setPhone(user.getPhone());
-            } else
-                activation.setNid(user.getNid());
+            } else {
+                if(user.getNid() != null)
+                    activation.setNid(user.getNid());
+                else if(user.getPhone() != null)
+                    activation.setPhone(user.getPhone());
+            }
 
             activationRepository.insert(activation);
             Utility.sendSMS(user.getPhone(), code + "", "", "", "activation");
@@ -394,7 +408,7 @@ public class UserService extends AbstractService<User, SignUpData> {
 
         User user = activation.getUser();
 
-        if (user.getCid() != null && userRepository.countByNID(user.getNid()) == 0) {
+        if (user != null && user.getCid() != null && userRepository.countByNID(user.getNid()) == 0) {
 
             userRepository.insert(user);
             activationRepository.delete(activation);

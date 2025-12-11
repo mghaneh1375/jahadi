@@ -48,7 +48,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/api/user/signUp",
             "/api/user/forgetPassword",
             "/api/user/resetPassword",
-            "/api/drug/removeRedundants"
+            "/api/drug/removeRedundants",
+            "/api/signup/**"
     };
 
     @Override
