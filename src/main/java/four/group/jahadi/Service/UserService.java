@@ -220,14 +220,11 @@ public class UserService extends AbstractService<User, SignUpData> {
     }
 
     public ResponseEntity<String> signUp(SignUpData dto) {
-
         Group group = null;
-
         if (dto.getGroupCode() != null)
             group = groupRepository.findByCode(dto.getGroupCode()).orElseThrow(InvalidCodeException::new);
 
         Activation activation = activationRepository.findByPhone(dto.getPhone()).orElseThrow(NotAccessException::new);
-
         User user = activation.getUser();
 
         if (group != null) {
@@ -238,6 +235,57 @@ public class UserService extends AbstractService<User, SignUpData> {
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setStatus(AccountStatus.PENDING);
         user.setAccesses(Collections.singletonList(Access.JAHADI));
+
+        user.setNearbyName(dto.getNearbyName());
+        user.setNearbyPhone(dto.getNearbyPhone());
+        user.setNearbyRel(dto.getNearbyRel());
+        user.setAllergies(dto.getAllergies());
+        user.setDiseases(dto.getDiseases());
+        user.setAbilities(dto.getAbilities());
+        user.setBloodType(dto.getBloodType());
+
+        activationRepository.delete(activation);
+        userRepository.insert(user);
+
+        return new ResponseEntity<>(
+                jwtTokenProvider.createToken(user.getNid(), user.getAccesses(), user.getGroupId(), user.getId()),
+                HttpStatus.OK
+        );
+    }
+
+    public ResponseEntity<String> newSignUp(PersonalSignUpData dto) {
+
+        Activation activation = activationRepository.findByPhone(dto.getPhone()).orElseThrow(NotAccessException::new);
+        if(!activation.getValidated() || !activation.getToken().equals(dto.getToken()))
+            throw new NotAccessException();
+
+        if(activation.getCreatedAt() < System.currentTimeMillis() - ONE_MIN_MSEC * 10)
+            throw new InvalidFieldsException("از زمان وارد کردن کد تاییده بیش از 10 دقیقه سپری شده و فرآیند مجاز نمی باشد. لطفا مجدد ثبت نام کنید");
+
+        Group group = null;
+        if (dto.getGroupCode() != null)
+            group = groupRepository.findByCode(dto.getGroupCode()).orElseThrow(InvalidCodeException::new);
+
+        User user = new User();
+        user.setName(dto.getName());
+        user.setPhone(dto.getPhone());
+        user.setNid(dto.getNid());
+        user.setFatherName(dto.getFatherName());
+        user.setBirthDay(dto.getBirthDay());
+        user.setField(dto.getField());
+        user.setUniversity(dto.getUniversity());
+        user.setUniversityYear(dto.getUniversityYear());
+        user.setSex(dto.getSex());
+        user.setPassword(getEncPass(dto.getPassword()));
+        user.setAccesses(new ArrayList<>() {{
+            add(Access.JAHADI);
+        }});
+        user.setStatus(AccountStatus.PENDING);
+
+        if (group != null) {
+            user.setGroupId(group.getId());
+            user.setGroupName(group.getName());
+        }
 
         user.setNearbyName(dto.getNearbyName());
         user.setNearbyPhone(dto.getNearbyPhone());
@@ -341,9 +389,7 @@ public class UserService extends AbstractService<User, SignUpData> {
     }
 
     User populateEntity(SignUpStep1ForGroupData userData) {
-
         User user = new User();
-
         user.setName(userData.getName());
         user.setPhone(userData.getPhone());
         user.setNid(userData.getNid());

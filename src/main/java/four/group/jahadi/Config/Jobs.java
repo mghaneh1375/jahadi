@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
+import static four.group.jahadi.Utility.StaticValues.ONE_MIN_MSEC;
 import static four.group.jahadi.Utility.StaticValues.SMS_RESEND_MSEC;
 
 @Configuration
@@ -18,6 +19,8 @@ public class Jobs {
     @Scheduled(fixedRate = 600000, initialDelay = 5000)
     public void scheduleFixedRateTask() {
         activationRepository.deleteExpired(System.currentTimeMillis() - SMS_RESEND_MSEC);
+        // پاک کردن رکوردهایی که بیش از 10 دقیقه از زمان active شدنش میگذرد
+        activationRepository.deleteValidatedExpired(System.currentTimeMillis() - ONE_MIN_MSEC * 10);
     }
 
 }

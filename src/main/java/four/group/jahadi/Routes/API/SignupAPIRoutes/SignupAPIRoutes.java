@@ -1,14 +1,12 @@
 package four.group.jahadi.Routes.API.SignupAPIRoutes;
 
 import four.group.jahadi.DTO.SignUp.PersonSignUpCheckPhoneData;
+import four.group.jahadi.DTO.SignUp.PersonalSignUpData;
 import four.group.jahadi.Service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.HashMap;
@@ -26,4 +24,9 @@ public class SignupAPIRoutes {
         return userService.checkPhone(data);
     }
 
+    @PostMapping(value = "/personalSignUp")
+    @ResponseBody
+    public ResponseEntity<String> signUp(@RequestBody @Valid PersonalSignUpData signUpData) {
+        return userService.newSignUp(signUpData);
+    }
 }
