@@ -140,6 +140,22 @@ public class RegionPatientAPIRoutes extends Router {
         );
     }
 
+    @GetMapping(value = "getReceptionStatusOfPatient/{areaId}/{moduleId}/{patientId}")
+    @ResponseBody
+    @Operation(
+            summary = "گرفتن وضعیت پذیرش یک بیمار در ماژول مدنظر در منطقه"
+    )
+    public ResponseEntity<Boolean> getReceptionStatusOfPatient(
+            @PathVariable @ObjectIdConstraint ObjectId areaId,
+            @PathVariable @ObjectIdConstraint ObjectId moduleId,
+            @PathVariable @ObjectIdConstraint ObjectId patientId
+    ) {
+        return ResponseEntity.ok(
+                patientServiceInArea.getReceptionStatusOfPatient(
+                        areaId, moduleId, patientId
+                )
+        );
+    }
 
     @GetMapping(value = "getPatients/{areaId}")
     @ResponseBody

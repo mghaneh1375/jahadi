@@ -135,19 +135,19 @@ public class RegionModuleAPIRoutes extends Router {
     }
 
 
-    @PutMapping(path = "addMembersToModule/{areaId}/{moduleIdInArea}")
+    @PutMapping(path = "setMembersToModule/{areaId}/{moduleIdInArea}")
     @ResponseBody
     @Operation(
             summary = "افزودن کاربر/کاربران به یک ماژول در منطقه توسط مسئول منطقه",
             description = "زمان شروع اردو نباید رسیده باشد"
     )
-    public void addMembersToModule(
+    public void setMembersToModule(
             HttpServletRequest request,
             @PathVariable @ObjectIdConstraint ObjectId areaId,
             @PathVariable @ObjectIdConstraint ObjectId moduleIdInArea,
             @RequestBody List<ObjectId> members
     ) {
-        moduleServiceInArea.addMembersToModule(getId(request), areaId, moduleIdInArea, members);
+        moduleServiceInArea.setMembersToModule(getId(request), areaId, moduleIdInArea, members);
     }
 
     @DeleteMapping(path = "removeMemberFromModule/{areaId}/{moduleIdInArea}/{userId}")

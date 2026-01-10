@@ -310,9 +310,10 @@ public class ModuleServiceInArea {
         return new Object[]{wantedTrip, area};
     }
 
-    public synchronized void addMembersToModule(ObjectId userId, ObjectId areaId,
-                                                ObjectId moduleIdInArea, List<ObjectId> userIds) {
-
+    public synchronized void setMembersToModule(
+            ObjectId userId, ObjectId areaId,
+            ObjectId moduleIdInArea, List<ObjectId> userIds
+    ) {
         Object[] tmp = checkUsers(userId, areaId, userIds, tripRepository);
         Trip wantedTrip = (Trip) tmp[0];
         Area foundArea = (Area) tmp[1];
@@ -321,13 +322,7 @@ public class ModuleServiceInArea {
                 .filter(moduleInArea -> moduleInArea.getId().equals(moduleIdInArea)).findFirst()
                 .orElseThrow(InvalidIdException::new);
 
-        List<ObjectId> members = foundModuleInArea.getMembers();
-        for (ObjectId oId : userIds) {
-            if (members.contains(oId)) continue;
-            members.add(oId);
-        }
-
-        foundModuleInArea.setMembers(members);
+        foundModuleInArea.setMembers(userIds);
         tripRepository.save(wantedTrip);
     }
 

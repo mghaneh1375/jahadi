@@ -23,7 +23,6 @@ import four.group.jahadi.Service.ExcelService;
 import four.group.jahadi.Utility.FileUtils;
 import four.group.jahadi.Utility.PairValue;
 import four.group.jahadi.Utility.Utility;
-import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -651,6 +650,27 @@ public class PatientServiceInArea {
             wantedReferral.setReceptedAt(LocalDateTime.now());
 
         patientsInAreaRepository.save(patientInArea);
+    }
+
+    public boolean getReceptionStatusOfPatient(
+            ObjectId areaId, ObjectId moduleId, ObjectId patientId
+    ) {
+        PatientsInArea patientInArea =
+                patientsInAreaRepository.findByAreaIdAndPatientId(areaId, patientId).orElseThrow(InvalidIdException::new);
+
+        if (patientInArea.getReferrals() == null)
+            return false;
+
+        Optional<PatientReferral> optionalPatientReferral =
+                patientInArea.getReferrals().stream()
+                        .filter(patientReferral -> patientReferral.getModuleId().equals(moduleId))
+                        .reduce((first, second) -> second);
+
+        if (optionalPatientReferral.isEmpty())
+            return false;
+
+        PatientReferral wantedReferral = optionalPatientReferral.get();
+        return wantedReferral.isRecepted();
     }
 
     private List<ObjectId> getMandatoryQuestionIds(List<Question> questions) {
