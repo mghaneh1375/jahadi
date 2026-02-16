@@ -17,7 +17,6 @@ import four.group.jahadi.Service.DrugService;
 import four.group.jahadi.Service.JahadgarDrugService;
 import four.group.jahadi.Utility.Utility;
 import four.group.jahadi.Validator.ObjectIdConstraint;
-import four.group.jahadi.Validator.ValidatedUpdatePresenceList;
 import io.swagger.v3.oas.annotations.Operation;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +30,6 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @RestController
@@ -159,6 +157,8 @@ public class DrugAPIRoutes extends Router {
     public ResponseEntity<List<JoinedAreaDrugs>> list(
             HttpServletRequest request,
             @PathVariable @ObjectIdConstraint ObjectId areaId,
+            @RequestParam(name = "pageIndex") Integer pageIndex,
+            @RequestParam(name = "pageSize") Integer pageSize,
             @RequestParam(required = false, name = "name") String name,
             @RequestParam(required = false, name = "drugType") String drugType,
             @RequestParam(required = false, name = "fromExpireAt") String fromExpireAt,
@@ -168,6 +168,7 @@ public class DrugAPIRoutes extends Router {
         return drugServiceInArea.list(
                 fullTokenInfo.getGroupId(), areaId,
                 fullTokenInfo.getAccesses().contains(Access.GROUP) ? null : fullTokenInfo.getUserId(),
+                pageIndex, pageSize,
                 name, drugType,
                 fromExpireAt == null ? null : Utility.getLastLocalDateTime(Utility.convertJalaliToGregorianDate(fromExpireAt)),
                 toExpireAt == null ? null : Utility.getLastLocalDateTime(Utility.convertJalaliToGregorianDate(toExpireAt))

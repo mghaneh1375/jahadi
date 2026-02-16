@@ -326,13 +326,12 @@ public class PatientServiceInArea {
                 .orElseThrow(NotAccessException::new);
         Area foundArea = findStartedArea(trip, areaId);
 
-        if(srcModuleId != null) {
+        if (srcModuleId != null) {
             ModuleInArea srcModuleInArea = findModule(foundArea, srcModuleId, userId, null);
             Module srcModule = moduleRepository.findById(srcModuleInArea.getModuleId()).orElseThrow(UnknownError::new);
             if (!srcModule.isReferral())
                 throw new InvalidFieldsException("در این ماژول امکان ارجاع دهی وجود ندارد");
-        }
-        else if(foundArea.getTrainers() == null ||
+        } else if (foundArea.getTrainers() == null ||
                 (!foundArea.getTrainers().contains(userId) && !foundArea.getOwnerId().equals(userId))
         )
             throw new NotAccessException();
@@ -570,7 +569,10 @@ public class PatientServiceInArea {
 
     public ResponseEntity<HashMap<String, Object>> getModulePatients(
             ObjectId userId, ObjectId areaId, ObjectId moduleId,
-            Boolean justRecepted, Boolean justUnRecepted
+            String search,
+            Boolean justRecepted, Boolean justUnRecepted,
+            int pageIndex, int pageSize,
+            Boolean needTotalElements
     ) {
 
         Trip trip = tripRepository.findByAreaIdAndResponsibleIdAndModuleId(
@@ -586,31 +588,58 @@ public class PatientServiceInArea {
 //                userId.equals(area.getOwnerId()) ? null : userId
         );
 
-        List<PatientJoinArea> patients = patientsInAreaRepository.findPatientsListInModuleByAreaId(
-                areaId, moduleId
-        );
+        List<PatientJoinArea> patients;
+        Long totalElements = 0L;
 
-        boolean noFilter = (justRecepted == null || !justRecepted) &&
-                (justUnRecepted == null || !justUnRecepted);
-
-        List<PatientJoinArea> output = new ArrayList<>();
-        for (PatientJoinArea patientJoinArea : patients) {
-            if (noFilter || patientJoinArea.getReferrals().stream()
-                    .filter(patientReferral -> patientReferral.getModuleId().equals(moduleId))
-                    .reduce((first, second) -> second)
-                    .filter(patientReferral ->
-                            Boolean.TRUE.equals(justRecepted) == patientReferral.isRecepted()
-                    ).isPresent()) {
-                List<PatientReferral> referrals = patientJoinArea.getReferrals().stream()
-                        .filter(patientReferral -> patientReferral.getModuleId().equals(moduleId)).collect(Collectors.toList());
-                patientJoinArea.setReferrals(referrals);
-                output.add(patientJoinArea);
+        if (justRecepted != null && justRecepted) {
+            patients = patientsInAreaRepository.findReceptedPatientsListInModuleByAreaId(
+                    areaId, moduleId, pageIndex * pageSize, pageSize, search
+            );
+            if(needTotalElements) {
+                if(search == null) {
+                    totalElements = patientsInAreaRepository.countReceptedPatientsInModuleByAreaId(
+                            areaId, moduleId
+                    );
+                }
+                else {
+                    totalElements = patientsInAreaRepository.countReceptedPatientsInModuleByAreaId(
+                            areaId, moduleId, search
+                    );
+                }
+            }
+        }
+        else if(justUnRecepted != null && justUnRecepted) {
+            patients = patientsInAreaRepository.findUnReceptedPatientsListInModuleByAreaId(
+                    areaId, moduleId, pageIndex * pageSize, pageSize, search
+            );
+            if(needTotalElements) {
+                if(search == null) {
+                    totalElements = patientsInAreaRepository.countUnReceptedPatientsInModuleByAreaId(
+                            areaId, moduleId
+                    );
+                }
+                else {
+                    totalElements = patientsInAreaRepository.countUnReceptedPatientsInModuleByAreaId(
+                            areaId, moduleId, search
+                    );
+                }
+            }
+        }
+        else {
+            patients = patientsInAreaRepository.findPatientsListInModuleByAreaId(
+                    areaId, moduleId, pageIndex * pageSize, pageSize
+            );
+            if(needTotalElements) {
+                totalElements = patientsInAreaRepository.countPatientsInModuleByAreaId(
+                        areaId, moduleId
+                );
             }
         }
 
         HashMap<String, Object> hashMap = new HashMap<>();
         hashMap.put("moduleName", moduleInArea.getModuleName());
-        hashMap.put("patients", output);
+        hashMap.put("patients", patients);
+        hashMap.put("totalElements", totalElements == null ? 0 : totalElements);
 
         return new ResponseEntity<>(hashMap, HttpStatus.OK);
     }
@@ -1181,15 +1210,14 @@ public class PatientServiceInArea {
                 if (!forms.containsKey(patientReferral.getModuleId())) {
                     forms.put(
                             patientReferral.getModuleId(),
-                            new HashMap<>(){{
+                            new HashMap<>() {{
                                 put(
                                         patientReferral.getId(),
                                         patientReferral.getForms()
                                 );
                             }}
                     );
-                }
-                else {
+                } else {
                     forms.get(patientReferral.getModuleId()).put(patientReferral.getId(), patientReferral.getForms());
                 }
             });

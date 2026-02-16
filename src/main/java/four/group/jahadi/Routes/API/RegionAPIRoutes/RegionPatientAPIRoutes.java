@@ -28,6 +28,8 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import java.util.HashMap;
 import java.util.List;
 
@@ -116,10 +118,18 @@ public class RegionPatientAPIRoutes extends Router {
             @PathVariable @ObjectIdConstraint ObjectId areaId,
             @PathVariable @ObjectIdConstraint ObjectId moduleId,
             @RequestParam(required = false, value = "justRecepted") Boolean justRecepted,
-            @RequestParam(required = false, value = "justUnRecepted") Boolean justUnRecepted
+            @RequestParam(required = false, value = "justUnRecepted") Boolean justUnRecepted,
+            @RequestParam(required = false, value = "search") String search,
+            @RequestParam(value = "pageIndex") @Min(0) @Max(100000) Integer pageIndex,
+            @RequestParam(value = "pageSize") @Min(5) @Max(100) Integer pageSize,
+            @RequestParam(value = "needTotalElements") Boolean needTotalElements
     ) {
         return patientServiceInArea.getModulePatients(
-                getId(request), areaId, moduleId, justRecepted, justUnRecepted
+                getId(request), areaId, moduleId,
+                search,
+                justRecepted, justUnRecepted,
+                pageIndex, pageSize,
+                needTotalElements
         );
     }
 

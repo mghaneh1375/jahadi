@@ -16,6 +16,8 @@ import four.group.jahadi.Repository.TripRepository;
 import four.group.jahadi.Repository.UserRepository;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -38,6 +40,8 @@ public class ModuleServiceInArea {
     private UserRepository userRepository;
     @Autowired
     private PatientsInAreaRepository patientsInAreaRepository;
+    @Autowired
+    private CacheService cacheService;
 
     public void setModules(ObjectId userId, ObjectId areaId, List<ObjectId> moduleIds) {
 
@@ -98,6 +102,11 @@ public class ModuleServiceInArea {
 
     public ResponseEntity<List<ModuleInArea>> getModulesInTab(ObjectId userId, ObjectId areaId, String tabName) {
 
+        List<ModuleInArea> cached = cacheService.getCachedModules(userId, areaId, tabName);
+        if (cached != null) {
+            return new ResponseEntity<>(cached, HttpStatus.OK);
+        }
+
         Area foundArea = tripRepository.findByAreaIdAndResponsibleId(areaId, userId)
                 .orElseThrow(InvalidIdException::new)
                 .getAreas().stream().filter(area -> area.getId().equals(areaId))
@@ -134,6 +143,7 @@ public class ModuleServiceInArea {
             output.add(moduleInArea);
         });
 
+        cacheService.cacheModulesResult(userId, areaId, tabName, output);
         return new ResponseEntity<>(output, HttpStatus.OK);
     }
 

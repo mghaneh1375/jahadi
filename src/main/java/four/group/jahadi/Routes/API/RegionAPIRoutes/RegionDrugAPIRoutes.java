@@ -1,7 +1,6 @@
 package four.group.jahadi.Routes.API.RegionAPIRoutes;
 
 import four.group.jahadi.Enums.Access;
-import four.group.jahadi.Models.Area.AreaDrugs;
 import four.group.jahadi.Models.Area.JoinedAreaDrugs;
 import four.group.jahadi.Models.TokenInfo;
 import four.group.jahadi.Routes.Router;
@@ -10,14 +9,13 @@ import four.group.jahadi.Validator.ObjectIdConstraint;
 import io.swagger.v3.oas.annotations.Operation;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.*;
 import java.util.List;
 
 @RestController
@@ -31,11 +29,25 @@ public class RegionDrugAPIRoutes extends Router {
     @GetMapping(value = "list/{areaId}")
     @ResponseBody
     @Operation(summary = "داروهای موجود در منطقه")
-    public ResponseEntity<List<JoinedAreaDrugs>> list(
+    public ResponseEntity<Page<JoinedAreaDrugs>> list(
             HttpServletRequest request,
-            @PathVariable @ObjectIdConstraint ObjectId areaId
+            @PathVariable @ObjectIdConstraint ObjectId areaId,
+            @RequestParam(value = "pageIndex") @Min(0) Integer pageIndex,
+            @RequestParam(value = "pageSize") @Min(10) Integer pageSize
     ) {
-        return drugServiceInArea.list(getId(request), areaId);
+        return drugServiceInArea.list(getId(request), areaId, pageIndex, pageSize);
+    }
+
+    @GetMapping(value = "search/{areaId}")
+    @ResponseBody
+    @Operation(summary = "جست و جو در داروهای موجود در منطقه")
+    public ResponseEntity<List<JoinedAreaDrugs>> search(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId,
+            @RequestParam(value = "key") @NotBlank @Size(min = 2) String key
+    ) {
+        TokenInfo fullTokenInfo = getFullTokenInfo(request);
+        return drugServiceInArea.search(fullTokenInfo.getUserId(), fullTokenInfo.getGroupId(), areaId, key);
     }
 
     @PutMapping(value = "returnAllDrugs/{areaId}")

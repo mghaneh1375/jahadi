@@ -28,6 +28,10 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -370,18 +374,42 @@ public class DrugServiceInArea {
 
     // ###################### JAHADGAR ACCESS #######################
 
-    public ResponseEntity<List<JoinedAreaDrugs>> list(ObjectId userId, ObjectId areaId) {
+    public ResponseEntity<List<JoinedAreaDrugs>> search(
+            ObjectId userId, ObjectId groupId, ObjectId areaId, String key
+    ) {
         tripRepository.findByAreaIdAndResponsibleId(areaId, userId)
                 .orElseThrow(NotAccessException::new);
 
+        List<JoinedAreaDrugs> digestByAreaId = drugRepository.searchInAreaByName(areaId, groupId, key);
+
         return new ResponseEntity<>(
-                areaDrugsRepository.findDigestByAreaId(areaId),
+                digestByAreaId,
+                HttpStatus.OK
+        );
+    }
+
+    public ResponseEntity<Page<JoinedAreaDrugs>> list(
+            ObjectId userId, ObjectId areaId, Integer pageIndex, Integer pageSize
+    ) {
+        tripRepository.findByAreaIdAndResponsibleId(areaId, userId)
+                .orElseThrow(NotAccessException::new);
+
+        Pageable pageable = PageRequest.of(pageIndex, pageSize);
+        List<JoinedAreaDrugs> digestByAreaId = areaDrugsRepository.findDigestByAreaId(areaId, pageIndex * pageSize, pageSize);
+
+        return new ResponseEntity<>(
+                new PageImpl<>(
+                        digestByAreaId,
+                        pageable,
+                        areaDrugsRepository.countByAreaId(areaId)
+                ),
                 HttpStatus.OK
         );
     }
 
     public ResponseEntity<List<JoinedAreaDrugs>> list(
             ObjectId groupId, ObjectId areaId, ObjectId userId,
+            Integer pageIndex, Integer pageSize,
             String name, String drugType,
             LocalDateTime fromExpireAt, LocalDateTime endExpireAt
     ) {
@@ -393,12 +421,12 @@ public class DrugServiceInArea {
 
         return new ResponseEntity<>(
                 fromExpireAt == null && endExpireAt == null ?
-                        areaDrugsRepository.findDigestByAreaId(areaId, name, drugType) :
+                        areaDrugsRepository.findDigestByAreaId(areaId, pageIndex * pageSize, pageSize, name, drugType) :
                         fromExpireAt != null && endExpireAt != null ?
-                                areaDrugsRepository.findDigestByAreaId(areaId, name, drugType, fromExpireAt, endExpireAt) :
+                                areaDrugsRepository.findDigestByAreaId(areaId, pageIndex * pageSize, pageSize, name, drugType, fromExpireAt, endExpireAt) :
                                 fromExpireAt != null ?
-                                        areaDrugsRepository.findDigestByAreaIdStartExpireAt(areaId, name, drugType, fromExpireAt) :
-                                        areaDrugsRepository.findDigestByAreaIdStartExpireAt(areaId, name, drugType, endExpireAt),
+                                        areaDrugsRepository.findDigestByAreaIdStartExpireAt(areaId, pageIndex * pageSize, pageSize, name, drugType, fromExpireAt) :
+                                        areaDrugsRepository.findDigestByAreaIdEndExpireAt(areaId, pageIndex * pageSize, pageSize, name, drugType, endExpireAt),
                 HttpStatus.OK
         );
     }

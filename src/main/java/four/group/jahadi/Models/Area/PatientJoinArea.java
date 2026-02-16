@@ -2,6 +2,7 @@ package four.group.jahadi.Models.Area;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import four.group.jahadi.Models.DateSerialization;
 import four.group.jahadi.Models.ObjectIdSerialization;
 import four.group.jahadi.Models.Patient;
 import lombok.*;
@@ -23,6 +24,7 @@ public class PatientJoinArea {
     private ObjectId id;
 
     @Field("created_at")
+    @JsonSerialize(using = DateSerialization.class)
     private LocalDateTime createdAt;
 
     private Boolean trained = false;

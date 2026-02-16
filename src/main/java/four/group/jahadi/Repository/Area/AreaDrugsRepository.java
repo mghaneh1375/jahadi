@@ -17,7 +17,7 @@ import java.util.Optional;
 public interface AreaDrugsRepository extends MongoRepository<AreaDrugs, ObjectId>, FilterableRepository<AreaDrugs> {
 
     @Query(value = "{areaId: ?0}", count = true)
-    Integer countByAreaId(ObjectId areaId);
+    Long countByAreaId(ObjectId areaId);
 
     @Query(value = "{areaId: ?0, drugId: ?1}", exists = true)
     Boolean existByAreaIdAndDrugId(ObjectId areaId, ObjectId drugId);
@@ -30,6 +30,8 @@ public interface AreaDrugsRepository extends MongoRepository<AreaDrugs, ObjectId
 
     @Aggregation(pipeline = {
             "{$match: {areaId: ?0}}",
+            "{$skip: ?1}",
+            "{$limit: ?2}",
             "{$lookup: {from: 'drug', localField: 'drug_id', foreignField: '_id', as: 'drugInfo'}}",
             "{$unset: 'drugInfo.created_at'}",
             "{$unset: 'drugInfo.user_id'}",
@@ -45,14 +47,16 @@ public interface AreaDrugsRepository extends MongoRepository<AreaDrugs, ObjectId
             "{$unset: 'drug_id'}",
             "{$unset: 'drug_name'}"
     })
-    List<JoinedAreaDrugs> findDigestByAreaId(ObjectId areaId);
+    List<JoinedAreaDrugs> findDigestByAreaId(ObjectId areaId, Integer skip, Integer limit);
 
     @Aggregation(pipeline = {
             "{$match: {areaId: ?0}}",
             "{$lookup: {from: 'drug', localField: 'drug_id', foreignField: '_id', as: 'drugInfo', pipeline: [{$match: {$expr: {$and: [" +
-                    "?#{ [1] == null ? { } : { $regexMatch: { input: '$name', regex: [1], options:'i'} } }," +
-                    "?#{ [2] == null ? { } : { $regexMatch: { input: '$drug_type', regex: [2], options:'i'} } }," +
+                    "?#{ [3] == null ? { } : { $regexMatch: { input: '$name', regex: [3], options:'i'} } }," +
+                    "?#{ [4] == null ? { } : { $regexMatch: { input: '$drug_type', regex: [4], options:'i'} } }," +
             "]}}}]}}",
+            "{$skip:  ?1}",
+            "{$limit:  ?2}",
             "{$unset: 'drugInfo.created_at'}",
             "{$unset: 'drugInfo.user_id'}",
             "{$unset: 'drugInfo.group_id'}",
@@ -68,16 +72,20 @@ public interface AreaDrugsRepository extends MongoRepository<AreaDrugs, ObjectId
             "{$unset: 'drug_name'}"
     })
     List<JoinedAreaDrugs> findDigestByAreaId(
-            ObjectId areaId, String name, String drugType
+            ObjectId areaId,
+            Integer limit, Integer skip,
+            String name, String drugType
     );
 
     @Aggregation(pipeline = {
             "{$match: {areaId: ?0}}",
             "{$lookup: {from: 'drug', localField: 'drug_id', foreignField: '_id', as: 'drugInfo', pipeline: [{$match: {$expr: {$and: [" +
-                    "?#{ [1] == null ? { } : { $regexMatch: { input: '$name', regex: [1], options:'i'} } }," +
-                    "?#{ [2] == null ? { } : { $regexMatch: { input: '$drug_type', regex: [2], options:'i'} } }," +
-                    "{$lte: [ '$expire_at', { $ifNull: [ ?3, Infinity ] } ]}," +
+                    "?#{ [3] == null ? { } : { $regexMatch: { input: '$name', regex: [3], options:'i'} } }," +
+                    "?#{ [4] == null ? { } : { $regexMatch: { input: '$drug_type', regex: [4], options:'i'} } }," +
+                    "{$lte: [ '$expire_at', { $ifNull: [ ?5, Infinity ] } ]}," +
                     "]}}}]}}",
+            "{$skip: ?1}",
+            "{$limit: ?2}",
             "{$unset: 'drugInfo.created_at'}",
             "{$unset: 'drugInfo.user_id'}",
             "{$unset: 'drugInfo.group_id'}",
@@ -93,16 +101,19 @@ public interface AreaDrugsRepository extends MongoRepository<AreaDrugs, ObjectId
             "{$unset: 'drug_name'}"
     })
     List<JoinedAreaDrugs> findDigestByAreaIdEndExpireAt(
-            ObjectId areaId, String name, String drugType,
+            ObjectId areaId, Integer skip, Integer limit,
+            String name, String drugType,
             LocalDateTime endExpireAt
     );
     @Aggregation(pipeline = {
             "{$match: {areaId: ?0}}",
             "{$lookup: {from: 'drug', localField: 'drug_id', foreignField: '_id', as: 'drugInfo', pipeline: [{$match: {$expr: {$and: [" +
-                    "?#{ [1] == null ? { } : { $regexMatch: { input: '$name', regex: [1], options:'i'} } }," +
-                    "?#{ [2] == null ? { } : { $regexMatch: { input: '$drug_type', regex: [2], options:'i'} } }," +
-                    "{$gte: [ '$expire_at', { $ifNull: [ ?3, -Infinity ] } ]}," +
+                    "?#{ [3] == null ? { } : { $regexMatch: { input: '$name', regex: [3], options:'i'} } }," +
+                    "?#{ [4] == null ? { } : { $regexMatch: { input: '$drug_type', regex: [4], options:'i'} } }," +
+                    "{$gte: [ '$expire_at', { $ifNull: [ ?5, -Infinity ] } ]}," +
                     "]}}}]}}",
+            "{$skip: ?1}",
+            "{$limit: ?2}",
             "{$unset: 'drugInfo.created_at'}",
             "{$unset: 'drugInfo.user_id'}",
             "{$unset: 'drugInfo.group_id'}",
@@ -118,18 +129,21 @@ public interface AreaDrugsRepository extends MongoRepository<AreaDrugs, ObjectId
             "{$unset: 'drug_name'}"
     })
     List<JoinedAreaDrugs> findDigestByAreaIdStartExpireAt(
-            ObjectId areaId, String name, String drugType,
+            ObjectId areaId, Integer skip, Integer limit,
+            String name, String drugType,
             LocalDateTime fromExpireAt
     );
 
     @Aggregation(pipeline = {
             "{$match: {areaId: ?0}}",
             "{$lookup: {from: 'drug', localField: 'drug_id', foreignField: '_id', as: 'drugInfo', pipeline: [{$match: {$expr: {$and: [" +
-                    "?#{ [1] == null ? { } : { $regexMatch: { input: '$name', regex: [1], options:'i'} } }," +
-                    "?#{ [2] == null ? { } : { $regexMatch: { input: '$drug_type', regex: [2], options:'i'} } }," +
-                    "{$gte: [ '$expire_at', { $ifNull: [ ?3, -Infinity ] } ]}," +
-                    "{$lte: [ '$expire_at', { $ifNull: [ ?4, Infinity ] } ]}," +
+                    "?#{ [3] == null ? { } : { $regexMatch: { input: '$name', regex: [3], options:'i'} } }," +
+                    "?#{ [4] == null ? { } : { $regexMatch: { input: '$drug_type', regex: [4], options:'i'} } }," +
+                    "{$gte: [ '$expire_at', { $ifNull: [ ?5, -Infinity ] } ]}," +
+                    "{$lte: [ '$expire_at', { $ifNull: [ ?6, Infinity ] } ]}," +
                     "]}}}]}}",
+            "{$skip: ?1}",
+            "{$limit: ?2}",
             "{$unset: 'drugInfo.created_at'}",
             "{$unset: 'drugInfo.user_id'}",
             "{$unset: 'drugInfo.group_id'}",
@@ -145,7 +159,8 @@ public interface AreaDrugsRepository extends MongoRepository<AreaDrugs, ObjectId
             "{$unset: 'drug_name'}"
     })
     List<JoinedAreaDrugs> findDigestByAreaId(
-            ObjectId areaId, String name, String drugType,
+            ObjectId areaId, Integer skip, Integer limit,
+            String name, String drugType,
             LocalDateTime fromExpireAt, LocalDateTime endExpireAt
     );
 

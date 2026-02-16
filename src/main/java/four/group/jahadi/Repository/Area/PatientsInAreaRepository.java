@@ -63,11 +63,122 @@ public interface PatientsInAreaRepository extends MongoRepository<PatientsInArea
             "{$lookup: {from: 'patient', localField: 'patient_id', foreignField: '_id', as: 'patientInfo'}}",
             "{$unset: 'patientInfo.created_at'}",
             "{$unwind: '$patientInfo'}",
-//            "{$unwind: {'path': '$referrals', 'preserveNullAndEmptyArrays': true}}",
             "{$unset: 'referrals.forms'}",
             "{$project: {'patientInfo': '$patientInfo', 'referrals': '$referrals'}}"
     })
-    List<PatientJoinArea> findPatientsListInModuleByAreaId(ObjectId areaId, ObjectId moduleId);
+    List<PatientJoinArea> findPatientsListInModuleByAreaId(
+            ObjectId areaId, ObjectId moduleId,
+            int skip, int limit
+    );
+
+    @Aggregation(pipeline = {
+            "{$match: {$and: [{areaId: ?0}, {'referrals.moduleId': ?1}]}}",
+            "{$count: 'total'}"
+    })
+    Long countPatientsInModuleByAreaId(
+            ObjectId areaId, ObjectId moduleId
+    );
+    @Aggregation(pipeline = {
+            "{$match: {$and: [{areaId: ?0}, {'referrals.moduleId': ?1}]}}",
+            "{$lookup: {from: 'patient', localField: 'patient_id', foreignField: '_id', as: 'patientInfo'}}",
+            "{$unset: 'patientInfo.created_at'}",
+            "{$unwind: '$patientInfo'}",
+            "{$match: {$expr: {$or: [{$or: [{$eq: [?4, null]}, {$regexMatch: {input: '$patientInfo.name', regex: ?4, options: 'i'}}]}, {$or: [{$eq: [?4, null]}, {$regexMatch: {input: '$patientInfo.identifier', regex: ?4, options: 'i'}}]}, {$or: [{$eq: [?4, null]}, {$regexMatch: {input: '$patientInfo.phone', regex: ?4, options: 'i'}}]}, {$or: [{$eq: [?4, null]}, {$regexMatch: {input: '$patientInfo.patient_no', regex: ?4, options: 'i'}}]}]}}}",
+            "{$unwind: '$referrals'}",
+            "{$match: {'referrals.moduleId': ?1}}",
+            "{$sort: {'referrals.createdAt': -1}}",
+            "{$group: {_id: '$_id', patientInfo: {$first: '$patientInfo'}, areaId: {$first: '$areaId'}, trained: {$first: '$trained'}, lastReferral: {$first: '$referrals'}}}",
+            "{$match: {'lastReferral.recepted': true}}",
+            "{$sort: {'lastReferral.recepted_at': -1}}",
+            "{$skip: ?2}",
+            "{$limit: ?3}",
+            "{$project: {'patientInfo': '$patientInfo', 'createdAt': '$lastReferral.recepted_at'}}"
+    })
+    List<PatientJoinArea> findReceptedPatientsListInModuleByAreaId(
+            ObjectId areaId, ObjectId moduleId,
+            int skip, int limit,
+            String search
+    );
+
+    @Aggregation(pipeline = {
+            "{$match: {$and: [{areaId: ?0}, {'referrals.moduleId': ?1}]}}",
+            "{$unwind: '$referrals'}",
+            "{$match: {'referrals.moduleId': ?1}}",
+            "{$sort: {'referrals.createdAt': -1}}",
+            "{$group: {_id: '$_id', lastReferral: {$first: '$referrals'}}}",
+            "{$match: {'lastReferral.recepted': true}}",
+            "{$count: 'total'}"
+    })
+    Long countReceptedPatientsInModuleByAreaId(
+            ObjectId areaId, ObjectId moduleId
+    );
+
+    @Aggregation(pipeline = {
+            "{$match: {$and: [{areaId: ?0}, {'referrals.moduleId': ?1}]}}",
+            "{$lookup: {from: 'patient', localField: 'patient_id', foreignField: '_id', as: 'patientInfo'}}",
+            "{$unwind: '$patientInfo'}",
+            "{$match: {$expr: {$or: [{$or: [{$eq: [?2, null]}, {$regexMatch: {input: '$patientInfo.name', regex: ?2, options: 'i'}}]}, {$or: [{$eq: [?2, null]}, {$regexMatch: {input: '$patientInfo.identifier', regex: ?2, options: 'i'}}]}, {$or: [{$eq: [?2, null]}, {$regexMatch: {input: '$patientInfo.phone', regex: ?2, options: 'i'}}]}, {$or: [{$eq: [?2, null]}, {$regexMatch: {input: '$patientInfo.patient_no', regex: ?2, options: 'i'}}]}]}}}",
+            "{$unwind: '$referrals'}",
+            "{$match: {'referrals.moduleId': ?1}}",
+            "{$sort: {'referrals.createdAt': -1}}",
+            "{$group: {_id: '$_id', lastReferral: {$first: '$referrals'}}}",
+            "{$match: {'lastReferral.recepted': true}}",
+            "{$count: 'total'}"
+    })
+    Long countReceptedPatientsInModuleByAreaId(
+            ObjectId areaId, ObjectId moduleId, String search
+    );
+
+    @Aggregation(pipeline = {
+            "{$match: {$and: [{areaId: ?0}, {'referrals.moduleId': ?1}]}}",
+            "{$lookup: {from: 'patient', localField: 'patient_id', foreignField: '_id', as: 'patientInfo'}}",
+            "{$unset: 'patientInfo.created_at'}",
+            "{$unwind: '$patientInfo'}",
+            "{$match: {$expr: {$or: [{$or: [{$eq: [?4, null]}, {$regexMatch: {input: '$patientInfo.name', regex: ?4, options: 'i'}}]}, {$or: [{$eq: [?4, null]}, {$regexMatch: {input: '$patientInfo.identifier', regex: ?4, options: 'i'}}]}, {$or: [{$eq: [?4, null]}, {$regexMatch: {input: '$patientInfo.phone', regex: ?4, options: 'i'}}]}, {$or: [{$eq: [?4, null]}, {$regexMatch: {input: '$patientInfo.patient_no', regex: ?4, options: 'i'}}]}]}}}",
+            "{$unwind: '$referrals'}",
+            "{$match: {'referrals.moduleId': ?1}}",
+            "{$sort: {'referrals.createdAt': -1}}",
+            "{$group: {_id: '$_id', patientInfo: {$first: '$patientInfo'}, areaId: {$first: '$areaId'}, lastReferral: {$first: '$referrals'}}}",
+            "{$match: {'lastReferral.recepted': false}}",
+            "{$sort: {'lastReferral.created_at': 1}}",
+            "{$skip: ?2}",
+            "{$limit: ?3}",
+            "{$project: {'patientInfo': '$patientInfo', 'createdAt': '$lastReferral.created_at'}}"
+    })
+    List<PatientJoinArea> findUnReceptedPatientsListInModuleByAreaId(
+            ObjectId areaId, ObjectId moduleId,
+            int skip, int limit,
+            String search
+    );
+
+    @Aggregation(pipeline = {
+            "{$match: {$and: [{areaId: ?0}, {'referrals.moduleId': ?1}]}}",
+            "{$unwind: '$referrals'}",
+            "{$match: {'referrals.moduleId': ?1}}",
+            "{$sort: {'referrals.createdAt': -1}}",
+            "{$group: {_id: '$_id', lastReferral: {$first: '$referrals'}}}",
+            "{$match: {'lastReferral.recepted': false}}",
+            "{$count: 'total'}"
+    })
+    Long countUnReceptedPatientsInModuleByAreaId(
+            ObjectId areaId, ObjectId moduleId
+    );
+
+    @Aggregation(pipeline = {
+            "{$match: {$and: [{areaId: ?0}, {'referrals.moduleId': ?1}]}}",
+            "{$lookup: {from: 'patient', localField: 'patient_id', foreignField: '_id', as: 'patientInfo'}}",
+            "{$unwind: '$patientInfo'}",
+            "{$match: {$expr: {$or: [{$or: [{$eq: [?2, null]}, {$regexMatch: {input: '$patientInfo.name', regex: ?2, options: 'i'}}]}, {$or: [{$eq: [?2, null]}, {$regexMatch: {input: '$patientInfo.identifier', regex: ?2, options: 'i'}}]}, {$or: [{$eq: [?2, null]}, {$regexMatch: {input: '$patientInfo.phone', regex: ?2, options: 'i'}}]}, {$or: [{$eq: [?2, null]}, {$regexMatch: {input: '$patientInfo.patient_no', regex: ?2, options: 'i'}}]}]}}}",
+            "{$unwind: '$referrals'}",
+            "{$match: {'referrals.moduleId': ?1}}",
+            "{$sort: {'referrals.createdAt': -1}}",
+            "{$group: {_id: '$_id', lastReferral: {$first: '$referrals'}}}",
+            "{$match: {'lastReferral.recepted': false}}",
+            "{$count: 'total'}"
+    })
+    Long countUnReceptedPatientsInModuleByAreaId(
+            ObjectId areaId, ObjectId moduleId, String search
+    );
 
 //    @Query(value = "{areaId: ?0, referrals: { $elemMatch: {moduleId: ?1, forms: {$exists: true}} } }")
     @Query(value = "{areaId: ?0, referrals: { $elemMatch: {moduleId: ?1} } }")

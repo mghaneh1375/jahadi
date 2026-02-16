@@ -312,4 +312,8 @@ public class TripService extends AbstractService<Trip, TripStepData> {
 
         return new ResponseEntity<>(trips, HttpStatus.OK);
     }
+
+    public boolean isAreaStarted(ObjectId areaId) {
+        return false;
+    }
 }
