@@ -243,6 +243,7 @@ public class PatientServiceInArea {
         PatientsInArea patientInArea = PatientsInArea.builder()
                 .patientId(patientId)
                 .areaId(area.getId())
+                .trained(false)
                 .build();
 
         patientsInAreaRepository.insert(patientInArea);
