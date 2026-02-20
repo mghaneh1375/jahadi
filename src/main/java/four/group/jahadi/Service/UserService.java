@@ -23,6 +23,8 @@ import four.group.jahadi.Utility.*;
 import org.apache.commons.beanutils.BeanUtilsBean;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
@@ -113,8 +115,9 @@ public class UserService extends AbstractService<User, SignUpData> {
 
     }
 
-    public void update(ObjectId id, UpdateInfoData dto) {
-        User user = userRepository.findById(id).orElseThrow(InvalidIdException::new);
+    @CacheEvict(value = "user", key = "#userId")
+    public void update(ObjectId userId, UpdateInfoData dto) {
+        User user = userRepository.findById(userId).orElseThrow(InvalidIdException::new);
         BeanUtilsBean notNull = new NullAwareBeanUtilsBean();
         if(user.getAccesses().contains(Access.GROUP)) {
             try {
@@ -214,6 +217,7 @@ public class UserService extends AbstractService<User, SignUpData> {
 
         return sendSMS(user, false);
     }
+
     public void checkGroup(SignUpStep3Data dto) {
         if (groupRepository.countByCode(dto.getGroupCode()) == 0)
             throw new InvalidFieldsException("کد گروه نامعتبر است");
@@ -412,12 +416,13 @@ public class UserService extends AbstractService<User, SignUpData> {
     }
 
     @Override
-    public ResponseEntity<User> findById(ObjectId id, Object... params) {
+    @Cacheable(value = "user", key = "#userId")
+    public ResponseEntity<User> findById(ObjectId userId, Object... params) {
 
-        if (id == null)
+        if (userId == null)
             throw new BadRequestException();
 
-        User user = userRepository.findById(id).orElseThrow(InvalidIdException::new);
+        User user = userRepository.findById(userId).orElseThrow(InvalidIdException::new);
 
         if (params.length > 0) {
             if (!Objects.equals(params[0], user.getGroupId()))
@@ -471,7 +476,6 @@ public class UserService extends AbstractService<User, SignUpData> {
         return new ResponseEntity<>("", HttpStatus.OK);
     }
 
-
     public ResponseEntity<String> checkForgetPassCode(CheckForgetPassCodeRequest checkCodeRequest) {
 
         Activation activation = activationRepository.findByNIDAndCodeAndToken(
@@ -522,6 +526,7 @@ public class UserService extends AbstractService<User, SignUpData> {
         userRepository.save(user);
     }
 
+    @CacheEvict(value = "user", key = "#userId")
     public String toggleStatus(ObjectId userId) {
         Optional<User> user = userRepository.findById(userId);
         if (user.isEmpty())
@@ -679,12 +684,14 @@ public class UserService extends AbstractService<User, SignUpData> {
         }
     }
 
+    @CacheEvict(value = "user", key = "#userId")
     public void changeStatus(ObjectId userId, AccountStatus status) {
         User user = userRepository.findById(userId).orElseThrow(InvalidIdException::new);
         user.setStatus(status);
         userRepository.save(user);
     }
 
+    @CacheEvict(value = "user", key = "#userId")
     public void changeStatusByGroup(ObjectId groupId, ObjectId userId, AccountStatus status) {
         User user = userRepository.findById(userId).orElseThrow(InvalidIdException::new);
         if(!Objects.equals(user.getGroupId(), groupId))
@@ -727,6 +734,7 @@ public class UserService extends AbstractService<User, SignUpData> {
         userRepository.save(user);
     }
 
+    @CacheEvict(value = "user", key = "#userId")
     public void setGroup(ObjectId id, Integer code) {
         Group group = groupRepository.findByCode(code).orElseThrow(InvalidCodeException::new);
         User user = userRepository.findById(id).orElseThrow(InvalidIdException::new);
@@ -735,6 +743,7 @@ public class UserService extends AbstractService<User, SignUpData> {
         userRepository.save(user);
     }
 
+    @CacheEvict(value = "user", key = "#userId")
     public void removeFromGroup(ObjectId userId, ObjectId groupId) {
         if (groupId == null)
             throw new NotAccessException();
@@ -747,7 +756,6 @@ public class UserService extends AbstractService<User, SignUpData> {
         u.setGroupId(null);
         userRepository.save(u);
     }
-
 
     public ResponseEntity<HashMap<String, Object>> groupStore(SignUpStep1ForGroupData dto) {
 
@@ -799,6 +807,7 @@ public class UserService extends AbstractService<User, SignUpData> {
         );
     }
 
+    @CacheEvict(value = "user", key = "#userId")
     public void remove(ObjectId userId) {
         User user = userRepository.findById(userId).orElseThrow(InvalidIdException::new);
         user.setRemoveAt(LocalDateTime.now());

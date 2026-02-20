@@ -336,7 +336,7 @@ public class Utility {
         date.setSeconds(0);
         return Instant.ofEpochMilli(date.getTime())
                 .atZone(tehranZoneId)
-                .toLocalDateTime();
+                .toLocalDateTime().withNano(0);
     }
 
     public static Date getCurrDate() {

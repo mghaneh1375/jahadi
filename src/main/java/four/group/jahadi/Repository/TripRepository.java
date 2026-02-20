@@ -117,7 +117,7 @@ public interface TripRepository extends MongoRepository<Trip, ObjectId>, Filtera
     @Query(value = "{ 'areas': {$elemMatch: { $and: [{'finished': true}, {'startAt': {$lte: ?2}}, {'endAt': {$gte: ?2}}, {'id': ?0}, {$or: [{'ownerId': ?1}, {'trainers': ?1}]} ] } } }")
     Optional<Trip> findActiveByAreaIdAndTrainerId(ObjectId areaId, ObjectId userId, LocalDateTime curr);
 
-    @Query(value = "{ 'areas': {$elemMatch: { 'finished': true, 'startAt': {$lte: ?2}, 'endAt': {$gte: ?2}, 'id': ?0, $or: [{'ownerId': ?1}, {'members': ?1}] } } }")
+    @Query(value = "{ 'areas': {$elemMatch: { $and: [{'finished': true}, {'startAt': {$lte: ?2}}, {'endAt': {$gte: ?2}}, {'id': ?0}, {$or: [{'ownerId': ?1}, {'members': ?1}]}] } } }")
     Optional<Trip> findActiveByAreaIdAndResponsibleId(ObjectId areaId, ObjectId userId, LocalDateTime curr);
 
     @Query(value = "{ 'areas': {$elemMatch: { 'id': ?0, $or: [{'ownerId': ?1}, {'members': ?1}] }} }")

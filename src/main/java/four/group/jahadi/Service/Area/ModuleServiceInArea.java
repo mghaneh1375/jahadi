@@ -16,6 +16,7 @@ import four.group.jahadi.Repository.TripRepository;
 import four.group.jahadi.Repository.UserRepository;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
@@ -43,6 +44,7 @@ public class ModuleServiceInArea {
     @Autowired
     private CacheService cacheService;
 
+    @CacheEvict(value = "modules", allEntries = true)
     public void setModules(ObjectId userId, ObjectId areaId, List<ObjectId> moduleIds) {
 
         Trip wantedTrip = tripRepository.findByAreaIdAndOwnerId(areaId, userId)
@@ -81,6 +83,7 @@ public class ModuleServiceInArea {
         tripRepository.save(wantedTrip);
     }
 
+    @CacheEvict(value = "modules", allEntries = true)
     public void removeModule(ObjectId userId, ObjectId areaId, List<ObjectId> moduleIds) {
 
         Trip wantedTrip = tripRepository.findByAreaIdAndOwnerId(areaId, userId)
@@ -320,6 +323,7 @@ public class ModuleServiceInArea {
         return new Object[]{wantedTrip, area};
     }
 
+    @CacheEvict(value = "modules", allEntries = true)
     public synchronized void setMembersToModule(
             ObjectId userId, ObjectId areaId,
             ObjectId moduleIdInArea, List<ObjectId> userIds
@@ -336,6 +340,7 @@ public class ModuleServiceInArea {
         tripRepository.save(wantedTrip);
     }
 
+    @CacheEvict(value = "modules", allEntries = true)
     public void removeMemberFromModule(ObjectId userId, ObjectId areaId,
                                        ObjectId moduleIdInArea, ObjectId wantedUserId) {
 
@@ -359,6 +364,7 @@ public class ModuleServiceInArea {
     }
 
 
+    @CacheEvict(value = "modules", allEntries = true)
     public synchronized void addSecretariesToModule(ObjectId userId, ObjectId areaId,
                                                     ObjectId moduleIdInArea, List<ObjectId> userIds) {
 
@@ -380,6 +386,7 @@ public class ModuleServiceInArea {
         tripRepository.save(wantedTrip);
     }
 
+    @CacheEvict(value = "modules", allEntries = true)
     public void removeMemberFromSecretaries(ObjectId userId, ObjectId areaId,
                                             ObjectId moduleIdInArea, ObjectId wantedUserId) {
 

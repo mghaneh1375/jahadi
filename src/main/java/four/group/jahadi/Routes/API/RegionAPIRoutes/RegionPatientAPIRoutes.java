@@ -30,6 +30,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.HashMap;
 import java.util.List;
 
@@ -46,11 +48,11 @@ public class RegionPatientAPIRoutes extends Router {
     @Operation(
             summary = "افزودن بیمار جدید و افزودن آن به لیست پذیرش در یک منطقه توسط فرد مسئول پذیرش"
     )
-    public void createPatientAndAddToRegion(HttpServletRequest request,
+    public ResponseEntity<PatientJoinArea> createPatientAndAddToRegion(HttpServletRequest request,
                                             @PathVariable @ObjectIdConstraint ObjectId areaId,
                                             @RequestBody @Valid PatientData patientData
     ) {
-        patientServiceInArea.createPatientAndAddToRegion(getId(request), areaId, patientData);
+       return patientServiceInArea.createPatientAndAddToRegion(getId(request), areaId, patientData);
     }
 
     @PutMapping(value = "updatePatient/{patientId}/{areaId}")
@@ -89,11 +91,11 @@ public class RegionPatientAPIRoutes extends Router {
     @Operation(
             summary = "افزودن بیمار از قبل موجود به لیست پذیرش در یک منطقه توسط فرد مسئول پذیرش"
     )
-    public void addPatientToRegion(HttpServletRequest request,
+    public ResponseEntity<PatientJoinArea> addPatientToRegion(HttpServletRequest request,
                                    @PathVariable @ObjectIdConstraint ObjectId areaId,
                                    @PathVariable @ObjectIdConstraint ObjectId patientId
     ) {
-        patientServiceInArea.addPatientToRegion(getId(request), areaId, patientId);
+        return patientServiceInArea.addPatientToRegion(getId(request), areaId, patientId);
     }
 
     @DeleteMapping(value = "removePatientFromArea/{areaId}/{patientId}")
@@ -172,12 +174,18 @@ public class RegionPatientAPIRoutes extends Router {
     @Operation(
             summary = "گرفتن لبستی از بیماران موجود در منطقه مدنظر توسط مسئول پذیرش"
     )
-    public ResponseEntity<List<PatientJoinArea>> getPatients(
+    public ResponseEntity<HashMap> getPatients(
             HttpServletRequest request,
-            @PathVariable @ObjectIdConstraint ObjectId areaId
+            @PathVariable @ObjectIdConstraint ObjectId areaId,
+            @RequestParam(value = "pageIndex") @NotNull @Min(0) @Max(10000) Integer pageIndex,
+            @RequestParam(value = "pageSize") @NotNull @Min(5) @Max(100) Integer pageSize,
+            @RequestParam(value = "needTotalElements") @NotNull boolean needTotalElements,
+            @RequestParam(value = "search", required = false) @Size(min = 3) String key
     ) {
         return patientServiceInArea.getPatients(
-                getId(request), areaId
+                getId(request), areaId,
+                pageIndex, pageSize, key,
+                needTotalElements
         );
     }
 
@@ -202,17 +210,22 @@ public class RegionPatientAPIRoutes extends Router {
     @Operation(
             summary = "گرفتن لیست آموزش از بیماران موجود در منطقه مدنظر توسط مسئول آموزش"
     )
-    public ResponseEntity<List<PatientJoinArea>> getTrainList(
+    public ResponseEntity<HashMap> getTrainList(
             HttpServletRequest request,
             @PathVariable @ObjectIdConstraint ObjectId areaId,
             @RequestParam(required = false, value = "justAdult") Boolean justAdult,
             @RequestParam(required = false, value = "justChildren") Boolean justChildren,
             @RequestParam(required = false, value = "justTrained") Boolean justTrained,
-            @RequestParam(required = false, value = "justNotTrained") Boolean justNotTrained
+            @RequestParam(required = false, value = "justNotTrained") Boolean justNotTrained,
+            @RequestParam(value = "pageIndex") @NotNull @Min(0) @Max(10000) Integer pageIndex,
+            @RequestParam(value = "pageSize") @NotNull @Min(5) @Max(100) Integer pageSize,
+            @RequestParam(required = false, value = "search") @Size(min = 3) String key,
+            @RequestParam(value = "needTotalElements") @NotNull boolean needTotalElements
     ) {
         return patientServiceInArea.getTrainList(
                 getId(request), areaId, justAdult, justChildren,
-                justTrained, justNotTrained
+                justTrained, justNotTrained, pageIndex, pageSize,
+                key, needTotalElements
         );
     }
 

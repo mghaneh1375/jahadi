@@ -62,16 +62,31 @@ public class PatientServiceInArea {
     @Autowired
     private ReportServiceInArea reportServiceInArea;
 
-    public ResponseEntity<List<PatientJoinArea>> getPatients(ObjectId userId, ObjectId areaId) {
+    public ResponseEntity<HashMap> getPatients(
+            ObjectId userId, ObjectId areaId,
+            Integer pageIndex, Integer pageSize,
+            String searchKey, boolean needTotalSize
+    ) {
         //todo: check finalize
         Trip trip = tripRepository.findActiveByAreaIdAndResponsibleId(areaId, userId, Utility.getCurrLocalDateTime())
                 .orElseThrow(NotAccessException::new);
 
         findStartedArea(trip, areaId);
-        List<PatientJoinArea> list = patientsInAreaRepository.findPatientsByAreaId(areaId);
-        list.sort(Comparator.comparing(PatientJoinArea::getCreatedAt, Comparator.reverseOrder()));
+        List<PatientJoinArea> list = patientsInAreaRepository.findPatientsByAreaId(
+                areaId, pageIndex * pageSize, pageSize, searchKey
+        );
+        HashMap<String, Object> hashMap = new HashMap<>();
+        hashMap.put("patients", list);
+
+        if(needTotalSize) {
+            Long totalElements = patientsInAreaRepository.countPatientsByAreaId(
+                    areaId, searchKey
+            );
+            hashMap.put("totalElements", totalElements == null ? 0 : totalElements);
+        }
+
         return new ResponseEntity<>(
-                list,
+                hashMap,
                 HttpStatus.OK
         );
     }
@@ -80,7 +95,6 @@ public class PatientServiceInArea {
             ObjectId userId, ObjectId areaId,
             Boolean justHasInsurance, Boolean justHasNotInsurance
     ) {
-
         Trip trip = tripRepository.findActiveByAreaIdAndInsurancerId(areaId, userId, Utility.getCurrLocalDateTime())
                 .orElseThrow(NotAccessException::new);
 
@@ -105,50 +119,50 @@ public class PatientServiceInArea {
         return new ResponseEntity<>(output, HttpStatus.OK);
     }
 
-    public ResponseEntity<List<PatientJoinArea>> getTrainList(
+    public ResponseEntity<HashMap> getTrainList(
             ObjectId userId, ObjectId areaId,
             Boolean justAdult, Boolean justChildren,
-            Boolean justTrained, Boolean justNotTrained
+            Boolean justTrained, Boolean justNotTrained,
+            Integer pageIndex, Integer pageSize,
+            String key, boolean needTotalElements
     ) {
+        if(justTrained == null)
+            justTrained = false;
+
+        if(justNotTrained == null)
+            justNotTrained = false;
+
+        if(justAdult == null)
+            justAdult = false;
+
+        if(justChildren == null)
+            justChildren = false;
+
+        if(!justAdult && !justChildren)
+            throw new InvalidFieldsException("لطفا فیلتر سن را وارد نمایید");
+
+        if(!justTrained && !justNotTrained)
+            throw new InvalidFieldsException("لطفا فیلتر آموزش را وارد نمایید");
 
         Trip trip = tripRepository.findActiveByAreaIdAndResponsibleId(areaId, userId, Utility.getCurrLocalDateTime())
                 .orElseThrow(NotAccessException::new);
 
         findStartedArea(trip, areaId);
-        List<PatientJoinArea> patientsInArea = patientsInAreaRepository.findPatientsByAreaId(areaId);
+        List<PatientJoinArea> patientsInArea = patientsInAreaRepository.findPatientsByAreaIdByTrainStatusAndAgeType(
+                areaId, justTrained, justAdult ? "ADULT" : "CHILD", pageIndex * pageSize, pageSize, key
+        );
 
-        if ((justAdult == null || !justAdult) &&
-                (justChildren == null || !justChildren) &&
-                (justTrained == null || !justTrained) &&
-                (justNotTrained == null || !justNotTrained)
-        )
-            return new ResponseEntity<>(patientsInArea, HttpStatus.OK);
+        HashMap<String, Object> hashMap = new HashMap<>();
+        hashMap.put("patients", patientsInArea);
 
-        List<PatientJoinArea> output = new ArrayList<>();
-        for (PatientJoinArea itr : patientsInArea) {
-
-//            boolean isAdult = itr.getPatientInfo().getBirthDate() != null && Period.between(
-//                    itr.getPatientInfo().getBirthDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate(),
-//                    new Date().toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
-//            ).getYears() > 10;
-            boolean isAdult = Objects.equals(itr.getPatientInfo().getAgeType(), AgeType.ADULT);
-
-            if (justAdult != null && justAdult && !isAdult)
-                continue;
-
-            if (justChildren != null && justChildren && isAdult)
-                continue;
-
-            if (justTrained != null && justTrained && !itr.getTrained())
-                continue;
-
-            if (justNotTrained != null && justNotTrained && itr.getTrained())
-                continue;
-
-            output.add(itr);
+        if(needTotalElements) {
+            Long totalSize = patientsInAreaRepository.countPatientsByAreaIdByTrainStatusAndAgeType(
+                    areaId, justTrained, justAdult ? "ADULT" : "CHILD", key
+            );
+            hashMap.put("totalElements", totalSize == null ? 0 : totalSize);
         }
 
-        return new ResponseEntity<>(output, HttpStatus.OK);
+        return new ResponseEntity<>(hashMap, HttpStatus.OK);
     }
 
     public void updatePatient(
@@ -178,7 +192,7 @@ public class PatientServiceInArea {
         patientRepository.save(patient);
     }
 
-    public void createPatientAndAddToRegion(ObjectId userId, ObjectId areaId, PatientData patientData) {
+    public ResponseEntity<PatientJoinArea> createPatientAndAddToRegion(ObjectId userId, ObjectId areaId, PatientData patientData) {
 
         //todo: check finalize
 
@@ -212,20 +226,30 @@ public class PatientServiceInArea {
                 .build();
 
         patientRepository.insert(newPatient);
-        doAddPatientToRegion(area, newPatient.getId(), newPatient.getAgeType());
+        ObjectId oId = doAddPatientToRegion(area, newPatient.getId(), newPatient.getAgeType());
+
+        return ResponseEntity.ok(
+                PatientJoinArea
+                        .builder()
+                        .patientInfo(newPatient)
+                        .createdAt(LocalDateTime.now())
+                        .trained(false)
+                        .id(oId)
+                        .build()
+        );
     }
 
-    private void doAddPatientToRegion(Area area, ObjectId patientId, AgeType ageType) {
-
+    private ObjectId doAddPatientToRegion(Area area, ObjectId patientId, AgeType ageType) {
         PatientsInArea patientInArea = PatientsInArea.builder()
                 .patientId(patientId)
                 .areaId(area.getId())
                 .build();
 
         patientsInAreaRepository.insert(patientInArea);
+        return patientInArea.getId();
     }
 
-    public void addPatientToRegion(ObjectId userId, ObjectId areaId, ObjectId patientId) {
+    public ResponseEntity<PatientJoinArea> addPatientToRegion(ObjectId userId, ObjectId areaId, ObjectId patientId) {
 
         Trip trip = tripRepository.findActiveByAreaIdAndDispatcherId(areaId, userId, Utility.getCurrLocalDateTime())
                 .orElseThrow(NotAccessException::new);
@@ -236,7 +260,15 @@ public class PatientServiceInArea {
         if (patientsInAreaRepository.existByAreaIdAndPatientId(areaId, patientId))
             throw new InvalidFieldsException("فرد مورد نظر پیش از این افزوده شده است");
 
-        doAddPatientToRegion(area, patientId, patient.getAgeType());
+        ObjectId oId = doAddPatientToRegion(area, patientId, patient.getAgeType());
+        return ResponseEntity.ok(PatientJoinArea
+                .builder()
+                .patientInfo(patient)
+                .createdAt(LocalDateTime.now())
+                .trained(false)
+                .id(oId)
+                .build()
+        );
     }
 
     public ResponseEntity<Patient> inquiryPatient(
@@ -574,6 +606,14 @@ public class PatientServiceInArea {
             int pageIndex, int pageSize,
             Boolean needTotalElements
     ) {
+        if(justRecepted == null)
+            justRecepted = false;
+
+        if(justUnRecepted == null)
+            justUnRecepted = false;
+
+        if(!justRecepted && !justUnRecepted)
+            throw new InvalidFieldsException("لطفا فیلتر پذیرش را وارد نمایید");
 
         Trip trip = tripRepository.findByAreaIdAndResponsibleIdAndModuleId(
                 areaId, userId, moduleId
@@ -591,7 +631,7 @@ public class PatientServiceInArea {
         List<PatientJoinArea> patients;
         Long totalElements = 0L;
 
-        if (justRecepted != null && justRecepted) {
+        if (justRecepted) {
             patients = patientsInAreaRepository.findReceptedPatientsListInModuleByAreaId(
                     areaId, moduleId, pageIndex * pageSize, pageSize, search
             );
@@ -608,7 +648,7 @@ public class PatientServiceInArea {
                 }
             }
         }
-        else if(justUnRecepted != null && justUnRecepted) {
+        else {
             patients = patientsInAreaRepository.findUnReceptedPatientsListInModuleByAreaId(
                     areaId, moduleId, pageIndex * pageSize, pageSize, search
             );
@@ -623,16 +663,6 @@ public class PatientServiceInArea {
                             areaId, moduleId, search
                     );
                 }
-            }
-        }
-        else {
-            patients = patientsInAreaRepository.findPatientsListInModuleByAreaId(
-                    areaId, moduleId, pageIndex * pageSize, pageSize
-            );
-            if(needTotalElements) {
-                totalElements = patientsInAreaRepository.countPatientsInModuleByAreaId(
-                        areaId, moduleId
-                );
             }
         }
 
