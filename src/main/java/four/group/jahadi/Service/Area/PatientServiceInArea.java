@@ -26,6 +26,7 @@ import four.group.jahadi.Utility.Utility;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -78,7 +79,7 @@ public class PatientServiceInArea {
         HashMap<String, Object> hashMap = new HashMap<>();
         hashMap.put("patients", list);
 
-        if(needTotalSize) {
+        if (needTotalSize) {
             Long totalElements = patientsInAreaRepository.countPatientsByAreaId(
                     areaId, searchKey
             );
@@ -91,32 +92,46 @@ public class PatientServiceInArea {
         );
     }
 
-    public ResponseEntity<List<PatientJoinArea>> getInsuranceList(
+    public ResponseEntity<HashMap> getInsuranceList(
             ObjectId userId, ObjectId areaId,
-            Boolean justHasInsurance, Boolean justHasNotInsurance
+            Boolean justHasInsurance, Boolean justHasNotInsurance,
+            Integer pageIndex, Integer pageSize,
+            String key, boolean needTotalElements
     ) {
+        if (justHasInsurance == null)
+            justHasInsurance = false;
+
+        if (justHasNotInsurance == null)
+            justHasNotInsurance = false;
+
+        if (!justHasInsurance && !justHasNotInsurance) throw new InvalidFieldsException("incorrect filter");
+
         Trip trip = tripRepository.findActiveByAreaIdAndInsurancerId(areaId, userId, Utility.getCurrLocalDateTime())
                 .orElseThrow(NotAccessException::new);
 
         findStartedArea(trip, areaId);
-        List<PatientJoinArea> areaPatients = patientsInAreaRepository.findPatientsByAreaId(areaId);
-        if ((justHasInsurance == null || !justHasInsurance) &&
-                (justHasNotInsurance == null || !justHasNotInsurance))
-            return new ResponseEntity<>(areaPatients, HttpStatus.OK);
+        List<PatientJoinArea> patientsInArea;
 
-        List<PatientJoinArea> output = new ArrayList<>();
-        for (PatientJoinArea itr : areaPatients) {
+        if (justHasInsurance)
+            patientsInArea = patientsInAreaRepository.findPatientsHasInsuranceByAreaId(areaId, pageIndex * pageSize, pageSize, key);
+        else
+            patientsInArea = patientsInAreaRepository.findPatientsNotHasInsuranceByAreaId(areaId, pageIndex * pageSize, pageSize, key);
 
-            if (justHasInsurance != null && justHasInsurance && itr.getPatientInfo().getInsurance().equals(Insurance.NONE))
-                continue;
+        HashMap<String, Object> hashMap = new HashMap<>();
+        hashMap.put("patients", patientsInArea);
 
-            if (justHasNotInsurance != null && justHasNotInsurance && !itr.getPatientInfo().getInsurance().equals(Insurance.NONE))
-                continue;
-
-            output.add(itr);
+        if (needTotalElements) {
+            Long totalSize = justHasInsurance
+                    ? patientsInAreaRepository.countPatientsHasInsuranceByAreaId(
+                            areaId, key
+                    ) :
+                    patientsInAreaRepository.countPatientsNotHasInsuranceByAreaId(
+                            areaId, key
+                    );
+            hashMap.put("totalElements", totalSize == null ? 0 : totalSize);
         }
 
-        return new ResponseEntity<>(output, HttpStatus.OK);
+        return new ResponseEntity<>(hashMap, HttpStatus.OK);
     }
 
     public ResponseEntity<HashMap> getTrainList(
@@ -126,22 +141,22 @@ public class PatientServiceInArea {
             Integer pageIndex, Integer pageSize,
             String key, boolean needTotalElements
     ) {
-        if(justTrained == null)
+        if (justTrained == null)
             justTrained = false;
 
-        if(justNotTrained == null)
+        if (justNotTrained == null)
             justNotTrained = false;
 
-        if(justAdult == null)
+        if (justAdult == null)
             justAdult = false;
 
-        if(justChildren == null)
+        if (justChildren == null)
             justChildren = false;
 
-        if(!justAdult && !justChildren)
+        if (!justAdult && !justChildren)
             throw new InvalidFieldsException("لطفا فیلتر سن را وارد نمایید");
 
-        if(!justTrained && !justNotTrained)
+        if (!justTrained && !justNotTrained)
             throw new InvalidFieldsException("لطفا فیلتر آموزش را وارد نمایید");
 
         Trip trip = tripRepository.findActiveByAreaIdAndResponsibleId(areaId, userId, Utility.getCurrLocalDateTime())
@@ -155,7 +170,7 @@ public class PatientServiceInArea {
         HashMap<String, Object> hashMap = new HashMap<>();
         hashMap.put("patients", patientsInArea);
 
-        if(needTotalElements) {
+        if (needTotalElements) {
             Long totalSize = patientsInAreaRepository.countPatientsByAreaIdByTrainStatusAndAgeType(
                     areaId, justTrained, justAdult ? "ADULT" : "CHILD", key
             );
@@ -272,6 +287,7 @@ public class PatientServiceInArea {
         );
     }
 
+    @Cacheable(cacheNames = "inquiryPatient", key = "#userId + '_' + #areaId + '_' + #patientData.identifier + '_' + #groupId")
     public ResponseEntity<Patient> inquiryPatient(
             ObjectId userId, ObjectId areaId,
             InquiryPatientData patientData,
@@ -607,13 +623,13 @@ public class PatientServiceInArea {
             int pageIndex, int pageSize,
             Boolean needTotalElements
     ) {
-        if(justRecepted == null)
+        if (justRecepted == null)
             justRecepted = false;
 
-        if(justUnRecepted == null)
+        if (justUnRecepted == null)
             justUnRecepted = false;
 
-        if(!justRecepted && !justUnRecepted)
+        if (!justRecepted && !justUnRecepted)
             throw new InvalidFieldsException("لطفا فیلتر پذیرش را وارد نمایید");
 
         Trip trip = tripRepository.findByAreaIdAndResponsibleIdAndModuleId(
@@ -636,30 +652,27 @@ public class PatientServiceInArea {
             patients = patientsInAreaRepository.findReceptedPatientsListInModuleByAreaId(
                     areaId, moduleId, pageIndex * pageSize, pageSize, search
             );
-            if(needTotalElements) {
-                if(search == null) {
+            if (needTotalElements) {
+                if (search == null) {
                     totalElements = patientsInAreaRepository.countReceptedPatientsInModuleByAreaId(
                             areaId, moduleId
                     );
-                }
-                else {
+                } else {
                     totalElements = patientsInAreaRepository.countReceptedPatientsInModuleByAreaId(
                             areaId, moduleId, search
                     );
                 }
             }
-        }
-        else {
+        } else {
             patients = patientsInAreaRepository.findUnReceptedPatientsListInModuleByAreaId(
                     areaId, moduleId, pageIndex * pageSize, pageSize, search
             );
-            if(needTotalElements) {
-                if(search == null) {
+            if (needTotalElements) {
+                if (search == null) {
                     totalElements = patientsInAreaRepository.countUnReceptedPatientsInModuleByAreaId(
                             areaId, moduleId
                     );
-                }
-                else {
+                } else {
                     totalElements = patientsInAreaRepository.countUnReceptedPatientsInModuleByAreaId(
                             areaId, moduleId, search
                     );

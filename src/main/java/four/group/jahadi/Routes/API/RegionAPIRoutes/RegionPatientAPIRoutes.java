@@ -194,14 +194,19 @@ public class RegionPatientAPIRoutes extends Router {
     @Operation(
             summary = "گرفتن لبستی از بیماران موجود در منطقه مدنظر توسط مسئول بیمه"
     )
-    public ResponseEntity<List<PatientJoinArea>> getInsuranceList(
+    public ResponseEntity<HashMap> getInsuranceList(
             HttpServletRequest request,
             @PathVariable @ObjectIdConstraint ObjectId areaId,
             @RequestParam(required = false, value = "justHasInsurance") Boolean justHasInsurance,
-            @RequestParam(required = false, value = "justHasNotInsurance") Boolean justHasNotInsurance
+            @RequestParam(required = false, value = "justHasNotInsurance") Boolean justHasNotInsurance,
+            @RequestParam(value = "pageIndex") @NotNull @Min(0) @Max(10000) Integer pageIndex,
+            @RequestParam(value = "pageSize") @NotNull @Min(5) @Max(100) Integer pageSize,
+            @RequestParam(required = false, value = "search") @Size(min = 3) String key,
+            @RequestParam(value = "needTotalElements") @NotNull boolean needTotalElements
     ) {
         return patientServiceInArea.getInsuranceList(
-                getId(request), areaId, justHasInsurance, justHasNotInsurance
+                getId(request), areaId, justHasInsurance, justHasNotInsurance,
+                pageIndex, pageSize, key, needTotalElements
         );
     }
 

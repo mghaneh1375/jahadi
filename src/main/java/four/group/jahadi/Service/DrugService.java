@@ -21,6 +21,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -443,6 +444,7 @@ public class DrugService extends AbstractService<Drug, DrugData> {
         return new ResponseEntity<>(DrugType.values(), HttpStatus.OK);
     }
 
+    @Cacheable(cacheNames = "drugAmountOfUseOptions")
     public ResponseEntity<List<PairValue>> getDrugAmountOfUseOptions() {
         return new ResponseEntity<>(
                 Arrays.stream(AmountOfUse.values())
@@ -451,7 +453,7 @@ public class DrugService extends AbstractService<Drug, DrugData> {
                 HttpStatus.OK
         );
     }
-
+    @Cacheable(cacheNames = "drugHowToUseOptions")
     public ResponseEntity<List<PairValue>> getDrugHowToUseOptions() {
         return new ResponseEntity<>(
                 Arrays.stream(HowToUse.values())
@@ -461,6 +463,7 @@ public class DrugService extends AbstractService<Drug, DrugData> {
         );
     }
 
+    @Cacheable(cacheNames = "drugUseTimeOptions")
     public ResponseEntity<List<PairValue>> getDrugUseTimeOptions() {
         return new ResponseEntity<>(
                 Arrays.stream(UseTime.values())

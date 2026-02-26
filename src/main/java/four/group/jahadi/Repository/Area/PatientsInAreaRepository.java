@@ -61,6 +61,71 @@ public interface PatientsInAreaRepository extends MongoRepository<PatientsInArea
 
     @Aggregation(pipeline = {
             "{$match: {areaId: ?0}}",
+            "{$lookup: {from: 'patient', let: {patientId: '$patient_id'}, " +
+                    "pipeline: [{$match: {$expr: {$and: [{$eq: ['$_id', '$$patientId']}, " +
+                    "{$ne: ['$insurance', 'NONE']}]}}}], as: 'patientInfo'}}",
+            "{$unset: 'patientInfo.created_at'}",
+            "{$unwind: '$patientInfo'}",
+            "{$match: {$expr: {$or: [{$or: [{$eq: [?3, null]}, {$regexMatch: {input: '$patientInfo.name', regex: ?3, options: 'i'}}]}, {$or: [{$eq: [?3, null]}, {$regexMatch: {input: '$patientInfo.identifier', regex: ?3, options: 'i'}}]}, {$or: [{$eq: [?3, null]}, {$regexMatch: {input: '$patientInfo.phone', regex: ?3, options: 'i'}}]}, {$or: [{$eq: [?3, null]}, {$regexMatch: {input: '$patientInfo.patient_no', regex: ?3, options: 'i'}}]}]}}}",
+            "{$unwind: '$created_at'}",
+            "{$sort: {'createdAt': -1}}",
+            "{$skip: ?1}",
+            "{$limit: ?2}",
+            "{$unwind: {'path': '$trained', 'preserveNullAndEmptyArrays': true}}",
+            "{$project: {'patientInfo': '$patientInfo', 'created_at': '$created_at', 'trained': '$trained'}}",
+    })
+    List<PatientJoinArea> findPatientsHasInsuranceByAreaId(
+            ObjectId areaId,
+            int skip, int limit, String key
+    );
+
+    @Aggregation(pipeline = {
+            "{$match: {areaId: ?0}}",
+            "{$lookup: {from: 'patient', let: {patientId: '$patient_id'}, " +
+                    "pipeline: [{$match: {$expr: {$and: [{$eq: ['$_id', '$$patientId']}, " +
+                    "{$ne: ['$insurance', 'NONE']}]}}}], as: 'patientInfo'}}",
+            "{$unwind: '$patientInfo'}",
+            "{$match: {$expr: {$or: [{$or: [{$eq: [?1, null]}, {$regexMatch: {input: '$patientInfo.name', regex: ?1, options: 'i'}}]}, {$or: [{$eq: [?1, null]}, {$regexMatch: {input: '$patientInfo.identifier', regex: ?1, options: 'i'}}]}, {$or: [{$eq: [?1, null]}, {$regexMatch: {input: '$patientInfo.phone', regex: ?1, options: 'i'}}]}, {$or: [{$eq: [?1, null]}, {$regexMatch: {input: '$patientInfo.patient_no', regex: ?1, options: 'i'}}]}]}}}",
+            "{$count: 'total'}"
+    })
+    Long countPatientsHasInsuranceByAreaId(
+            ObjectId areaId, String key
+    );
+    @Aggregation(pipeline = {
+            "{$match: {areaId: ?0}}",
+            "{$lookup: {from: 'patient', let: {patientId: '$patient_id'}, " +
+                    "pipeline: [{$match: {$expr: {$and: [{$eq: ['$_id', '$$patientId']}, " +
+                    "{$eq: ['$insurance', 'NONE']}]}}}], as: 'patientInfo'}}",
+            "{$unset: 'patientInfo.created_at'}",
+            "{$unwind: '$patientInfo'}",
+            "{$match: {$expr: {$or: [{$or: [{$eq: [?3, null]}, {$regexMatch: {input: '$patientInfo.name', regex: ?3, options: 'i'}}]}, {$or: [{$eq: [?3, null]}, {$regexMatch: {input: '$patientInfo.identifier', regex: ?3, options: 'i'}}]}, {$or: [{$eq: [?3, null]}, {$regexMatch: {input: '$patientInfo.phone', regex: ?3, options: 'i'}}]}, {$or: [{$eq: [?3, null]}, {$regexMatch: {input: '$patientInfo.patient_no', regex: ?3, options: 'i'}}]}]}}}",
+            "{$unwind: '$created_at'}",
+            "{$sort: {'createdAt': -1}}",
+            "{$skip: ?1}",
+            "{$limit: ?2}",
+            "{$unwind: {'path': '$trained', 'preserveNullAndEmptyArrays': true}}",
+            "{$project: {'patientInfo': '$patientInfo', 'created_at': '$created_at', 'trained': '$trained'}}",
+    })
+    List<PatientJoinArea> findPatientsNotHasInsuranceByAreaId(
+            ObjectId areaId,
+            int skip, int limit, String key
+    );
+
+    @Aggregation(pipeline = {
+            "{$match: {areaId: ?0}}",
+            "{$lookup: {from: 'patient', let: {patientId: '$patient_id'}, " +
+                    "pipeline: [{$match: {$expr: {$and: [{$eq: ['$_id', '$$patientId']}, " +
+                    "{$eq: ['$insurance', 'NONE']}]}}}], as: 'patientInfo'}}",
+            "{$unwind: '$patientInfo'}",
+            "{$match: {$expr: {$or: [{$or: [{$eq: [?1, null]}, {$regexMatch: {input: '$patientInfo.name', regex: ?1, options: 'i'}}]}, {$or: [{$eq: [?1, null]}, {$regexMatch: {input: '$patientInfo.identifier', regex: ?1, options: 'i'}}]}, {$or: [{$eq: [?1, null]}, {$regexMatch: {input: '$patientInfo.phone', regex: ?1, options: 'i'}}]}, {$or: [{$eq: [?1, null]}, {$regexMatch: {input: '$patientInfo.patient_no', regex: ?1, options: 'i'}}]}]}}}",
+            "{$count: 'total'}"
+    })
+    Long countPatientsNotHasInsuranceByAreaId(
+            ObjectId areaId, String key
+    );
+
+    @Aggregation(pipeline = {
+            "{$match: {areaId: ?0}}",
             "{$lookup: {from: 'patient', localField: 'patient_id', foreignField: '_id', as: 'patientInfo'}}",
             "{$unset: 'patientInfo.created_at'}",
             "{$unwind: '$patientInfo'}",

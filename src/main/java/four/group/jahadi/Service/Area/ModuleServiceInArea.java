@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -44,7 +45,10 @@ public class ModuleServiceInArea {
     @Autowired
     private CacheService cacheService;
 
-    @CacheEvict(value = "modules", allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(value = "modules", allEntries = true),
+            @CacheEvict(value = "tabs", allEntries = true)
+    })
     public void setModules(ObjectId userId, ObjectId areaId, List<ObjectId> moduleIds) {
 
         Trip wantedTrip = tripRepository.findByAreaIdAndOwnerId(areaId, userId)
@@ -83,7 +87,10 @@ public class ModuleServiceInArea {
         tripRepository.save(wantedTrip);
     }
 
-    @CacheEvict(value = "modules", allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(value = "modules", allEntries = true),
+            @CacheEvict(value = "tabs", allEntries = true)
+    })
     public void removeModule(ObjectId userId, ObjectId areaId, List<ObjectId> moduleIds) {
 
         Trip wantedTrip = tripRepository.findByAreaIdAndOwnerId(areaId, userId)
@@ -217,6 +224,7 @@ public class ModuleServiceInArea {
         return new ResponseEntity<>(modules, HttpStatus.OK);
     }
 
+    @Cacheable(cacheNames = "tabs", key = "#userId + '_' + #areaId + '_' + #groupId")
     public ResponseEntity<Map<String, String>> tabs(ObjectId userId, ObjectId areaId, ObjectId groupId) {
         Trip trip;
         if (groupId != null)
@@ -259,23 +267,24 @@ public class ModuleServiceInArea {
         return new ResponseEntity<>(module, HttpStatus.OK);
     }
 
+    @Cacheable(cacheNames = "subModule", key = "#moduleId + '_' + #subModuleId")
     public ResponseEntity<SubModule> getSubModule(
             ObjectId userId, ObjectId areaId,
             ObjectId moduleId, ObjectId subModuleId,
             ObjectId patientId
     ) {
-        Trip trip = tripRepository.findByAreaIdAndResponsibleIdAndModuleId(
-                areaId, userId, moduleId
-        ).orElseThrow(NotAccessException::new);
-
-        Area area = AreaUtils.findStartedArea(trip, areaId);
-        AreaUtils.findModule(
-                area, moduleId,
-                null, null
-//              todo:
-//                userId.equals(area.getOwnerId()) ? null : userId,
-//                userId.equals(area.getOwnerId()) ? null : userId
-        );
+//        Trip trip = tripRepository.findByAreaIdAndResponsibleIdAndModuleId(
+//                areaId, userId, moduleId
+//        ).orElseThrow(NotAccessException::new);
+//
+//        Area area = AreaUtils.findStartedArea(trip, areaId);
+//        AreaUtils.findModule(
+//                area, moduleId,
+//                null, null
+////              todo:
+////                userId.equals(area.getOwnerId()) ? null : userId,
+////                userId.equals(area.getOwnerId()) ? null : userId
+//        );
 
         Module module = moduleRepository.findById(moduleId).orElseThrow(UnknownError::new);
         SubModule wantedSubModule = module.getSubModules().stream().filter(subModule -> Objects.equals(subModule.getId(), subModuleId)).findFirst()
@@ -323,7 +332,10 @@ public class ModuleServiceInArea {
         return new Object[]{wantedTrip, area};
     }
 
-    @CacheEvict(value = "modules", allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(value = "modules", allEntries = true),
+            @CacheEvict(value = "tabs", allEntries = true)
+    })
     public synchronized void setMembersToModule(
             ObjectId userId, ObjectId areaId,
             ObjectId moduleIdInArea, List<ObjectId> userIds
@@ -340,7 +352,10 @@ public class ModuleServiceInArea {
         tripRepository.save(wantedTrip);
     }
 
-    @CacheEvict(value = "modules", allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(value = "modules", allEntries = true),
+            @CacheEvict(value = "tabs", allEntries = true)
+    })
     public void removeMemberFromModule(ObjectId userId, ObjectId areaId,
                                        ObjectId moduleIdInArea, ObjectId wantedUserId) {
 
@@ -364,7 +379,10 @@ public class ModuleServiceInArea {
     }
 
 
-    @CacheEvict(value = "modules", allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(value = "modules", allEntries = true),
+            @CacheEvict(value = "tabs", allEntries = true)
+    })
     public synchronized void addSecretariesToModule(ObjectId userId, ObjectId areaId,
                                                     ObjectId moduleIdInArea, List<ObjectId> userIds) {
 
@@ -386,7 +404,10 @@ public class ModuleServiceInArea {
         tripRepository.save(wantedTrip);
     }
 
-    @CacheEvict(value = "modules", allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(value = "modules", allEntries = true),
+            @CacheEvict(value = "tabs", allEntries = true)
+    })
     public void removeMemberFromSecretaries(ObjectId userId, ObjectId areaId,
                                             ObjectId moduleIdInArea, ObjectId wantedUserId) {
 
