@@ -1,5 +1,8 @@
 package four.group.jahadi.Repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
@@ -19,6 +22,7 @@ public interface FilterableRepository<T> {
 
     // this method is used to get a page of results from the database with filtering
     List<T> findAllWithFilter(Class<T> typeParameterClass, Filtering filtering);
+    Page<T> findAllWithFilterWithPagination(Class<T> typeParameterClass, Filtering filtering, Pageable pageable, Sort sort);
 
     default Query constructQueryFromFiltering(Filtering filtering) {
         Query query = new Query();

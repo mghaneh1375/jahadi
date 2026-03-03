@@ -7,35 +7,34 @@ import four.group.jahadi.Exception.NotActivateAccountException;
 import four.group.jahadi.Exception.UnAuthException;
 import four.group.jahadi.Models.Equipment;
 import four.group.jahadi.Models.TokenInfo;
-import four.group.jahadi.Repository.UserRepository;
 import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Service.EquipmentService;
 import four.group.jahadi.Service.EquipmentServiceInArea;
 import four.group.jahadi.Utility.ValidList;
 import four.group.jahadi.Validator.ObjectIdConstraint;
 import io.swagger.v3.oas.annotations.Operation;
+import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @RestController
 @RequestMapping(path = "/api/jahadgar/equipment")
 @Validated
+@RequiredArgsConstructor
 public class JahadgarEquipmentAPIRoutes extends Router {
-    @Autowired
-    private EquipmentServiceInArea equipmentServiceInArea;
-    @Autowired
-    private EquipmentService equipmentService;
-    @Autowired
-    private UserRepository userRepository;
+    private final EquipmentServiceInArea equipmentServiceInArea;
+    private final EquipmentService equipmentService;
 
     @PutMapping(value = "addAllEquipmentsToArea/{areaId}")
     @Operation(summary = "افزودن یک یا چند تجهیز به منطقه توسط مسئول گروه")
@@ -79,8 +78,10 @@ public class JahadgarEquipmentAPIRoutes extends Router {
 
     @GetMapping(value = "list")
     @ResponseBody
-    public ResponseEntity<List<Equipment>> list(
+    public ResponseEntity<Page<Equipment>> list(
             HttpServletRequest request,
+            @RequestParam(name = "pageIndex") @NotNull @Min(0) @Max(10000) Integer pageIndex,
+            @RequestParam(name = "pageSize") @NotNull @Min(5) @Max(100) Integer pageSize,
             @RequestParam(required = false, value = "name") String name,
             @RequestParam(required = false, value = "minAvailable") Integer minAvailable,
             @RequestParam(required = false, value = "maxAvailable") Integer maxAvailable,
@@ -106,7 +107,8 @@ public class JahadgarEquipmentAPIRoutes extends Router {
             )
                 throw new NotAccessException();
         }
-        return equipmentService.list(
+        return equipmentService.paginateList(
+                pageIndex, pageSize,
                 fullTokenInfo.getGroupId(),
                 name, minAvailable, maxAvailable,
                 healthyStatus, propertyId, location, equipmentType,

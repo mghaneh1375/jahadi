@@ -16,6 +16,7 @@ import four.group.jahadi.Validator.ObjectIdConstraint;
 import io.swagger.v3.oas.annotations.Operation;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +26,6 @@ import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Size;
-import java.util.List;
 
 @RestController
 @RequestMapping(value = "/api/admin/project")
@@ -94,10 +94,13 @@ public class ProjectAPIRoutes extends Router {
 
     @GetMapping(value = "/list")
     @ResponseBody
-    public ResponseEntity<List<Project>> list(@RequestParam(value = "name", required = false) String name,
-                                              @RequestParam(value = "status", required = false) Status status
+    public ResponseEntity<Page<Project>> list(
+            @RequestParam(value = "name", required = false) String name,
+            @RequestParam(value = "status", required = false) Status status,
+            @RequestParam(value = "pageIndex") @Min(0) Integer pageIndex,
+            @RequestParam(value = "pageSize") @Min(5) Integer pageSize
     ) {
-        return projectService.list(name, status);
+        return projectService.paginateList(pageIndex, pageSize, name, status);
     }
 
     @GetMapping(value = "/get/{id}")

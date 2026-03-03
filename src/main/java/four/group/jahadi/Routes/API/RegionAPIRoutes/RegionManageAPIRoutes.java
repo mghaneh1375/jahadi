@@ -72,8 +72,8 @@ public class RegionManageAPIRoutes extends Router {
         return areaService.getGroupTrips(
                 tokenInfo.getAccesses().contains(Access.GROUP)
                         ? null
-                        : tokenInfo.getUserId()
-                , tokenInfo.getGroupId(), tripStatus
+                        : tokenInfo.getUserId(),
+                tokenInfo.getGroupId(), tripStatus
         );
     }
 

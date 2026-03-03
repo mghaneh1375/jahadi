@@ -1,6 +1,7 @@
 package four.group.jahadi.Routes.API.GroupAPIRoutes;
 
 import four.group.jahadi.DTO.AdminSignInData;
+import four.group.jahadi.DTO.UserDigest;
 import four.group.jahadi.DTO.WareHouseAccessForGroupData;
 import four.group.jahadi.Enums.AccountStatus;
 import four.group.jahadi.Enums.Sex;
@@ -16,39 +17,48 @@ import four.group.jahadi.Service.WareHouseAccessService;
 import four.group.jahadi.Validator.EnumValidator;
 import four.group.jahadi.Validator.ObjectIdConstraint;
 import io.swagger.v3.oas.annotations.Operation;
+import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @RestController
 @RequestMapping(value = "api/group/user")
 @Validated
+@RequiredArgsConstructor
 public class GroupUserAPIRoutes extends Router {
 
-    @Autowired
-    private UserService userService;
-    @Autowired
-    private WareHouseAccessService wareHouseAccessService;
-    @Autowired
-    private ExternalReferralAccessForGroupService externalReferralAccessForGroupService;
+    private final UserService userService;
+    private final WareHouseAccessService wareHouseAccessService;
+    private final ExternalReferralAccessForGroupService externalReferralAccessForGroupService;
 
     @GetMapping(value = "list")
     @ResponseBody
     @Operation(summary = "گرفتن لیست کاربران یک گروه توسط مسئول آن گروه")
-    public ResponseEntity<List<User>> list(
+    public ResponseEntity<Page<User>> list(
             HttpServletRequest request,
             @RequestParam(required = false, value = "sex") Sex sex,
             @RequestParam(required = false, value = "NID") String NID,
             @RequestParam(required = false, value = "phone") String phone,
-            @RequestParam(required = false, value = "name") String name
+            @RequestParam(required = false, value = "name") String name,
+            @RequestParam(required = false, value = "searchKey") String searchKey,
+            @RequestParam(value = "pageIndex") @NotNull @Min(0) @Max(1000) Integer pageIndex,
+            @RequestParam(value = "pageSize") @NotNull @Min(5) @Max(1000) Integer pageSize
     ) throws UnAuthException, NotActivateAccountException {
-        return userService.list(null, null, name, NID, phone, sex, null, getGroup(request), null);
+        return userService.paginateList(
+                pageIndex, pageSize,
+                AccountStatus.ACTIVE, null, name, NID, phone, sex,
+                null, getGroup(request), null, searchKey
+        );
     }
 
     @PutMapping(value = "changeStatus/{userId}/{status}")
@@ -153,5 +163,11 @@ public class GroupUserAPIRoutes extends Router {
         return externalReferralAccessForGroupService.store(
                 userId, getGroup(request)
         );
+    }
+
+    @GetMapping(value = "findGroupActiveMembersName")
+    @ResponseBody
+    public ResponseEntity<List<UserDigest>> findGroupActiveMembersName(HttpServletRequest request) {
+        return userService.findGroupActiveMembersName(getGroup(request));
     }
 }

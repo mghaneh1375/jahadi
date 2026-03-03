@@ -11,6 +11,9 @@ import four.group.jahadi.Repository.*;
 import four.group.jahadi.Utility.Utility;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -42,9 +45,12 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
     // 2- status
     @Override
     public ResponseEntity<List<Project>> list(Object... filters) {
+        return null;
+    }
 
+    @Override
+    public ResponseEntity<Page<Project>> paginateList(int pageIndex, int pageSize, Object... filters) {
         List<List<Object>> filtersList = new ArrayList<>();
-
         if (filters[0] != null)
             filtersList.add(new ArrayList<>() {
                 {
@@ -55,7 +61,6 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
             });
 
         LocalDateTime today = Utility.getCurrLocalDateTime();
-
         if (filters[1] != null) {
 
             if (Objects.equals(filters[1], Status.IN_PROGRESS)) {
@@ -84,31 +89,20 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
             }
         }
 
-        if (filters.length > 3 && filters[3] != null) {
-            List<String> groupIds = groupRepository.findByUserId((ObjectId) filters[3]).stream().map(Group::getId)
-                    .map(ObjectId::toString).collect(Collectors.toList());
-            filtersList.add(new ArrayList<>() {
-                {
-                    add("groupIds");
-                    add("in");
-                    add(String.join(";", groupIds));
-                }
-            });
-        }
-
-        List<Project> projects = projectRepository.findAllWithFilter(Project.class,
-                FilteringFactory.abstractParseFromParams(filtersList, Project.class)
+        Page<Project> projects = projectRepository.findAllWithFilterWithPagination(
+                Project.class,
+                FilteringFactory.abstractParseFromParams(filtersList, Project.class),
+                Pageable.ofSize(pageSize).withPage(pageIndex),
+                Sort.by("start_at").descending()
         );
 
         projects.forEach(x -> x.setGroups(new ArrayList<>()));
-
         List<Group> groups = groupRepository.findByIdsIn(projects.stream()
                 .map(Project::getGroupIds).collect(Collectors.toList())
                 .stream().flatMap(List::stream).distinct().collect(Collectors.toList())
         );
 
         List<User> users = userRepository.findByIdsIn(groups.stream().map(Group::getOwner).distinct().collect(Collectors.toList()));
-
         groups.forEach(group ->
                 users.stream().filter(user -> user.getId().equals(group.getOwner())).findFirst()
                         .ifPresent(group::setUser)
@@ -124,7 +118,6 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
                 project.getGroups().add(group);
             }
         });
-
         return new ResponseEntity<>(projects, HttpStatus.OK);
     }
 
@@ -248,7 +241,6 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
     }
 
     public List<Project> myProjectsNeedAction(ObjectId groupId) {
-
         List<Project> projects =
                 projectRepository.findByOwner(Collections.singletonList(groupId));
         List<Project> result = new ArrayList<>();
@@ -261,7 +253,6 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
                 return;
 
             List<ObjectId> ids = new ArrayList<>();
-
             for (Trip trip : trips) {
                 if (trip.getGroupsWithAccess().stream().noneMatch(groupAccess ->
                         groupAccess.getWriteAccess() && groupAccess.getGroupId().equals(groupId)

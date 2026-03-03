@@ -5,8 +5,6 @@ import four.group.jahadi.DTO.SignUp.PasswordData;
 import four.group.jahadi.Enums.Access;
 import four.group.jahadi.Enums.AccountStatus;
 import four.group.jahadi.Enums.Sex;
-import four.group.jahadi.Exception.NotActivateAccountException;
-import four.group.jahadi.Exception.UnAuthException;
 import four.group.jahadi.Models.User;
 import four.group.jahadi.Service.UserService;
 import four.group.jahadi.Validator.EnumValidator;
@@ -14,6 +12,7 @@ import four.group.jahadi.Validator.ObjectIdConstraint;
 import io.swagger.v3.oas.annotations.Operation;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
-import java.util.List;
+import javax.validation.constraints.NotNull;
 
 @RestController
 @RequestMapping(value = "api/admin/user")
@@ -51,7 +50,7 @@ public class AdminUserAPIRoutes {
 
     @GetMapping(value = "list")
     @ResponseBody
-    public ResponseEntity<List<User>> list(
+    public ResponseEntity<Page<User>> list(
             @RequestParam(required = false, value = "status") AccountStatus status,
             @RequestParam(required = false, value = "access") Access access,
             @RequestParam(required = false, value = "sex") Sex sex,
@@ -59,9 +58,17 @@ public class AdminUserAPIRoutes {
             @RequestParam(required = false, value = "phone") String phone,
             @RequestParam(required = false, value = "name") String name,
             @RequestParam(required = false, value = "justGroupRequests") Boolean justGroupRequests,
-            @RequestParam(required = false, value = "groupName") String groupName
+            @RequestParam(required = false, value = "groupName") String groupName,
+            @RequestParam(required = false, value = "searchKey") String searchKey,
+            @RequestParam(value = "pageIndex") @NotNull @Min(0) @Max(1000) Integer pageIndex,
+            @RequestParam(value = "pageSize") @NotNull @Min(5) @Max(1000) Integer pageSize
     ) {
-        return userService.list(status, access, name, NID, phone, sex, groupName, null, justGroupRequests);
+        return userService.paginateList(
+                pageIndex, pageSize,
+                status, access, name,
+                NID, phone, sex, groupName,
+                null, justGroupRequests, searchKey
+        );
     }
 
     @GetMapping(value = "get/{userId}")

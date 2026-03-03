@@ -12,22 +12,19 @@ import four.group.jahadi.Models.DrugLog;
 import four.group.jahadi.Models.DrugLogJoinModel;
 import four.group.jahadi.Repository.Area.PatientsDrugRepository;
 import four.group.jahadi.Repository.*;
+import four.group.jahadi.Repository.impl.DrugCustomRepositoryImpl;
 import four.group.jahadi.Service.Area.ReportUtil;
 import four.group.jahadi.Utility.PairValue;
+import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.bson.types.ObjectId;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -45,33 +42,26 @@ import static four.group.jahadi.Utility.Utility.isCellDateFormatted;
 
 
 @Service
+@RequiredArgsConstructor
 public class DrugService extends AbstractService<Drug, DrugData> {
 
-    @Autowired
-    private DrugRepository drugRepository;
-    @Autowired
-    private DrugLogRepository drugLogRepository;
-    @Autowired
-    private DrugBookmarkRepository drugBookmarkRepository;
-    @Autowired
-    private WareHouseAccessForGroupRepository wareHouseAccessForGroupRepository;
-    @Autowired
-    private GroupRepository groupRepository;
-    @Autowired
-    private DrugsInAreaRepository drugsInAreaRepository;
-    @Autowired
-    private PatientsDrugRepository patientsDrugRepository;
-    @Autowired
-    MongoTemplate mongoTemplate;
+    private final DrugRepository drugRepository;
+    private final DrugLogRepository drugLogRepository;
+    private final DrugBookmarkRepository drugBookmarkRepository;
+    private final WareHouseAccessForGroupRepository wareHouseAccessForGroupRepository;
+    private final GroupRepository groupRepository;
+    private final DrugsInAreaRepository drugsInAreaRepository;
+    private final PatientsDrugRepository patientsDrugRepository;
+    private final DrugCustomRepositoryImpl drugCustomRepositoryImpl;
 
     public ResponseEntity<List<Drug>> search(String name) {
         try {
             return new ResponseEntity<>(
-                    drugRepository.findByFilters(
+                    drugCustomRepositoryImpl.findDrugsAdvanced(
                             null, name, null, null,
                             null, null, null, null,
                             null, null, Pageable.ofSize(Integer.MAX_VALUE).withPage(0)
-                    ),
+                    ).getContent(),
                     HttpStatus.OK
             );
         } catch (Exception x) {
@@ -81,7 +71,7 @@ public class DrugService extends AbstractService<Drug, DrugData> {
 
 
     @Override
-    public ResponseEntity<PageImpl<Drug>> paginateList(Object... filters) {
+    public ResponseEntity<Page<Drug>> paginateList(int pageIndex, int pageSize, Object... filters) {
         ObjectId groupId = (ObjectId) filters[0];
         try {
             String name = filters.length > 1 ? (String) filters[1] : null;
@@ -93,24 +83,16 @@ public class DrugService extends AbstractService<Drug, DrugData> {
             LocalDateTime toExpireAt = filters.length > 7 ? (LocalDateTime) filters[7] : null;
             String boxNo = filters.length > 8 ? (String) filters[8] : null;
             String shelfNo = filters.length > 9 ? (String) filters[9] : null;
-            Integer pageIndex = (Integer) filters[10];
-            Integer pageSize = (Integer) filters[11];
             Pageable pageable = Pageable.ofSize(pageSize).withPage(pageIndex);
 
-            List<Drug> drugs = drugRepository.findByFilters(
+            Page<Drug> drugs = drugCustomRepositoryImpl.findDrugsAdvanced(
                     groupId, name, minAvailableCount, maxAvailableCount,
                     drugLocation, drugType, fromExpireAt, toExpireAt,
                     boxNo, shelfNo, pageable
             );
-            long total = drugRepository.countWithFilters(
-                    groupId, name, minAvailableCount, maxAvailableCount,
-                    drugLocation, drugType, fromExpireAt, toExpireAt,
-                    boxNo, shelfNo
-            );
-            PageImpl<Drug> drugPage = new PageImpl<>(drugs, pageable, total);
 
             return new ResponseEntity<>(
-                    drugPage,
+                    drugs,
                     HttpStatus.OK
             );
         } catch (Exception x) {
@@ -257,11 +239,7 @@ public class DrugService extends AbstractService<Drug, DrugData> {
         )
             throw new NotAccessException();
 
-        Query query = new Query(Criteria.where("_id").is(id));
-        query.addCriteria(Criteria.where("group_id").is(groupId));
-        Update update = new Update().set("deleted_at", new Date());
-
-        mongoTemplate.updateFirst(query, update, Drug.class);
+        drugCustomRepositoryImpl.archive(id, groupId);
     }
 
     public void archiveAll(
@@ -273,11 +251,7 @@ public class DrugService extends AbstractService<Drug, DrugData> {
         )
             throw new NotAccessException();
 
-        Query query = new Query(Criteria.where("_id").in(ids));
-        query.addCriteria(Criteria.where("group_id").is(groupId));
-        Update update = new Update().set("deleted_at", new Date());
-
-        mongoTemplate.updateMulti(query, update, Drug.class);
+        drugCustomRepositoryImpl.archiveAll(ids, groupId);
     }
 //    public void removeAll(
 //            List<ObjectId> id, ObjectId userId,
@@ -545,7 +519,10 @@ public class DrugService extends AbstractService<Drug, DrugData> {
     }
 
     public void report(ObjectId groupId, HttpServletResponse response) {
-        List<DrugJoinModel> drugs = drugRepository.findAllByGroupId(groupId);
+        List<DrugJoinModel> drugs = groupId == null
+                ? drugRepository.findAllJoinByGroup()
+                : drugRepository.findAllByGroupId(groupId);
+
         Workbook workbook = ReportUtil.createWorkbook(drugReportHeaders);
         Sheet sheet = workbook.getSheetAt(0);
         AtomicInteger counter = new AtomicInteger(1);

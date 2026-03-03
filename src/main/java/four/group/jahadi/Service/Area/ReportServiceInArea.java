@@ -21,11 +21,11 @@ import four.group.jahadi.Repository.TripRepository;
 import four.group.jahadi.Repository.UserRepository;
 import four.group.jahadi.Service.ExcelService;
 import four.group.jahadi.Utility.Utility;
+import lombok.RequiredArgsConstructor;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.bson.types.ObjectId;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
@@ -42,22 +42,16 @@ import static four.group.jahadi.Service.Area.ReportUtil.prepareHttpServletRespon
 import static four.group.jahadi.Service.ExcelService.isMergedCell;
 
 @Service
+@RequiredArgsConstructor
 public class ReportServiceInArea {
 
-    @Autowired
-    private TripRepository tripRepository;
-    @Autowired
-    private ModuleRepository moduleRepository;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private PatientsInAreaRepository patientsInAreaRepository;
-    @Autowired
-    private PatientsDrugRepository patientsDrugRepository;
-    @Autowired
-    private ExcelService excelService;
-    @Autowired
-    private PatientRepository patientRepository;
+    private final TripRepository tripRepository;
+    private final ModuleRepository moduleRepository;
+    private final UserRepository userRepository;
+    private final PatientsInAreaRepository patientsInAreaRepository;
+    private final PatientsDrugRepository patientsDrugRepository;
+    private final ExcelService excelService;
+    private final PatientRepository patientRepository;
 
     public void getPatientReport(
             Patient patient, Module module, Sheet sheet,
@@ -221,7 +215,8 @@ public class ReportServiceInArea {
 
     public void getModuleReport(
             ObjectId areaId, Module module,
-            Sheet sheet
+            Sheet sheet, List<PatientJoinArea> patientsJoinArea,
+            List<User> doctors
     ) {
         ObjectId moduleId = module.getId();
         HashMap<ObjectId, List<Question>> subModulesQuestions = new HashMap<>();
@@ -319,7 +314,7 @@ public class ReportServiceInArea {
         }
 
         Row firstRow = sheet.getRow(1);
-        String[] drugCols = new String[] {
+        String[] drugCols = new String[]{
                 "نام دارو تجویز شده",
                 "دُز دارو تجویز شده",
                 "تعداد دارو تجویز شده",
@@ -375,25 +370,9 @@ public class ReportServiceInArea {
             );
         }
 
-        List<PatientsInArea> patients = patientsInAreaRepository.findByAreaIdAndModuleId(areaId, moduleId);
-        if (patients.isEmpty())
+        if (patientsJoinArea.isEmpty())
             return;
 
-        Set<ObjectId> patientIds = new HashSet<>();
-        Set<ObjectId> doctorIds = new HashSet<>();
-        patients.forEach(patientsInArea -> {
-            patientIds.add(patientsInArea.getPatientId());
-            patientsInArea.getReferrals().forEach(patientReferral -> {
-                if (patientReferral.getForms() == null)
-                    return;
-                patientReferral
-                        .getForms()
-                        .forEach(patientForm -> doctorIds.add(patientForm.getDoctorId()));
-            });
-        });
-
-        List<Patient> patientsInfo = patientRepository.findExcelInfoByIdIn(new ArrayList<>(patientIds));
-        List<User> doctors = userRepository.findJustNameByIdsIn(new ArrayList<>(doctorIds));
 
         HashMap<ObjectId, Row> patientsRow = new HashMap<>();
         HashMap<ObjectId, ObjectId> pp = new HashMap<>();
@@ -401,8 +380,7 @@ public class ReportServiceInArea {
         subModuleIds.forEach(subModuleId -> {
             ReportUtil.addPatientRowForSpecificSubModule(
                     startIndicesHistory.get(subModuleId),
-                    patients,
-                    patientsInfo,
+                    patientsJoinArea,
                     sheet,
                     patientsRow,
                     doctors,
@@ -434,7 +412,7 @@ public class ReportServiceInArea {
 
     }
 
-    public void getReceptionReport(List<PatientsInArea> patients, Sheet sheet) {
+    public void getReceptionReport(List<PatientJoinArea> patients, Sheet sheet) {
         Row row = sheet.createRow(0);
         Workbook wb = row.getSheet().getWorkbook();
         CellStyle parentCellStyle = wb.createCellStyle();
@@ -445,7 +423,7 @@ public class ReportServiceInArea {
         parentCellStyle.setFont(font);
         LocalDate curr = LocalDate.now();
 
-        String[] headers = new String[] {
+        String[] headers = new String[]{
                 "نام بیمار", "نام پدر", "سن", "تاریخ تولد", "جنسیت",
                 "شماره همراه", "شناسه", "شغل", "شماره پرونده"
         };
@@ -457,8 +435,8 @@ public class ReportServiceInArea {
             c.setCellValue(header);
         }
         counter = 1;
-        for (PatientsInArea patientsInArea : patients) {
-            Patient patient = patientsInArea.getPatient();
+        for (PatientJoinArea patientsInArea : patients) {
+            Patient patient = patientsInArea.getPatientInfo();
             Row row1 = sheet.createRow(counter++);
             int index = 0;
 
@@ -474,7 +452,7 @@ public class ReportServiceInArea {
         }
     }
 
-    public void getChildTrainReport(List<PatientsInArea> patients, Sheet sheet) {
+    public void getChildTrainReport(List<PatientJoinArea> patients, Sheet sheet) {
         Row row = sheet.createRow(0);
         Workbook wb = row.getSheet().getWorkbook();
         CellStyle parentCellStyle = wb.createCellStyle();
@@ -485,7 +463,7 @@ public class ReportServiceInArea {
         parentCellStyle.setFont(font);
         LocalDate curr = LocalDate.now();
 
-        String[] headers = new String[] {
+        String[] headers = new String[]{
                 "نام بیمار", "نام پدر", "جنسیت",
                 "شماره همراه", "شناسه", "شماره پرونده",
                 "قد", "وزن", "BMI", "شپش", "بسته فرهنگی",
@@ -499,8 +477,8 @@ public class ReportServiceInArea {
             c.setCellValue(header);
         }
         counter = 1;
-        for (PatientsInArea patientInArea : patients) {
-            Patient patient = patientInArea.getPatient();
+        for (PatientJoinArea patientInArea : patients) {
+            Patient patient = patientInArea.getPatientInfo();
             Row row1 = sheet.createRow(counter++);
             int index = 0;
 
@@ -524,6 +502,8 @@ public class ReportServiceInArea {
             final ObjectId areaId, final ObjectId wantedModuleId,
             HttpServletResponse response
     ) {
+        System.out.println("############## START ###########");
+        long start = System.currentTimeMillis();
         Trip wantedTrip = userId_groupId == null ?
                 tripRepository.findByAreaId(areaId).orElseThrow(InvalidIdException::new)
                 : isGroupAccess
@@ -549,17 +529,8 @@ public class ReportServiceInArea {
                 ).collect(Collectors.toList())
         );
 
-        if(wantedModuleId == null) {
-            List<PatientsInArea> patientsInArea = patientsInAreaRepository.findByAreaId(areaId);
-            List<Patient> patients = patientRepository
-                    .findAllByIds(patientsInArea.stream().map(PatientsInArea::getPatientId).collect(Collectors.toList()));
-
-            patientsInArea.forEach(patientsInArea1 -> patients
-                    .stream()
-                    .filter(patient -> patient.getId().equals(patientsInArea1.getPatientId()))
-                    .findFirst()
-                    .ifPresent(patientsInArea1::setPatient));
-
+        List<PatientJoinArea> patientsInArea = patientsInAreaRepository.findPatientsByAreaId(areaId);
+        if (wantedModuleId == null) {
             for (String staticModule : staticModules) {
                 Sheet sheet = null;
                 for (int j = 0; j < workbook.getNumberOfSheets(); j++) {
@@ -577,7 +548,7 @@ public class ReportServiceInArea {
                             getChildTrainReport(
                                     patientsInArea
                                             .stream()
-                                            .filter(patient -> patient.getTrainForm() != null && patient.getPatient().getAgeType().equals(AgeType.CHILD))
+                                            .filter(patient -> patient.getTrainForm() != null && patient.getPatientInfo().getAgeType().equals(AgeType.CHILD))
                                             .collect(Collectors.toList()),
                                     sheet
                             );
@@ -586,6 +557,21 @@ public class ReportServiceInArea {
                 }
             }
         }
+
+
+        Set<ObjectId> doctorIds = new HashSet<>();
+        patientsInArea.forEach(patientJoinArea -> {
+            if(patientJoinArea.getReferrals() == null) return;
+            patientJoinArea.getReferrals().forEach(patientReferral -> {
+                if (patientReferral.getForms() == null)
+                    return;
+                patientReferral
+                        .getForms()
+                        .forEach(patientForm -> doctorIds.add(patientForm.getDoctorId()));
+            });
+        });
+
+        List<User> doctors = userRepository.findJustNameByIdsIn(new ArrayList<>(doctorIds));
 
         for (int z = 0; z < area.getModules().size(); z++) {
             ModuleInArea areaModule = area.getModules().get(z);
@@ -602,10 +588,21 @@ public class ReportServiceInArea {
                     }
                 }
                 if (sheet != null)
-                    getModuleReport(areaId, module, sheet);
+                    getModuleReport(
+                            areaId, module, sheet,
+                            patientsInArea.stream()
+                                    .filter(patientJoinArea -> patientJoinArea.getReferrals() != null &&
+                                            patientJoinArea.getReferrals()
+                                                    .stream()
+                                                    .anyMatch(patientReferral -> patientReferral.getModuleId().equals(module.getId())))
+                                    .collect(Collectors.toList()),
+                            doctors
+                    );
             });
         }
 
+        System.out.println((System.currentTimeMillis() - start) / 1000);
+        System.out.println("############## END ###########");
         prepareHttpServletResponse(response, workbook, "moduleReport");
     }
 

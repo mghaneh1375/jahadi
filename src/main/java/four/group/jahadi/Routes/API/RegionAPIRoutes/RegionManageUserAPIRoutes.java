@@ -8,11 +8,15 @@ import four.group.jahadi.Validator.ObjectIdConstraint;
 import io.swagger.v3.oas.annotations.Operation;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @RestController
@@ -30,9 +34,14 @@ public class RegionManageUserAPIRoutes extends Router {
     @GetMapping(value = "list")
     @ResponseBody
     @Operation(summary = "گرفتن اعضای گروه توسط مسئول منطقه")
-    public ResponseEntity<List<User>> getList(HttpServletRequest request) {
+    public ResponseEntity<Page<User>> getList(
+            HttpServletRequest request,
+            @RequestParam(name = "pageIndex") @NotNull @Min(0) @Max(1000) Integer pageIndex,
+            @RequestParam(name = "pageSize") @NotNull @Min(5) @Max(100) Integer pageSize
+    ) {
         return userService.findGroupMembersByRegionOwner(
-                getId(request), getGroup(request)
+                getId(request), getGroup(request),
+                pageIndex, pageSize
         );
     }
 

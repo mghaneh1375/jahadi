@@ -1,9 +1,6 @@
 package four.group.jahadi.Service;
 
-import four.group.jahadi.DTO.AdminSignInData;
-import four.group.jahadi.DTO.ChangePhoneDAO;
-import four.group.jahadi.DTO.ChangePhoneResponseDAO;
-import four.group.jahadi.DTO.DoChangePhoneDAO;
+import four.group.jahadi.DTO.*;
 import four.group.jahadi.DTO.SignUp.*;
 import four.group.jahadi.Enums.Access;
 import four.group.jahadi.Enums.AccountStatus;
@@ -17,14 +14,18 @@ import four.group.jahadi.Repository.ActivationRepository;
 import four.group.jahadi.Repository.GroupRepository;
 import four.group.jahadi.Repository.TripRepository;
 import four.group.jahadi.Repository.UserRepository;
+import four.group.jahadi.Repository.impl.UserCustomRepositoryImpl;
 import four.group.jahadi.Security.JwtTokenFilter;
 import four.group.jahadi.Security.JwtTokenProvider;
 import four.group.jahadi.Utility.*;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.beanutils.BeanUtilsBean;
 import org.bson.types.ObjectId;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
@@ -36,7 +37,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static four.group.jahadi.Utility.FileUtils.removeFile;
 import static four.group.jahadi.Utility.FileUtils.uploadFile;
@@ -46,28 +46,24 @@ import static org.springframework.beans.BeanUtils.copyProperties;
 
 
 @Service
+@RequiredArgsConstructor
 public class UserService extends AbstractService<User, SignUpData> {
 
     private static final ArrayList<Cache> cachedToken = new ArrayList<>();
     public final static String PICS_FOLDER = "userPics";
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private ActivationRepository activationRepository;
+    private final ActivationRepository activationRepository;
 
-    @Autowired
-    private GroupRepository groupRepository;
+    private final GroupRepository groupRepository;
 
-    @Autowired
-    private TripRepository tripRepository;
+    private final TripRepository tripRepository;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private JwtTokenProvider jwtTokenProvider;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final UserCustomRepositoryImpl userCustomRepository;
 
     public String getEncPass(String pass) {
         return passwordEncoder.encode(convertPersianDigits(pass));
@@ -75,21 +71,26 @@ public class UserService extends AbstractService<User, SignUpData> {
 
     @Override
     public ResponseEntity<List<User>> list(Object... filters) {
+        return null;
+    }
 
-        List<User> users = userRepository.findAll(
+    @Override
+    public ResponseEntity<Page<User>> paginateList(int pageIndex, int pageSize, Object... filters) {
+        Page<User> users = userCustomRepository.findAdvanced(
                 (AccountStatus) filters[0], (Access) filters[1],
                 filters[2] != null ? filters[2].toString() : null,
                 filters[3] != null ? filters[3].toString() : null,
                 filters[4] != null ? filters[4].toString() : null,
-                (Sex) filters[5],
+                filters[5] != null ? (Sex) filters[5] : null,
                 filters[6] != null ? filters[6].toString() : null,
                 filters[7] != null ? (ObjectId) filters[7] : null,
-                filters[8] != null ? (Boolean) filters[8] : null
+                filters[8] != null ? (Boolean) filters[8] : null,
+                filters[9] != null ? filters[9].toString() : null,
+                Pageable.ofSize(pageSize).withPage(pageIndex)
         );
 
         if (filters[8] != null && (Boolean) filters[8]) {
             users.forEach(user -> {
-
                 AccountStatus accountStatus = AccountStatus.PENDING;
 
                 if (user.getGroupId() != null) {
@@ -100,7 +101,6 @@ public class UserService extends AbstractService<User, SignUpData> {
                 }
 
                 user.setGroupStatus(accountStatus);
-
             });
         }
 
@@ -119,15 +119,14 @@ public class UserService extends AbstractService<User, SignUpData> {
     public void update(ObjectId userId, UpdateInfoData dto) {
         User user = userRepository.findById(userId).orElseThrow(InvalidIdException::new);
         BeanUtilsBean notNull = new NullAwareBeanUtilsBean();
-        if(user.getAccesses().contains(Access.GROUP)) {
+        if (user.getAccesses().contains(Access.GROUP)) {
             try {
                 notNull.copyProperties(user, dto);
                 userRepository.save(user);
             } catch (IllegalAccessException | InvocationTargetException e) {
                 throw new RuntimeException(e);
             }
-        }
-        else {
+        } else {
             try {
                 PersonalUpdateInfoData personalUpdateInfoData = new PersonalUpdateInfoData();
                 notNull.copyProperties(personalUpdateInfoData, dto);
@@ -140,15 +139,15 @@ public class UserService extends AbstractService<User, SignUpData> {
     }
 
     public ResponseEntity<ChangePhoneResponseDAO> changePhone(User user, ChangePhoneDAO request) {
-        if(!user.getStatus().equals(AccountStatus.ACTIVE))
+        if (!user.getStatus().equals(AccountStatus.ACTIVE))
             throw new NotAccessException();
 
-        if(userRepository.countByPhone(request.getNewPhone()) > 0)
+        if (userRepository.countByPhone(request.getNewPhone()) > 0)
             throw new InvalidFieldsException("این شماره در سیستم موجود است");
 
         long curr = System.currentTimeMillis();
         activationRepository.findByPhone(request.getNewPhone()).ifPresent(activation -> {
-            if((curr - activation.getCreatedAt()) / 60000 > 2)
+            if ((curr - activation.getCreatedAt()) / 60000 > 2)
                 activationRepository.deleteByPhone(request.getNewPhone(), curr);
             throw new InvalidFieldsException("کد قبلی هنوز منقضی نشده است");
         });
@@ -183,7 +182,7 @@ public class UserService extends AbstractService<User, SignUpData> {
             throw new InvalidFieldsException("کد وارد شده اشتباه است");
         });
 
-        if(((System.currentTimeMillis() - activation.getCreatedAt()) / 60000) > 2)
+        if (((System.currentTimeMillis() - activation.getCreatedAt()) / 60000) > 2)
             throw new InvalidFieldsException("زمان کد ارسال شده منقضی شده است");
 
         user.setPhone(activation.getPhone());
@@ -260,10 +259,10 @@ public class UserService extends AbstractService<User, SignUpData> {
     public ResponseEntity<String> newSignUp(PersonalSignUpData dto) {
 
         Activation activation = activationRepository.findByPhone(dto.getPhone()).orElseThrow(NotAccessException::new);
-        if(!activation.getValidated() || !activation.getToken().equals(dto.getToken()))
+        if (!activation.getValidated() || !activation.getToken().equals(dto.getToken()))
             throw new NotAccessException();
 
-        if(activation.getCreatedAt() < System.currentTimeMillis() - ONE_MIN_MSEC * 10)
+        if (activation.getCreatedAt() < System.currentTimeMillis() - ONE_MIN_MSEC * 10)
             throw new InvalidFieldsException("از زمان وارد کردن کد تاییده بیش از 10 دقیقه سپری شده و فرآیند مجاز نمی باشد. لطفا مجدد ثبت نام کنید");
 
         Group group = null;
@@ -373,9 +372,9 @@ public class UserService extends AbstractService<User, SignUpData> {
                 activation.setUser(user);
                 activation.setPhone(user.getPhone());
             } else {
-                if(user.getNid() != null)
+                if (user.getNid() != null)
                     activation.setNid(user.getNid());
-                else if(user.getPhone() != null)
+                else if (user.getPhone() != null)
                     activation.setPhone(user.getPhone());
             }
 
@@ -429,7 +428,7 @@ public class UserService extends AbstractService<User, SignUpData> {
                 throw new NotAccessException();
         }
 
-        if(user.getGroupId() != null) {
+        if (user.getGroupId() != null) {
             groupRepository.findById(user.getGroupId())
                     .ifPresent(value -> {
                         user.setGroupCode(value.getCode());
@@ -694,7 +693,7 @@ public class UserService extends AbstractService<User, SignUpData> {
     @CacheEvict(value = "user", key = "#userId")
     public void changeStatusByGroup(ObjectId groupId, ObjectId userId, AccountStatus status) {
         User user = userRepository.findById(userId).orElseThrow(InvalidIdException::new);
-        if(!Objects.equals(user.getGroupId(), groupId))
+        if (!Objects.equals(user.getGroupId(), groupId))
             throw new NotAccessException();
         user.setStatus(status);
         userRepository.save(user);
@@ -702,7 +701,7 @@ public class UserService extends AbstractService<User, SignUpData> {
 
     public void changePassword(ObjectId userId, PasswordData passwordData) {
         User user = userRepository.findById(userId).orElseThrow(InvalidIdException::new);
-        if(!passwordEncoder.matches(passwordData.getCurrPassword(), user.getPassword()))
+        if (!passwordEncoder.matches(passwordData.getCurrPassword(), user.getPassword()))
             throw new InvalidFieldsException("رمزعبور فعلی اشتباه است");
         user.setPassword(passwordEncoder.encode(passwordData.getPassword()));
         userRepository.save(user);
@@ -787,8 +786,10 @@ public class UserService extends AbstractService<User, SignUpData> {
         userRepository.save(user);
     }
 
-    public ResponseEntity<List<User>> findGroupMembersByRegionOwner(ObjectId userId, ObjectId groupId) {
-
+    public ResponseEntity<Page<User>> findGroupMembersByRegionOwner(
+            ObjectId userId, ObjectId groupId,
+            Integer pageIndex, Integer pageSize
+    ) {
         List<Trip> trips =
                 tripRepository.findActivesOrNotStartedProjectIdsByAreaOwnerId(Utility.getCurrLocalDateTime(), userId);
 
@@ -796,13 +797,14 @@ public class UserService extends AbstractService<User, SignUpData> {
             throw new NotAccessException();
 
         return new ResponseEntity<>(
-                userRepository.findAll(
+                userCustomRepository.findAdvanced(
                                 AccountStatus.ACTIVE, Access.JAHADI,
                                 null, null, null, null,
-                                null, groupId, null
-                        ).stream()
-                        .filter(user -> !user.getId().equals(userId) && !user.getAccesses().contains(Access.GROUP))
-                        .collect(Collectors.toList()),
+                                null, groupId, null, null,
+                                Pageable.ofSize(pageSize).withPage(pageIndex),
+                                Criteria.where("_id").ne(userId),
+                                Criteria.where("accesses").ne(Access.GROUP)
+                ),
                 HttpStatus.OK
         );
     }
@@ -832,5 +834,9 @@ public class UserService extends AbstractService<User, SignUpData> {
                 user,
                 HttpStatus.OK
         );
+    }
+
+    public ResponseEntity<List<UserDigest>> findGroupActiveMembersName(ObjectId groupId) {
+        return ResponseEntity.ok(userRepository.findGroupActiveMembersName(groupId));
     }
 }

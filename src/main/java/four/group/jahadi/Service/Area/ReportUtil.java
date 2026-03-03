@@ -3,7 +3,7 @@ package four.group.jahadi.Service.Area;
 import four.group.jahadi.Enums.Module.QuestionType;
 import four.group.jahadi.Models.Area.PatientAnswer;
 import four.group.jahadi.Models.Area.PatientForm;
-import four.group.jahadi.Models.Area.PatientsInArea;
+import four.group.jahadi.Models.Area.PatientJoinArea;
 import four.group.jahadi.Models.Patient;
 import four.group.jahadi.Models.Question.Question;
 import four.group.jahadi.Models.Question.SimpleQuestion;
@@ -80,8 +80,7 @@ public class ReportUtil {
 
     static void addPatientRowForSpecificSubModule(
             int subModuleStartIdx,
-            List<PatientsInArea> patients,
-            List<Patient> patientsInfo,
+            List<PatientJoinArea> patients,
             Sheet sheet,
             HashMap<ObjectId, Row> patientsRow,
             List<User> doctors,
@@ -93,11 +92,6 @@ public class ReportUtil {
             HashMap<ObjectId, ObjectId> pp
     ) {
         patients.forEach(patient -> {
-            Patient wantedPatient = patientsInfo
-                    .stream()
-                    .filter(patient1 -> patient1.getId().equals(patient.getPatientId()))
-                    .findFirst().get();
-
             AtomicReference<Row> patientRow = new AtomicReference<>();
             patient.getReferrals()
                     .stream()
@@ -115,10 +109,10 @@ public class ReportUtil {
                         if (patientsRow.containsKey(patientReferral.getId()))
                             patientRow.set(patientsRow.get(patientReferral.getId()));
                         else {
-                            Row r = createNewPatientRow(sheet, wantedPatient, incRowStep);
+                            Row r = createNewPatientRow(sheet, patient.getPatientInfo(), incRowStep);
                             patientsRow.put(patientReferral.getId(), r);
                             patientRow.set(r);
-                            pp.put(patient.getPatientId(), patientReferral.getId());
+                            pp.put(patient.getPatientInfo().getId(), patientReferral.getId());
                         }
 
                         final int patientRowNum = patientRow.get().getRowNum();

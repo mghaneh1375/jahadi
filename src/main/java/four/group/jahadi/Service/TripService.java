@@ -7,13 +7,16 @@ import four.group.jahadi.Enums.Status;
 import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Exception.NotAccessException;
-import four.group.jahadi.Models.*;
 import four.group.jahadi.Models.Area.Area;
+import four.group.jahadi.Models.*;
 import four.group.jahadi.Repository.*;
 import four.group.jahadi.Service.Area.AreaService;
 import four.group.jahadi.Utility.Utility;
+import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -27,24 +30,24 @@ import java.util.stream.Collectors;
 import static four.group.jahadi.Utility.Utility.*;
 
 @Service
+@RequiredArgsConstructor
 public class TripService extends AbstractService<Trip, TripStepData> {
 
-    @Autowired
-    private TripRepository tripRepository;
-    @Autowired
-    private GroupRepository groupRepository;
-    @Autowired
-    private ProjectRepository projectRepository;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private AreaService areaService;
+    private final TripRepository tripRepository;
+    private final GroupRepository groupRepository;
+    private final ProjectRepository projectRepository;
+    private final UserRepository userRepository;
+    private final AreaService areaService;
 
+    @Override
+    public ResponseEntity<List<Trip>> list(Object... filters) {
+        return null;
+    }
 
     // 1- groupId
     // 2- status
     @Override
-    public ResponseEntity<List<Trip>> list(Object... filters) {
+    public ResponseEntity<Page<Trip>> paginateList(int pageIndex, int pageSize, Object... filters) {
         List<List<Object>> filtersList = new ArrayList<>();
         if (filters[0] != null) {
             filtersList.add(new ArrayList<>() {
@@ -96,11 +99,13 @@ public class TripService extends AbstractService<Trip, TripStepData> {
             }
         }
 
-        List<Trip> trips = tripRepository.findAllWithFilter(
+        Page<Trip> trips = tripRepository.findAllWithFilterWithPagination(
                 Trip.class,
-                FilteringFactory.abstractParseFromParams(filtersList, Trip.class)
+                FilteringFactory.abstractParseFromParams(filtersList, Trip.class),
+                Pageable.ofSize(pageSize).withPage(pageIndex),
+                Sort.by("start_at").descending()
         );
-        List<Group> groups = groupRepository.findByIdsIn(findFromTripGroupIds(trips));
+        List<Group> groups = groupRepository.findByIdsIn(findFromTripGroupIds(trips.getContent()));
 
         trips.forEach(trip -> {
             for (Group group : groups) {
@@ -174,9 +179,9 @@ public class TripService extends AbstractService<Trip, TripStepData> {
         Project project = projectRepository.findById(trip.getProjectId()).get();
         // Validate dates
         if(project.getStartAt().isAfter(startAt))
-            throw new InvalidFieldsException("تاریخ شروع باید از " + Utility.convertUTCDateToJalali(project.getStartAt()) + " باشد");
+            throw new InvalidFieldsException("تاریخ شروع باید از " + Utility.convertUTCDateToJalali(project.getStartAt()) + " بزرگتر باشد");
         if(project.getEndAt().isBefore(endAt))
-            throw new InvalidFieldsException("تاریخ اتمام باید از " + Utility.convertUTCDateToJalali(project.getEndAt()) + " باشد");
+            throw new InvalidFieldsException("تاریخ اتمام باید از " + Utility.convertUTCDateToJalali(project.getEndAt()) + " کوچکتر باشد");
 
         trip.setName(dto.getName());
         trip.setStartAt(startAt);

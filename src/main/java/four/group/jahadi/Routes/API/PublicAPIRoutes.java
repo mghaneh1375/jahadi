@@ -53,13 +53,6 @@ public class PublicAPIRoutes {
         return drugService.getDrugUseTimeOptions();
     }
 
-    @GetMapping(value = "getAllDrugs")
-    @ResponseBody
-    @Operation(summary = "گرفتن اطلاعات مختصر داروها و یا سرچ در داروها برای عموم", description = "پارامتر نام دارو که میتواند بخشی از نام دارو هم باشد اختیاری و برای سرچ کردن است که باید حداقل سه کاراکتر باشد")
-    public ResponseEntity<List<Drug>> getAllDrugs(@RequestParam(required = false, value = "name") String name) {
-        return drugService.search(name != null && name.length() > 2 ? name : null);
-    }
-
     @GetMapping(value = "getDrug/{drugId}")
     @ResponseBody
     @Operation(summary = "گرفتن اطلاعات تکمیلی دارو مثل طریقه مصرف و ...")

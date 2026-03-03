@@ -32,4 +32,7 @@ public class PatientJoinArea {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<PatientReferral> referrals;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private TrainForm trainForm;
 }

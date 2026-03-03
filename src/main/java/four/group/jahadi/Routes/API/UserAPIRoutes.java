@@ -22,6 +22,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import java.util.HashMap;
+import java.util.List;
 
 import static four.group.jahadi.Utility.Utility.convertPersianDigits;
 
@@ -193,7 +194,6 @@ public class UserAPIRoutes extends Router {
     public ResponseEntity<User> myInfo(HttpServletRequest request) {
         return userService.findById(getId(request));
     }
-
 
     @GetMapping(value = "digest")
     @ResponseBody

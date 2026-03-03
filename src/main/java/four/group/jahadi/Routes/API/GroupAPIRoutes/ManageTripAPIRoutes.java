@@ -13,12 +13,15 @@ import four.group.jahadi.Service.TripService;
 import four.group.jahadi.Validator.ObjectIdConstraint;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import java.util.List;
 
 @RestController
@@ -51,11 +54,13 @@ public class ManageTripAPIRoutes extends Router {
     }
 
     @GetMapping(value = "myTrips")
-    public ResponseEntity<List<Trip>> myTrips(
+    public ResponseEntity<Page<Trip>> myTrips(
             HttpServletRequest request,
-            @RequestParam(value = "status", required = false) Status status
+            @RequestParam(value = "status", required = false) Status status,
+            @RequestParam(value = "pageIndex") @Min(0) @Max(10000) Integer pageIndex,
+            @RequestParam(value = "pageSize") @Min(5) @Max(100) Integer pageSize
     ) {
-        return tripService.list(getGroup(request), status);
+        return tripService.paginateList(pageIndex, pageSize, getGroup(request), status);
     }
 
     @GetMapping(value = "myActiveTrips")

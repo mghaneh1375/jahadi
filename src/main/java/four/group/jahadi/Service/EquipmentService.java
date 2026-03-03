@@ -10,15 +10,16 @@ import four.group.jahadi.Exception.NotAccessException;
 import four.group.jahadi.Models.Equipment;
 import four.group.jahadi.Repository.EquipmentRepository;
 import four.group.jahadi.Repository.WareHouseAccessForGroupRepository;
-import four.group.jahadi.Utility.Utility;
-import lombok.Data;
+import four.group.jahadi.Repository.impl.EquipmentCustomRepositoryImpl;
+import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.bson.types.ObjectId;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -27,21 +28,21 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
-import static four.group.jahadi.Utility.Utility.*;
+import static four.group.jahadi.Utility.Utility.getExcelDate;
+import static four.group.jahadi.Utility.Utility.isCellDateFormatted;
 
 @Service
+@RequiredArgsConstructor
 public class EquipmentService extends AbstractService<Equipment, EquipmentData> {
 
-    @Autowired
-    private EquipmentRepository equipmentRepository;
-    @Autowired
-    private WareHouseAccessForGroupRepository wareHouseAccessForGroupRepository;
+    private final EquipmentRepository equipmentRepository;
+    private final EquipmentCustomRepositoryImpl equipmentCustomRepository;
+    private final WareHouseAccessForGroupRepository wareHouseAccessForGroupRepository;
 
     @Override
-    public ResponseEntity<List<Equipment>> list(Object... filters) {
+    public ResponseEntity<Page<Equipment>> paginateList(int pageIndex, int pageSize, Object... filters) {
         ObjectId groupId = (ObjectId) filters[0];
         try {
             String name = filters.length > 1 ? (String) filters[1] : null;
@@ -60,10 +61,11 @@ public class EquipmentService extends AbstractService<Equipment, EquipmentData> 
             LocalDateTime fromGuaranteeExpireAt = filters.length > 12 ? (LocalDateTime) filters[12] : null;
             LocalDateTime toGuaranteeExpireAt = filters.length > 13 ? (LocalDateTime) filters[13] : null;
             return new ResponseEntity<>(
-                    equipmentRepository.findByFilters(
+                    equipmentCustomRepository.findAdvanced(
                             groupId, name, minAvailable, maxAvailable, healthyStatus,
                             propertyId, location, equipmentType, rowNo, shelfNo,
-                            fromBuyAt, toBuyAt, fromGuaranteeExpireAt, toGuaranteeExpireAt
+                            fromBuyAt, toBuyAt, fromGuaranteeExpireAt, toGuaranteeExpireAt,
+                            Pageable.ofSize(pageSize).withPage(pageIndex)
                     ),
                     HttpStatus.OK
             );
