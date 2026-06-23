@@ -1,4 +1,4 @@
-package four.group.jahadi.Service;
+package four.group.jahadi.Service.admin;
 
 import four.group.jahadi.Enums.Access;
 import four.group.jahadi.Models.Area.Area;

@@ -1,7 +1,7 @@
 package four.group.jahadi.Routes.API.AdminAPIRoutes;
 
 import four.group.jahadi.Routes.Router;
-import four.group.jahadi.Service.AdminService;
+import four.group.jahadi.Service.admin.AdminService;
 import four.group.jahadi.Service.Area.AreaService;
 import four.group.jahadi.Validator.ObjectIdConstraint;
 import io.swagger.v3.oas.annotations.Operation;

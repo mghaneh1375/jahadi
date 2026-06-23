@@ -21,7 +21,6 @@ import java.util.TimeZone;
 @SpringBootApplication()
 @OpenAPIDefinition(info = @Info(title = "Jahadi API", version = "2.0", description = "Jahadi Information"))
 @EnableMongoAuditing
-@EnableCaching
 public class JahadiApplication {
 
     @Bean

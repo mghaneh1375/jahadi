@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import four.group.jahadi.DTO.Area.AreaData;
 import four.group.jahadi.DTO.Area.AreaDigest;
+import four.group.jahadi.DTO.Area.CompleteAreaInfoDto;
 import four.group.jahadi.DTO.Area.UpdateAreaData;
 import four.group.jahadi.DTO.Region.RegionRunInfoData;
 import four.group.jahadi.DTO.Region.RegionSendNotifData;
@@ -25,6 +26,7 @@ import four.group.jahadi.Utility.Utility;
 import four.group.jahadi.Utility.ValidList;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
@@ -105,8 +107,8 @@ public class AreaService extends AbstractService<Area, AreaData> {
         return null;
     }
 
+    @CacheEvict(value = "groupStatisticData", key = "#params[2]")
     public ResponseEntity<List<Area>> store(List<AreaData> areas, Object... params) {
-
         boolean hasAdminAccess = (boolean) params[0];
         ObjectId tripId = (ObjectId) params[1];
         Object groupId = params[2];
@@ -139,7 +141,7 @@ public class AreaService extends AbstractService<Area, AreaData> {
     }
 
     public void updateAreas(
-            ObjectId tripId, ValidList<UpdateAreaData> areas,
+            ObjectId tripId, ValidList<UpdateAreaData> areasDto,
             boolean hasAdminAccess, ObjectId userId, ObjectId groupId
     ) {
         Trip trip = tripRepository.findById(tripId).orElseThrow(InvalidIdException::new);
@@ -148,24 +150,23 @@ public class AreaService extends AbstractService<Area, AreaData> {
         )
             throw new NotAccessException();
 
-        areas.forEach(updateAreaData -> {
-            trip
-                    .getAreas()
-                    .stream()
-                    .filter(area -> area.getId().equals(updateAreaData.getAreaId()))
-                    .findFirst().orElseThrow(InvalidIdException::new);
-        });
-
-        areas.forEach(updateAreaData -> {
-            Area area1 = trip
-                    .getAreas()
-                    .stream()
-                    .filter(area -> area.getId().equals(updateAreaData.getAreaId()))
-                    .findFirst().orElseThrow(InvalidIdException::new);
+        List<Area> areas = trip.getAreas();
+        areasDto.forEach(updateAreaData -> {
+            Area area1;
+            if(updateAreaData.getAreaId() != null) {
+                area1 = areas
+                        .stream()
+                        .filter(area -> area.getId().equals(updateAreaData.getAreaId()))
+                        .findFirst().orElseGet(Area::new);
+            }
+            else area1 = new Area();
 
             area1.setOwnerId(updateAreaData.getOwner());
             area1.setName(updateAreaData.getName());
-            area1.setColor(updateAreaData.getColor());
+            if(area1.getId() == null) {
+                area1.setId(new ObjectId());
+                areas.add(area1);
+            }
         });
 
         tripRepository.save(trip);
@@ -425,6 +426,37 @@ public class AreaService extends AbstractService<Area, AreaData> {
         output.put("endAt", Utility.convertUTCDateToJalali(foundArea.getEndAt()));
         output.put("lat", foundArea.getLat());
         output.put("lng", foundArea.getLng());
+
+        return new ResponseEntity<>(output, HttpStatus.OK);
+    }
+
+    public ResponseEntity<CompleteAreaInfoDto> getAreaCompleteInfo(ObjectId userId, ObjectId areaId) {
+
+        Trip trip = tripRepository.findByAreaIdAndOwnerId(areaId, userId)
+                .orElseThrow(NotAccessException::new);
+
+        Area foundArea = trip
+                .getAreas().stream().filter(area -> area.getId().equals(areaId))
+                .findFirst().orElseThrow(RuntimeException::new);
+
+        Optional<Country> countryOptional = foundArea.getCountry() == null
+                ? Optional.empty()
+                : countryRepository.findByName(foundArea.getCountry());
+
+        Country country = countryOptional.orElse(null);
+
+        CompleteAreaInfoDto output = CompleteAreaInfoDto
+                .builder()
+                .cityId(foundArea.getCityId())
+                .stateId(foundArea.getStateId())
+                .countryId(country == null ? null : country.getId())
+                .dailyStartAt(foundArea.getDailyStartAt())
+                .dailyEndAt(foundArea.getDailyEndAt())
+                .startAt(foundArea.getStartAt())
+                .endAt(foundArea.getEndAt())
+                .lat(foundArea.getLat())
+                .lng(foundArea.getLng())
+                .build();
 
         return new ResponseEntity<>(output, HttpStatus.OK);
     }

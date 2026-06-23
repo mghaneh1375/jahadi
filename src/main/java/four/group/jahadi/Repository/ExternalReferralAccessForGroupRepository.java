@@ -2,7 +2,6 @@ package four.group.jahadi.Repository;
 
 import four.group.jahadi.Models.ExternalReferralAccessForGroup;
 import four.group.jahadi.Models.ExternalReferralAccessJoinWithUser;
-import four.group.jahadi.Models.WareHouseAccessForGroupJoinWithUser;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.MongoRepository;

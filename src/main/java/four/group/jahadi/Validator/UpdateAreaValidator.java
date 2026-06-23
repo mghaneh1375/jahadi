@@ -19,7 +19,7 @@ public class UpdateAreaValidator implements ConstraintValidator<ValidatedUpdateA
         boolean isErrored = false;
         JSONObject errs = new JSONObject();
 
-        if(value.getAreaId() == null || value.getColor() == null || value.getOwner() == null) {
+        if(value.getOwner() == null) {
             errs.put("data", "لطفا تمام اطلاعات را وارد نمایید");
             isErrored = true;
         }

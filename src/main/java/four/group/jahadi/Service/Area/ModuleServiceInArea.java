@@ -1,6 +1,8 @@
 package four.group.jahadi.Service.Area;
 
 
+import four.group.jahadi.DTO.Area.CompleteAreaDto;
+import four.group.jahadi.DTO.Area.UserAccess;
 import four.group.jahadi.Enums.AccessInModuleArea;
 import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Exception.InvalidIdException;
@@ -10,26 +12,27 @@ import four.group.jahadi.Models.Area.Area;
 import four.group.jahadi.Models.Area.ModuleInArea;
 import four.group.jahadi.Models.Area.PatientForm;
 import four.group.jahadi.Models.Module;
+import four.group.jahadi.Repository.*;
 import four.group.jahadi.Repository.Area.PatientsInAreaRepository;
-import four.group.jahadi.Repository.ModuleRepository;
-import four.group.jahadi.Repository.TripRepository;
-import four.group.jahadi.Repository.UserRepository;
+import four.group.jahadi.Utility.Utility;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static four.group.jahadi.Service.Area.AreaUtils.findArea;
 import static four.group.jahadi.Tests.Modules.ModuleSeeder.tabIcons;
+import static four.group.jahadi.Utility.Utility.getLastLocalDateTime;
+import static four.group.jahadi.Utility.Utility.getLocalDateTime;
 
 @Service
 public class ModuleServiceInArea {
@@ -42,6 +45,16 @@ public class ModuleServiceInArea {
     private UserRepository userRepository;
     @Autowired
     private PatientsInAreaRepository patientsInAreaRepository;
+
+    @Autowired
+    private CountryRepository countryRepository;
+
+    @Autowired
+    private StateRepository stateRepository;
+
+    @Autowired
+    private CityRepository cityRepository;
+
     @Autowired
     private CacheService cacheService;
 
@@ -334,7 +347,8 @@ public class ModuleServiceInArea {
 
     @Caching(evict = {
             @CacheEvict(value = "modules", allEntries = true),
-            @CacheEvict(value = "tabs", allEntries = true)
+            @CacheEvict(value = "tabs", allEntries = true),
+            @CacheEvict(value = "regionMembers", allEntries = true)
     })
     public synchronized void setMembersToModule(
             ObjectId userId, ObjectId areaId,
@@ -354,7 +368,8 @@ public class ModuleServiceInArea {
 
     @Caching(evict = {
             @CacheEvict(value = "modules", allEntries = true),
-            @CacheEvict(value = "tabs", allEntries = true)
+            @CacheEvict(value = "tabs", allEntries = true),
+            @CacheEvict(value = "regionMembers", allEntries = true)
     })
     public void removeMemberFromModule(ObjectId userId, ObjectId areaId,
                                        ObjectId moduleIdInArea, ObjectId wantedUserId) {
@@ -381,7 +396,8 @@ public class ModuleServiceInArea {
 
     @Caching(evict = {
             @CacheEvict(value = "modules", allEntries = true),
-            @CacheEvict(value = "tabs", allEntries = true)
+            @CacheEvict(value = "tabs", allEntries = true),
+            @CacheEvict(value = "regionMembers", allEntries = true)
     })
     public synchronized void addSecretariesToModule(ObjectId userId, ObjectId areaId,
                                                     ObjectId moduleIdInArea, List<ObjectId> userIds) {
@@ -406,7 +422,8 @@ public class ModuleServiceInArea {
 
     @Caching(evict = {
             @CacheEvict(value = "modules", allEntries = true),
-            @CacheEvict(value = "tabs", allEntries = true)
+            @CacheEvict(value = "tabs", allEntries = true),
+            @CacheEvict(value = "regionMembers", allEntries = true)
     })
     public void removeMemberFromSecretaries(ObjectId userId, ObjectId areaId,
                                             ObjectId moduleIdInArea, ObjectId wantedUserId) {
@@ -427,6 +444,162 @@ public class ModuleServiceInArea {
             throw new InvalidIdException();
 
         secretaries.remove(wantedUserId);
+        tripRepository.save(wantedTrip);
+    }
+
+
+    @Caching(evict = {
+            @CacheEvict(value = "modules", allEntries = true),
+            @CacheEvict(value = "tabs", allEntries = true),
+            @CacheEvict(value = "regionMembers", allEntries = true)
+    })
+    public synchronized void completeAreaInfo(
+            ObjectId userId, ObjectId areaId,
+            CompleteAreaDto completeAreaDto
+    ) {
+        City city = cityRepository.findById(completeAreaDto.getCityId()).orElseThrow(() -> {
+            throw new InvalidFieldsException("آی دی شهر وارد شده نامعتبر است");
+        });
+
+        List<UserAccess> userAccesses = completeAreaDto.getUserAccesses();
+        List<ObjectId> members = userAccesses.stream().map(UserAccess::getUserId)
+                .distinct().collect(Collectors.toList());
+
+        Trip wantedTrip = tripRepository.findByAreaIdAndOwnerId(areaId, userId)
+                .orElseThrow(NotAccessException::new);
+
+        Area foundArea = findArea(wantedTrip, areaId, userId);
+
+        LocalDateTime start = getLocalDateTime(new Date((long) completeAreaDto.getStartAt()));
+        LocalDateTime end = getLastLocalDateTime(new Date((long) completeAreaDto.getEndAt()));
+
+        if (wantedTrip.getStartAt().isAfter(start))
+            throw new InvalidFieldsException("زمان آغاز باید بعد از " + Utility.convertUTCDateToJalali(wantedTrip.getStartAt()) + " باشد");
+
+        if (wantedTrip.getEndAt().isBefore(end))
+            throw new InvalidFieldsException("زمان پایان باید قبل از " + Utility.convertUTCDateToJalali(wantedTrip.getEndAt()) + " باشد");
+
+        State state = stateRepository.findById(city.getStateId()).orElseThrow(RuntimeException::new);
+        Country country = countryRepository.findById(state.getCountryId()).orElseThrow(RuntimeException::new);
+
+        foundArea.setCity(city.getName());
+        foundArea.setState(state.getName());
+        foundArea.setCityId(city.getId());
+        foundArea.setStateId(state.getId());
+        foundArea.setCountry(country.getName());
+        foundArea.setDailyStartAt(completeAreaDto.getDailyStartAt());
+        foundArea.setDailyEndAt(completeAreaDto.getDailyEndAt());
+        foundArea.setStartAt(start);
+        foundArea.setEndAt(end);
+        foundArea.setLat(completeAreaDto.getLat());
+        foundArea.setLng(completeAreaDto.getLng());
+
+        foundArea.setMembers(members);
+        List<Module> modules = moduleRepository.findAll();
+
+        foundArea.setModules(
+                userAccesses.stream()
+                        .map(UserAccess::getAccesses)
+                        .flatMap(List::stream)
+                        .filter(o -> ObjectId.isValid(o.toString()))
+                        .distinct()
+                        .map(o -> new ObjectId(o.toString()))
+                        .map(o -> {
+                            Module foundModule = modules
+                                    .stream()
+                                    .filter(module -> module.getId().equals(o))
+                                    .findFirst().get();
+
+                            return ModuleInArea
+                                    .builder()
+                                    .id(new ObjectId())
+                                    .moduleId(foundModule.getId())
+                                    .moduleName(foundModule.getName())
+                                    .moduleTabName(foundModule.getTabName())
+                                    .members(
+                                            userAccesses
+                                                    .stream()
+                                                    .filter(userAccess -> userAccess.getAccesses().contains(foundModule.getId().toString()))
+                                                    .map(UserAccess::getUserId)
+                                                    .collect(Collectors.toList())
+                                    )
+                                    .build();
+                        })
+                        .collect(Collectors.toList())
+        );
+
+        foundArea.setInsurancers(
+                userAccesses
+                        .stream()
+                        .filter(userAccess -> userAccess.getAccesses().contains("insurance"))
+                        .map(UserAccess::getUserId)
+                        .collect(Collectors.toList())
+        );
+
+        foundArea.setTrainers(
+                userAccesses
+                        .stream()
+                        .filter(userAccess -> userAccess.getAccesses().contains("trainer"))
+                        .map(UserAccess::getUserId)
+                        .collect(Collectors.toList())
+        );
+
+        foundArea.setPharmacyManagers(
+                userAccesses
+                        .stream()
+                        .filter(userAccess -> userAccess.getAccesses().contains("pharmacyManager"))
+                        .map(UserAccess::getUserId)
+                        .collect(Collectors.toList())
+        );
+
+        foundArea.setLaboratoryManager(
+                userAccesses
+                        .stream()
+                        .filter(userAccess -> userAccess.getAccesses().contains("laboratoryManager"))
+                        .map(UserAccess::getUserId)
+                        .collect(Collectors.toList())
+        );
+
+        foundArea.setDispatchers(
+                userAccesses
+                        .stream()
+                        .filter(userAccess -> userAccess.getAccesses().contains("dispatcher"))
+                        .map(UserAccess::getUserId)
+                        .collect(Collectors.toList())
+        );
+
+        foundArea.setEquipmentManagers(
+                userAccesses
+                        .stream()
+                        .filter(userAccess -> userAccess.getAccesses().contains("equipmentManager"))
+                        .map(UserAccess::getUserId)
+                        .collect(Collectors.toList())
+        );
+
+        AtomicBoolean isFinished = new AtomicBoolean(true);
+        if (foundArea.getCity() == null || foundArea.getLat() == null ||
+                foundArea.getLng() == null || foundArea.getStartAt() == null ||
+                foundArea.getEndAt() == null || foundArea.getDailyStartAt() == null ||
+                foundArea.getDailyEndAt() == null
+        )
+            isFinished.set(false);
+
+        if (foundArea.getMembers().size() == 0)
+            isFinished.set(false);
+
+        if (foundArea.getModules().size() == 0)
+            isFinished.set(false);
+
+        if (foundArea.getDispatchers().size() == 0)
+            isFinished.set(false);
+
+        foundArea.getModules().forEach(moduleInArea -> {
+            if (moduleInArea.getMembers().size() == 0)
+                isFinished.set(false);
+        });
+
+        foundArea.setFinished(isFinished.get());
+
         tripRepository.save(wantedTrip);
     }
 }

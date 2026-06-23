@@ -6,13 +6,16 @@ import four.group.jahadi.Service.GroupService;
 import four.group.jahadi.Validator.ObjectIdConstraint;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.HashMap;
 import java.util.List;
 
@@ -26,8 +29,16 @@ public class AdminGroupAPIRoutes {
 
     @GetMapping(value = "list")
     @ResponseBody
-    public ResponseEntity<List<Group>> list(@RequestParam(required = false, value = "name") String name) {
-        return groupService.list(name);
+    public ResponseEntity<Page<Group>> list(
+            @RequestParam(value = "pageIndex", required = false) @Min(0) @Max(1000) Integer pageIndex,
+            @RequestParam(value = "pageSize", required = false) @Min(5) @Max(100) Integer pageSize,
+            @RequestParam(required = false, value = "name") @Size(min = 2, max = 100) String name
+    ) {
+        return groupService.list(
+                pageIndex == null ? 0 : pageIndex,
+                pageSize == null ? Integer.MAX_VALUE : pageSize,
+                name
+        );
     }
 
     @PostMapping(value = "store")

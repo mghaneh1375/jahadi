@@ -1,6 +1,8 @@
 package four.group.jahadi.Routes.API.RegionAPIRoutes;
 
 import four.group.jahadi.DTO.Area.AreaDigest;
+import four.group.jahadi.DTO.Area.CompleteAreaDto;
+import four.group.jahadi.DTO.Area.CompleteAreaInfoDto;
 import four.group.jahadi.DTO.Region.RegionRunInfoData;
 import four.group.jahadi.DTO.Region.RegionSendNotifData;
 import four.group.jahadi.DTO.UpdatePresenceList;
@@ -12,6 +14,7 @@ import four.group.jahadi.Models.Trip;
 import four.group.jahadi.Models.UserPresenceList;
 import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Service.Area.AreaService;
+import four.group.jahadi.Service.Area.ModuleServiceInArea;
 import four.group.jahadi.Validator.ObjectIdConstraint;
 import io.swagger.v3.oas.annotations.Operation;
 import org.bson.types.ObjectId;
@@ -36,6 +39,9 @@ public class RegionManageAPIRoutes extends Router {
 
     @Autowired
     AreaService areaService;
+
+    @Autowired
+    private ModuleServiceInArea moduleServiceInArea;
 
     @GetMapping(value = "myCartableAreas")
     @ResponseBody
@@ -104,6 +110,19 @@ public class RegionManageAPIRoutes extends Router {
         areaService.setRunInfo(getId(request), areaId, regionRunInfoData);
     }
 
+    @PutMapping(value = "completeArea/{areaId}")
+    @ResponseBody
+    @Operation(summary = "ست کردن اطلاعات منطقه", description = "ست کردن اطلاعاتی نظیر شهر محل برگزاری، مختصات جغرافیایی و روز و زمان شروع و پایان")
+    public void completeArea(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId,
+            @RequestBody @Valid CompleteAreaDto completeAreaDto
+    ) {
+        moduleServiceInArea.completeAreaInfo(
+                getId(request), areaId, completeAreaDto
+        );
+    }
+
     @GetMapping(value = "getRunInfo/{areaId}")
     @ResponseBody
     @Operation(summary = "گرفتن اطلاعات منطقه", description = "گرفتن اطلاعاتی نظیر شهر محل برگزاری، مختصات جغرافیایی و روز و زمان شروع و پایان")
@@ -112,6 +131,16 @@ public class RegionManageAPIRoutes extends Router {
             @PathVariable @ObjectIdConstraint ObjectId areaId
     ) {
         return areaService.getRunInfo(getId(request), areaId);
+    }
+
+    @GetMapping(value = "getAreaCompleteInfo/{areaId}")
+    @ResponseBody
+    @Operation(summary = "گرفتن اطلاعات منطقه", description = "گرفتن اطلاعاتی نظیر شهر محل برگزاری، مختصات جغرافیایی و روز و زمان شروع و پایان")
+    public ResponseEntity<CompleteAreaInfoDto> getAreaCompleteInfo(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId
+    ) {
+        return areaService.getAreaCompleteInfo(getId(request), areaId);
     }
 
     @PutMapping(value = "finalize/{areaId}")

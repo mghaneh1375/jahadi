@@ -1,5 +1,6 @@
 package four.group.jahadi.Service.Area;
 
+import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Exception.NotAccessException;
 import four.group.jahadi.Models.Area.Area;
@@ -29,7 +30,7 @@ public class AreaUtils {
                 foundArea.getDates().get(foundArea.getDates().size() - 1).getEnd() != null ||
                 foundArea.getDates().get(foundArea.getDates().size() - 1).getStart().isAfter(LocalDateTime.now())
         )
-            throw new RuntimeException("اردو در وضعیت شروع فعالیت ها قرار ندارد");
+            throw new InvalidFieldsException("اردو در وضعیت شروع فعالیت ها قرار ندارد");
 
         return foundArea;
     }

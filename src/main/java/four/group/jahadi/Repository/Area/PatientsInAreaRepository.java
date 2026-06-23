@@ -1,16 +1,18 @@
 package four.group.jahadi.Repository.Area;
 
+import four.group.jahadi.DTO.dashboard.PerProvinceData;
 import four.group.jahadi.Models.Area.PatientJoinArea;
 import four.group.jahadi.Models.Area.PatientJoinForReferrals;
-import four.group.jahadi.Models.Patient;
 import four.group.jahadi.Models.Area.PatientsInArea;
 import four.group.jahadi.Repository.FilterableRepository;
 import org.bson.types.ObjectId;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,6 +21,9 @@ public interface PatientsInAreaRepository extends MongoRepository<PatientsInArea
 
     @Query(value = "{areaId: ?0}", count = true)
     Integer countByAreaId(ObjectId areaId);
+
+    @Query(value = "{areaId: {$in: ?0}}", count = true)
+    Integer countByAreaIds(List<ObjectId> areaIds);
 
     @Query(value = "{areaId: ?0}", delete = true)
     void deleteByAreaId(ObjectId areaId);
@@ -37,14 +42,6 @@ public interface PatientsInAreaRepository extends MongoRepository<PatientsInArea
 
     @Query(value = "{areaId: ?0, patientId: ?1}")
     Optional<PatientsInArea> findByAreaIdAndPatientId(ObjectId areaId, ObjectId patientId);
-
-    @Aggregation(pipeline = {
-            "{$match: {areaId: ?0}}",
-            "{$lookup: {from: 'patient', localField: 'id', foreignField: 'patients_in_area.patientId', as: 'patients'}}",
-            "{$unwind: '$patients'}",
-            "{$project: {'identifier': '$patients.identifier'}}",
-    })
-    List<Patient> findPatientsIdentifierByAreaId(ObjectId areaId);
 
     @Aggregation(pipeline = {
             "{$match: {areaId: ?0}}",
@@ -291,7 +288,10 @@ public interface PatientsInAreaRepository extends MongoRepository<PatientsInArea
     List<PatientsInArea> findByAreaIdAndModuleId(ObjectId areaId, ObjectId moduleId);
 
     @Query(value = "{areaId: ?0, referrals: { $elemMatch: {moduleId: {$in: ?1}, forms: {$exists: true}, 'forms.subModuleId': {$in: ?2}} } }", fields = "{_id: 1, patientId: 1}")
-    List<PatientsInArea> findByAreaIdAndModuleIdInAndSubModuleIdIn(ObjectId areaId, List<ObjectId> moduleIds, List<ObjectId> subModuleId);
+    List<PatientsInArea> findByAreaIdAndModuleIdInAndSubModuleIdIn(ObjectId areaId, List<ObjectId> moduleIds, List<ObjectId> subModuleId, Pageable pageable);
+
+    @Query(value = "{areaId: ?0, referrals: { $elemMatch: {moduleId: {$in: ?1}, forms: {$exists: true}, 'forms.subModuleId': {$in: ?2}} } }", count = true)
+    Integer countByAreaIdAndModuleIdInAndSubModuleIdIn(ObjectId areaId, List<ObjectId> moduleIds, List<ObjectId> subModuleId);
 
     @Aggregation(pipeline = {
             "{$match: {$and: [{areaId: ?0}, {referrals: { $elemMatch: {moduleId: {$in: ?1}, forms: {$exists: true}, 'forms.subModuleId': {$in: ?2}} }}]}}",
@@ -300,4 +300,27 @@ public interface PatientsInAreaRepository extends MongoRepository<PatientsInArea
     })
     List<PatientJoinForReferrals> findByAreaIdAndModuleIdInAndSubModuleIdInWithJoin(ObjectId areaId, List<ObjectId> moduleIds, List<ObjectId> subModuleId);
 
+    @Aggregation(pipeline = {
+            "{ $project: { referrals: 0 } }",
+            "{ $match: { created_at: { $gte: ?0, $lte: ?1 } } }",
+            "{ $lookup: { " +
+                    "from: 'trip', " +
+                    "let: { areaId: '$area_id', createdAt: '$created_at' }, " +
+                    "pipeline: [ " +
+                    "{ $unwind: '$areas' }, " +
+                    "{ $match: { $expr: { $and: [ " +
+                    "{ $eq: ['$areas._id', '$$areaId'] }, " +
+                    "] } } }, " +
+                    "{ $project: { state: '$areas.state', _id: 0 } } " +
+                    "], " +
+                    "as: 'areaInfo' " +
+                    "} }",
+            "{ $unwind: { path: '$areaInfo', preserveNullAndEmptyArrays: false } }",
+            "{ $group: { _id: '$areaInfo.state', uniquePatients: { $addToSet: '$patient_id' } } }",
+            "{ $project: { province: '$_id', count: { $size: '$uniquePatients' }, _id: 0 } }"
+    })
+    List<PerProvinceData> countPatientsByStateInDateRange(LocalDateTime startDate, LocalDateTime endDate);
+
+    @Query(value = "{ created_at: { $gte: ?0 } }", count = true)
+    Long getTotalPatientsCountInLastMonth(LocalDateTime oneMonthAgo);
 }

@@ -138,7 +138,7 @@ public class Area {
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     private User owner;
 
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @JsonProperty(access = JsonProperty.Access.READ_WRITE)
     @Builder.Default
     private Boolean finished = false;
 

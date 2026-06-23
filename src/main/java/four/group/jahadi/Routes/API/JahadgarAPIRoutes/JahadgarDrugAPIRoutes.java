@@ -5,7 +5,6 @@ import four.group.jahadi.DTO.Area.AreaDrugsData;
 import four.group.jahadi.DTO.Area.GiveDrugData;
 import four.group.jahadi.DTO.DrugBookmarkData;
 import four.group.jahadi.DTO.ErrorRow;
-import four.group.jahadi.DTO.Patient.PatientAdvices;
 import four.group.jahadi.Enums.Access;
 import four.group.jahadi.Enums.Module.DeliveryStatus;
 import four.group.jahadi.Exception.NotAccessException;
@@ -15,7 +14,6 @@ import four.group.jahadi.Models.Area.JoinedDrugBookmarkWithAreaDto;
 import four.group.jahadi.Models.Drug;
 import four.group.jahadi.Models.PatientDrug;
 import four.group.jahadi.Models.TokenInfo;
-import four.group.jahadi.Repository.UserRepository;
 import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Service.Area.DrugServiceInArea;
 import four.group.jahadi.Service.DrugService;
@@ -23,8 +21,8 @@ import four.group.jahadi.Service.JahadgarDrugService;
 import four.group.jahadi.Utility.ValidList;
 import four.group.jahadi.Validator.ObjectIdConstraint;
 import io.swagger.v3.oas.annotations.Operation;
+import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -33,27 +31,26 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 
 @RestController
 @RequestMapping(path = "/api/jahadgar/drug")
 @Validated
+@RequiredArgsConstructor
 public class JahadgarDrugAPIRoutes extends Router {
 
-    @Autowired
-    private JahadgarDrugService jahadgarDrugService;
-    @Autowired
-    private DrugServiceInArea drugServiceInArea;
-    @Autowired
-    private DrugService drugService;
-    @Autowired
-    private UserRepository userRepository;
+    private final JahadgarDrugService jahadgarDrugService;
+    private final DrugServiceInArea drugServiceInArea;
+    private final DrugService drugService;
+
 
     @PutMapping(value = "bookmark/{drugId}")
     @ResponseBody
@@ -144,7 +141,7 @@ public class JahadgarDrugAPIRoutes extends Router {
     @GetMapping(value = "listOfAdvices/{areaId}/{patientId}")
     @ResponseBody
     @Operation(summary = "گرفتن لیست داروهای تجویز شده توسط دکتر")
-    public ResponseEntity<List<PatientAdvices>> listOfAdvices(
+    public ResponseEntity<HashMap<String, Object>> listOfAdvices(
             HttpServletRequest request,
             @PathVariable @ObjectIdConstraint ObjectId areaId,
             @PathVariable @ObjectIdConstraint ObjectId patientId,
@@ -156,14 +153,14 @@ public class JahadgarDrugAPIRoutes extends Router {
                 moduleId, null, deliveryStatus,
                 null, null, null, null,
                 null, null, null, null,
-                null
+                null, null, null
         );
     }
 
     @GetMapping(value = "listOfAdvices/{areaId}")
     @ResponseBody
     @Operation(summary = "گرفتن لیست داروهای تجویز شده توسط مسئول داروخانه")
-    public ResponseEntity<List<PatientAdvices>> listOfAdvices(
+    public ResponseEntity<HashMap<String, Object>> listOfAdvices(
             HttpServletRequest request,
             @PathVariable @ObjectIdConstraint ObjectId areaId,
             @RequestParam(value = "patientId", required = false) ObjectId patientId,
@@ -178,14 +175,18 @@ public class JahadgarDrugAPIRoutes extends Router {
             @RequestParam(value = "startSuggestCount", required = false) Integer startSuggestCount,
             @RequestParam(value = "endSuggestCount", required = false) Integer endSuggestCount,
             @RequestParam(value = "giverId", required = false) ObjectId giverId,
-            @RequestParam(value = "pageNo") Integer pageNo
+            @RequestParam(value = "pageIndex", required = false) @Min(0) @Max(10000) Integer pageIndex,
+            @RequestParam(value = "pageSize", required = false) @Min(5) @Max(100) Integer pageSize,
+            @RequestParam(value = "neededTotalSize", required = false) Boolean neededTotalSize
     ) {
         return drugServiceInArea.listOfAdvices(
                 getId(request), areaId, patientId,
                 moduleId, doctorId, deliveryStatus,
                 drugId, startAdviceAt, endAdviceAt, startGiveAt,
                 endGiveAt, startSuggestCount, endSuggestCount, giverId,
-                pageNo
+                pageIndex == null ? 0 : pageIndex,
+                pageSize == null ? Integer.MAX_VALUE : pageSize,
+                neededTotalSize
         );
     }
 
@@ -245,6 +246,41 @@ public class JahadgarDrugAPIRoutes extends Router {
         }
         return drugService.paginateList(
                 pageIndex, pageSize, fullTokenInfo.getGroupId(),
+                name, minAvailableCount, maxAvailableCount,
+                drugLocation, drugType, fromExpireAt, toExpireAt,
+                boxNo, shelfNo
+        );
+    }
+
+    @GetMapping(value = "excel-report")
+    @Operation(summary = "گرفتن خروجی اکسل از لیست داروها توسط مسئول گروه یا مسئول انبار")
+    public void excelReport(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            @RequestParam(required = false, name = "name") String name,
+            @RequestParam(required = false, name = "minAvailableCount") Integer minAvailableCount,
+            @RequestParam(required = false, name = "maxAvailableCount") Integer maxAvailableCount,
+            @RequestParam(required = false, name = "drugLocation") String drugLocation,
+            @RequestParam(required = false, name = "drugType") String drugType,
+            @RequestParam(required = false, name = "fromExpireAt") LocalDateTime fromExpireAt,
+            @RequestParam(required = false, name = "toExpireAt") LocalDateTime toExpireAt,
+            @RequestParam(required = false, name = "boxNo") String boxNo,
+            @RequestParam(required = false, name = "shelfNo") String shelfNo
+    ) {
+        TokenInfo fullTokenInfo = getFullTokenInfo(request);
+        if (!fullTokenInfo.getAccesses().contains(Access.GROUP)) {
+            ResponseEntity<Boolean> hasAccess = jahadgarDrugService.checkAccessToWareHouse(
+                    fullTokenInfo.getGroupId(),
+                    fullTokenInfo.getUserId()
+            );
+            if (hasAccess == null || hasAccess.getBody() == null ||
+                    !hasAccess.getBody()
+            )
+                throw new NotAccessException();
+        }
+        drugService.excelReport(
+                response,
+                fullTokenInfo.getGroupId(),
                 name, minAvailableCount, maxAvailableCount,
                 drugLocation, drugType, fromExpireAt, toExpireAt,
                 boxNo, shelfNo

@@ -3,10 +3,7 @@ package four.group.jahadi.Models;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import four.group.jahadi.Utility.Utility;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.apache.poi.ss.usermodel.Row;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Transient;
@@ -23,6 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Document(collection = "external_referral_service")
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 public class ExternalReferralService extends Model {
 
     @Field("patient_id")

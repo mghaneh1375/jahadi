@@ -57,10 +57,14 @@ public class ManageTripAPIRoutes extends Router {
     public ResponseEntity<Page<Trip>> myTrips(
             HttpServletRequest request,
             @RequestParam(value = "status", required = false) Status status,
-            @RequestParam(value = "pageIndex") @Min(0) @Max(10000) Integer pageIndex,
-            @RequestParam(value = "pageSize") @Min(5) @Max(100) Integer pageSize
+            @RequestParam(value = "pageIndex", required = false) @Min(0) @Max(10000) Integer pageIndex,
+            @RequestParam(value = "pageSize", required = false) @Min(5) @Max(100) Integer pageSize
     ) {
-        return tripService.paginateList(pageIndex, pageSize, getGroup(request), status);
+        return tripService.paginateList(
+                pageIndex == null ? 0 : pageIndex,
+                pageSize == null ? Integer.MAX_VALUE : pageSize,
+                getGroup(request), status
+        );
     }
 
     @GetMapping(value = "myActiveTrips")

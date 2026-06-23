@@ -20,6 +20,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -92,8 +93,9 @@ public class PatientExternalReferralsService {
         return new PairValue(moduleIds, subModuleIds);
     }
 
-    public ResponseEntity<List<Patient>> getAllExternalReferrals(
-            ObjectId userId, ObjectId groupId, ObjectId areaId
+    public ResponseEntity<Object> getAllExternalReferrals(
+            ObjectId userId, ObjectId groupId, ObjectId areaId,
+            int pageIndex, int pageSize, Boolean needTotalSize
     ) {
         if ((userId != null &&
                 !externalReferralAccessForGroupRepository.existsAccessByGroupIdAndUserId(groupId, userId)) ||
@@ -101,17 +103,32 @@ public class PatientExternalReferralsService {
         )
             throw new NotAccessException();
 
+        HashMap<String, Object> result = new HashMap<>();
         PairValue pairValue = getExternalReferralsSubModulesId();
+        List<ObjectId> ids = ((List<SubModule>) pairValue.getValue())
+                .stream()
+                .map(SubModule::getId)
+                .collect(Collectors.toList());
+
+        if(Objects.equals(Boolean.TRUE, needTotalSize)) {
+            result.put("totalSize", patientsInAreaRepository.countByAreaIdAndModuleIdInAndSubModuleIdIn(
+                    areaId, (List<ObjectId>) pairValue.getKey(),
+                    ids
+            ));
+        }
+
         List<ObjectId> patientsId = patientsInAreaRepository.findByAreaIdAndModuleIdInAndSubModuleIdIn(
                         areaId, (List<ObjectId>) pairValue.getKey(),
-                        ((List<SubModule>) pairValue.getValue()).stream().map(SubModule::getId).collect(Collectors.toList())
+                        ids, Pageable.ofSize(pageSize).withPage(pageIndex)
                 )
                 .stream()
                 .map(PatientsInArea::getPatientId)
                 .collect(Collectors.toList());
 
+        result.put("patients", patientRepository.findAllByIds(patientsId));
+
         return new ResponseEntity<>(
-                patientRepository.findAllByIds(patientsId),
+                result,
                 HttpStatus.OK
         );
     }

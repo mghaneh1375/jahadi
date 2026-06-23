@@ -1,16 +1,20 @@
 package four.group.jahadi.Service;
 
+import four.group.jahadi.DTO.Area.AreaDigest;
 import four.group.jahadi.DTO.ProjectData;
+import four.group.jahadi.DTO.Trip.TripDigest;
 import four.group.jahadi.DTO.Trip.TripStep1Data;
 import four.group.jahadi.DTO.UpdateProjectData;
+import four.group.jahadi.Enums.Color;
 import four.group.jahadi.Enums.Status;
 import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Models.*;
 import four.group.jahadi.Repository.*;
 import four.group.jahadi.Utility.Utility;
+import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -27,18 +31,14 @@ import static four.group.jahadi.Utility.Utility.getLocalDateTime;
 
 
 @Service
+@RequiredArgsConstructor
 public class ProjectService extends AbstractService<Project, ProjectData> {
 
-    @Autowired
-    private ProjectRepository projectRepository;
-    @Autowired
-    private GroupRepository groupRepository;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private TripRepository tripRepository;
-    @Autowired
-    private TripService tripService;
+    private final ProjectRepository projectRepository;
+    private final GroupRepository groupRepository;
+    private final UserRepository userRepository;
+    private final TripRepository tripRepository;
+    private final TripService tripService;
 
     // filters:
     // 1- name
@@ -96,7 +96,20 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
                 Sort.by("start_at").descending()
         );
 
-        projects.forEach(x -> x.setGroups(new ArrayList<>()));
+        Map<ObjectId, List<ObjectId>> tripsPerProject = tripRepository.findTripByProjectIds(
+                        projects.stream().map(Project::getId).collect(Collectors.toList())
+                )
+                .stream()
+                .collect(Collectors.groupingBy(
+                        Trip::getProjectId,
+                        HashMap::new,
+                        Collectors.mapping(Model::getId, Collectors.toList())
+                ));
+
+        projects.forEach(x -> {
+            x.setGroups(new ArrayList<>());
+            x.setTripIds(tripsPerProject.get(x.getId()));
+        });
         List<Group> groups = groupRepository.findByIdsIn(projects.stream()
                 .map(Project::getGroupIds).collect(Collectors.toList())
                 .stream().flatMap(List::stream).distinct().collect(Collectors.toList())
@@ -109,9 +122,7 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
         );
 
         projects.forEach(project -> {
-
             for (Group group : groups) {
-
                 if (project.getGroupIds().stream().noneMatch(x -> x.equals(group.getId())))
                     continue;
 
@@ -127,10 +138,11 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
         projectRepository.save(project);
     }
 
-//    @Transactional
+    //    @Transactional
+    @CacheEvict(value = "groupStatisticData", allEntries = true)
     public void remove(ObjectId id, ObjectId userId, String username, ObjectId groupId) {
         Project project = projectRepository.findById(id).orElseThrow(InvalidIdException::new);
-        if (project.getStartAt().isAfter(Utility.getCurrLocalDateTime()))
+        if (project.getStartAt().isBefore(Utility.getCurrLocalDateTime()))
             throw new InvalidFieldsException("پروژه آغاز شده و امکان حدف آن وجود ندارد");
 
         tripRepository
@@ -140,6 +152,10 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
     }
 
     public void update(ObjectId id, UpdateProjectData dto) {
+        if(dto.getEndAt() != null && dto.getStartAt() > dto.getEndAt()) {
+            throw new InvalidFieldsException("تاریخ اتمام باید از شروع بزرگ تر باشد");
+        }
+
         Project project = projectRepository.findById(id).orElseThrow(InvalidIdException::new);
         project = populateEntity(project, dto);
 
@@ -156,9 +172,15 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
 
     public ResponseEntity<Project> findById(ObjectId id, Object... params) {
         Project project = projectRepository.findById(id).orElseThrow(InvalidIdException::new);
-        project.setGroupNames(
-                groupRepository.findByIdsIn(project.getGroupIds())
-                        .stream().map(Group::getName).collect(Collectors.toList())
+        project.setTripsGroupAccess(
+                tripRepository.findTripExcludeAreaByProjectId(project.getId())
+                        .stream()
+                        .map(trip -> trip.getGroupsWithAccess().stream().map(groupAccess -> JSONGroupAccess
+                                .builder()
+                                .groupId(groupAccess.getGroupId())
+                                .writeAccess(groupAccess.getWriteAccess())
+                                .build()).collect(Collectors.toList()))
+                        .collect(Collectors.toList())
         );
 
         return new ResponseEntity<>(
@@ -167,9 +189,10 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
         );
     }
 
+    @CacheEvict(value = "groupStatisticData", allEntries = true)
     public ResponseEntity<Project> store(ProjectData data, Object... params) {
 
-        if(projectRepository.countByName(data.getName()) > 0)
+        if (projectRepository.countByName(data.getName()) > 0)
             throw new InvalidFieldsException("نام وارد شده تکراری است");
 
         List<ObjectId> groupIds = data.getTrips().stream()
@@ -221,7 +244,7 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
 
     Project populateEntity(Project project, UpdateProjectData projectData) {
         project.setName(projectData.getName());
-        project.setColor(projectData.getColor());
+        project.setColor(Color.WHITE);
         project.setStartAt(getLocalDateTime(new Date(projectData.getStartAt())));
         project.setEndAt(getLastLocalDateTime(new Date(projectData.getEndAt())));
         return project;
@@ -242,30 +265,50 @@ public class ProjectService extends AbstractService<Project, ProjectData> {
 
     public List<Project> myProjectsNeedAction(ObjectId groupId) {
         List<Project> projects =
-                projectRepository.findByOwner(Collections.singletonList(groupId));
+                projectRepository.findActivesByOwner(Collections.singletonList(groupId), Utility.getCurrLocalDateTime());
         List<Project> result = new ArrayList<>();
 
         projects.forEach(project -> {
             List<Trip> trips =
                     tripRepository.findNeedActionByGroupId(Utility.getCurrLocalDateTime(), groupId, project.getId());
 
-            if(trips.size() == 0)
+            if (trips.size() == 0)
                 return;
 
-            List<ObjectId> ids = new ArrayList<>();
+            List<TripDigest> tripDigests = new ArrayList<>();
             for (Trip trip : trips) {
                 if (trip.getGroupsWithAccess().stream().noneMatch(groupAccess ->
                         groupAccess.getWriteAccess() && groupAccess.getGroupId().equals(groupId)
                 ))
                     continue;
 
-                ids.add(trip.getId());
+                tripDigests.add(
+                        TripDigest
+                                .builder()
+                                .id(trip.getId())
+                                .name(trip.getName())
+                                .startAt(trip.getStartAt())
+                                .endAt(trip.getEndAt())
+                                .dailyStartAt(trip.getDailyStartAt())
+                                .dailyEndAt(trip.getDailyEndAt())
+                                .areas(
+                                        trip.getAreas().stream().map(area -> {
+                                            return AreaDigest
+                                                    .builder()
+                                                    .id(area.getId())
+                                                    .ownerId(area.getOwnerId())
+                                                    .name(area.getName())
+                                                    .build();
+                                        }).collect(Collectors.toList())
+                                )
+                                .build()
+                );
             }
 
-            if(ids.size() == 0)
+            if (tripDigests.size() == 0)
                 return;
 
-            project.setTripIds(ids);
+            project.setTripDigests(tripDigests);
             result.add(project);
         });
 

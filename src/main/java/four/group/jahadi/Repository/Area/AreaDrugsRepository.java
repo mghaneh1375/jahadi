@@ -19,6 +19,15 @@ public interface AreaDrugsRepository extends MongoRepository<AreaDrugs, ObjectId
     @Query(value = "{areaId: ?0}", count = true)
     Long countByAreaId(ObjectId areaId);
 
+    @Aggregation(pipeline = {
+            "{$match: {areaId: ?0}}",
+            "{$lookup: {from: 'drug', localField: 'drug_id', foreignField: '_id', as: 'drugInfo'}}",
+            "{$unwind: '$drugInfo'}",
+            "{$match: {'drugInfo.name': {$regex: ?1, $options: 'i'}}}",
+            "{$count: 'total'}"
+    })
+    Long countByAreaIdAndSearchKey(ObjectId areaId, String searchRegex);
+
     @Query(value = "{areaId: ?0, drugId: ?1}", exists = true)
     Boolean existByAreaIdAndDrugId(ObjectId areaId, ObjectId drugId);
 
@@ -30,9 +39,17 @@ public interface AreaDrugsRepository extends MongoRepository<AreaDrugs, ObjectId
 
     @Aggregation(pipeline = {
             "{$match: {areaId: ?0}}",
+
+            "{$lookup: {from: 'drug', localField: 'drug_id', foreignField: '_id', as: 'drugInfo'}}",
+            "{$unwind: '$drugInfo'}",
+
+            "{$match: {'drugInfo.name': {$regex: ?3, $options: 'i'}}}",
+
+            "{$sort: {'drugInfo.name': 1}}",
+
             "{$skip: ?1}",
             "{$limit: ?2}",
-            "{$lookup: {from: 'drug', localField: 'drug_id', foreignField: '_id', as: 'drugInfo'}}",
+
             "{$unset: 'drugInfo.created_at'}",
             "{$unset: 'drugInfo.user_id'}",
             "{$unset: 'drugInfo.group_id'}",
@@ -42,12 +59,12 @@ public interface AreaDrugsRepository extends MongoRepository<AreaDrugs, ObjectId
             "{$unset: 'drugInfo.location'}",
             "{$unset: 'drugInfo.box_no'}",
             "{$unset: 'drugInfo.shelf_no'}",
-            "{$unwind: '$drugInfo'}",
+
             "{$unset: 'area_id'}",
             "{$unset: 'drug_id'}",
             "{$unset: 'drug_name'}"
     })
-    List<JoinedAreaDrugs> findDigestByAreaId(ObjectId areaId, Integer skip, Integer limit);
+    List<JoinedAreaDrugs> findDigestByAreaId(ObjectId areaId, Integer skip, Integer limit, String searchKey);
 
     @Aggregation(pipeline = {
             "{$match: {areaId: ?0}}",

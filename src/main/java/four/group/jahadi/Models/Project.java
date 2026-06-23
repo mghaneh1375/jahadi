@@ -3,6 +3,7 @@ package four.group.jahadi.Models;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import four.group.jahadi.DTO.Trip.TripDigest;
 import four.group.jahadi.Enums.Color;
 import lombok.*;
 import org.bson.types.ObjectId;
@@ -30,11 +31,11 @@ public class Project extends Model {
     private int progress = 0;
 
     @Field("start_at")
-    @JsonSerialize(using = DateSerialization.class)
+    @JsonSerialize(using = JustDateSerialization.class)
     private LocalDateTime startAt;
 
     @Field("end_at")
-    @JsonSerialize(using = DateSerialization.class)
+    @JsonSerialize(using = JustDateSerialization.class)
     private LocalDateTime endAt;
 
     @Field("group_ids")
@@ -50,8 +51,15 @@ public class Project extends Model {
     private List<Group> groups;
 
     @Transient
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    private List<List<JSONGroupAccess>> tripsGroupAccess;
+
+    @Transient
     @JsonSerialize(using = ObjectIdListSerialization.class)
     private List<ObjectId> tripIds;
+
+    @Transient
+    private List<TripDigest> tripDigests;
 
     @Override
     public String toString() {

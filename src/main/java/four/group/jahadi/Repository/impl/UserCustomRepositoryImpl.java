@@ -14,6 +14,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -27,62 +28,78 @@ public class UserCustomRepositoryImpl {
             String NID, String phone, Sex sex, String groupName,
             ObjectId groupId, Boolean justGroupRequests,
             String searchKey, Pageable pageable,
-            Criteria ...moreCriteriaList
+            Boolean justName, Criteria... moreCriteriaList
     ) {
-        Criteria criteria = new Criteria();
-        criteria.andOperator(
+        List<Criteria> criteriaList = new ArrayList<>();
+
+        criteriaList.add(
                 new Criteria().orOperator(
                         Criteria.where("remove_at").is(null),
                         Criteria.where("remove_at").exists(false)
                 )
         );
 
-        if(status != null)
-            criteria.and("status").is(status);
+        if (status != null) {
+            criteriaList.add(Criteria.where("status").is(status));
+        }
 
-        if(access != null)
-            criteria.and("access").is(access);
+        if (access != null) {
+            criteriaList.add(Criteria.where("accesses").is(access));
+        }
 
         if (name != null && !name.isEmpty()) {
-            criteria.and("name").regex(name, "i");
+            criteriaList.add(Criteria.where("name").regex(name, "i"));
         }
 
-        if(NID != null)
-            criteria.and("NID").regex(NID, "i");
-
-        if(phone != null)
-            criteria.and("phone").regex(phone, "i");
-
-        if(sex != null)
-            criteria.and("sex").is(sex);
-
-        if(groupName != null)
-            criteria.and("group_name").regex(groupName, "i");
-
-        if(groupId != null)
-            criteria.and("group_id").is(groupId);
-
-        if(Boolean.TRUE.equals(justGroupRequests))
-            criteria.and("total_members").exists(true);
-
-        if(moreCriteriaList != null && moreCriteriaList.length > 0) {
-            criteria.andOperator(moreCriteriaList);
+        if (NID != null) {
+            criteriaList.add(Criteria.where("NID").regex(NID, "i"));
         }
 
-        if(searchKey != null) {
-            criteria.orOperator(
-                    Criteria.where("group_name").regex(searchKey, "i"),
-                    Criteria.where("NID").regex(searchKey, "i"),
-                    Criteria.where("name").regex(searchKey, "i"),
-                    Criteria.where("phone").regex(searchKey, "i"),
-                    Criteria.where("father_name").regex(searchKey, "i"),
-                    Criteria.where("university").regex(searchKey, "i")
+        if (phone != null) {
+            criteriaList.add(Criteria.where("phone").regex(phone, "i"));
+        }
+
+        if (sex != null) {
+            criteriaList.add(Criteria.where("sex").is(sex));
+        }
+
+        if (groupName != null) {
+            criteriaList.add(Criteria.where("group_name").regex(groupName, "i"));
+        }
+
+        if (groupId != null) {
+            criteriaList.add(Criteria.where("group_id").is(groupId));
+        }
+
+        if (Boolean.TRUE.equals(justGroupRequests)) {
+            criteriaList.add(Criteria.where("total_members").exists(true));
+        }
+
+        if (moreCriteriaList != null && moreCriteriaList.length > 0) {
+            criteriaList.add(new Criteria().andOperator(moreCriteriaList));
+        }
+
+        if (searchKey != null && !searchKey.isEmpty()) {
+            criteriaList.add(
+                    new Criteria().orOperator(
+                            Criteria.where("group_name").regex(searchKey, "i"),
+                            Criteria.where("NID").regex(searchKey, "i"),
+                            Criteria.where("name").regex(searchKey, "i"),
+                            Criteria.where("phone").regex(searchKey, "i"),
+                            Criteria.where("father_name").regex(searchKey, "i"),
+                            Criteria.where("university").regex(searchKey, "i")
+                    )
             );
         }
 
-        Query query = new Query(criteria);
-        long total = mongoTemplate.count(query, User.class);
+        Query query = new Query(new Criteria()
+                .andOperator(criteriaList.toArray(new Criteria[0]))
+        );
 
+        if(Boolean.TRUE.equals(justName))
+            query.fields().include("name").include("_id");
+
+        long total = mongoTemplate.count(query, User.class);
         query.with(pageable);
         List<User> content = mongoTemplate.find(query, User.class);
 

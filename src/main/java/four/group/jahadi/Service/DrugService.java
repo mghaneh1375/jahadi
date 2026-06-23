@@ -15,11 +15,9 @@ import four.group.jahadi.Repository.*;
 import four.group.jahadi.Repository.impl.DrugCustomRepositoryImpl;
 import four.group.jahadi.Service.Area.ReportUtil;
 import four.group.jahadi.Utility.PairValue;
+import four.group.jahadi.Utility.Utility;
 import lombok.RequiredArgsConstructor;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.bson.types.ObjectId;
 import org.springframework.cache.annotation.Cacheable;
@@ -37,6 +35,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static four.group.jahadi.Service.Area.ReportUtil.prepareHttpServletResponse;
 import static four.group.jahadi.Utility.Utility.getExcelDate;
 import static four.group.jahadi.Utility.Utility.isCellDateFormatted;
 
@@ -53,6 +52,22 @@ public class DrugService extends AbstractService<Drug, DrugData> {
     private final DrugsInAreaRepository drugsInAreaRepository;
     private final PatientsDrugRepository patientsDrugRepository;
     private final DrugCustomRepositoryImpl drugCustomRepositoryImpl;
+    private final ExcelService excelService;
+    private final static List<String> DRUGS_EXCEL_COLS = List.of(
+            "نام دارو",
+            "نوع دارو",
+            "کد دارو",
+            "دز دارو",
+            "تاریخ انقضا",
+            "شرکت سازنده",
+            "تعداد دانه",
+            "تعداد پک",
+            "قیمت یک عدد",
+            "قیمت کل",
+            "محل دارو",
+            "شماره جعبه",
+            "شماره قفسه"
+    );
 
     public ResponseEntity<List<Drug>> search(String name) {
         try {
@@ -68,7 +83,6 @@ public class DrugService extends AbstractService<Drug, DrugData> {
             throw new InvalidFieldsException(x.getMessage());
         }
     }
-
 
     @Override
     public ResponseEntity<Page<Drug>> paginateList(int pageIndex, int pageSize, Object... filters) {
@@ -95,6 +109,74 @@ public class DrugService extends AbstractService<Drug, DrugData> {
                     drugs,
                     HttpStatus.OK
             );
+        } catch (Exception x) {
+            throw new InvalidFieldsException(x.getMessage());
+        }
+    }
+
+    public void excelReport(HttpServletResponse response, Object... filters) {
+        ObjectId groupId = (ObjectId) filters[0];
+        try {
+            String name = filters.length > 1 ? (String) filters[1] : null;
+            Integer minAvailableCount = filters.length > 2 ? (Integer) filters[2] : null;
+            Integer maxAvailableCount = filters.length > 3 ? (Integer) filters[3] : null;
+            DrugLocation drugLocation = filters.length > 4 && filters[4] != null ? DrugLocation.valueOf(filters[4].toString().toUpperCase()) : null;
+            DrugType drugType = filters.length > 5 && filters[5] != null ? DrugType.valueOf(filters[5].toString().toUpperCase()) : null;
+            LocalDateTime fromExpireAt = filters.length > 6 ? (LocalDateTime) filters[6] : null;
+            LocalDateTime toExpireAt = filters.length > 7 ? (LocalDateTime) filters[7] : null;
+            String boxNo = filters.length > 8 ? (String) filters[8] : null;
+            String shelfNo = filters.length > 9 ? (String) filters[9] : null;
+            Pageable pageable = Pageable.ofSize(Integer.MAX_VALUE).withPage(0);
+
+            Page<Drug> drugs = drugCustomRepositoryImpl.findDrugsAdvanced(
+                    groupId, name, minAvailableCount, maxAvailableCount,
+                    drugLocation, drugType, fromExpireAt, toExpireAt,
+                    boxNo, shelfNo, pageable
+            );
+
+            Workbook workbook = excelService.createExcel(Collections.singletonList("داروها"));
+            Sheet sheet = workbook.getSheetAt(0);
+            excelService.writeExcelHeader(sheet, DRUGS_EXCEL_COLS);
+
+            AtomicInteger atomicInteger = new AtomicInteger(1);
+            drugs.getContent().forEach(drug -> {
+                Row row = sheet.createRow(atomicInteger.getAndIncrement());
+                int col = 0;
+                Cell cell = row.createCell(col++);
+                cell.setCellValue(drug.getName());
+                cell = row.createCell(col++);
+                cell.setCellValue(drug.getDrugType() == null ? "" : drug.getDrugType().getName());
+                cell = row.createCell(col++);
+                cell.setCellValue(drug.getCode());
+                cell = row.createCell(col++);
+                cell.setCellValue(drug.getDose());
+                cell = row.createCell(col++);
+                cell.setCellValue(drug.getExpireAt() == null
+                        ? ""
+                        :
+                        Utility.convertUTCDateToJalali(
+                                drug.getExpireAt()
+                        ).replaceAll("\\s+", "").split("-")[0]
+                );
+                cell = row.createCell(col++);
+                cell.setCellValue(drug.getProducer());
+                cell = row.createCell(col++);
+                cell.setCellValue(drug.getAvailable());
+                cell = row.createCell(col++);
+                cell.setCellValue(drug.getAvailablePack());
+                cell = row.createCell(col++);
+                cell.setCellValue(drug.getPrice());
+                cell = row.createCell(col++);
+                cell.setCellValue(drug.getPrice() * drug.getAvailable());
+                cell = row.createCell(col++);
+                cell.setCellValue(drug.getLocation() == null ? "" : drug.getLocation().getFaTranslate());
+                cell = row.createCell(col++);
+                cell.setCellValue(drug.getBoxNo());
+                cell = row.createCell(col++);
+                cell.setCellValue(drug.getShelfNo());
+            });
+
+            prepareHttpServletResponse(response, workbook, "drugs");
         } catch (Exception x) {
             throw new InvalidFieldsException(x.getMessage());
         }
@@ -427,6 +509,7 @@ public class DrugService extends AbstractService<Drug, DrugData> {
                 HttpStatus.OK
         );
     }
+
     @Cacheable(cacheNames = "drugHowToUseOptions")
     public ResponseEntity<List<PairValue>> getDrugHowToUseOptions() {
         return new ResponseEntity<>(

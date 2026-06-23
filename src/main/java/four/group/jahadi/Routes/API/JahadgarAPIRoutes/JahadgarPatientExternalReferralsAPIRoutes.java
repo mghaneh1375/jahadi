@@ -23,6 +23,9 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @RestController
@@ -37,16 +40,20 @@ public class JahadgarPatientExternalReferralsAPIRoutes extends Router {
     @Operation(
             summary = "گرفتن فرم بیمار توسط پزشک در یک ماژول خاص در یک منطقه"
     )
-    public ResponseEntity<List<Patient>> getExternalReferrals(
+    public ResponseEntity<Object> getExternalReferrals(
             HttpServletRequest request,
-            @PathVariable @ObjectIdConstraint ObjectId areaId
+            @PathVariable @ObjectIdConstraint ObjectId areaId,
+            @RequestParam(value = "pageIndex") @NotNull @Min(0) @Max(10000) int pageIndex,
+            @RequestParam(value = "pageSize") @NotNull @Min(5) @Max(100) int pageSize,
+            @RequestParam(value = "needTotalSize", required = false) Boolean needTotalSize
     ) {
         TokenInfo fullTokenInfo = getFullTokenInfo(request);
         return patientExternalReferralsService.getAllExternalReferrals(
                 fullTokenInfo.getAccesses().contains(Access.GROUP)
                         ? null
                         : fullTokenInfo.getUserId(),
-                fullTokenInfo.getGroupId(), areaId
+                fullTokenInfo.getGroupId(), areaId,
+                pageIndex, pageSize, needTotalSize
         );
     }
 

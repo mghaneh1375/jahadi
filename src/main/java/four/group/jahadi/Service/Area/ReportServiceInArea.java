@@ -20,6 +20,7 @@ import four.group.jahadi.Repository.PatientRepository;
 import four.group.jahadi.Repository.TripRepository;
 import four.group.jahadi.Repository.UserRepository;
 import four.group.jahadi.Service.ExcelService;
+import four.group.jahadi.Utility.PairValue;
 import four.group.jahadi.Utility.Utility;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.hssf.util.HSSFColor;
@@ -39,6 +40,7 @@ import java.util.stream.Stream;
 
 import static four.group.jahadi.Service.Area.AreaUtils.findArea;
 import static four.group.jahadi.Service.Area.ReportUtil.prepareHttpServletResponse;
+import static four.group.jahadi.Service.ExcelService.commonPatuientExcelTitles;
 import static four.group.jahadi.Service.ExcelService.isMergedCell;
 
 @Service
@@ -55,7 +57,8 @@ public class ReportServiceInArea {
 
     public void getPatientReport(
             Patient patient, Module module, Sheet sheet,
-            HashMap<ObjectId, List<PatientForm>> patientForms
+            HashMap<ObjectId, List<PatientForm>> patientForms,
+            HashMap<ObjectId, Boolean> referralsInfo
     ) {
         HashMap<ObjectId, List<Question>> subModulesQuestions = new HashMap<>();
         AtomicInteger incRowStep = new AtomicInteger(1);
@@ -115,7 +118,7 @@ public class ReportServiceInArea {
                 .map(SubModule::getId)
                 .collect(Collectors.toList());
 
-        excelService.writeCommonHeader(sheet);
+        excelService.writeExcelHeader(sheet, commonPatuientExcelTitles);
 
         Workbook wb = sheet.getWorkbook();
         CellStyle parentCellStyle = wb.createCellStyle();
@@ -126,7 +129,7 @@ public class ReportServiceInArea {
         font.setBold(true);
         parentCellStyle.setFont(font);
 
-        int startIdx = 8;
+        int startIdx = 9;
         int maxRowIdx = 1;
         HashMap<ObjectId, HashMap<ObjectId, Integer>> questionsColIdx = new HashMap<>();
         HashMap<ObjectId, Integer> startIndicesHistory = new HashMap<>();
@@ -154,7 +157,7 @@ public class ReportServiceInArea {
         if (maxRowIdx > 1) {
             for (int i = 2; i <= maxRowIdx; i++)
                 sheet.createRow(i);
-            for (int i = 8; i < sheet.getRow(1).getLastCellNum(); i++) {
+            for (int i = 9; i < sheet.getRow(1).getLastCellNum(); i++) {
                 CellRangeAddress mergedCell = isMergedCell(1, i, sheet);
                 if (mergedCell == null) {
                     sheet.addMergedRegion(
@@ -167,7 +170,7 @@ public class ReportServiceInArea {
             }
         }
 
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i < 9; i++) {
             sheet.addMergedRegion(
                     new CellRangeAddress(
                             0, maxRowIdx, i, i
@@ -200,6 +203,7 @@ public class ReportServiceInArea {
                         startIndicesHistory.get(subModuleId),
                         patient,
                         patientForms.get(referId),
+                        referralsInfo.get(referId),
                         sheet,
                         new HashMap<>(),
                         userRepository.findJustNameByIdsIn(new ArrayList<>(doctorIds)),
@@ -275,7 +279,7 @@ public class ReportServiceInArea {
         List<ObjectId> subModuleIds = module.getSubModules().stream().map(SubModule::getId)
                 .collect(Collectors.toList());
 
-        excelService.writeCommonHeader(sheet);
+        excelService.writeExcelHeader(sheet, commonPatuientExcelTitles);
         Row row = sheet.getRow(0);
         Workbook wb = row.getSheet().getWorkbook();
 
@@ -287,7 +291,7 @@ public class ReportServiceInArea {
         font.setBold(true);
         parentCellStyle.setFont(font);
 
-        int startIdx = 8;
+        int startIdx = 9;
         int maxRowIdx = 1;
         HashMap<ObjectId, HashMap<ObjectId, Integer>> questionsColIdx = new HashMap<>();
         HashMap<ObjectId, Integer> startIndicesHistory = new HashMap<>();
@@ -342,7 +346,7 @@ public class ReportServiceInArea {
         if (maxRowIdx > 1) {
             for (int i = 2; i <= maxRowIdx; i++)
                 sheet.createRow(i);
-            for (int i = 8; i < sheet.getRow(1).getLastCellNum(); i++) {
+            for (int i = 9; i < sheet.getRow(1).getLastCellNum(); i++) {
                 CellRangeAddress mergedCell = isMergedCell(1, i, sheet);
                 if (mergedCell == null) {
                     sheet.addMergedRegion(
@@ -355,7 +359,7 @@ public class ReportServiceInArea {
             }
         }
 
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i < 9; i++) {
             sheet.addMergedRegion(
                     new CellRangeAddress(
                             0, maxRowIdx, i, i

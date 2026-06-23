@@ -3,6 +3,8 @@ package four.group.jahadi.Service;
 import four.group.jahadi.DTO.Trip.TripStep1Data;
 import four.group.jahadi.DTO.Trip.TripStep2Data;
 import four.group.jahadi.DTO.Trip.TripStepData;
+import four.group.jahadi.DTO.dashboard.DashboardActiveArea;
+import four.group.jahadi.DTO.profile.ProfileDigest;
 import four.group.jahadi.Enums.Status;
 import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Exception.InvalidIdException;
@@ -14,6 +16,8 @@ import four.group.jahadi.Service.Area.AreaService;
 import four.group.jahadi.Utility.Utility;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -22,9 +26,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static four.group.jahadi.Utility.Utility.*;
@@ -123,9 +125,20 @@ public class TripService extends AbstractService<Trip, TripStepData> {
                         .flatMap(List::stream).distinct().collect(Collectors.toList())
         );
 
+        List<Project> projects = projectRepository.findByIds(
+                trips.stream().map(Trip::getProjectId)
+                        .distinct()
+                        .collect(Collectors.toList())
+        );
+
         trips.forEach(trip -> trip.getAreas().forEach(area -> users.stream()
                 .filter(user -> user.getId().equals(area.getOwnerId()))
                 .findFirst().ifPresent(area::setOwner)));
+
+        trips.forEach(trip -> projects.stream()
+                .filter(project -> project.getId().equals(trip.getProjectId()))
+                .findFirst().map(Project::getName).ifPresent(trip::setProject)
+        );
 
         return new ResponseEntity<>(trips, HttpStatus.OK);
     }
@@ -136,33 +149,85 @@ public class TripService extends AbstractService<Trip, TripStepData> {
         ), HttpStatus.OK);
     }
 
-    public ResponseEntity<List<Trip>> inProgressTripsForGroupAccess(ObjectId groupId) {
+    public ResponseEntity<List<DashboardActiveArea>> inProgressTripsForGroupAccess(ObjectId groupId) {
+//        List<Trip> trips;
+//        try {
+//            trips = tripRepository.findActivesOrNotStartedProjectsByGroupId(
+//                    Utility.getCurrLocalDateTime(), groupId
+//            );
+//        } catch (Exception x) {
+//            x.printStackTrace();
+//            return null;
+//        }
+//
+//        List<User> users = userRepository.findByIdsIn(
+//                trips.stream().map(Trip::getAreas)
+//                        .map(areas -> areas.stream().map(Area::getOwnerId).collect(Collectors.toList()))
+//                        .flatMap(List::stream).distinct().collect(Collectors.toList())
+//        );
+//
+//        trips.forEach(trip -> trip.getAreas().forEach(area -> users.stream()
+//                .filter(user -> user.getId().equals(area.getOwnerId()))
+//                .findFirst().ifPresent(area::setOwner)));
+//
+//        return new ResponseEntity<>(trips, HttpStatus.OK);
 
-        List<Trip> trips;
+        List<Trip> trips = tripRepository.findActivesOrNotStartedProjectsByGroupId(Utility.getCurrLocalDateTime(), groupId);
+        List<Group> groups = groupRepository.findDigestByIdsIn(
+                trips.stream().map(Trip::getGroupsWithAccess)
+                        .map(groupAccesses -> groupAccesses.stream().map(GroupAccess::getGroupId).collect(Collectors.toList()))
+                        .flatMap(List::stream).distinct().collect(Collectors.toList())
+        );
 
-        try {
-            trips = tripRepository.findActivesOrNotStartedProjectsByGroupId(
-                    Utility.getCurrLocalDateTime(), groupId
-            );
-        } catch (Exception x) {
-            x.printStackTrace();
-            return null;
-        }
+        trips.forEach(trip -> trip.getGroupsWithAccess().forEach(groupAccess -> groups.stream()
+                .filter(user -> user.getId().equals(groupAccess.getGroupId()))
+                .findFirst().ifPresent(groupAccess::setGroup)));
 
-        List<User> users = userRepository.findByIdsIn(
+        List<User> areaOwners = userRepository.findDigestByIdsIn(
                 trips.stream().map(Trip::getAreas)
                         .map(areas -> areas.stream().map(Area::getOwnerId).collect(Collectors.toList()))
                         .flatMap(List::stream).distinct().collect(Collectors.toList())
         );
-
-        trips.forEach(trip -> trip.getAreas().forEach(area -> users.stream()
+        trips.forEach(trip -> trip.getAreas().forEach(area -> areaOwners.stream()
                 .filter(user -> user.getId().equals(area.getOwnerId()))
                 .findFirst().ifPresent(area::setOwner)));
 
-        return new ResponseEntity<>(trips, HttpStatus.OK);
+        List<DashboardActiveArea> dashboardActiveAreas = new ArrayList<>();
+        trips.forEach(trip -> {
+            dashboardActiveAreas.addAll(
+                    trip.getAreas().stream().map(area -> DashboardActiveArea
+                            .builder()
+                            .groups(
+                                    trip.getGroupsWithAccess()
+                                            .stream()
+                                            .map(GroupAccess::getGroup)
+                                            .map(group ->
+                                                    ProfileDigest
+                                                            .builder()
+                                                            .pic(group.getPic())
+                                                            .name(group.getName())
+                                                            .id(group.getId())
+                                                            .build()
+                                            ).collect(Collectors.toList())
+                            )
+                            .name(area.getName())
+                            .city(area.getCity())
+                            .areaOwner(
+                                    ProfileDigest
+                                            .builder()
+                                            .id(area.getOwnerId())
+                                            .name(area.getOwner().getName())
+                                            .build()
+                            )
+                            .build()).collect(Collectors.toList())
+            );
+        });
+
+        return new ResponseEntity<>(dashboardActiveAreas, HttpStatus.OK);
     }
 
     @Override
+    @CacheEvict(value = "groupsWithActiveTrip", allEntries = true)
     public void update(ObjectId id, TripStepData data, Object... params) {
         Trip trip = tripRepository.findById(id).orElseThrow(InvalidIdException::new);
         boolean hasAdminAccess = (boolean) params[0];
@@ -195,6 +260,7 @@ public class TripService extends AbstractService<Trip, TripStepData> {
         return null;
     }
 
+    @CacheEvict(value = "groupsWithActiveTrip", allEntries = true)
     public void removeTrip(
             Trip trip, ObjectId userId,
             String username, ObjectId groupId
@@ -219,6 +285,7 @@ public class TripService extends AbstractService<Trip, TripStepData> {
         removeTrip(trip, userId, username, groupId);
     }
 
+    @CacheEvict(value = "groupsWithActiveTrip", allEntries = true)
     public void resetGroupAccessesForTrip(ObjectId projectId, ObjectId tripId, List<TripStep1Data> data) {
         Trip trip = tripRepository.findTripByProjectIdAndId(projectId, tripId).orElseThrow(InvalidIdException::new);
         List<GroupAccess> groupsWithAccess = new ArrayList<>();
@@ -233,6 +300,7 @@ public class TripService extends AbstractService<Trip, TripStepData> {
         tripRepository.save(trip);
     }
 
+    @CacheEvict(value = "groupsWithActiveTrip", allEntries = true)
     public void store(ObjectId projectId, List<TripStep1Data> data) {
         Project project = projectRepository.findById(projectId).orElseThrow(InvalidIdException::new);
         Trip trip = Trip
@@ -258,25 +326,23 @@ public class TripService extends AbstractService<Trip, TripStepData> {
         return null;
     }
 
-    public ResponseEntity<List<Group>> getGroupsWhichHasActiveTrip() {
+    @Cacheable(value = "groupsWithActiveTrip")
+    public ResponseEntity<List<ActiveGroups>> getGroupsWhichHaveActiveTrip() {
+        List<Trip> trips = tripRepository.findActiveTrips(getCurrLocalDateTime());
+        if(trips.size() == 0)
+            return new ResponseEntity<>(null, HttpStatus.OK);
 
-        List<Trip> activeTrips = tripRepository.findActives(Utility.getCurrLocalDateTime());
+        List<ObjectId> groupIds = trips.stream()
+                .map(Trip::getGroupsWithAccess)
+                .flatMap(groupAccesses -> groupAccesses.stream().map(GroupAccess::getGroupId))
+                .distinct().collect(Collectors.toList());
 
-        List<Group> groups = groupRepository.findByIdsIn(findFromTripGroupIds(activeTrips));
-        groups.forEach(x -> x.setAreas(new ArrayList<>()));
-
-        GroupService.fillGroupByUsers(groups, userRepository);
-
-        activeTrips.forEach(trip -> {
-
-            for (Group group : groups) {
-                if (trip.getGroupsWithAccess().stream().anyMatch(x -> x.getGroupId().equals(group.getId())))
-                    group.getAreas().addAll(trip.getAreas());
-            }
-
-        });
-
-        return new ResponseEntity<>(groups, HttpStatus.OK);
+        return ResponseEntity.ok(
+                groupRepository.findByIdsIn(groupIds)
+                        .stream()
+                        .map(group -> ActiveGroups.builder().name(group.getName()).pic(group.getPic()).build())
+                        .collect(Collectors.toList())
+        );
     }
 
     private List<ObjectId> findFromTripGroupIds(List<Trip> trips) {
@@ -287,7 +353,6 @@ public class TripService extends AbstractService<Trip, TripStepData> {
     }
 
     public ResponseEntity<List<Trip>> getGroupsTrips(ObjectId groupId) {
-
         List<Trip> trips = tripRepository.findByGroupId(groupId);
         List<ObjectId> projectIds = trips.stream().map(Trip::getProjectId)
                 .distinct().collect(Collectors.toList());
@@ -302,7 +367,40 @@ public class TripService extends AbstractService<Trip, TripStepData> {
 
         List<Project> projects = projectRepository.findDigestByIds(projectIds);
         trips.forEach(trip -> {
+            trip.getGroupsWithAccess().forEach(groupAccess ->
+                    groups.stream().filter(group -> group.getId().equals(groupAccess.getGroupId()))
+                            .findFirst().ifPresent(groupAccess::setGroup)
+            );
 
+            projects.stream()
+                    .filter(project -> project.getId().equals(trip.getProjectId()))
+                    .findFirst().ifPresent(project1 ->
+                            trip.setProject(project1.getName())
+                    );
+        });
+
+        return new ResponseEntity<>(trips, HttpStatus.OK);
+    }
+
+    public ResponseEntity<Page<Trip>> getGroupsTripsWithPagination(
+            ObjectId groupId, int pageIndex, int pageSize
+    ) {
+        Page<Trip> trips = tripRepository.findByGroupIdWithPagination(
+                groupId, Pageable.ofSize(pageSize).withPage(pageIndex)
+        );
+        List<ObjectId> projectIds = trips.stream().map(Trip::getProjectId)
+                .distinct().collect(Collectors.toList());
+
+        List<Group> groups = groupRepository.findByIdsIn(findFromTripGroupIds(trips.getContent()));
+        List<User> users = userRepository.findByIdsIn(groups.stream().map(Group::getOwner).distinct().collect(Collectors.toList()));
+
+        groups.forEach(group ->
+                users.stream().filter(user -> user.getId().equals(group.getOwner())).findFirst()
+                        .ifPresent(group::setUser)
+        );
+
+        List<Project> projects = projectRepository.findDigestByIds(projectIds);
+        trips.getContent().forEach(trip -> {
             trip.getGroupsWithAccess().forEach(groupAccess ->
                     groups.stream().filter(group -> group.getId().equals(groupAccess.getGroupId()))
                             .findFirst().ifPresent(groupAccess::setGroup)

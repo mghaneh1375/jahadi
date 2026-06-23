@@ -33,9 +33,15 @@ public class RegionDrugAPIRoutes extends Router {
             HttpServletRequest request,
             @PathVariable @ObjectIdConstraint ObjectId areaId,
             @RequestParam(value = "pageIndex") @Min(0) Integer pageIndex,
-            @RequestParam(value = "pageSize") @Min(10) Integer pageSize
+            @RequestParam(value = "pageSize") @Min(10) Integer pageSize,
+            @RequestParam(value = "key", required = false) @Size(min = 3, max = 100) String searchKey,
+            @RequestParam(value = "needTotalSize", required = false) Boolean needTotalSize
     ) {
-        return drugServiceInArea.list(getId(request), areaId, pageIndex, pageSize);
+        return drugServiceInArea.list(
+                getId(request), areaId,
+                pageIndex, pageSize,
+                searchKey, needTotalSize
+        );
     }
 
     @GetMapping(value = "search/{areaId}")

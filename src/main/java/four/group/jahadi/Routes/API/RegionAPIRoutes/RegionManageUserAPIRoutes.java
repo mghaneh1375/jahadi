@@ -36,12 +36,23 @@ public class RegionManageUserAPIRoutes extends Router {
     @Operation(summary = "گرفتن اعضای گروه توسط مسئول منطقه")
     public ResponseEntity<Page<User>> getList(
             HttpServletRequest request,
-            @RequestParam(name = "pageIndex") @NotNull @Min(0) @Max(1000) Integer pageIndex,
-            @RequestParam(name = "pageSize") @NotNull @Min(5) @Max(100) Integer pageSize
+            @RequestParam(name = "pageIndex", required = false) @Min(0) @Max(1000) Integer pageIndex,
+            @RequestParam(name = "pageSize", required = false) @Min(5) @Max(100) Integer pageSize
     ) {
         return userService.findGroupMembersByRegionOwner(
                 getId(request), getGroup(request),
-                pageIndex, pageSize
+                pageIndex == null ? 0 : pageIndex, pageSize == null ? Integer.MAX_VALUE : pageSize
+        );
+    }
+
+    @GetMapping(value = "digestList")
+    @ResponseBody
+    @Operation(summary = "گرفتن اعضای گروه توسط مسئول منطقه")
+    public ResponseEntity<List<User>> getList(
+            HttpServletRequest request
+    ) {
+        return userService.findMembersDigestByRegionOwner(
+                getId(request), getGroup(request)
         );
     }
 
@@ -183,8 +194,8 @@ public class RegionManageUserAPIRoutes extends Router {
             description = "قبل از شروع اردو باید صدا زده شود"
     )
     public void addEquipmentManager(HttpServletRequest request,
-                                   @PathVariable @ObjectIdConstraint ObjectId areaId,
-                                   @RequestBody List<ObjectId> userIds
+                                    @PathVariable @ObjectIdConstraint ObjectId areaId,
+                                    @RequestBody List<ObjectId> userIds
     ) {
         membersServiceInArea.addEquipmentManager(getId(request), areaId, userIds);
     }
@@ -196,8 +207,8 @@ public class RegionManageUserAPIRoutes extends Router {
             description = "قبل از شروع اردو باید صدا زده شود"
     )
     public void removeEquipmentManager(HttpServletRequest request,
-                                      @PathVariable @ObjectIdConstraint ObjectId areaId,
-                                      @PathVariable @ObjectIdConstraint ObjectId userId
+                                       @PathVariable @ObjectIdConstraint ObjectId areaId,
+                                       @PathVariable @ObjectIdConstraint ObjectId userId
     ) {
         membersServiceInArea.removeEquipmentManager(getId(request), areaId, userId);
     }

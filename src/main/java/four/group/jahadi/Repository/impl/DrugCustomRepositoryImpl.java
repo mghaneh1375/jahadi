@@ -15,6 +15,7 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -37,52 +38,74 @@ public class DrugCustomRepositoryImpl {
             String shelfNo,
             Pageable pageable
     ) {
-        Criteria criteria = new Criteria();
-        criteria.andOperator(
+        List<Criteria> andCriteria = new ArrayList<>();
+        andCriteria.add(
                 new Criteria().orOperator(
                         Criteria.where("deleted_at").is(null),
                         Criteria.where("deleted_at").exists(false)
                 )
         );
 
-        if(groupId != null)
-            criteria.and("group_id").is(groupId);
-
-        if (name != null && !name.isEmpty()) {
-            criteria.and("name").regex(name, "i");
+        if (groupId != null) {
+            andCriteria.add(Criteria.where("group_id").is(groupId));
         }
 
-        if (availableMin != null) {
-            criteria.and("available").gte(availableMin);
+        if (name != null && !name.isBlank()) {
+            andCriteria.add(
+                    new Criteria().orOperator(
+                            Criteria.where("name").regex(name, "i"),
+                            Criteria.where("code").regex(name, "i")
+                    )
+            );
         }
 
-        if (availableMax != null) {
-            criteria.and("available").lte(availableMax);
+        if (availableMin != null || availableMax != null) {
+            Criteria availableCriteria = Criteria.where("available");
+
+            if (availableMin != null) {
+                availableCriteria.gte(availableMin);
+            }
+
+            if (availableMax != null) {
+                availableCriteria.lte(availableMax);
+            }
+
+            andCriteria.add(availableCriteria);
         }
 
         if (location != null) {
-            criteria.and("location").is(location);
+            andCriteria.add(Criteria.where("location").is(location));
         }
 
         if (drugType != null) {
-            criteria.and("drug_type").is(drugType);
+            andCriteria.add(Criteria.where("drug_type").is(drugType));
         }
 
-        if (expireFrom != null) {
-            criteria.and("expire_at").gte(expireFrom);
-        }
+        if (expireFrom != null || expireTo != null) {
+            Criteria expireCriteria = Criteria.where("expire_at");
 
-        if (expireTo != null) {
-            criteria.and("expire_at").lte(expireTo);
+            if (expireFrom != null) {
+                expireCriteria.gte(expireFrom);
+            }
+
+            if (expireTo != null) {
+                expireCriteria.lte(expireTo);
+            }
+
+            andCriteria.add(expireCriteria);
         }
 
         if (boxNo != null) {
-            criteria.and("box_no").is(boxNo);
+            andCriteria.add(Criteria.where("box_no").is(boxNo));
         }
 
         if (shelfNo != null) {
-            criteria.and("shelf_no").is(shelfNo);
+            andCriteria.add(Criteria.where("shelf_no").is(shelfNo));
         }
+
+        Criteria criteria = new Criteria().andOperator(
+                andCriteria.toArray(new Criteria[0])
+        );
 
         Query query = new Query(criteria);
         long total = mongoTemplate.count(query, Drug.class);

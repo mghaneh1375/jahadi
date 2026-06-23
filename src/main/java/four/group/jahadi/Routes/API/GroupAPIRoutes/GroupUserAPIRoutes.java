@@ -3,15 +3,15 @@ package four.group.jahadi.Routes.API.GroupAPIRoutes;
 import four.group.jahadi.DTO.AdminSignInData;
 import four.group.jahadi.DTO.UserDigest;
 import four.group.jahadi.DTO.WareHouseAccessForGroupData;
+import four.group.jahadi.Enums.Access;
 import four.group.jahadi.Enums.AccountStatus;
 import four.group.jahadi.Enums.Sex;
 import four.group.jahadi.Exception.NotActivateAccountException;
 import four.group.jahadi.Exception.UnAuthException;
-import four.group.jahadi.Models.ExternalReferralAccessJoinWithUser;
-import four.group.jahadi.Models.User;
-import four.group.jahadi.Models.WareHouseAccessForGroupJoinWithUser;
+import four.group.jahadi.Models.*;
 import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Service.ExternalReferralAccessForGroupService;
+import four.group.jahadi.Service.GroupService;
 import four.group.jahadi.Service.UserService;
 import four.group.jahadi.Service.WareHouseAccessService;
 import four.group.jahadi.Validator.EnumValidator;
@@ -25,6 +25,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -39,6 +40,7 @@ public class GroupUserAPIRoutes extends Router {
 
     private final UserService userService;
     private final WareHouseAccessService wareHouseAccessService;
+    private final GroupService groupService;
     private final ExternalReferralAccessForGroupService externalReferralAccessForGroupService;
 
     @GetMapping(value = "list")
@@ -108,6 +110,17 @@ public class GroupUserAPIRoutes extends Router {
         return wareHouseAccessService.list(getGroup(request));
     }
 
+    @GetMapping(value = "getAccesses")
+    @ResponseBody
+    @Operation(summary = "گرفتن لیستی از کاربرانی که در گروه دسترسی دارند")
+    public ResponseEntity<Page<UserAccessInGroupDto>> getAccesses(
+            HttpServletRequest request,
+            @RequestParam(value = "pageIndex") @NotNull @Min(0) @Max(10000) int pageIndex,
+            @RequestParam(value = "pageSize") @NotNull @Min(5) @Max(100) int pageSize
+    ) {
+        return groupService.getAccesses(getGroup(request), pageIndex, pageSize);
+    }
+
     @PostMapping(value = "addWareHouseAccesses")
     @ResponseBody
     @Operation(summary = "افزودن یا ویرایش کاربری از گروه برای دسترسی انبارداری")
@@ -169,5 +182,34 @@ public class GroupUserAPIRoutes extends Router {
     @ResponseBody
     public ResponseEntity<List<UserDigest>> findGroupActiveMembersName(HttpServletRequest request) {
         return userService.findGroupActiveMembersName(getGroup(request));
+    }
+
+    @GetMapping(value = "excel-report")
+    public void excelReport(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            @RequestParam(required = false, value = "status") AccountStatus status,
+            @RequestParam(required = false, value = "access") Access access,
+            @RequestParam(required = false, value = "sex") Sex sex,
+            @RequestParam(required = false, value = "NID") String NID,
+            @RequestParam(required = false, value = "phone") String phone,
+            @RequestParam(required = false, value = "name") String name,
+            @RequestParam(required = false, value = "justGroupRequests") Boolean justGroupRequests,
+            @RequestParam(required = false, value = "groupName") String groupName,
+            @RequestParam(required = false, value = "searchKey") String searchKey
+    ) {
+        TokenInfo tokenInfo = getFullTokenInfo(request);
+        userService.excelReport(
+                response,
+                status, access, name,
+                NID, phone, sex,
+                tokenInfo.getAccesses().contains(Access.ADMIN)
+                        ? groupName
+                        : null,
+                tokenInfo.getAccesses().contains(Access.ADMIN)
+                        ? null
+                        : tokenInfo.getGroupId(),
+                justGroupRequests, searchKey
+        );
     }
 }

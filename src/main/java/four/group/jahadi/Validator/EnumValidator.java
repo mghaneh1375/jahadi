@@ -9,7 +9,7 @@ import java.lang.annotation.*;
 @Documented
 @Constraint(validatedBy = EnumValidatorImp.class)
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.PARAMETER)
+@Target({ElementType.PARAMETER, ElementType.FIELD})
 @NotNull(message = "Value cannot be null")
 @ReportAsSingleViolation
 public @interface EnumValidator {

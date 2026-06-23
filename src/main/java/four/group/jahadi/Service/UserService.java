@@ -20,6 +20,10 @@ import four.group.jahadi.Security.JwtTokenProvider;
 import four.group.jahadi.Utility.*;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.beanutils.BeanUtilsBean;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.bson.types.ObjectId;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -34,10 +38,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import static four.group.jahadi.Service.Area.ReportUtil.prepareHttpServletResponse;
 import static four.group.jahadi.Utility.FileUtils.removeFile;
 import static four.group.jahadi.Utility.FileUtils.uploadFile;
 import static four.group.jahadi.Utility.StaticValues.*;
@@ -51,19 +58,30 @@ public class UserService extends AbstractService<User, SignUpData> {
 
     private static final ArrayList<Cache> cachedToken = new ArrayList<>();
     public final static String PICS_FOLDER = "userPics";
-
     private final UserRepository userRepository;
-
     private final ActivationRepository activationRepository;
-
     private final GroupRepository groupRepository;
-
     private final TripRepository tripRepository;
-
     private final PasswordEncoder passwordEncoder;
-
+    private final ExcelService excelService;
     private final JwtTokenProvider jwtTokenProvider;
     private final UserCustomRepositoryImpl userCustomRepository;
+    private final static List<String> USERS_EXCEL_COLS = List.of(
+            "نام مسئول",
+            "جنسیت",
+            "نام پدر",
+            "گروه",
+            "کد ملی",
+            "دانشگاه",
+            "شماره تلفن",
+            "تاریخ تولد",
+            "رشته تحصیلی",
+            "حساسیت ها",
+            "مهارت ها",
+            "بیماری ها",
+            "اطلاعات آشنایان",
+            "گروه خونی"
+    );
 
     public String getEncPass(String pass) {
         return passwordEncoder.encode(convertPersianDigits(pass));
@@ -86,7 +104,8 @@ public class UserService extends AbstractService<User, SignUpData> {
                 filters[7] != null ? (ObjectId) filters[7] : null,
                 filters[8] != null ? (Boolean) filters[8] : null,
                 filters[9] != null ? filters[9].toString() : null,
-                Pageable.ofSize(pageSize).withPage(pageIndex)
+                Pageable.ofSize(pageSize).withPage(pageIndex),
+                null
         );
 
         if (filters[8] != null && (Boolean) filters[8]) {
@@ -108,6 +127,67 @@ public class UserService extends AbstractService<User, SignUpData> {
                 users,
                 HttpStatus.OK
         );
+    }
+
+    public void excelReport(HttpServletResponse response, Object... filters) {
+        Page<User> users = userCustomRepository.findAdvanced(
+                (AccountStatus) filters[0], (Access) filters[1],
+                filters[2] != null ? filters[2].toString() : null,
+                filters[3] != null ? filters[3].toString() : null,
+                filters[4] != null ? filters[4].toString() : null,
+                filters[5] != null ? (Sex) filters[5] : null,
+                filters[6] != null ? filters[6].toString() : null,
+                filters[7] != null ? (ObjectId) filters[7] : null,
+                filters[8] != null ? (Boolean) filters[8] : null,
+                filters[9] != null ? filters[9].toString() : null,
+                Pageable.ofSize(Integer.MAX_VALUE).withPage(0), null
+        );
+
+        Workbook workbook = excelService.createExcel(Collections.singletonList("کاربران"));
+        Sheet sheet = workbook.getSheetAt(0);
+        excelService.writeExcelHeader(sheet, USERS_EXCEL_COLS);
+
+        AtomicInteger atomicInteger = new AtomicInteger(1);
+        users.getContent().forEach(user -> {
+            Row row = sheet.createRow(atomicInteger.getAndIncrement());
+            int col = 0;
+            Cell cell = row.createCell(col++);
+            cell.setCellValue(user.getName());
+            cell = row.createCell(col++);
+            cell.setCellValue(user.getSex() == null ? "" : user.getSex().getFaTranslate());
+            cell = row.createCell(col++);
+            cell.setCellValue(user.getFatherName());
+            cell = row.createCell(col++);
+            cell.setCellValue(user.getGroupName());
+            cell = row.createCell(col++);
+            cell.setCellValue(user.getNid());
+            cell = row.createCell(col++);
+            cell.setCellValue(user.getUniversity());
+            cell = row.createCell(col++);
+            cell.setCellValue(user.getPhone());
+            cell = row.createCell(col++);
+            cell.setCellValue(user.getBirthDay());
+            cell = row.createCell(col++);
+            cell.setCellValue(user.getField());
+            cell = row.createCell(col++);
+            cell.setCellValue(user.getAllergies());
+            cell = row.createCell(col++);
+            cell.setCellValue(user.getAbilities());
+            cell = row.createCell(col++);
+            cell.setCellValue(user.getDiseases());
+            cell = row.createCell(col++);
+            cell.setCellValue(
+                    String.format("%s / %s / %s",
+                            user.getNearbyName() == null ? "" : user.getNearbyName(),
+                            user.getNearbyRel() == null ? "" : user.getNearbyRel(),
+                            user.getNearbyPhone() == null ? "" : user.getNearbyPhone()
+                    )
+            );
+            cell = row.createCell(col++);
+            cell.setCellValue(user.getBloodType() == null ? "" : user.getBloodType().getFaTranslate());
+        });
+
+        prepareHttpServletResponse(response, workbook, "users");
     }
 
     @Override
@@ -798,13 +878,37 @@ public class UserService extends AbstractService<User, SignUpData> {
 
         return new ResponseEntity<>(
                 userCustomRepository.findAdvanced(
-                                AccountStatus.ACTIVE, Access.JAHADI,
-                                null, null, null, null,
-                                null, groupId, null, null,
-                                Pageable.ofSize(pageSize).withPage(pageIndex),
-                                Criteria.where("_id").ne(userId),
-                                Criteria.where("accesses").ne(Access.GROUP)
+                        AccountStatus.ACTIVE, Access.JAHADI,
+                        null, null, null, null,
+                        null, groupId, null, null,
+                        Pageable.ofSize(pageSize).withPage(pageIndex),
+                        null,
+                        Criteria.where("_id").ne(userId),
+                        Criteria.where("accesses").ne(Access.GROUP)
                 ),
+                HttpStatus.OK
+        );
+    }
+
+    public ResponseEntity<List<User>> findMembersDigestByRegionOwner(
+            ObjectId userId, ObjectId groupId
+    ) {
+        List<Trip> trips =
+                tripRepository.findActivesOrNotStartedProjectIdsByAreaOwnerId(Utility.getCurrLocalDateTime(), userId);
+
+        if (trips.size() == 0)
+            throw new NotAccessException();
+
+        return new ResponseEntity<>(
+                userCustomRepository.findAdvanced(
+                        AccountStatus.ACTIVE, Access.JAHADI,
+                        null, null, null, null,
+                        null, groupId, null, null,
+                        Pageable.ofSize(Integer.MAX_VALUE).withPage(0),
+                        null,
+                        Criteria.where("_id").ne(userId),
+                        Criteria.where("accesses").ne(Access.GROUP)
+                ).getContent(),
                 HttpStatus.OK
         );
     }

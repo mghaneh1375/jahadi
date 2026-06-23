@@ -5,6 +5,7 @@ import four.group.jahadi.DTO.Patient.InquiryPatientData;
 import four.group.jahadi.DTO.Patient.PatientData;
 import four.group.jahadi.DTO.Patient.TrainFormData;
 import four.group.jahadi.Enums.AgeType;
+import four.group.jahadi.Enums.IdentifierType;
 import four.group.jahadi.Enums.Insurance;
 import four.group.jahadi.Enums.Module.AnswerType;
 import four.group.jahadi.Enums.Module.QuestionType;
@@ -23,9 +24,13 @@ import four.group.jahadi.Service.ExcelService;
 import four.group.jahadi.Utility.FileUtils;
 import four.group.jahadi.Utility.PairValue;
 import four.group.jahadi.Utility.Utility;
+import lombok.RequiredArgsConstructor;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.bson.types.ObjectId;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +41,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static four.group.jahadi.Service.Area.AreaUtils.findModule;
@@ -46,22 +52,30 @@ import static four.group.jahadi.Utility.FileUtils.uploadFile;
 import static four.group.jahadi.Utility.StaticValues.ONE_MB;
 
 @Service
+@RequiredArgsConstructor
 public class PatientServiceInArea {
 
     public final static String UPLOAD_FOLDER = "patients_docs";
+    private final PatientsInAreaRepository patientsInAreaRepository;
+    private final ModuleRepository moduleRepository;
+    private final PatientRepository patientRepository;
+    private final TripRepository tripRepository;
+    private final ExcelService excelService;
+    private final ReportServiceInArea reportServiceInArea;
 
-    @Autowired
-    PatientsInAreaRepository patientsInAreaRepository;
-    @Autowired
-    ModuleRepository moduleRepository;
-    @Autowired
-    PatientRepository patientRepository;
-    @Autowired
-    TripRepository tripRepository;
-    @Autowired
-    private ExcelService excelService;
-    @Autowired
-    private ReportServiceInArea reportServiceInArea;
+    private final static List<String> PATIENTS_EXCEL_COLS = List.of(
+            "نام و نام خانوادگی",
+            "ملیت",
+            "جنسیت",
+            "کدملی/کد اتباع",
+            "شماره تلفن",
+            "نام پدر",
+            "بیمه",
+            "وضعیت سنی",
+            "تاریخ تولد",
+            "شغل",
+            "شماره پرونده"
+    );
 
     public ResponseEntity<HashMap> getPatients(
             ObjectId userId, ObjectId areaId,
@@ -89,6 +103,70 @@ public class PatientServiceInArea {
         return new ResponseEntity<>(
                 hashMap,
                 HttpStatus.OK
+        );
+    }
+
+    public void getPatientsExcelReport(
+            ObjectId userId, ObjectId areaId,
+            String searchKey, HttpServletResponse response
+    ) {
+        Trip trip = tripRepository.findActiveByAreaIdAndResponsibleId(areaId, userId, Utility.getCurrLocalDateTime())
+                .orElseThrow(NotAccessException::new);
+
+        findStartedArea(trip, areaId);
+        List<PatientJoinArea> list = patientsInAreaRepository.findPatientsByAreaId(
+                areaId, 0, Integer.MAX_VALUE, searchKey
+        );
+
+        Workbook patients = excelService.createExcel(Collections.singletonList("بیماران"));
+        Sheet sheet = patients.getSheetAt(0);
+        excelService.writeExcelHeader(
+                sheet, PATIENTS_EXCEL_COLS
+        );
+
+        AtomicInteger atomicInteger = new AtomicInteger(1);
+        list.forEach(item -> {
+            Row row = sheet.createRow(atomicInteger.getAndIncrement());
+            int cellIdx = 0;
+            Cell cell = row.createCell(cellIdx++);
+            cell.setCellValue(item.getPatientInfo().getName());
+            cell = row.createCell(cellIdx++);
+            cell.setCellValue(item.getPatientInfo().getIdentifierType() == null
+                    ? ""
+                    : item.getPatientInfo().getIdentifierType().equals(IdentifierType.NATIONAL_CODE) ? "ایرانی" : "اتباع"
+            );
+            cell = row.createCell(cellIdx++);
+            cell.setCellValue(
+                    item.getPatientInfo().getSex() == null
+                            ? ""
+                            : item.getPatientInfo().getSex().getFaTranslate()
+            );
+            cell = row.createCell(cellIdx++);
+            cell.setCellValue(item.getPatientInfo().getIdentifier());
+            cell = row.createCell(cellIdx++);
+            cell.setCellValue(item.getPatientInfo().getPhone());
+            cell = row.createCell(cellIdx++);
+            cell.setCellValue(item.getPatientInfo().getFatherName());
+            cell = row.createCell(cellIdx++);
+            cell.setCellValue(item.getPatientInfo().getInsurance() == null
+                    ? ""
+                    : item.getPatientInfo().getInsurance().getFaTranslate()
+            );
+            cell = row.createCell(cellIdx++);
+            cell.setCellValue(item.getPatientInfo().getAgeType() == null
+                    ? ""
+                    : item.getPatientInfo().getAgeType().getFaTranslate()
+            );
+            cell = row.createCell(cellIdx++);
+            cell.setCellValue(item.getPatientInfo().getBirthDate());
+            cell = row.createCell(cellIdx++);
+            cell.setCellValue(item.getPatientInfo().getJob());
+            cell = row.createCell(cellIdx++);
+            cell.setCellValue(item.getPatientInfo().getPatientNo());
+        });
+
+        prepareHttpServletResponse(
+                response, patients, "patients"
         );
     }
 
@@ -123,8 +201,8 @@ public class PatientServiceInArea {
         if (needTotalElements) {
             Long totalSize = justHasInsurance
                     ? patientsInAreaRepository.countPatientsHasInsuranceByAreaId(
-                            areaId, key
-                    ) :
+                    areaId, key
+            ) :
                     patientsInAreaRepository.countPatientsNotHasInsuranceByAreaId(
                             areaId, key
                     );
@@ -180,6 +258,7 @@ public class PatientServiceInArea {
         return new ResponseEntity<>(hashMap, HttpStatus.OK);
     }
 
+    @CacheEvict(value = "inquiryPatient", allEntries = true)
     public void updatePatient(
             ObjectId patientId, ObjectId userId,
             ObjectId areaId, PatientData patientData
@@ -207,6 +286,7 @@ public class PatientServiceInArea {
         patientRepository.save(patient);
     }
 
+    @CacheEvict(value = "inquiryPatient", allEntries = true)
     public ResponseEntity<PatientJoinArea> createPatientAndAddToRegion(ObjectId userId, ObjectId areaId, PatientData patientData) {
 
         //todo: check finalize
@@ -220,12 +300,6 @@ public class PatientServiceInArea {
                 patientData.getIdentifier(), patientData.getIdentifierType()
         ) > 0)
             throw new InvalidFieldsException("اطلاعات بیمار پیش از این وارد شده است");
-
-        patientsInAreaRepository.findPatientsIdentifierByAreaId(areaId)
-                .stream().filter(patient -> patient.getIdentifier().equals(patientData.getIdentifier()))
-                .findFirst().ifPresent(patient -> {
-                    throw new InvalidFieldsException("کاربر مدنظر در منطقه موردنظر پذیرش شده است");
-                });
 
         Patient newPatient = Patient.builder().ageType(patientData.getAgeType())
                 .job(patientData.getJob())
@@ -265,8 +339,8 @@ public class PatientServiceInArea {
         return patientInArea.getId();
     }
 
+    @CacheEvict(value = "inquiryPatient", allEntries = true)
     public ResponseEntity<PatientJoinArea> addPatientToRegion(ObjectId userId, ObjectId areaId, ObjectId patientId) {
-
         Trip trip = tripRepository.findActiveByAreaIdAndDispatcherId(areaId, userId, Utility.getCurrLocalDateTime())
                 .orElseThrow(NotAccessException::new);
 
@@ -301,9 +375,7 @@ public class PatientServiceInArea {
 
         Patient patient = patientRepository.findByIdentifierAndIdentifierType(
                 patientData.getIdentifier(), patientData.getIdentifierType()
-        ).orElseThrow(() -> {
-            throw new InvalidFieldsException("کاربری یافت نشد");
-        });
+        ).orElseGet(() -> null);
 
         return new ResponseEntity<>(patient, HttpStatus.OK);
     }
@@ -503,7 +575,7 @@ public class PatientServiceInArea {
             trip = tripRepository.findActiveByAreaIdAndTrainerId(areaId, userId, Utility.getCurrLocalDateTime())
                     .orElseThrow(NotAccessException::new);
 
-        Area foundArea = findStartedArea(trip, areaId);
+        findStartedArea(trip, areaId);
 //        if (!foundArea.getOwnerId().equals(userId) &&
 //                (
 //                        foundArea.getTrainers() == null ||
@@ -1235,7 +1307,7 @@ public class PatientServiceInArea {
 
     public void patientReport(
             ObjectId patientId, ObjectId areaId, Boolean justCurrArea,
-            ObjectId wantedModuleId, HttpServletResponse response
+            HttpServletResponse response
     ) {
         Patient patient = patientRepository.findById(patientId).orElseThrow(InvalidIdException::new);
         List<PatientsInArea> patientForms = null;
@@ -1245,10 +1317,12 @@ public class PatientServiceInArea {
                 patientForms = Collections.singletonList(form.get());
         } else patientForms = patientsInAreaRepository.findByPatientId(patientId);
 
-        HashMap<ObjectId, HashMap<ObjectId, List<PatientForm>>> forms = new HashMap<>();
-        if (patientForms == null) {
+        if (patientForms == null)
             return;
-        }
+
+        HashMap<ObjectId, HashMap<ObjectId, List<PatientForm>>> forms = new HashMap<>();
+        HashMap<ObjectId, HashMap<ObjectId, Boolean>> referralsInfoPerModuleId = new HashMap<>();
+
         patientForms.forEach(patientForm -> {
             patientForm.getReferrals().forEach(patientReferral -> {
                 if (!forms.containsKey(patientReferral.getModuleId())) {
@@ -1261,8 +1335,19 @@ public class PatientServiceInArea {
                                 );
                             }}
                     );
+                    referralsInfoPerModuleId.put(
+                            patientReferral.getModuleId(),
+                            new HashMap<>() {{
+                                put(
+                                        patientReferral.getId(),
+                                        patientReferral.isRecepted()
+                                );
+                            }}
+                    );
                 } else {
                     forms.get(patientReferral.getModuleId()).put(patientReferral.getId(), patientReferral.getForms());
+                    referralsInfoPerModuleId.get(patientReferral.getModuleId())
+                            .put(patientReferral.getId(), patientReferral.isRecepted());
                 }
             });
         });
@@ -1276,7 +1361,9 @@ public class PatientServiceInArea {
         AtomicBoolean a = new AtomicBoolean(false);
         for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
             reportServiceInArea.getPatientReport(
-                    patient, modules.get(i), workbook.getSheetAt(i), forms.get(modules.get(i).getId())
+                    patient, modules.get(i), workbook.getSheetAt(i),
+                    forms.get(modules.get(i).getId()),
+                    referralsInfoPerModuleId.get(modules.get(i).getId())
             );
         }
         prepareHttpServletResponse(response, workbook, "patientReport");

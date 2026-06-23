@@ -36,7 +36,7 @@ public class ReportUtil {
 
     private static Row createNewPatientRow(
             Sheet sheet, Patient wantedPatient,
-            int incRowStep
+            int incRowStep, Boolean isRecepted
     ) {
         Row r = sheet.createRow(sheet.getLastRowNum() + 1);
         r.createCell(0).setCellValue(wantedPatient.getName());
@@ -47,9 +47,10 @@ public class ReportUtil {
         r.createCell(5).setCellValue(wantedPatient.getInsurance().getFaTranslate());
         r.createCell(6).setCellValue(wantedPatient.getAgeType().getFaTranslate());
         r.createCell(7).setCellValue(wantedPatient.getSex().getFaTranslate());
+        r.createCell(8).setCellValue(Boolean.TRUE.equals(isRecepted) ? "پذیرش شده" : "پذیرش نشده");
 
         if (incRowStep > 1) {
-            for (int i = 0; i < 8; i++)
+            for (int i = 0; i < 9; i++)
                 mergeCell(sheet, r, i);
         }
         return r;
@@ -109,7 +110,9 @@ public class ReportUtil {
                         if (patientsRow.containsKey(patientReferral.getId()))
                             patientRow.set(patientsRow.get(patientReferral.getId()));
                         else {
-                            Row r = createNewPatientRow(sheet, patient.getPatientInfo(), incRowStep);
+                            Row r = createNewPatientRow(sheet, patient.getPatientInfo(), incRowStep,
+                                    patientReferral.isRecepted()
+                            );
                             patientsRow.put(patientReferral.getId(), r);
                             patientRow.set(r);
                             pp.put(patient.getPatientInfo().getId(), patientReferral.getId());
@@ -213,6 +216,7 @@ public class ReportUtil {
             int subModuleStartIdx,
             Patient wantedPatient,
             List<PatientForm> forms,
+            boolean isRecepted,
             Sheet sheet,
             HashMap<ObjectId, Row> patientsRow,
             List<User> doctors,
@@ -236,7 +240,10 @@ public class ReportUtil {
         if (patientsRow.containsKey(referId))
             patientRow.set(patientsRow.get(referId));
         else {
-            Row r = createNewPatientRow(sheet, wantedPatient, incRowStep);
+            Row r = createNewPatientRow(
+                    sheet, wantedPatient, incRowStep,
+                    isRecepted
+            );
             patientsRow.put(referId, r);
             patientRow.set(r);
         }

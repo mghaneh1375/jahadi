@@ -1,5 +1,6 @@
 package four.group.jahadi.Models.Area;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import four.group.jahadi.Enums.Module.Shepesh;
 import lombok.*;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -15,6 +16,8 @@ public class TrainForm {
 
     private Integer height;
     private Integer weight;
+
+    @JsonSerialize(using = CustomDoubleSerializer.class)
     private Double BMI;
     private Shepesh shepesh;
 

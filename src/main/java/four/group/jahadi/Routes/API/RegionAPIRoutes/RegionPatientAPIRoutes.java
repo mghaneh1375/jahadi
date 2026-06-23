@@ -189,6 +189,22 @@ public class RegionPatientAPIRoutes extends Router {
         );
     }
 
+    @GetMapping(value = "get-patients-excel-report/{areaId}")
+    @Operation(
+            summary = "گرفتن خروجی اکسل لبستی از بیماران موجود در منطقه مدنظر توسط مسئول پذیرش"
+    )
+    public void getPatientsExcelReport(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            @PathVariable @ObjectIdConstraint ObjectId areaId,
+            @RequestParam(value = "search", required = false) @Size(min = 3) String key
+    ) {
+        patientServiceInArea.getPatientsExcelReport(
+                getId(request), areaId, key,
+                response
+        );
+    }
+
     @GetMapping(value = "getInsuranceList/{areaId}")
     @ResponseBody
     @Operation(
@@ -434,7 +450,7 @@ public class RegionPatientAPIRoutes extends Router {
             HttpServletResponse response
     ) {
         patientServiceInArea.patientReport(
-                patientId, null, false, null, response
+                patientId, null, false, response
         );
     }
 }

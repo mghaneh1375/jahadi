@@ -9,6 +9,9 @@ import four.group.jahadi.Repository.TripRepository;
 import four.group.jahadi.Repository.UserRepository;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -29,6 +32,8 @@ public class MembersServiceInArea {
     @Autowired
     private UserRepository userRepository;
 
+
+    @Cacheable(value = "regionMembers", key = "#userId + '_' + #areaId")
     public ResponseEntity<List<User>> members(ObjectId userId, ObjectId areaId) {
         Area wantedArea = tripRepository.getMembersByAreaIdAndOwnerId(areaId, userId)
                 .orElseThrow(InvalidIdException::new).getAreas().stream()
@@ -68,6 +73,11 @@ public class MembersServiceInArea {
         );
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "modules", allEntries = true),
+            @CacheEvict(value = "tabs", allEntries = true),
+            @CacheEvict(value = "regionMembers", allEntries = true)
+    })
     public void addMembers(ObjectId userId, ObjectId groupId,
                            ObjectId areaId, List<ObjectId> userIds) {
 
@@ -92,6 +102,11 @@ public class MembersServiceInArea {
         tripRepository.save(wantedTrip);
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "modules", allEntries = true),
+            @CacheEvict(value = "tabs", allEntries = true),
+            @CacheEvict(value = "regionMembers", allEntries = true)
+    })
     public void removeMember(ObjectId userId, ObjectId areaId,
                              ObjectId wantedUserId) {
 
@@ -123,6 +138,11 @@ public class MembersServiceInArea {
         return returnUsers(AreaUtils.findArea(trip, areaId, userId).getDispatchers());
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "modules", allEntries = true),
+            @CacheEvict(value = "tabs", allEntries = true),
+            @CacheEvict(value = "regionMembers", allEntries = true)
+    })
     public void addDispatchers(ObjectId userId, ObjectId areaId, List<ObjectId> userIds) {
 
         Object[] tmp = checkUsers(userId, areaId, userIds, tripRepository);
@@ -139,6 +159,11 @@ public class MembersServiceInArea {
         tripRepository.save(wantedTrip);
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "modules", allEntries = true),
+            @CacheEvict(value = "tabs", allEntries = true),
+            @CacheEvict(value = "regionMembers", allEntries = true)
+    })
     public void removeDispatcher(ObjectId userId, ObjectId areaId, ObjectId wantedUserId) {
 
         Trip wantedTrip = tripRepository.findByAreaIdAndOwnerId(areaId, userId)
@@ -154,6 +179,11 @@ public class MembersServiceInArea {
         tripRepository.save(wantedTrip);
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "modules", allEntries = true),
+            @CacheEvict(value = "tabs", allEntries = true),
+            @CacheEvict(value = "regionMembers", allEntries = true)
+    })
     public void addTrainer(ObjectId userId, ObjectId areaId, List<ObjectId> userIds) {
 
         Object[] tmp = checkUsers(userId, areaId, userIds, tripRepository);
@@ -173,6 +203,11 @@ public class MembersServiceInArea {
         tripRepository.save(wantedTrip);
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "modules", allEntries = true),
+            @CacheEvict(value = "tabs", allEntries = true),
+            @CacheEvict(value = "regionMembers", allEntries = true)
+    })
     public void removeTrainer(ObjectId userId, ObjectId areaId, ObjectId wantedUserId) {
 
         Trip wantedTrip = tripRepository.findByAreaIdAndOwnerId(areaId, userId)
@@ -195,6 +230,11 @@ public class MembersServiceInArea {
         return returnUsers(AreaUtils.findArea(trip, areaId, userId).getTrainers());
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "modules", allEntries = true),
+            @CacheEvict(value = "tabs", allEntries = true),
+            @CacheEvict(value = "regionMembers", allEntries = true)
+    })
     public void addPharmacyManager(ObjectId userId, ObjectId areaId, List<ObjectId> userIds) {
 
         Object[] tmp = checkUsers(userId, areaId, userIds, tripRepository);
@@ -214,6 +254,11 @@ public class MembersServiceInArea {
         tripRepository.save(wantedTrip);
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "modules", allEntries = true),
+            @CacheEvict(value = "tabs", allEntries = true),
+            @CacheEvict(value = "regionMembers", allEntries = true)
+    })
     public void removePharmacyManager(ObjectId userId, ObjectId areaId, ObjectId wantedUserId) {
 
         Trip wantedTrip = tripRepository.findByAreaIdAndOwnerId(areaId, userId)
@@ -236,6 +281,11 @@ public class MembersServiceInArea {
         return returnUsers(AreaUtils.findArea(trip, areaId, userId).getPharmacyManagers());
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "modules", allEntries = true),
+            @CacheEvict(value = "tabs", allEntries = true),
+            @CacheEvict(value = "regionMembers", allEntries = true)
+    })
     public void addEquipmentManager(ObjectId userId, ObjectId areaId, List<ObjectId> userIds) {
 
         Object[] tmp = checkUsers(userId, areaId, userIds, tripRepository);
@@ -255,6 +305,11 @@ public class MembersServiceInArea {
         tripRepository.save(wantedTrip);
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "modules", allEntries = true),
+            @CacheEvict(value = "tabs", allEntries = true),
+            @CacheEvict(value = "regionMembers", allEntries = true)
+    })
     public void removeEquipmentManager(ObjectId userId, ObjectId areaId, ObjectId wantedUserId) {
 
         Trip wantedTrip = tripRepository.findByAreaIdAndOwnerId(areaId, userId)
@@ -283,6 +338,11 @@ public class MembersServiceInArea {
         return returnUsers(AreaUtils.findArea(trip, areaId, userId).getLaboratoryManager());
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "modules", allEntries = true),
+            @CacheEvict(value = "tabs", allEntries = true),
+            @CacheEvict(value = "regionMembers", allEntries = true)
+    })
     public void addLaboratoryManager(ObjectId userId, ObjectId areaId, List<ObjectId> userIds) {
 
         Object[] tmp = checkUsers(userId, areaId, userIds, tripRepository);
@@ -302,6 +362,11 @@ public class MembersServiceInArea {
         tripRepository.save(wantedTrip);
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "modules", allEntries = true),
+            @CacheEvict(value = "tabs", allEntries = true),
+            @CacheEvict(value = "regionMembers", allEntries = true)
+    })
     public void removeLaboratoryManager(ObjectId userId, ObjectId areaId, ObjectId wantedUserId) {
 
         Trip wantedTrip = tripRepository.findByAreaIdAndOwnerId(areaId, userId)
@@ -324,6 +389,11 @@ public class MembersServiceInArea {
         return returnUsers(AreaUtils.findArea(trip, areaId, userId).getInsurancers());
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "modules", allEntries = true),
+            @CacheEvict(value = "tabs", allEntries = true),
+            @CacheEvict(value = "regionMembers", allEntries = true)
+    })
     public void addInsurancer(ObjectId userId, ObjectId areaId, List<ObjectId> userIds) {
 
         Object[] tmp = checkUsers(userId, areaId, userIds, tripRepository);
@@ -343,6 +413,11 @@ public class MembersServiceInArea {
         tripRepository.save(wantedTrip);
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "modules", allEntries = true),
+            @CacheEvict(value = "tabs", allEntries = true),
+            @CacheEvict(value = "regionMembers", allEntries = true)
+    })
     public void removeInsurancer(ObjectId userId, ObjectId areaId, ObjectId wantedUserId) {
 
         Trip wantedTrip = tripRepository.findByAreaIdAndOwnerId(areaId, userId)

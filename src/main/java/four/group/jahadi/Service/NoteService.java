@@ -7,12 +7,13 @@ import four.group.jahadi.Models.Note;
 import four.group.jahadi.Repository.NoteRepository;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import static four.group.jahadi.Utility.StaticValues.JSON_NOT_ACCESS;
 import static four.group.jahadi.Utility.StaticValues.JSON_OK;
@@ -24,9 +25,9 @@ public class NoteService extends AbstractService<Note, NoteData> {
     NoteRepository noteRepository;
 
     @Override
-    public ResponseEntity<List<Note>> list(Object... filters) {
+    public ResponseEntity<Page<Note>> paginateList(int pageIndex, int pageSize, Object... filters) {
         return new ResponseEntity<>(
-                noteRepository.findByUserId((ObjectId) filters[0]),
+                noteRepository.findByUserId((ObjectId) filters[0], Pageable.ofSize(pageSize).withPage(pageIndex)),
                 HttpStatus.OK
         );
     }

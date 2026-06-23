@@ -16,7 +16,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 public class ExcelService {
-
+    public final static List<String> commonPatuientExcelTitles = new ArrayList<>() {{
+        add("نام بیمار");
+        add("شماره همراه");
+        add("کدملی");
+        add("شماره پرونده");
+        add("تاریخ تولد");
+        add("بیمه");
+        add("سن");
+        add("جنسیت");
+        add("پذیرش شده/نشده");
+    }};
     public Workbook createExcel(List<String> sheets) {
         Workbook workbook = new XSSFWorkbook();
         sheets.forEach(workbook::createSheet);
@@ -33,7 +43,7 @@ public class ExcelService {
         return null;
     }
 
-    public void writeCommonHeader(Sheet sheet) {
+    public void writeExcelHeader(Sheet sheet, List<String> headers) {
         Row row = sheet.createRow(0);
         Workbook wb = row.getSheet().getWorkbook();
         CellStyle parentCellStyle = wb.createCellStyle();
@@ -42,19 +52,9 @@ public class ExcelService {
         font.setColor(HSSFColor.HSSFColorPredefined.RED.getIndex());
         font.setBold(true);
         parentCellStyle.setFont(font);
-        List<String> titles = new ArrayList<>() {{
-            add("نام بیمار");
-            add("شماره همراه");
-            add("کدملی");
-            add("شماره پرونده");
-            add("تاریخ تولد");
-            add("بیمه");
-            add("سن");
-            add("جنسیت");
-        }};
 
         AtomicInteger counter = new AtomicInteger();
-        titles.forEach(s -> {
+        headers.forEach(s -> {
             Cell c0 = row.createCell(counter.getAndIncrement());
             c0.setCellStyle(parentCellStyle);
             c0.setCellValue(s);

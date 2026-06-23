@@ -24,7 +24,7 @@ public interface UserRepository extends MongoRepository<User, ObjectId>, Filtera
     Integer countUsersByAccess(String access);
 
     @Query(value = "{ '_id': { $in: ?0 } }",
-            fields = "{ 'name': 1, 'nid': 1, 'phone': 1, 'tel': 1, 'field': 1, 'pic': 1, 'color': 1, 'sex': 1  }"
+            fields = "{ 'name': 1, 'nid': 1, 'phone': 1, 'tel': 1, 'field': 1, 'university': 1, 'pic': 1, 'color': 1, 'sex': 1  }"
     )
     List<User> findByIdsIn(List<ObjectId> ids);
 

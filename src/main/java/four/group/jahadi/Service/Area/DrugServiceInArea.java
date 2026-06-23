@@ -42,12 +42,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
 public class DrugServiceInArea {
 
-    private final static Integer PAGE_SIZE = 20;
     @Autowired
     private WareHouseAccessForGroupRepository wareHouseAccessForGroupRepository;
     @Autowired
@@ -389,19 +389,34 @@ public class DrugServiceInArea {
     }
 
     public ResponseEntity<Page<JoinedAreaDrugs>> list(
-            ObjectId userId, ObjectId areaId, Integer pageIndex, Integer pageSize
+            ObjectId userId, ObjectId areaId,
+            Integer pageIndex, Integer pageSize,
+            String searchKey, Boolean needTotalSize
     ) {
         tripRepository.findByAreaIdAndResponsibleId(areaId, userId)
                 .orElseThrow(NotAccessException::new);
 
+        if (searchKey == null || searchKey.isBlank()) {
+            searchKey = ".*";
+        } else {
+            searchKey = ".*" + Pattern.quote(searchKey.trim()) + ".*";
+        }
+
         Pageable pageable = PageRequest.of(pageIndex, pageSize);
-        List<JoinedAreaDrugs> digestByAreaId = areaDrugsRepository.findDigestByAreaId(areaId, pageIndex * pageSize, pageSize);
+        List<JoinedAreaDrugs> digestByAreaId =
+                areaDrugsRepository.findDigestByAreaId(areaId, pageIndex * pageSize, pageSize, searchKey);
+
+        Long count = Objects.equals(needTotalSize, Boolean.TRUE)
+                ? searchKey.equals(".*")
+                ? areaDrugsRepository.countByAreaId(areaId)
+                : areaDrugsRepository.countByAreaIdAndSearchKey(areaId, searchKey)
+                : null;
 
         return new ResponseEntity<>(
                 new PageImpl<>(
                         digestByAreaId,
                         pageable,
-                        areaDrugsRepository.countByAreaId(areaId)
+                        count == null ? 0 : count
                 ),
                 HttpStatus.OK
         );
@@ -624,17 +639,17 @@ public class DrugServiceInArea {
         }
     }
 
-    public ResponseEntity<List<PatientAdvices>> listOfAdvices(
+    public ResponseEntity<HashMap<String, Object>> listOfAdvices(
             ObjectId userId, ObjectId areaId,
             ObjectId patientId, ObjectId moduleId,
             ObjectId doctorId, DeliveryStatus deliveryStatus,
             ObjectId drugId, LocalDateTime startAdviceAt, LocalDateTime endAdviceAt,
             LocalDateTime startGiveAt, LocalDateTime endGiveAt,
             Integer startSuggestCount, Integer endSuggestCount,
-            ObjectId giverId, Integer pageNo
+            ObjectId giverId, Integer pageIndex, Integer pageSize,
+            Boolean neededTotalSize
     ) {
         Trip trip;
-        List<PatientAdvices> output = new ArrayList<>();
 
         if (patientId == null) {
             trip = tripRepository.findActiveByAreaIdAndPharmacyManager(
@@ -646,7 +661,7 @@ public class DrugServiceInArea {
             ).orElseThrow(NotAccessException::new);
         }
         AreaUtils.findStartedArea(trip, areaId);
-        List<PatientDrug> patientsDrugs = patientsDrugRepository.findByFilters(
+        List<PatientAdvices> patientsDrugs = patientsDrugRepository.findByFiltersGroupedByPatient(
                 areaId, patientId, moduleId,
                 doctorId,
                 deliveryStatus == null ? null : Objects.equals(DeliveryStatus.DELIVERED, deliveryStatus),
@@ -655,21 +670,33 @@ public class DrugServiceInArea {
                 startSuggestCount, endSuggestCount,
                 giverId,
                 patientId == null
-                        ? (pageNo - 1) * PAGE_SIZE
+                        ? pageIndex * pageSize
                         : 0,
                 patientId == null
-                        ? PAGE_SIZE
+                        ? pageSize
                         : 100
         );
-        List<Patient> patients = patientRepository.findPublicInfoByIdIn(
-                patientsDrugs.stream().map(PatientDrug::getPatientId)
-                        .distinct().collect(Collectors.toList())
-        );
-        patients.forEach(patient -> output.add(PatientAdvices.builder().patient(patient).drugs(new ArrayList<>()).build()));
-        patientsDrugs.forEach(patientDrug -> output.stream()
-                .filter(patientAdvices -> patientAdvices.getPatient().getId().equals(patientDrug.getPatientId()))
-                .findFirst()
-                .ifPresent(patientAdvices -> patientAdvices.addToDrugList(patientDrug)));
+//        List<Patient> patients = patientRepository.findPublicInfoByIdIn(
+//                patientsDrugs.stream().map(PatientDrug::getPatientId)
+//                        .distinct().collect(Collectors.toList())
+//        );
+//        patients.forEach(patient -> output.add(PatientAdvices.builder().patient(patient).drugs(new ArrayList<>()).build()));
+        patientsDrugs.forEach(PatientAdvices::setTranslatedItems);
+        HashMap<String, Object> output = new HashMap<>();
+        output.put("content", patientsDrugs);
+
+        if(Objects.equals(neededTotalSize, Boolean.TRUE)) {
+            Long count = patientsDrugRepository.countPatientAdvices(
+                    areaId, patientId, moduleId,
+                    doctorId,
+                    deliveryStatus == null ? null : Objects.equals(DeliveryStatus.DELIVERED, deliveryStatus),
+                    drugId, startAdviceAt, endAdviceAt,
+                    startGiveAt, endGiveAt,
+                    startSuggestCount, endSuggestCount,
+                    giverId
+            );
+            output.put("totalElements", count);
+        }
 
         return new ResponseEntity<>(output, HttpStatus.OK);
     }

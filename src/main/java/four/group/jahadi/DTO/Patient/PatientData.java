@@ -12,6 +12,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import static four.group.jahadi.Exception.CommonErrorMessages.*;
@@ -22,31 +24,43 @@ import static four.group.jahadi.Exception.CommonErrorMessages.*;
 @NoArgsConstructor
 public class PatientData {
 
+    @NotBlank
     @Size(min = 2, max = 255, message = NAME_ERR)
     private String name;
 
+    @NotBlank
     @Size(min = 2, max = 255, message = FATHER_NAME_ERR)
     private String fatherName;
 
+    @NotNull
     private Sex sex;
+    @NotNull
     private long birthDate;
 
+    @NotNull
     @JustNumeric
     @JsonDeserialize(using = PersianNumberDeserializer.class)
     private String phone;
 
+    @NotBlank
     @JustNumeric
     @Size(min = 7, max = 13, message = IDENTIFIER_ERR)
     @JsonDeserialize(using = PersianNumberDeserializer.class)
     private String identifier;
 
+    @NotNull
     private IdentifierType identifierType;
+
+    @NotNull
     private Insurance insurance;
+
+    @NotNull
     private AgeType ageType;
 
     @Size(min = 2, max = 255, message = JOB_ERR)
     private String job;
 
+    @NotBlank
     @Size(min = 5, max = 20, message = PATIENT_NO_ERR)
     @JsonDeserialize(using = PersianNumberDeserializer.class)
     private String patientNo;

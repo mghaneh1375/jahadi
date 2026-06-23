@@ -1,29 +1,25 @@
 package four.group.jahadi.DTO;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import four.group.jahadi.Enums.Color;
-import four.group.jahadi.Models.ColorDeserialization;
-import four.group.jahadi.Validator.ValidatedProject;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
-@Setter
-@ValidatedProject
 public class UpdateProjectData {
 
+    @NotBlank
     @Size(min = 2, max = 50)
     String name;
 
-    @JsonDeserialize(using = ColorDeserialization.class)
-    Color color;
-
+    @NotNull
     Long startAt;
+
+    @NotNull
     Long endAt;
 }

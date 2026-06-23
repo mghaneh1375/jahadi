@@ -1,9 +1,9 @@
 package four.group.jahadi.Repository.Area;
 
+import four.group.jahadi.DTO.Patient.PatientAdvices;
 import four.group.jahadi.Models.Area.DrugAggregationModel;
 import four.group.jahadi.Models.Area.PatientDrugJoinModel;
 import four.group.jahadi.Models.Area.PatientsInArea;
-import four.group.jahadi.Models.Drug;
 import four.group.jahadi.Models.PatientDrug;
 import four.group.jahadi.Repository.FilterableRepository;
 import org.bson.types.ObjectId;
@@ -32,20 +32,88 @@ public interface PatientsDrugRepository extends MongoRepository<PatientDrug, Obj
                     "?#{ [9] == null ? { '_id': {$exists: true}} : { 'give_at' : {$lte: [9]} } }," +
                     "?#{ [10] == null ? { '_id': {$exists: true}} : { 'suggest_count' : {$gte: [10]} } }," +
                     "?#{ [11] == null ? { '_id': {$exists: true}} : { 'suggest_count' : {$lte: [11]} } }," +
-                    "?#{ [12] == null ? { '_id': {$exists: true}} : { 'giver_id': [12] } }," +
+                    "?#{ [12] == null ? { '_id': {$exists: true}} : { 'giver_id': [12] } }" +
                     "]}}",
-            "{ $project: {areaId: 0, doctorId: 0, giverId: 0, moduleId: 0, description: 0, giveDescription: 0, givenDrugId: 0} }",
+
+            "{ $group: { " +
+                    "_id: '$patient_id', " +
+                    "drugs: { $push: '$$ROOT' }, " +
+                    "latestCreatedAt: { $max: '$created_at' } " +
+                    "} }",
+
+            "{ $lookup: { " +
+                    "from: 'patient', " +
+                    "localField: '_id', " +
+                    "foreignField: '_id', " +
+                    "as: 'patient' " +
+                    "} }",
+
+            "{ $unwind: { " +
+                    "path: '$patient', " +
+                    "preserveNullAndEmptyArrays: true " +
+                    "} }",
+
+            "{ $sort: { 'latestCreatedAt': -1 } }",
+
             "{ $skip: ?13 }",
             "{ $limit: ?14 }",
+
+            "{ $project: { " +
+                    "_id: 0, " +
+                    "patient: 1, " +
+                    "drugs: 1 " +
+                    "} }"
     })
-    List<PatientDrug> findByFilters(
-            ObjectId areaId, ObjectId patientId,
-            ObjectId moduleId, ObjectId doctorId,
-            Boolean justGiven, ObjectId drugId,
-            LocalDateTime startAdviceAt, LocalDateTime endAdviceAt,
-            LocalDateTime startGiveAt, LocalDateTime endGiveAt,
-            Integer startSuggestCount, Integer endSuggestCount,
-            ObjectId giverId, Integer skip, Integer limit
+    List<PatientAdvices> findByFiltersGroupedByPatient(
+            ObjectId areaId,
+            ObjectId patientId,
+            ObjectId moduleId,
+            ObjectId doctorId,
+            Boolean justGiven,
+            ObjectId drugId,
+            LocalDateTime startAdviceAt,
+            LocalDateTime endAdviceAt,
+            LocalDateTime startGiveAt,
+            LocalDateTime endGiveAt,
+            Integer startSuggestCount,
+            Integer endSuggestCount,
+            ObjectId giverId,
+            Integer skip,
+            Integer limit
+    );
+
+    @Aggregation(pipeline = {
+            "{ $match:  {$and :[{'areaId': ?0}," +
+                    "?#{ [1] == null ? { '_id': {$exists: true}} : { 'patient_id' : [1] } }," +
+                    "?#{ [2] == null ? { '_id': {$exists: true}} : { 'module_id': [2] } }," +
+                    "?#{ [3] == null ? { '_id': {$exists: true}} : { 'doctor_id': [3] } }," +
+                    "?#{ [4] == null ? { '_id': {$exists: true}} : { 'dedicated': [4] } }," +
+                    "?#{ [5] == null ? { '_id': {$exists: true}} : { 'drug_id': [5] } }," +
+                    "?#{ [6] == null ? { '_id': {$exists: true}} : { 'created_at' : {$gte: [6]} } }," +
+                    "?#{ [7] == null ? { '_id': {$exists: true}} : { 'created_at' : {$lte: [7]} } }," +
+                    "?#{ [8] == null ? { '_id': {$exists: true}} : { 'give_at' : {$gte: [8]} } }," +
+                    "?#{ [9] == null ? { '_id': {$exists: true}} : { 'give_at' : {$lte: [9]} } }," +
+                    "?#{ [10] == null ? { '_id': {$exists: true}} : { 'suggest_count' : {$gte: [10]} } }," +
+                    "?#{ [11] == null ? { '_id': {$exists: true}} : { 'suggest_count' : {$lte: [11]} } }," +
+                    "?#{ [12] == null ? { '_id': {$exists: true}} : { 'giver_id': [12] } }" +
+                    "]}}",
+            "{ $group: { _id: '$patient_id' } }",
+            "{ $count: 'total' }"
+    })
+    Long countPatientAdvices(
+            ObjectId areaId,
+            ObjectId patientId,
+            ObjectId moduleId,
+            ObjectId doctorId,
+            Boolean justGiven,
+            ObjectId drugId,
+            LocalDateTime startAdviceAt,
+            LocalDateTime endAdviceAt,
+            LocalDateTime startGiveAt,
+            LocalDateTime endGiveAt,
+            Integer startSuggestCount,
+            Integer endSuggestCount,
+            ObjectId giverId
     );
 
     @Aggregation(pipeline = {
