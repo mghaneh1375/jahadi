@@ -153,17 +153,16 @@ public class AreaService extends AbstractService<Area, AreaData> {
         List<Area> areas = trip.getAreas();
         areasDto.forEach(updateAreaData -> {
             Area area1;
-            if(updateAreaData.getAreaId() != null) {
+            if (updateAreaData.getAreaId() != null) {
                 area1 = areas
                         .stream()
                         .filter(area -> area.getId().equals(updateAreaData.getAreaId()))
                         .findFirst().orElseGet(Area::new);
-            }
-            else area1 = new Area();
+            } else area1 = new Area();
 
             area1.setOwnerId(updateAreaData.getOwner());
             area1.setName(updateAreaData.getName());
-            if(area1.getId() == null) {
+            if (area1.getId() == null) {
                 area1.setId(new ObjectId());
                 areas.add(area1);
             }
@@ -209,13 +208,15 @@ public class AreaService extends AbstractService<Area, AreaData> {
                 if (trip.getAreas() != null && trip.getAreas().size() > 0) {
                     if (isForOwner) {
                         trip.getAreas().removeIf(area ->
-                                area.getOwnerId() == null ||
-                                        !area.getOwnerId().equals(userId)
+                                !Objects.equals(area.getOwnerId(), userId)
                         );
                     } else {
                         trip.getAreas().removeIf(area ->
-                                area.getMembers() == null ||
-                                        !area.getMembers().contains(userId)
+                                !Objects.equals(area.getOwnerId(), userId) &&
+                                        (
+                                                area.getMembers() == null ||
+                                                        !area.getMembers().contains(userId)
+                                        )
                         );
                     }
                 }
@@ -247,7 +248,7 @@ public class AreaService extends AbstractService<Area, AreaData> {
     public ResponseEntity<List<AreaDigest>> getGroupAreas(
             ObjectId tripId, ObjectId userId, ObjectId groupId
     ) {
-        if(userId != null) {
+        if (userId != null) {
             if (!wareHouseAccessForGroupRepository.existsAccessByGroupIdAndUserId(groupId, userId) &&
                     !externalReferralAccessForGroupRepository.existsAccessByGroupIdAndUserId(groupId, userId)
             )
@@ -274,7 +275,7 @@ public class AreaService extends AbstractService<Area, AreaData> {
     }
 
     public ResponseEntity<List<AreaDigest>> getGroupTrips(ObjectId userId, ObjectId groupId, Status tripStatus) {
-        if(userId != null) {
+        if (userId != null) {
             if (!wareHouseAccessForGroupRepository.existsAccessByGroupIdAndUserId(groupId, userId) &&
                     !externalReferralAccessForGroupRepository.existsAccessByGroupIdAndUserId(groupId, userId)
             )
@@ -285,18 +286,18 @@ public class AreaService extends AbstractService<Area, AreaData> {
         List<AreaDigest> digests = new ArrayList<>();
         final LocalDateTime curr = getCurrLocalDateTime();
         trips.forEach(trip -> {
-            if(tripStatus != null) {
+            if (tripStatus != null) {
                 switch (tripStatus) {
                     case FINISHED:
-                        if(trip.getEndAt().isAfter(curr))
+                        if (trip.getEndAt().isAfter(curr))
                             return;
                         break;
                     case NOT_START:
-                        if(trip.getStartAt().isBefore(curr))
+                        if (trip.getStartAt().isBefore(curr))
                             return;
                         break;
                     case IN_PROGRESS:
-                        if(trip.getEndAt().isBefore(curr) || trip.getStartAt().isAfter(curr))
+                        if (trip.getEndAt().isBefore(curr) || trip.getStartAt().isAfter(curr))
                             return;
                         break;
                 }
@@ -749,8 +750,7 @@ public class AreaService extends AbstractService<Area, AreaData> {
                                 Method method = aClass.getMethod("deleteByIdsIn", List.class);
                                 method.invoke(bean, ids);
                             }
-                        }
-                        catch (Exception ex) {
+                        } catch (Exception ex) {
                             throw new RuntimeException(ex);
                         }
                     } catch (InvocationTargetException |

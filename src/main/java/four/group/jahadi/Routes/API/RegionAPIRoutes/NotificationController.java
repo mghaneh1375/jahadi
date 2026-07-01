@@ -2,6 +2,7 @@ package four.group.jahadi.Routes.API.RegionAPIRoutes;
 
 
 import four.group.jahadi.DTO.Area.NotificationData;
+import four.group.jahadi.DTO.NotificationDto;
 import four.group.jahadi.Models.Area.Notification;
 import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Service.NotificationService;
@@ -24,7 +25,7 @@ import javax.validation.constraints.NotNull;
 
 
 @RestController
-@RequestMapping("/api/region/notification")
+@RequestMapping("/api/notification")
 @RequiredArgsConstructor
 @Validated
 public class NotificationController extends Router {
@@ -40,6 +41,30 @@ public class NotificationController extends Router {
                 page,
                 size,
                 areaId
+        );
+    }
+
+    @GetMapping("/user-notifications")
+    public ResponseEntity<Page<NotificationDto>> list(
+            HttpServletRequest request,
+            @RequestParam(value = "page") @NotNull @Min(0) @Max(10000) int page,
+            @RequestParam(value = "size") @NotNull @Min(5) @Max(100) int size,
+            @RequestParam(required = false, value = "seenStatus") Boolean seenStatus
+    ){
+        return service.userNotifications(
+                getId(request),
+                seenStatus,
+                page,
+                size
+        );
+    }
+
+    @GetMapping("/user-notifications-count")
+    public ResponseEntity<Long> count(
+            HttpServletRequest request
+    ){
+        return service.userNotificationsCount(
+                getId(request)
         );
     }
 

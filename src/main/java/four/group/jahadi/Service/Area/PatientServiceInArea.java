@@ -264,8 +264,8 @@ public class PatientServiceInArea {
             ObjectId areaId, PatientData patientData
     ) {
         Patient patient = patientRepository.findById(patientId).orElseThrow(InvalidIdException::new);
-        if (!patientsInAreaRepository.existByAreaIdAndPatientId(areaId, patientId))
-            throw new NotAccessException();
+//        if (!patientsInAreaRepository.existByAreaIdAndPatientId(areaId, patientId))
+//            throw new NotAccessException();
 
         Trip trip = tripRepository.findActiveByAreaIdAndDispatcherId(areaId, userId, Utility.getCurrLocalDateTime())
                 .orElseThrow(NotAccessException::new);

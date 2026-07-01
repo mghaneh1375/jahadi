@@ -2,21 +2,23 @@ package four.group.jahadi.Service;
 
 
 import four.group.jahadi.DTO.Area.NotificationData;
+import four.group.jahadi.DTO.NotificationDto;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Exception.NotAccessException;
 import four.group.jahadi.Models.Area.Notification;
 import four.group.jahadi.Repository.NotificationRepository;
+import four.group.jahadi.Repository.impl.NotificationCustomRepositoryImpl;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-
 import java.time.LocalDateTime;
-
 
 import static four.group.jahadi.Utility.StaticValues.JSON_NOT_ACCESS;
 import static four.group.jahadi.Utility.StaticValues.JSON_OK;
@@ -28,6 +30,38 @@ public class NotificationService
 
     @Autowired
     NotificationRepository notificationRepository;
+
+    @Autowired
+    NotificationCustomRepositoryImpl notificationCustomRepository;
+
+    public ResponseEntity<Page<NotificationDto>> userNotifications(
+            ObjectId userId,
+            Boolean seenStatus,
+            int pageIndex,
+            int pageSize
+    ) {
+        return new ResponseEntity<>(
+                notificationCustomRepository.findUserNotifications(
+                        userId,
+                        seenStatus,
+                        Pageable.ofSize(pageSize)
+                                .withPage(pageIndex)
+                ),
+                HttpStatus.OK
+        );
+    }
+
+    @Cacheable(value = "userNotificationsCount", key = "#userId")
+    public ResponseEntity<Long> userNotificationsCount(
+            ObjectId userId
+    ) {
+        return new ResponseEntity<>(
+                notificationCustomRepository.countUnreadNotifications(
+                        userId
+                ),
+                HttpStatus.OK
+        );
+    }
 
 
     @Override
@@ -44,11 +78,11 @@ public class NotificationService
                 ),
                 HttpStatus.OK
         );
-
     }
 
 
     @Override
+    @CacheEvict(value = "userNotificationsCount", allEntries = true)
     public ResponseEntity<Notification> store(
             NotificationData dto,
             Object... params
@@ -77,6 +111,7 @@ public class NotificationService
 
 
     @Override
+    @CacheEvict(value = "userNotificationsCount", allEntries = true)
     public void update(
             ObjectId id,
             NotificationData dto,
@@ -112,6 +147,7 @@ public class NotificationService
     }
 
 
+    @CacheEvict(value = "userNotificationsCount", allEntries = true)
     public String remove(ObjectId id, ObjectId userId) {
         Notification notification =
                 notificationRepository
@@ -129,6 +165,7 @@ public class NotificationService
     }
 
 
+    @CacheEvict(value = "userNotificationsCount", key = "#jahadiId")
     public void markAsSeen(ObjectId notificationId, ObjectId jahadiId) {
         Notification notification =
                 notificationRepository
@@ -139,9 +176,8 @@ public class NotificationService
 
         if (!notification.getSeenBy().contains(jahadiId)) {
             notification.getSeenBy().add(jahadiId);
+            notificationRepository.save(notification);
         }
-
-        notificationRepository.save(notification);
     }
 
 }

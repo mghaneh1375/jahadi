@@ -3,6 +3,7 @@ package four.group.jahadi.Models.Area;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import four.group.jahadi.Enums.NotificationType;
+import four.group.jahadi.Models.DateSerialization;
 import four.group.jahadi.Models.Model;
 import four.group.jahadi.Models.ObjectIdSerialization;
 import lombok.AllArgsConstructor;
@@ -50,5 +51,6 @@ public class Notification extends Model {
 
 
     @Field("updated_at")
+    @JsonSerialize(using = DateSerialization.class)
     private LocalDateTime updatedAt;
 }
