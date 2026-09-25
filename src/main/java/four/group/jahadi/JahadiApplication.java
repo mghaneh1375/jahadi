@@ -1,5 +1,6 @@
 package four.group.jahadi;
 
+import four.group.jahadi.Repository.UserRepository;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.models.Components;
@@ -10,9 +11,9 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.bson.types.ObjectId;
 import org.modelmapper.ModelMapper;
 import org.springdoc.core.SpringDocUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.mongodb.config.EnableMongoAuditing;
 
@@ -22,6 +23,9 @@ import java.util.TimeZone;
 @OpenAPIDefinition(info = @Info(title = "Jahadi API", version = "2.0", description = "Jahadi Information"))
 @EnableMongoAuditing
 public class JahadiApplication {
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Bean
     public ModelMapper modelMapper() {

@@ -2,6 +2,7 @@ package four.group.jahadi.DTO.Area;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import four.group.jahadi.DTO.Region.ConvertStringToLongDeserialization;
+import four.group.jahadi.Enums.CoOrg;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -44,9 +45,14 @@ public class CompleteAreaDto {
     @NotNull
     private Double lng;
 
+    @NotNull
+    private String serialPrefix;
+
+    @NotNull
+    private CoOrg coOrg;
+
     @Valid
     @NotNull
     @Size(min = 1)
     List<UserAccess> userAccesses;
-
 }

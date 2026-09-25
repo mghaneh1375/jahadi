@@ -538,7 +538,7 @@ public class DrugServiceInArea {
                     areaDrug.getAreaId(), userId, moduleId
             ).orElseThrow(NotAccessException::new);
             ModuleInArea moduleInArea = AreaUtils.findModule(
-                    AreaUtils.findStartedArea(trip, areaDrug.getAreaId()),
+                    AreaUtils.findStartedArea(trip, areaDrug.getAreaId(), false),
                     moduleId, userId
             );
 
@@ -583,7 +583,7 @@ public class DrugServiceInArea {
         Trip trip = tripRepository.findActiveByAreaIdAndPharmacyManager(
                 areaId, userId, Utility.getCurrLocalDateTime()
         ).orElseThrow(InvalidIdException::new);
-        AreaUtils.findStartedArea(trip, areaId);
+        AreaUtils.findStartedArea(trip, areaId, false);
         PatientDrug patientDrug = patientsDrugRepository.findById(adviceId)
                 .orElseThrow(InvalidIdException::new);
 
@@ -650,7 +650,6 @@ public class DrugServiceInArea {
             Boolean neededTotalSize
     ) {
         Trip trip;
-
         if (patientId == null) {
             trip = tripRepository.findActiveByAreaIdAndPharmacyManager(
                     areaId, userId, Utility.getCurrLocalDateTime()
@@ -660,7 +659,7 @@ public class DrugServiceInArea {
                     areaId, userId, Utility.getCurrLocalDateTime()
             ).orElseThrow(NotAccessException::new);
         }
-        AreaUtils.findStartedArea(trip, areaId);
+        AreaUtils.findStartedArea(trip, areaId, false);
         List<PatientAdvices> patientsDrugs = patientsDrugRepository.findByFiltersGroupedByPatient(
                 areaId, patientId, moduleId,
                 doctorId,
@@ -709,7 +708,7 @@ public class DrugServiceInArea {
         Trip trip = tripRepository.findByAreaIdAndResponsibleId(
                 patientDrug.getAreaId(), userId
         ).orElseThrow(NotAccessException::new);
-        AreaUtils.findStartedArea(trip, patientDrug.getAreaId());
+        AreaUtils.findStartedArea(trip, patientDrug.getAreaId(), false);
         userRepository.findById(patientDrug.getDoctorId())
                 .ifPresent(user -> patientDrug.setDoctor(user.getName()));
         if (patientDrug.getGiverId() != null) {

@@ -124,7 +124,6 @@ public class ModuleServiceInArea {
     }
 
     public ResponseEntity<List<ModuleInArea>> getModulesInTab(ObjectId userId, ObjectId areaId, String tabName) {
-
         List<ModuleInArea> cached = cacheService.getCachedModules(userId, areaId, tabName);
         if (cached != null) {
             return new ResponseEntity<>(cached, HttpStatus.OK);
@@ -171,7 +170,6 @@ public class ModuleServiceInArea {
     }
 
     public ResponseEntity<List<ModuleInArea>> modules(ObjectId userId, ObjectId areaId) {
-
         Area foundArea = tripRepository.findByAreaIdAndResponsibleId(areaId, userId)
                 .orElseThrow(InvalidIdException::new)
                 .getAreas().stream().filter(area -> area.getId().equals(areaId))
@@ -261,12 +259,11 @@ public class ModuleServiceInArea {
     }
 
     public ResponseEntity<Module> getModule(ObjectId userId, ObjectId areaId, ObjectId moduleId) {
-
         Trip trip = tripRepository.findByAreaIdAndResponsibleIdAndModuleId(
                 areaId, userId, moduleId
         ).orElseThrow(NotAccessException::new);
 
-        Area area = AreaUtils.findStartedArea(trip, areaId);
+        Area area = AreaUtils.findStartedArea(trip, areaId, false);
         AreaUtils.findModule(
                 area, moduleId, null, null
 // todo: check
@@ -493,6 +490,8 @@ public class ModuleServiceInArea {
         foundArea.setEndAt(end);
         foundArea.setLat(completeAreaDto.getLat());
         foundArea.setLng(completeAreaDto.getLng());
+        foundArea.setSerialPrefix(completeAreaDto.getSerialPrefix());
+        foundArea.setCoOrg(completeAreaDto.getCoOrg());
 
         foundArea.setMembers(members);
         List<Module> modules = moduleRepository.findAll();

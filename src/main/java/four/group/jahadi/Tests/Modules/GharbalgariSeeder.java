@@ -20,10 +20,10 @@ public class GharbalgariSeeder {
                         .icon("icon-health-1")
                         .subModules(
                                 List.of(
-                                        General.make(moduleIds.get("پزشک عمومی")),
-                                        Sight.make(moduleIds.get("غربالگری دوم بینایی")),
-                                        Audiologists.make(moduleIds.get("شنوایی")),
-                                        Mama.make(moduleIds.get("متخصص زنان"))
+                                        General.make("غربالگری پایه", moduleIds.get("پزشک عمومی")),
+                                        Sight.make("غربالگری پایه", moduleIds.get("غربالگری دوم بینایی")),
+                                        Audiologists.make("غربالگری پایه", moduleIds.get("شنوایی")),
+                                        Mama.make("غربالگری پایه", moduleIds.get("متخصص زنان"))
                                 )
                         )
                         .isReferral(true)
@@ -36,7 +36,7 @@ public class GharbalgariSeeder {
                         .icon("icon-health-1")
                         .subModules(
                                 List.of(
-                                        RavanSeeder.make(moduleIds.get("روانشناس"))
+                                        RavanSeeder.make("غربالگری روان", moduleIds.get("روانشناس"))
                                 )
                         )
                         .isReferral(true)

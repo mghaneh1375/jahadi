@@ -16,4 +16,5 @@ public class UserAccessInGroupDto {
     private Boolean drugAccess;
     private Boolean equipmentAccess;
     private Boolean externalReferralAccess;
+    private Boolean reportAccess;
 }

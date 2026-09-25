@@ -20,7 +20,7 @@ import four.group.jahadi.Repository.PatientRepository;
 import four.group.jahadi.Repository.TripRepository;
 import four.group.jahadi.Repository.UserRepository;
 import four.group.jahadi.Service.ExcelService;
-import four.group.jahadi.Utility.PairValue;
+import four.group.jahadi.Service.GroupReportService;
 import four.group.jahadi.Utility.Utility;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.hssf.util.HSSFColor;
@@ -54,6 +54,7 @@ public class ReportServiceInArea {
     private final PatientsDrugRepository patientsDrugRepository;
     private final ExcelService excelService;
     private final PatientRepository patientRepository;
+    private final GroupReportService groupReportService;
 
     public void getPatientReport(
             Patient patient, Module module, Sheet sheet,
@@ -334,13 +335,35 @@ public class ReportServiceInArea {
         sheet.addMergedRegion(
                 new CellRangeAddress(
                         0, 0,
-                        startIdx, startIdx + drugCols.length
+                        startIdx, startIdx + drugCols.length - 1
                 )
         );
 
         for (String drugCol : drugCols) {
             firstRow.createCell(startIdx).setCellValue(drugCol);
             sheet.setColumnWidth(startIdx++, 18 * 255);
+        }
+
+        final int expStartIndex = startIdx;
+        if(module.isCanSuggestExperiment()) {
+            String[] expCols = new String[]{
+                    "نام خدمت / خدمات"
+            };
+
+            Cell cellTmp = moduleHeaderRow.createCell(startIdx);
+            cellTmp.setCellStyle(parentCellStyle);
+            cellTmp.setCellValue("فرم نسخه آزمایشگاه");
+//            sheet.addMergedRegion(
+//                    new CellRangeAddress(
+//                            0, 0,
+//                            startIdx, startIdx + expCols.length - 1
+//                    )
+//            );
+
+            for (String expCol : expCols) {
+                firstRow.createCell(startIdx).setCellValue(expCol);
+                sheet.setColumnWidth(startIdx++, 80 * 255);
+            }
         }
 
         if (maxRowIdx > 1) {
@@ -376,7 +399,6 @@ public class ReportServiceInArea {
 
         if (patientsJoinArea.isEmpty())
             return;
-
 
         HashMap<ObjectId, Row> patientsRow = new HashMap<>();
         HashMap<ObjectId, ObjectId> pp = new HashMap<>();
@@ -414,6 +436,31 @@ public class ReportServiceInArea {
                     });
         });
 
+        if(module.isCanSuggestExperiment()) {
+            List<PatientReferral> patientReferrals = patientsJoinArea
+                    .stream()
+                    .map(PatientJoinArea::getReferrals)
+                    .filter(Objects::nonNull)
+                    .flatMap(List::stream)
+                    .filter(patientReferral -> patientReferral.getExperiments() != null && patientReferral.getExperiments().size() > 0)
+                    .collect(Collectors.toList());
+
+            patientsRow.forEach((refId, row1) -> {
+                patientReferrals
+                        .stream()
+                        .filter(patientReferral -> patientReferral.getId().equals(refId))
+                        .findFirst()
+                        .ifPresent(patientJoinArea -> {
+                            row1.createCell(expStartIndex).setCellValue(
+                                    patientJoinArea
+                                            .getExperiments()
+                                            .stream()
+                                            .map(experiment -> experiment.getExperiment().getFaTranslate() + " ( " + "علت تجویز: " + experiment.getDescription() + " ) ")
+                                            .collect(Collectors.joining(" - "))
+                            );
+                        });
+            });
+        }
     }
 
     public void getReceptionReport(List<PatientJoinArea> patients, Sheet sheet) {
@@ -502,10 +549,18 @@ public class ReportServiceInArea {
     }
 
     public void getAreaReport(
-            final ObjectId userId_groupId, final boolean isGroupAccess,
+            ObjectId userId_groupId, boolean isGroupAccess,
+            ObjectId groupId,
             final ObjectId areaId, final ObjectId wantedModuleId,
             HttpServletResponse response
     ) {
+        if(userId_groupId != null && !isGroupAccess) {
+            if(groupReportService.getGroupReporterUsers(groupId).contains(userId_groupId)) {
+                isGroupAccess = true;
+                userId_groupId = groupId;
+            }
+        }
+
         System.out.println("############## START ###########");
         long start = System.currentTimeMillis();
         Trip wantedTrip = userId_groupId == null ?
@@ -646,14 +701,21 @@ public class ReportServiceInArea {
             };
 
     public void getPatientDrugReport(
-            final ObjectId userId_groupId, final boolean isGroupAccess,
-            final ObjectId areaId, ObjectId doctorId,
+            ObjectId userId_groupId, boolean isGroupAccess,
+            final ObjectId areaId, ObjectId groupId, ObjectId doctorId,
             DeliveryStatus deliveryStatus, ObjectId drugId,
             LocalDateTime startAdviceAt, LocalDateTime endAdviceAt,
             LocalDateTime startGiveAt, LocalDateTime endGiveAt,
             ObjectId giverId,
             HttpServletResponse response
     ) {
+        if(userId_groupId != null && !isGroupAccess) {
+            if(groupReportService.getGroupReporterUsers(groupId).contains(userId_groupId)) {
+                isGroupAccess = true;
+                userId_groupId = groupId;
+            }
+        }
+
         Trip wantedTrip = userId_groupId == null ?
                 tripRepository.findByAreaId(areaId).orElseThrow(InvalidIdException::new)
                 : isGroupAccess
@@ -691,11 +753,19 @@ public class ReportServiceInArea {
     }
 
     public void getAreaDrugReport(
-            final ObjectId userId_groupId,
-            final boolean isGroupAccess,
+            ObjectId userId_groupId,
+            boolean isGroupAccess,
+            final ObjectId groupId,
             final ObjectId areaId,
             HttpServletResponse response
     ) {
+        if(userId_groupId != null && !isGroupAccess) {
+            if(groupReportService.getGroupReporterUsers(groupId).contains(userId_groupId)) {
+                isGroupAccess = true;
+                userId_groupId = groupId;
+            }
+        }
+
         Trip wantedTrip = userId_groupId == null ?
                 tripRepository.findByAreaId(areaId).orElseThrow(InvalidIdException::new)
                 : isGroupAccess

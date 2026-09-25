@@ -6,8 +6,10 @@ import four.group.jahadi.Enums.Module.IsOrNot;
 import four.group.jahadi.Enums.Module.QuestionType;
 import four.group.jahadi.Models.Question.CheckListGroupQuestion;
 import four.group.jahadi.Models.Question.GroupQuestion;
+import four.group.jahadi.Models.Question.Question;
 import four.group.jahadi.Models.Question.SimpleQuestion;
 import four.group.jahadi.Models.SubModule;
+import four.group.jahadi.Tests.Modules.SubModules.Helper;
 import four.group.jahadi.Utility.PairValue;
 import org.bson.types.ObjectId;
 
@@ -15,16 +17,22 @@ import java.util.List;
 
 public class Step1 {
 
-    public static SubModule make() {
+    public static SubModule make(String moduleName) {
+        String subModuleName = "جدول آزمایش";
+        SubModule oldSubModule = Helper.findSubModule(moduleName, subModuleName);
+        Question mainQuestion1 = Helper.findQuestionInSubModule(oldSubModule, "خدمات آزمایش");
+        Question mainQuestion2 = Helper.findQuestionInSubModule(oldSubModule, "جزئیات آزمایش");
+        Question mainQuestion3 = Helper.findQuestionInSubModule(oldSubModule, "LMP");
+
         return SubModule
                 .builder()
-                .id(new ObjectId())
-                .name("جدول آزمایش")
+                .id(oldSubModule == null ? new ObjectId() : oldSubModule.getId())
+                .name(subModuleName)
                 .isReferral(false)
                 .questions(List.of(
                         CheckListGroupQuestion
                                 .builder()
-                                .id(new ObjectId())
+                                .id(mainQuestion1 == null ? new ObjectId() : mainQuestion1.getId())
                                 .questionType(QuestionType.CHECK_LIST)
                                 .sectionTitle("خدمات آزمایش")
                                 .options(List.of(
@@ -40,7 +48,7 @@ public class Step1 {
                                 .questions(List.of(
                                         SimpleQuestion
                                                 .builder()
-                                                .id(new ObjectId())
+                                                .id(Helper.findSimpleQuestionInList((CheckListGroupQuestion) mainQuestion1, "لوله لخته"))
                                                 .questionType(QuestionType.SIMPLE)
                                                 .question("لوله لخته")
                                                 .answerType(AnswerType.TICK)
@@ -48,7 +56,7 @@ public class Step1 {
                                                 .build(),
                                         SimpleQuestion
                                                 .builder()
-                                                .id(new ObjectId())
+                                                .id(Helper.findSimpleQuestionInList((CheckListGroupQuestion) mainQuestion1, "لوله EDTA"))
                                                 .questionType(QuestionType.SIMPLE)
                                                 .question("لوله EDTA")
                                                 .answerType(AnswerType.TICK)
@@ -56,7 +64,7 @@ public class Step1 {
                                                 .build(),
                                         SimpleQuestion
                                                 .builder()
-                                                .id(new ObjectId())
+                                                .id(Helper.findSimpleQuestionInList((CheckListGroupQuestion) mainQuestion1, "نمونه ادرار"))
                                                 .questionType(QuestionType.SIMPLE)
                                                 .question("نمونه ادرار")
                                                 .answerType(AnswerType.TICK)
@@ -64,7 +72,7 @@ public class Step1 {
                                                 .build(),
                                         SimpleQuestion
                                                 .builder()
-                                                .id(new ObjectId())
+                                                .id(Helper.findSimpleQuestionInList((CheckListGroupQuestion) mainQuestion1, "ناشتا"))
                                                 .questionType(QuestionType.SIMPLE)
                                                 .question("ناشتا")
                                                 .answerType(AnswerType.TICK)
@@ -74,13 +82,13 @@ public class Step1 {
                                 .build(),
                         GroupQuestion
                                 .builder()
-                                .id(new ObjectId())
+                                .id(mainQuestion2 == null ? new ObjectId() : mainQuestion2.getId())
                                 .questionType(QuestionType.GROUP)
                                 .sectionTitle("جزئیات آزمایش")
                                 .questions(List.of(
                                         SimpleQuestion
                                                 .builder()
-                                                .id(new ObjectId())
+                                                .id(Helper.findSimpleQuestionInList((GroupQuestion) mainQuestion2, "بیمار باردار"))
                                                 .questionType(QuestionType.SIMPLE)
                                                 .answerType(AnswerType.RADIO)
                                                 .required(false)
@@ -98,7 +106,7 @@ public class Step1 {
                                                 .build(),
                                         SimpleQuestion
                                                 .builder()
-                                                .id(new ObjectId())
+                                                .id(Helper.findSimpleQuestionInList((GroupQuestion) mainQuestion2, "مدت زمان بارداری (به روز)"))
                                                 .questionType(QuestionType.SIMPLE)
                                                 .answerType(AnswerType.NUMBER)
                                                 .required(false)
@@ -108,7 +116,7 @@ public class Step1 {
                                 .build(),
                         SimpleQuestion
                                 .builder()
-                                .id(new ObjectId())
+                                .id(mainQuestion3 == null ? new ObjectId() : mainQuestion3.getId())
                                 .questionType(QuestionType.SIMPLE)
                                 .answerType(AnswerType.DATE)
                                 .required(false)

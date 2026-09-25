@@ -3,32 +3,39 @@ package four.group.jahadi.Tests.Modules.SubModules.Sampler;
 import four.group.jahadi.Enums.Module.AnswerType;
 import four.group.jahadi.Enums.Module.QuestionType;
 import four.group.jahadi.Models.Question.GroupQuestion;
+import four.group.jahadi.Models.Question.Question;
 import four.group.jahadi.Models.Question.SimpleQuestion;
 import four.group.jahadi.Models.Question.TableQuestion;
 import four.group.jahadi.Models.SubModule;
+import four.group.jahadi.Tests.Modules.SubModules.Helper;
 import four.group.jahadi.Utility.PairValue;
 import org.bson.types.ObjectId;
 
 import java.util.List;
 
 public class Step2 {
-    public static SubModule make() {
+    public static SubModule make(String moduleName) {
+        String subModuleName = "فرم نتیجه آزمایش ادرار";
+        SubModule oldSubModule = Helper.findSubModule(moduleName, subModuleName);
+        Question mainQuestion1 = Helper.findQuestionInSubModule(oldSubModule, "نتیجه آزمایش ادرار");
+        Question mainQuestion2 = Helper.findQuestionInSubModule(oldSubModule, List.of("Beta HCG", "Result"));
+
         return SubModule
                 .builder()
-                .id(new ObjectId())
-                .name("فرم نتیجه آزمایش ادرار")
+                .id(oldSubModule == null ? new ObjectId() : oldSubModule.getId())
+                .name(subModuleName)
                 .isReferral(false)
                 .questions(
                         List.of(
                                 GroupQuestion
                                         .builder()
-                                        .id(new ObjectId())
+                                        .id(mainQuestion1 == null ? new ObjectId() : mainQuestion1.getId())
                                         .questionType(QuestionType.GROUP)
                                         .sectionTitle("نتیجه آزمایش ادرار")
                                         .questions(List.of(
                                                 SimpleQuestion
                                                         .builder()
-                                                        .id(new ObjectId())
+                                                        .id(Helper.findSimpleQuestionInList((GroupQuestion) mainQuestion1, "تست Blood (60 ثانیه)"))
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("تست Blood (60 ثانیه)")
                                                         .required(false)
@@ -47,7 +54,7 @@ public class Step2 {
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
-                                                        .id(new ObjectId())
+                                                        .id(Helper.findSimpleQuestionInList((GroupQuestion) mainQuestion1, "تست Nitrite (60 ثانیه)"))
                                                         .required(false)
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("تست Nitrite (60 ثانیه)")
@@ -61,7 +68,7 @@ public class Step2 {
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
-                                                        .id(new ObjectId())
+                                                        .id(Helper.findSimpleQuestionInList((GroupQuestion) mainQuestion1, "تست Leukocytes (120 ثانیه)"))
                                                         .required(false)
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("تست Leukocytes (120 ثانیه)")
@@ -77,7 +84,7 @@ public class Step2 {
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
-                                                        .id(new ObjectId())
+                                                        .id(Helper.findSimpleQuestionInList((GroupQuestion) mainQuestion1, "تست Protein (30 ثانیه)"))
                                                         .required(false)
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("تست Protein (30 ثانیه)")
@@ -93,7 +100,7 @@ public class Step2 {
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
-                                                        .id(new ObjectId())
+                                                        .id(Helper.findSimpleQuestionInList((GroupQuestion) mainQuestion1, "تست Ketone (90 ثانیه)"))
                                                         .required(false)
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("تست Ketone (90 ثانیه)")
@@ -110,7 +117,7 @@ public class Step2 {
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
-                                                        .id(new ObjectId())
+                                                        .id(Helper.findSimpleQuestionInList((GroupQuestion) mainQuestion1, "تست Glucose (90 ثانیه)"))
                                                         .required(false)
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("تست Glucose (90 ثانیه)")
@@ -127,7 +134,7 @@ public class Step2 {
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
-                                                        .id(new ObjectId())
+                                                        .id(Helper.findSimpleQuestionInList((GroupQuestion) mainQuestion1, "تست Uroblilinogen (90 ثانیه)"))
                                                         .required(false)
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("تست Uroblilinogen (90 ثانیه)")
@@ -144,7 +151,7 @@ public class Step2 {
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
-                                                        .id(new ObjectId())
+                                                        .id(Helper.findSimpleQuestionInList((GroupQuestion) mainQuestion1, "تست Bilirubin (60 ثانیه)"))
                                                         .required(false)
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("تست Bilirubin (60 ثانیه)")
@@ -160,7 +167,7 @@ public class Step2 {
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
-                                                        .id(new ObjectId())
+                                                        .id(Helper.findSimpleQuestionInList((GroupQuestion) mainQuestion1, "تست Ascorbic Acid (30 ثانیه)"))
                                                         .required(false)
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("تست Ascorbic Acid (30 ثانیه)")
@@ -175,7 +182,7 @@ public class Step2 {
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
-                                                        .id(new ObjectId())
+                                                        .id(Helper.findSimpleQuestionInList((GroupQuestion) mainQuestion1, "تست PH (30 ثانیه)"))
                                                         .required(false)
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("تست PH (30 ثانیه)")
@@ -193,7 +200,7 @@ public class Step2 {
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
-                                                        .id(new ObjectId())
+                                                        .id(Helper.findSimpleQuestionInList((GroupQuestion) mainQuestion1, "تست Specific Gravity (60 ثانیه)"))
                                                         .required(false)
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("تست Specific Gravity (60 ثانیه)")
@@ -212,7 +219,7 @@ public class Step2 {
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
-                                                        .id(new ObjectId())
+                                                        .id(Helper.findSimpleQuestionInList((GroupQuestion) mainQuestion1, "تست موارد شفافیت"))
                                                         .required(false)
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("تست موارد شفافیت")
@@ -226,7 +233,7 @@ public class Step2 {
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
-                                                        .id(new ObjectId())
+                                                        .id(Helper.findSimpleQuestionInList((GroupQuestion) mainQuestion1, "بوی نامطبوع"))
                                                         .required(false)
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("بوی نامطبوع")
@@ -240,7 +247,7 @@ public class Step2 {
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
-                                                        .id(new ObjectId())
+                                                        .id(Helper.findSimpleQuestionInList((GroupQuestion) mainQuestion1, "رنگ"))
                                                         .required(false)
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("رنگ")
@@ -250,7 +257,7 @@ public class Step2 {
                                         .build(),
                                 TableQuestion
                                         .builder()
-                                        .id(new ObjectId())
+                                        .id(mainQuestion2 == null ? new ObjectId() : mainQuestion2.getId())
                                         .required(false)
                                         .title("جدول")
                                         .questionType(QuestionType.TABLE)

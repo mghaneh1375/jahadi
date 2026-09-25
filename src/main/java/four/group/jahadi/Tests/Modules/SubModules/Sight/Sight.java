@@ -14,8 +14,8 @@ public class Sight {
                 .tabName("توان بخشی")
                 .subModules(
                         List.of(
-                                SightRoom.make(),
-                                ExternalRefer.make()
+                                SightRoom.make("اتاق بینایی"),
+                                ExternalRefer.make("اتاق بینایی")
                         )
                 )
                 .isReferral(true)

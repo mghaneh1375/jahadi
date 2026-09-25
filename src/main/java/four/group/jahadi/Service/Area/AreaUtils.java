@@ -20,7 +20,7 @@ public class AreaUtils {
                 .findFirst().orElseThrow(RuntimeException::new);
     }
 
-    public static Area findStartedArea(Trip trip, ObjectId areaId) {
+    public static Area findStartedArea(Trip trip, ObjectId areaId, boolean isPrivilegeAccess) {
         Area foundArea = trip
                 .getAreas().stream()
                 .filter(area -> area.getId().equals(areaId))
@@ -42,8 +42,9 @@ public class AreaUtils {
                 .findFirst().orElseThrow(RuntimeException::new);
     }
 
-    public static ModuleInArea findModule(Area area, ObjectId moduleId, ObjectId responsibleId, ObjectId secretaryId) {
-
+    public static ModuleInArea findModule(
+            Area area, ObjectId moduleId, ObjectId responsibleId, ObjectId secretaryId
+    ) {
         ModuleInArea moduleInArea = area
                 .getModules().stream()
                 .filter(module -> module.getModuleId().equals(moduleId))
@@ -72,7 +73,6 @@ public class AreaUtils {
     }
 
     public static ModuleInArea findModule(Area area, ObjectId moduleId, ObjectId responsibleId) {
-
         ModuleInArea moduleInArea = area
                 .getModules().stream()
                 .filter(module -> module.getModuleId().equals(moduleId))

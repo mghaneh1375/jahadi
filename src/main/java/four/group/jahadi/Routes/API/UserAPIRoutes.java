@@ -2,10 +2,12 @@ package four.group.jahadi.Routes.API;
 
 import four.group.jahadi.DTO.ChangePhoneDAO;
 import four.group.jahadi.DTO.ChangePhoneResponseDAO;
+import four.group.jahadi.DTO.Digest.MyAccesses;
 import four.group.jahadi.DTO.DoChangePhoneDAO;
 import four.group.jahadi.DTO.SignUp.*;
 import four.group.jahadi.Exception.NotActivateAccountException;
 import four.group.jahadi.Exception.UnAuthException;
+import four.group.jahadi.Models.TokenInfo;
 import four.group.jahadi.Models.User;
 import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Security.JwtTokenFilter;
@@ -22,7 +24,6 @@ import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import java.util.HashMap;
-import java.util.List;
 
 import static four.group.jahadi.Utility.Utility.convertPersianDigits;
 
@@ -49,11 +50,12 @@ public class UserAPIRoutes extends Router {
 
     @PutMapping(value = "setGroup/{code}")
     @ResponseBody
-    public void setGroup(
+    public ResponseEntity setGroup(
             HttpServletRequest request,
             @PathVariable @Min(1111) @Max(999999) Integer code
     ) {
         userService.setGroup(getId(request), code);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping(value = "/signIn")
@@ -70,8 +72,20 @@ public class UserAPIRoutes extends Router {
         return userService.signUp(signUpData);
     }
 
+    @PostMapping(value = "/updateInfo")
+    @ResponseBody
+    public ResponseEntity updateInfo(
+            HttpServletRequest request,
+            @RequestBody @Valid UpdatePersonalInfo dto
+    ) {
+        return userService.updateInfo(
+                getId(request),
+                dto
+        );
+    }
+
     @PostMapping(value = "checkSignUpFormStep1")
-    public ResponseEntity<HashMap<String, Object>> checkSignUpFormStep1(@RequestBody @Valid SignUpStep1Data data) {
+    public ResponseEntity checkSignUpFormStep1(@RequestBody @Valid UniquenessValidatorData data) {
         return userService.checkUniqueness(data);
     }
 
@@ -90,32 +104,8 @@ public class UserAPIRoutes extends Router {
 
     @PostMapping(value = "/groupSignUp")
     @ResponseBody
-    public ResponseEntity<HashMap<String, Object>> groupSignUp(@RequestBody @Valid SignUpStep1ForGroupData data) {
+    public ResponseEntity<String> groupSignUp(@RequestBody @Valid SignUpStep1ForGroupData data) {
         return userService.groupStore(data);
-    }
-
-    @PutMapping(value = "signUpStep2ForGroups")
-    public void signUpStep2ForGroups(
-            HttpServletRequest request,
-            @RequestBody @Valid SignUpStep2ForGroupData data
-    ) throws UnAuthException, NotActivateAccountException {
-        userService.signUpStep2ForGroups(getUserWithOutCheckCompleteness(request), data);
-    }
-
-    @PutMapping(value = "signUpStep3ForGroups")
-    public void signUpStep3ForGroups(
-            HttpServletRequest request,
-            @RequestBody @Valid SignUpStep3ForGroupData data
-    ) throws UnAuthException, NotActivateAccountException {
-        userService.signUpStep3ForGroups(getUserWithOutCheckCompleteness(request), data);
-    }
-
-    @PutMapping(value = "signUpStep4ForGroups")
-    public void signUpStep4ForGroups(
-            HttpServletRequest request,
-            @RequestBody @Valid SignUpStep4ForGroupData data
-    ) throws UnAuthException, NotActivateAccountException {
-        userService.signUpStep4ForGroups(getUserWithOutCheckCompleteness(request), data);
     }
 
     @DeleteMapping(value = "logout")
@@ -158,8 +148,8 @@ public class UserAPIRoutes extends Router {
 
     @PostMapping(value = "/forgetPassword")
     @ResponseBody
-    public ResponseEntity<HashMap<String, Object>> forgetPassword(@RequestParam String NID) {
-        return userService.forgetPass(convertPersianDigits(NID));
+    public ResponseEntity<HashMap<String, Object>> forgetPassword(@RequestBody @Valid ForgetPasswordDto dto) {
+        return userService.forgetPass(convertPersianDigits(dto.getNid()));
     }
 
     @PostMapping(value = "/checkForgetPassCode")
@@ -199,5 +189,22 @@ public class UserAPIRoutes extends Router {
     @ResponseBody
     public ResponseEntity<User> info(HttpServletRequest request) {
         return userService.info(getId(request));
+    }
+
+    @DeleteMapping(value = "remove")
+    @ResponseBody
+    public ResponseEntity remove(HttpServletRequest request) {
+        userService.remove(getId(request));
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping(value = "my-accesses")
+    @ResponseBody
+    public ResponseEntity<MyAccesses> myAccesses(HttpServletRequest request) {
+        TokenInfo fullTokenInfo = getFullTokenInfo(request);
+        return userService.myAccesses(
+                fullTokenInfo.getUserId(),
+                fullTokenInfo.getGroupId()
+        );
     }
 }

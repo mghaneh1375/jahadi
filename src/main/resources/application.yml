@@ -34,3 +34,6 @@ token:
   secret:
     key:
       custom: 'D/RG6sq9~=payYb8df:@h'
+custom:
+  application:
+    mode: 'dev'

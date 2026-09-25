@@ -3,6 +3,7 @@ package four.group.jahadi.Routes.API.GroupAPIRoutes;
 import four.group.jahadi.DTO.AdminSignInData;
 import four.group.jahadi.DTO.UserDigest;
 import four.group.jahadi.DTO.WareHouseAccessForGroupData;
+import four.group.jahadi.DTO.profile.SetTripsCountDto;
 import four.group.jahadi.Enums.Access;
 import four.group.jahadi.Enums.AccountStatus;
 import four.group.jahadi.Enums.Sex;
@@ -10,10 +11,7 @@ import four.group.jahadi.Exception.NotActivateAccountException;
 import four.group.jahadi.Exception.UnAuthException;
 import four.group.jahadi.Models.*;
 import four.group.jahadi.Routes.Router;
-import four.group.jahadi.Service.ExternalReferralAccessForGroupService;
-import four.group.jahadi.Service.GroupService;
-import four.group.jahadi.Service.UserService;
-import four.group.jahadi.Service.WareHouseAccessService;
+import four.group.jahadi.Service.*;
 import four.group.jahadi.Validator.EnumValidator;
 import four.group.jahadi.Validator.ObjectIdConstraint;
 import io.swagger.v3.oas.annotations.Operation;
@@ -42,6 +40,7 @@ public class GroupUserAPIRoutes extends Router {
     private final WareHouseAccessService wareHouseAccessService;
     private final GroupService groupService;
     private final ExternalReferralAccessForGroupService externalReferralAccessForGroupService;
+    private final GroupReportService groupReportService;
 
     @GetMapping(value = "list")
     @ResponseBody
@@ -81,14 +80,23 @@ public class GroupUserAPIRoutes extends Router {
         userService.removeFromGroup(userId, getGroup(request));
     }
 
-    @PostMapping(value = "signIn")
+//    @PostMapping(value = "signIn")
+//    @ResponseBody
+//    @Operation(summary = "ورود کردن به اکانت یک کاربر خاص در یک گروه توسط مسئول آن گروه")
+//    public ResponseEntity<String> signIn(
+//            HttpServletRequest request,
+//            @RequestBody @Valid AdminSignInData dto
+//    ) {
+//        return userService.groupSignIn(dto, getGroup(request));
+//    }
+
+    @PostMapping(value = "generateTempCode/{userId}")
     @ResponseBody
-    @Operation(summary = "ورود کردن به اکانت یک کاربر خاص در یک گروه توسط مسئول آن گروه")
-    public ResponseEntity<String> signIn(
+    public ResponseEntity<String> generateTempCode(
             HttpServletRequest request,
-            @RequestBody @Valid AdminSignInData dto
+            @PathVariable @NotNull @ObjectIdConstraint ObjectId userId
     ) {
-        return userService.groupSignIn(dto, getGroup(request));
+        return userService.generateTempCode(getFullTokenInfo(request).getGroupId(), userId);
     }
 
     @GetMapping(value = "get/{userId}")
@@ -133,6 +141,18 @@ public class GroupUserAPIRoutes extends Router {
         );
     }
 
+    @PostMapping(value = "addReportAccess/{userId}")
+    @ResponseBody
+    @Operation(summary = "افزودن یا ویرایش کاربری از گروه برای دسترسی انبارداری")
+    public ResponseEntity<ReportAccessJoinWithUser> addReportAccess(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId userId
+    ) {
+        return groupReportService.store(
+                userId, getGroup(request)
+        );
+    }
+
     @DeleteMapping(value = "removeWareHouseAccesses/{userId}")
     @ResponseBody
     @Operation(summary = "حذف کاربر از دسترسی کاربران انبارداری در یک گروه")
@@ -153,6 +173,18 @@ public class GroupUserAPIRoutes extends Router {
             @PathVariable @ObjectIdConstraint ObjectId userId
     ) {
         externalReferralAccessForGroupService.revokeAccess(
+                userId, getGroup(request)
+        );
+    }
+
+    @DeleteMapping(value = "revokeReportAccess/{userId}")
+    @ResponseBody
+    @Operation(summary = "حذف کاربر از دسترسی کاربران گزارشگیر در یک گروه")
+    public void revokeReportAccess(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId userId
+    ) {
+        groupReportService.revokeAccess(
                 userId, getGroup(request)
         );
     }
@@ -211,5 +243,16 @@ public class GroupUserAPIRoutes extends Router {
                         : tokenInfo.getGroupId(),
                 justGroupRequests, searchKey
         );
+    }
+
+    @PutMapping(value = "set-user-old-trips-count/{userId}")
+    @ResponseBody
+    public ResponseEntity setUserOldTripsCount(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId userId,
+            @RequestBody @Validated SetTripsCountDto dto
+    ) {
+        userService.setUserOldTripsCount(getGroup(request), userId, dto.getTripsCount());
+        return ResponseEntity.ok().build();
     }
 }

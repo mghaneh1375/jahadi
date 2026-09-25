@@ -3,10 +3,13 @@ package four.group.jahadi.Service.Area;
 import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Exception.NotAccessException;
 import four.group.jahadi.Models.Area.Area;
+import four.group.jahadi.Models.PresenceList;
 import four.group.jahadi.Models.Trip;
 import four.group.jahadi.Models.User;
+import four.group.jahadi.Repository.Area.PresenceListRepository;
 import four.group.jahadi.Repository.TripRepository;
 import four.group.jahadi.Repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -18,23 +21,27 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static four.group.jahadi.Service.Area.AreaUtils.findArea;
 import static four.group.jahadi.Service.Area.ModuleServiceInArea.checkUsers;
 
 @Service
+@RequiredArgsConstructor
 public class MembersServiceInArea {
 
-    @Autowired
-    private TripRepository tripRepository;
-
-    @Autowired
-    private UserRepository userRepository;
+    private final TripRepository tripRepository;
+    private final UserRepository userRepository;
+    private final PresenceListRepository presenceListRepository;
 
 
-    @Cacheable(value = "regionMembers", key = "#userId + '_' + #areaId")
-    public ResponseEntity<List<User>> members(ObjectId userId, ObjectId areaId) {
+    @Cacheable(
+            value = "regionMembers",
+            key = "#userId + '_' + #areaId",
+            condition = "#returnPresenceList == null || #returnPresenceList == false"
+    )
+    public ResponseEntity<List<User>> members(ObjectId userId, ObjectId areaId, Boolean returnPresenceList) {
         Area wantedArea = tripRepository.getMembersByAreaIdAndOwnerId(areaId, userId)
                 .orElseThrow(InvalidIdException::new).getAreas().stream()
                 .filter(area -> area.getId().equals(areaId) && area.getOwnerId().equals(userId))
@@ -46,15 +53,15 @@ public class MembersServiceInArea {
                     List<String> accesses = new ArrayList<>();
                     if (wantedArea.getTrainers().contains(user.getId()))
                         accesses.add("مسئول آموزش");
-                    if(wantedArea.getInsurancers().contains(user.getId()))
+                    if (wantedArea.getInsurancers().contains(user.getId()))
                         accesses.add("مسئول بیمه");
-                    if(wantedArea.getLaboratoryManager().contains(user.getId()))
+                    if (wantedArea.getLaboratoryManager().contains(user.getId()))
                         accesses.add("مسئول آزمایشگاه");
-                    if(wantedArea.getEquipmentManagers().contains(user.getId()))
+                    if (wantedArea.getEquipmentManagers().contains(user.getId()))
                         accesses.add("مسئول تجهیزات");
-                    if(wantedArea.getDispatchers().contains(user.getId()))
+                    if (wantedArea.getDispatchers().contains(user.getId()))
                         accesses.add("مسئول پذیرش");
-                    if(wantedArea.getPharmacyManagers().contains(user.getId()))
+                    if (wantedArea.getPharmacyManagers().contains(user.getId()))
                         accesses.add("مسئول داروخانه");
                     wantedArea.getModules()
                             .stream()
@@ -66,6 +73,19 @@ public class MembersServiceInArea {
                     return user;
                 }).collect(Collectors.toList());
 
+        if (Objects.equals(Boolean.TRUE, returnPresenceList)) {
+            List<ObjectId> presenceLists =
+                    presenceListRepository.getLastPresenceByUsersAndAreaId(areaId, wantedArea.getMembers());
+            for (ObjectId uId : presenceLists) {
+                users
+                        .stream()
+                        .filter(user -> user.getId().equals(uId))
+                        .findFirst()
+                        .ifPresent(user -> {
+                            user.setPresent(true);
+                        });
+            }
+        }
 
         return new ResponseEntity<>(
                 users,

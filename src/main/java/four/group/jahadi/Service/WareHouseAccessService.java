@@ -11,6 +11,8 @@ import four.group.jahadi.Repository.UserRepository;
 import four.group.jahadi.Repository.WareHouseAccessForGroupRepository;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -37,10 +39,12 @@ public class WareHouseAccessService extends AbstractService<WareHouseAccessForGr
     }
 
     @Override
+    @CacheEvict(value = "groupWareHouseAccesses", allEntries = true)
     public void update(ObjectId id, WareHouseAccessForGroupData dto, Object... params) {
     }
 
     @Override
+    @CacheEvict(value = "groupWareHouseAccesses", allEntries = true)
     public ResponseEntity<WareHouseAccessForGroupJoinWithUser> store(WareHouseAccessForGroupData dto, Object... params) {
         if (dto.getDrugAccess() == null && dto.getEquipmentAccess() == null)
             throw new InvalidFieldsException("لطفا سطح دسترسی را تعیین نمایید");
@@ -88,7 +92,13 @@ public class WareHouseAccessService extends AbstractService<WareHouseAccessForGr
         return null;
     }
 
+    @CacheEvict(value = "groupWareHouseAccesses", allEntries = true)
     public void removeFromWareHouseAccesses(ObjectId userId, ObjectId groupId) {
         wareHouseAccessForGroupRepository.removeAccessByGroupIdAndUserId(groupId, userId);
+    }
+
+    @Cacheable(value = "groupWareHouseAccesses", key = "#groupId")
+    public List<WareHouseAccessForGroup> getWareHouseAccessesByGroupId(ObjectId groupId) {
+        return wareHouseAccessForGroupRepository.findAccessByGroupId(groupId);
     }
 }

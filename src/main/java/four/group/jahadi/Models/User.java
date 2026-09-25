@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import four.group.jahadi.Enums.*;
+import four.group.jahadi.Service.UserService;
 import lombok.*;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -29,6 +30,14 @@ public class User extends Model {
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
+
+    @Field("temp_code")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private String tempCode;
+
+    @Field("temp_code_exp")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private Long tempCodeExp;
 
     @Field("father_name")
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -66,6 +75,18 @@ public class User extends Model {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private ObjectId groupId;
 
+    @Field("old_trips_count")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Integer oldTripsCount;
+
+    @Transient
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    private Integer tripsCount;
+
+    @Transient
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    private UserService.Level level;
+
     @Transient
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     private AccountStatus groupStatus;
@@ -73,7 +94,11 @@ public class User extends Model {
     @Transient
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     private List<String> areaTripAccesses;
-    
+
+    @Transient
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    private Boolean present;
+
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String abilities;
 
@@ -479,6 +504,22 @@ public class User extends Model {
     @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     private boolean movementHelpEquipments = false;
 
+    @Field("tooth_extraction")
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+    private boolean toothExtraction = false;
+
+    @Field("dental_restoration")
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+    private boolean dentalRestoration = false;
+
+    @Field("tooth_nerve_removal")
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+    private boolean toothNerveRemoval = false;
+
+    @Field("gum_surgery")
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+    private boolean gumSurgery = false;
+
     @Override
     public String toString() {
         return "{" +
@@ -594,6 +635,10 @@ public class User extends Model {
                 ", \"bioChemTest\":" + bioChemTest +
                 ", \"hormonTest\":" + hormonTest +
                 ", \"movementHelpEquipments\":" + movementHelpEquipments +
+                ", \"toothExtraction\":" + toothExtraction +
+                ", \"dentalRestoration\":" + dentalRestoration +
+                ", \"toothNerveRemoval\":" + toothNerveRemoval +
+                ", \"gumSurgery\":" + gumSurgery +
                 "}\n";
     }
 }

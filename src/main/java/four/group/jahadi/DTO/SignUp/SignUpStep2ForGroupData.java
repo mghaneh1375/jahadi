@@ -24,9 +24,6 @@ import javax.validation.constraints.Size;
 @ValidatedSignUpFormStep2ForGroups
 public class SignUpStep2ForGroupData {
 
-    @Size(min = 3, max = 50)
-    private String groupName;
-
     @Year
     private String establishYear;
 

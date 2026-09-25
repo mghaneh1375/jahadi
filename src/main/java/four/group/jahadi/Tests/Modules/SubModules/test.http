@@ -1,0 +1,7 @@
+# curl -X POST "http://test.asar.app/api/user/signIn"
+#  -H "Content-Type: application/json"
+#  -d '{"nid":"1233123212","password":"wefewfewfewf"}'
+POST http://test.asar.app/api/user/signIn
+Content-Type: application/json
+
+{"nid":"1233123212","password":"wefewfewfewf"}

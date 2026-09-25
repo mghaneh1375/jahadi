@@ -31,17 +31,4 @@ public class CacheService {
         return null;
     }
 
-    @Cacheable(value = "area", key = "#userId + '_' + #areaId + '_' + #moduleId",
-            condition = "@tripService.isAreaStarted(#areaId)")
-    public Area findAreaInTrip(
-            ObjectId userId, ObjectId areaId, ObjectId moduleId
-    ) {
-        Trip trip = tripRepository.findByAreaIdAndResponsibleIdAndModuleId(
-                areaId, userId, moduleId
-        ).orElseThrow(NotAccessException::new);
-
-        Area area = AreaUtils.findStartedArea(trip, areaId);
-        return area;
-    }
-
 }

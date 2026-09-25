@@ -4,6 +4,7 @@ import four.group.jahadi.Enums.Module.AnswerType;
 import four.group.jahadi.Enums.Module.QuestionType;
 import four.group.jahadi.Models.Module;
 import four.group.jahadi.Models.Question.CheckListGroupQuestion;
+import four.group.jahadi.Models.Question.Question;
 import four.group.jahadi.Models.Question.SimpleQuestion;
 import four.group.jahadi.Models.SubModule;
 import four.group.jahadi.Utility.PairValue;
@@ -13,11 +14,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static four.group.jahadi.Tests.Modules.ModuleSeeder.moduleIds;
-
 public class ParaClinic {
 
     public static Module seed() {
+
+        String moduleName = "پاراکلینیک";
+        String subModuleName = "خدمات پاراکلینیک";
+        SubModule oldSubModule = Helper.findSubModule(moduleName, subModuleName);
 
 //        SubModule history = SubModule
 //                .builder()
@@ -27,15 +30,20 @@ public class ParaClinic {
 //                .readOnlySubModuleId(miniParaClinicSubModuleId)
 //                .build();
 
+        Question mainQuestion1 = Helper.findQuestionInSubModule(oldSubModule, "توضیحات (مربوط به عملیات احیا)");
+        Question mainQuestion2 = Helper.findQuestionInSubModule(oldSubModule, "افرادی که حضور داشتند");
+        Question mainQuestion3 = Helper.findQuestionInSubModule(oldSubModule, "خدمات پاراکلینیک");
+        Question mainQuestion4 = Helper.findQuestionInSubModule(oldSubModule, "توضیحات");
+
         SubModule services = SubModule
                 .builder()
-                .id(new ObjectId())
-                .name("خدمات پاراکلینیک")
+                .id(oldSubModule == null ? new ObjectId() : oldSubModule.getId())
+                .name(subModuleName)
                 .questions(
                         List.of(
                                 SimpleQuestion
                                         .builder()
-                                        .id(new ObjectId())
+                                        .id(mainQuestion1 == null ? new ObjectId() : mainQuestion1.getId())
                                         .required(false)
                                         .questionType(QuestionType.SIMPLE)
                                         .answerType(AnswerType.TEXT)
@@ -43,7 +51,7 @@ public class ParaClinic {
                                         .build(),
                                 SimpleQuestion
                                         .builder()
-                                        .id(new ObjectId())
+                                        .id(mainQuestion2 == null ? new ObjectId() : mainQuestion2.getId())
                                         .required(false)
                                         .questionType(QuestionType.SIMPLE)
                                         .answerType(AnswerType.TEXT)
@@ -51,7 +59,7 @@ public class ParaClinic {
                                         .build(),
                                 CheckListGroupQuestion
                                         .builder()
-                                        .id(new ObjectId())
+                                        .id(mainQuestion3 == null ? new ObjectId() : mainQuestion3.getId())
                                         .questionType(QuestionType.CHECK_LIST)
                                         .sectionTitle("خدمات پاراکلینیک")
                                         .options(
@@ -67,7 +75,7 @@ public class ParaClinic {
                                                         .map(itr ->
                                                                 SimpleQuestion
                                                                         .builder()
-                                                                        .id(new ObjectId())
+                                                                        .id(Helper.findSimpleQuestionInList((CheckListGroupQuestion) mainQuestion3, itr.getFaTranslate()))
                                                                         .questionType(QuestionType.SIMPLE)
                                                                         .question(itr.getFaTranslate())
                                                                         .answerType(AnswerType.TICK)
@@ -81,7 +89,7 @@ public class ParaClinic {
                                         .build(),
                                 SimpleQuestion
                                         .builder()
-                                        .id(new ObjectId())
+                                        .id(mainQuestion4 == null ? new ObjectId() : mainQuestion4.getId())
                                         .questionType(QuestionType.SIMPLE)
                                         .answerType(AnswerType.LONG_TEXT)
                                         .question("توضیحات")
@@ -94,7 +102,7 @@ public class ParaClinic {
         return Module
                 .builder()
                 .tabName("پاراکلینیک")
-                .name("پاراکلینیک")
+                .name(moduleName)
                 .icon("icon-injection-1")
 //                .subModules(List.of(history, services))
                 .subModules(List.of(services))

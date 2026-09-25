@@ -7,6 +7,8 @@ import four.group.jahadi.Enums.IdentifierType;
 import four.group.jahadi.Enums.Insurance;
 import four.group.jahadi.Enums.Sex;
 import lombok.*;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
@@ -38,6 +40,8 @@ public class Patient extends Model {
 
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     private String phone;
+
+//    @CompoundIndex(def = "{'identifier': 1, 'identifierType': 1}", unique = true)
     private String identifier;
 
     @Field("identifier_type")

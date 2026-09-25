@@ -25,6 +25,9 @@ public interface WareHouseAccessForGroupRepository extends
     @Query(value = "{groupId: ?0, userId: ?1}", exists = true)
     boolean existsAccessByGroupIdAndUserId(ObjectId groupId, ObjectId userId);
 
+    @Query(value = "{groupId: ?0}")
+    List<WareHouseAccessForGroup> findAccessByGroupId(ObjectId groupId);
+
     @Query(value = "{groupId: ?0, userId: ?1}")
     Optional<WareHouseAccessForGroup> findAccessByGroupIdAndUserId(ObjectId groupId, ObjectId userId);
 
@@ -58,6 +61,7 @@ public interface WareHouseAccessForGroupRepository extends
                     "drugAccess: { $ifNull: ['$has_access_for_drug', false] }, " +
                     "equipmentAccess: { $ifNull: ['$has_access_for_equipment', false] }, " +
                     "externalReferralAccess: { $literal: false }, " +
+                    "reportAccess: { $literal: false }, " +
                     "createdAt: '$created_at' " +
                     "} }",
 
@@ -69,7 +73,23 @@ public interface WareHouseAccessForGroupRepository extends
                     "user_id: '$user_id', " +
                     "drugAccess: { $literal: false }, " +
                     "equipmentAccess: { $literal: false }, " +
+                    "reportAccess: { $literal: false }, " +
                     "externalReferralAccess: { $literal: true }, " +
+                    "createdAt: '$created_at' " +
+                    "} }" +
+                    "] " +
+                    "} }",
+
+            "{ $unionWith: { " +
+                    "coll: 'report_access_for_group', " +
+                    "pipeline: [" +
+                    "{ $match: { group_id: ?0 } }, " +
+                    "{ $project: { " +
+                    "user_id: '$user_id', " +
+                    "drugAccess: { $literal: false }, " +
+                    "equipmentAccess: { $literal: false }, " +
+                    "externalReferralAccess: { $literal: false }, " +
+                    "reportAccess: { $literal: true }, " +
                     "createdAt: '$created_at' " +
                     "} }" +
                     "] " +
@@ -80,13 +100,15 @@ public interface WareHouseAccessForGroupRepository extends
                     "drugAccess: { $max: '$drugAccess' }, " +
                     "equipmentAccess: { $max: '$equipmentAccess' }, " +
                     "externalReferralAccess: { $max: '$externalReferralAccess' }, " +
+                    "reportAccess: { $max: '$reportAccess' }, " +
                     "createdAt: { $max: '$createdAt' } " +
                     "} }",
 
             "{ $match: { $or: [ " +
                     "{ drugAccess: true }, " +
                     "{ equipmentAccess: true }, " +
-                    "{ externalReferralAccess: true } " +
+                    "{ externalReferralAccess: true }, " +
+                    "{ reportAccess: true } " +
                     "] } }",
 
             "{ $lookup: { " +
@@ -104,6 +126,7 @@ public interface WareHouseAccessForGroupRepository extends
                     "drugAccess: '$drugAccess', " +
                     "equipmentAccess: '$equipmentAccess', " +
                     "externalReferralAccess: '$externalReferralAccess', " +
+                    "reportAccess: '$reportAccess', " +
                     "createdAt: '$createdAt' " +
                     "} }",
 
@@ -116,7 +139,8 @@ public interface WareHouseAccessForGroupRepository extends
                     "user: 1, " +
                     "drugAccess: 1, " +
                     "equipmentAccess: 1, " +
-                    "externalReferralAccess: 1 " +
+                    "externalReferralAccess: 1, " +
+                    "reportAccess: 1 " +
                     "} }" +
                     "], " +
                     "totalElements: [ " +

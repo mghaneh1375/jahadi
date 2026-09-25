@@ -12,7 +12,9 @@ public enum HowToUse {
     ANAL_USE("استعمال مقعدی"), SPRAY("اسپری شود"),
     IF_NEEDED("در صورت نیاز"), ACCORDING_TO_MANUAL("طبق دستور"),
     VEIN("وریدی (IV)"), MUSCULAR("عضلانی (IM)"),
-    SERUM("داخل سرم");
+    SERUM("داخل سرم"), TOPICAL_USE("استفاده موضعی"),
+    FIRST_DOSE_DOUBLE_THEN_SINGLE("دوز اول دو برابر سپس یک برابر"),
+    EVERY_THREE_DAYS("سه روز یکبار");
 
     String faTranslate;
 

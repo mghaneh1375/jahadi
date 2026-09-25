@@ -222,6 +222,9 @@ public class DrugService extends AbstractService<Drug, DrugData> {
         )
             throw new NotAccessException();
 
+        if(drugRepository.existByCodeAndGroupId(data.getCode(), groupId))
+            throw new InvalidFieldsException("کد دارو وارد شده تکراری است");
+
         Drug drug = populateEntity(null, data);
         drug.setUserId(userId);
         drug.setGroupId(groupId);
@@ -251,6 +254,13 @@ public class DrugService extends AbstractService<Drug, DrugData> {
 
         Drug drug = drugRepository.findByIdAndGroupId(id, groupId)
                 .orElseThrow(InvalidIdException::new);
+
+        if(!Objects.equals(drugData.getCode(), drug.getCode()) &&
+                drugRepository.existByCodeAndGroupId(drugData.getCode(), groupId)
+        ) {
+            throw new InvalidFieldsException("کد دارو وارد شده تکراری است");
+        }
+
         int oldAvailable = drug.getAvailable();
         drug = populateEntity(drug, drugData);
         if (drug.getAvailable() != oldAvailable) {
@@ -355,7 +365,7 @@ public class DrugService extends AbstractService<Drug, DrugData> {
     // A: index, B: drugType, C: name, D: dose, E: expireAt,
     // F: producer, G: available, H: availablePack, I: price,
     // J: location, K: boxNo, L: shelfNo, M: code
-    private Drug isRowValid(Row row) {
+    private Drug isRowValid(Row row, ObjectId grouoId) {
         Drug drug = new Drug();
 
         for (int i = 1; i <= row.getLastCellNum(); i++) {
@@ -459,6 +469,9 @@ public class DrugService extends AbstractService<Drug, DrugData> {
         )
             throw new InvalidFieldsException("لطفا تمام موارد را وارد نمایید");
 
+        if(drugRepository.existByCodeAndGroupId(drug.getCode(), grouoId))
+            throw new InvalidFieldsException("کد دارو وارد شده تکراری است");
+
         return drug;
     }
 
@@ -472,7 +485,7 @@ public class DrugService extends AbstractService<Drug, DrugData> {
             List<ErrorRow> errorRows = new ArrayList<>();
             for (int i = 1; i <= sheet.getLastRowNum(); i++) {
                 try {
-                    Drug drug = isRowValid(sheet.getRow(i));
+                    Drug drug = isRowValid(sheet.getRow(i), groupId);
                     drug.setUserId(userId);
                     drug.setGroupId(groupId);
                     drugs.add(drug);

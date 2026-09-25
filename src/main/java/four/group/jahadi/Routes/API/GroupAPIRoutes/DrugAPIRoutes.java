@@ -14,12 +14,13 @@ import four.group.jahadi.Models.TokenInfo;
 import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Service.Area.DrugServiceInArea;
 import four.group.jahadi.Service.DrugService;
+import four.group.jahadi.Service.GroupReportService;
 import four.group.jahadi.Service.JahadgarDrugService;
 import four.group.jahadi.Utility.Utility;
 import four.group.jahadi.Validator.ObjectIdConstraint;
 import io.swagger.v3.oas.annotations.Operation;
+import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -35,15 +36,12 @@ import java.util.List;
 @RestController
 @RequestMapping(path = "/api/drug")
 @Validated
+@RequiredArgsConstructor
 public class DrugAPIRoutes extends Router {
-    @Autowired
-    private DrugService drugService;
-
-    @Autowired
-    private DrugServiceInArea drugServiceInArea;
-
-    @Autowired
-    private JahadgarDrugService jahadgarDrugService;
+    private final DrugService drugService;
+    private final DrugServiceInArea drugServiceInArea;
+    private final JahadgarDrugService jahadgarDrugService;
+    private final GroupReportService groupReportService;
 
     @DeleteMapping(value = "remove/{id}")
     public void remove(
@@ -188,18 +186,23 @@ public class DrugAPIRoutes extends Router {
             HttpServletResponse response
     ) {
         TokenInfo fullTokenInfo = getFullTokenInfo(request);
-        if(
+        if (
                 !fullTokenInfo.getAccesses().contains(Access.GROUP) &&
                         !fullTokenInfo.getAccesses().contains(Access.ADMIN)
         ) {
-            ResponseEntity<Boolean> hasAccess = jahadgarDrugService.checkAccessToWareHouse(
-                    fullTokenInfo.getGroupId(),
-                    fullTokenInfo.getUserId()
-            );
-            if(hasAccess == null || hasAccess.getBody() == null ||
-                    !hasAccess.getBody()
-            )
-                throw new NotAccessException();
+            if (
+                    !groupReportService.getGroupReporterUsers(fullTokenInfo.getGroupId())
+                            .contains(fullTokenInfo.getUserId())
+            ) {
+                ResponseEntity<Boolean> hasAccess = jahadgarDrugService.checkAccessToWareHouse(
+                        fullTokenInfo.getGroupId(),
+                        fullTokenInfo.getUserId()
+                );
+                if (hasAccess == null || hasAccess.getBody() == null ||
+                        !hasAccess.getBody()
+                )
+                    throw new NotAccessException();
+            }
         }
 
         drugService.logReport(
@@ -221,18 +224,23 @@ public class DrugAPIRoutes extends Router {
             HttpServletResponse response
     ) {
         TokenInfo fullTokenInfo = getFullTokenInfo(request);
-        if(
+        if (
                 !fullTokenInfo.getAccesses().contains(Access.GROUP) &&
                         !fullTokenInfo.getAccesses().contains(Access.ADMIN)
         ) {
-            ResponseEntity<Boolean> hasAccess = jahadgarDrugService.checkAccessToWareHouse(
-                    fullTokenInfo.getGroupId(),
-                    fullTokenInfo.getUserId()
-            );
-            if(hasAccess == null || hasAccess.getBody() == null ||
-                    !hasAccess.getBody()
-            )
-                throw new NotAccessException();
+            if (
+                    !groupReportService.getGroupReporterUsers(fullTokenInfo.getGroupId())
+                            .contains(fullTokenInfo.getUserId())
+            ) {
+                ResponseEntity<Boolean> hasAccess = jahadgarDrugService.checkAccessToWareHouse(
+                        fullTokenInfo.getGroupId(),
+                        fullTokenInfo.getUserId()
+                );
+                if (hasAccess == null || hasAccess.getBody() == null ||
+                        !hasAccess.getBody()
+                )
+                    throw new NotAccessException();
+            }
         }
 
         drugService.report(

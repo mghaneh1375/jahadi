@@ -59,9 +59,4 @@ public class PatientData {
 
     @Size(min = 2, max = 255, message = JOB_ERR)
     private String job;
-
-    @NotBlank
-    @Size(min = 5, max = 20, message = PATIENT_NO_ERR)
-    @JsonDeserialize(using = PersianNumberDeserializer.class)
-    private String patientNo;
 }

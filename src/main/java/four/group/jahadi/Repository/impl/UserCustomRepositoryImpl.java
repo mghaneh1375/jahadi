@@ -28,7 +28,7 @@ public class UserCustomRepositoryImpl {
             String NID, String phone, Sex sex, String groupName,
             ObjectId groupId, Boolean justGroupRequests,
             String searchKey, Pageable pageable,
-            Boolean justName, Criteria... moreCriteriaList
+            String[] projection, Criteria... moreCriteriaList
     ) {
         List<Criteria> criteriaList = new ArrayList<>();
 
@@ -96,8 +96,9 @@ public class UserCustomRepositoryImpl {
                 .andOperator(criteriaList.toArray(new Criteria[0]))
         );
 
-        if(Boolean.TRUE.equals(justName))
-            query.fields().include("name").include("_id");
+//        if(Boolean.TRUE.equals(justName))
+//            query.fields().include("name").include("_id");
+        query.fields().include(projection);
 
         long total = mongoTemplate.count(query, User.class);
         query.with(pageable);

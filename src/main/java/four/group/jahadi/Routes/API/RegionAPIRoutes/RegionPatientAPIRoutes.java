@@ -354,8 +354,14 @@ public class RegionPatientAPIRoutes extends Router {
             @PathVariable @ObjectIdConstraint ObjectId patientId,
             @RequestBody(required = false) @Valid PatientReferralData data
     ) {
+        TokenInfo fullTokenInfo = getFullTokenInfo(request);
         patientServiceInArea.addReferralForPatient(
-                getId(request), areaId, patientId, srcModuleId, destModuleId, data != null ? data.getDesc() : null
+                fullTokenInfo.getAccesses().contains(Access.GROUP)
+                        ? fullTokenInfo.getGroupId()
+                        : fullTokenInfo.getUserId(),
+                areaId, patientId, srcModuleId, destModuleId,
+                data != null ? data.getDesc() : null,
+                fullTokenInfo.getAccesses().contains(Access.GROUP)
         );
     }
 
@@ -371,7 +377,9 @@ public class RegionPatientAPIRoutes extends Router {
             @RequestBody(required = false) @Valid PatientReferralData data
     ) {
         patientServiceInArea.addReferralForPatient(
-                getId(request), areaId, patientId, null, destModuleId, data != null ? data.getDesc() : null
+                getId(request), areaId, patientId, null,
+                destModuleId, data != null ? data.getDesc() : null,
+                false
         );
     }
 
@@ -386,8 +394,13 @@ public class RegionPatientAPIRoutes extends Router {
             @PathVariable @ObjectIdConstraint ObjectId subModuleId,
             @PathVariable @ObjectIdConstraint ObjectId patientId
     ) {
+        TokenInfo fullTokenInfo = getFullTokenInfo(request);
         patientServiceInArea.addReferralForPatientBySubModule(
-                getId(request), areaId, patientId, moduleId, subModuleId
+                fullTokenInfo.getAccesses().contains(Access.GROUP)
+                        ? fullTokenInfo.getGroupId()
+                        : fullTokenInfo.getUserId(),
+                areaId, patientId, moduleId, subModuleId,
+                fullTokenInfo.getAccesses().contains(Access.GROUP)
         );
     }
 
@@ -412,12 +425,17 @@ public class RegionPatientAPIRoutes extends Router {
         try {
             List<PatientFormData> forms = new ObjectMapper().readValue(tmp, new TypeReference<>() {
             });
-            if (forms.size() == 0)
+            if (forms.isEmpty())
                 throw new InvalidFieldsException("form size is 0");
 
+            TokenInfo fullTokenInfo = getFullTokenInfo(request);
             patientServiceInArea.setPatientForm(
-                    getId(request), areaId, moduleId,
-                    subModuleId, patientId, forms, files
+                    fullTokenInfo.getAccesses().contains(Access.GROUP)
+                            ? fullTokenInfo.getGroupId()
+                            : fullTokenInfo.getUserId(),
+                    areaId, moduleId,
+                    subModuleId, patientId, forms,
+                    files,fullTokenInfo.getAccesses().contains(Access.GROUP)
             );
         } catch (Exception x) {
             throw new InvalidFieldsException(x.getMessage());
@@ -435,8 +453,12 @@ public class RegionPatientAPIRoutes extends Router {
             @PathVariable @ObjectIdConstraint ObjectId subModuleId,
             @PathVariable @ObjectIdConstraint ObjectId patientId
     ) {
+        TokenInfo fullTokenInfo = getFullTokenInfo(request);
         return patientServiceInArea.getPatientForm(
-                getId(request), areaId, moduleId, subModuleId, patientId
+                fullTokenInfo.getAccesses().contains(Access.GROUP)
+                        ? fullTokenInfo.getGroupId()
+                        : fullTokenInfo.getUserId(),
+                areaId, moduleId, subModuleId, patientId
         );
     }
 
@@ -450,7 +472,7 @@ public class RegionPatientAPIRoutes extends Router {
             HttpServletResponse response
     ) {
         patientServiceInArea.patientReport(
-                patientId, null, false, response
+                patientId, null, response
         );
     }
 }

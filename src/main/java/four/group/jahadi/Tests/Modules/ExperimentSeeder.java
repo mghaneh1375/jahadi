@@ -16,7 +16,7 @@ public class ExperimentSeeder {
                 .canSuggestDrug(false)
                 .isReferral(false)
                 .subModules(List.of(
-                        ExperimentAnswer.make()
+                        ExperimentAnswer.make("آزمایشگاه")
                 ))
                 .build();
     }

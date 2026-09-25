@@ -4,15 +4,18 @@ import four.group.jahadi.DTO.Trip.TripStep1Data;
 import four.group.jahadi.DTO.Trip.TripStep2Data;
 import four.group.jahadi.Enums.Access;
 import four.group.jahadi.Enums.Status;
+import four.group.jahadi.Exception.NotAccessException;
 import four.group.jahadi.Exception.NotActivateAccountException;
 import four.group.jahadi.Exception.UnAuthException;
+import four.group.jahadi.Models.TokenInfo;
 import four.group.jahadi.Models.Trip;
 import four.group.jahadi.Models.User;
 import four.group.jahadi.Routes.Router;
+import four.group.jahadi.Service.GroupReportService;
 import four.group.jahadi.Service.TripService;
 import four.group.jahadi.Validator.ObjectIdConstraint;
+import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -27,10 +30,11 @@ import java.util.List;
 @RestController
 @RequestMapping(value = "api/group/trip")
 @Validated
+@RequiredArgsConstructor
 public class ManageTripAPIRoutes extends Router {
 
-    @Autowired
-    private TripService tripService;
+    private final TripService tripService;
+    private final GroupReportService groupReportService;
 
     @PostMapping(value = "store/{projectId}")
     @ResponseBody
@@ -60,10 +64,18 @@ public class ManageTripAPIRoutes extends Router {
             @RequestParam(value = "pageIndex", required = false) @Min(0) @Max(10000) Integer pageIndex,
             @RequestParam(value = "pageSize", required = false) @Min(5) @Max(100) Integer pageSize
     ) {
+        TokenInfo fullTokenInfo = getFullTokenInfo(request);
+        if(!fullTokenInfo.getAccesses().contains(Access.GROUP) &&
+                !groupReportService.getGroupReporterUsers(fullTokenInfo.getGroupId())
+                        .contains(fullTokenInfo.getUserId())
+        ) {
+            throw new NotAccessException();
+        }
+
         return tripService.paginateList(
                 pageIndex == null ? 0 : pageIndex,
                 pageSize == null ? Integer.MAX_VALUE : pageSize,
-                getGroup(request), status
+                fullTokenInfo.getGroupId(), status
         );
     }
 

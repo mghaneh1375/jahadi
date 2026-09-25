@@ -22,6 +22,7 @@ public interface ExternalReferralAccessForGroupRepository extends
             "{$project: {'user': '$userObj', 'created_at': 1}}",
     })
     List<ExternalReferralAccessJoinWithUser> findAggregateByGroupIdAndUserId(ObjectId groupId, ObjectId userId);
+
     @Aggregation(pipeline = {
             "{$match: {groupId: ?0}}",
             "{$lookup: {from: 'user', localField: 'user_id', foreignField: '_id', as: 'userObj'}}",
@@ -32,4 +33,7 @@ public interface ExternalReferralAccessForGroupRepository extends
 
     @Query(value = "{groupId: ?0, userId: ?1}", delete = true)
     void revokeAccessByGroupIdAndUserId(ObjectId groupId, ObjectId userId);
+
+    @Query(value = "{groupId: ?0}")
+    List<ExternalReferralAccessForGroup> getAccessByGroupId(ObjectId groupId);
 }

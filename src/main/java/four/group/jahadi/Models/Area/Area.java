@@ -3,6 +3,7 @@ package four.group.jahadi.Models.Area;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import four.group.jahadi.Enums.CoOrg;
 import four.group.jahadi.Enums.Color;
 import four.group.jahadi.Models.*;
 import lombok.*;
@@ -66,6 +67,19 @@ public class Area {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Double lng;
+
+    @Field(value = "serial_prefix")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String serialPrefix;
+
+    @Field(value = "co_org")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private CoOrg coOrg;
+
+    @Field(value = "stop_reception")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @Builder.Default
+    private Boolean stopReception = false;
 
     @Field("start_at")
     @JsonSerialize(using = DateSerialization.class)

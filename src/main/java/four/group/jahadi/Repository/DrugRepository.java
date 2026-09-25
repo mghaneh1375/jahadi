@@ -19,6 +19,9 @@ public interface DrugRepository extends MongoRepository<Drug, ObjectId>, Filtera
     @Query(value = "{_id: ?0, groupId: ?1}")
     Optional<Drug> findByIdAndGroupId(ObjectId id, ObjectId groupId);
 
+    @Query(value = "{code: ?0, groupId: ?1}", exists = true)
+    Boolean existByCodeAndGroupId(String code, ObjectId groupId);
+
     @Query(value = "{_id: {$in: ?0}, groupId: ?1}")
     List<Drug> findAllByIdsAndGroupId(List<ObjectId> ids, ObjectId groupId);
 

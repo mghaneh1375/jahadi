@@ -17,8 +17,8 @@ public class Sampler {
                 .canSuggestDrug(false)
                 .isReferral(false)
                 .subModules(List.of(
-                        Step1.make(),
-                        Step2.make()
+                        Step1.make("نمونه گیر"),
+                        Step2.make("نمونه گیر")
                 ))
                 .build();
     }

@@ -6,44 +6,23 @@ import four.group.jahadi.Service.Area.MembersServiceInArea;
 import four.group.jahadi.Service.UserService;
 import four.group.jahadi.Validator.ObjectIdConstraint;
 import io.swagger.v3.oas.annotations.Operation;
+import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @RestController
 @RequestMapping(value = "api/region/manage_user")
 @Validated
+@RequiredArgsConstructor
 public class RegionManageUserAPIRoutes extends Router {
 
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private MembersServiceInArea membersServiceInArea;
-
-
-    @GetMapping(value = "list")
-    @ResponseBody
-    @Operation(summary = "گرفتن اعضای گروه توسط مسئول منطقه")
-    public ResponseEntity<Page<User>> getList(
-            HttpServletRequest request,
-            @RequestParam(name = "pageIndex", required = false) @Min(0) @Max(1000) Integer pageIndex,
-            @RequestParam(name = "pageSize", required = false) @Min(5) @Max(100) Integer pageSize
-    ) {
-        return userService.findGroupMembersByRegionOwner(
-                getId(request), getGroup(request),
-                pageIndex == null ? 0 : pageIndex, pageSize == null ? Integer.MAX_VALUE : pageSize
-        );
-    }
+    private final UserService userService;
+    private final MembersServiceInArea membersServiceInArea;
 
     @GetMapping(value = "digestList")
     @ResponseBody
@@ -61,9 +40,10 @@ public class RegionManageUserAPIRoutes extends Router {
     @Operation(summary = "گرفتن اعضای افزوده شده توسط مسئول منطقه")
     public ResponseEntity<List<User>> members(
             HttpServletRequest request,
-            @PathVariable @ObjectIdConstraint ObjectId areaId
+            @PathVariable @ObjectIdConstraint ObjectId areaId,
+            @RequestParam(value = "returnPresenceList", required = false) Boolean returnPresenceList
     ) {
-        return membersServiceInArea.members(getId(request), areaId);
+        return membersServiceInArea.members(getId(request), areaId, returnPresenceList);
     }
 
     @PutMapping(value = "addMembers/{areaId}")

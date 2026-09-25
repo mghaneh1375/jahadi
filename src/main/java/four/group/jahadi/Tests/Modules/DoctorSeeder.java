@@ -5,9 +5,11 @@ import four.group.jahadi.Enums.Module.HaveOrNot;
 import four.group.jahadi.Enums.Module.QuestionType;
 import four.group.jahadi.Models.Module;
 import four.group.jahadi.Models.Question.CheckListGroupQuestion;
+import four.group.jahadi.Models.Question.Question;
 import four.group.jahadi.Models.Question.SimpleQuestion;
 import four.group.jahadi.Models.SubModule;
 import four.group.jahadi.Tests.Modules.SubModules.ExternalReferral;
+import four.group.jahadi.Tests.Modules.SubModules.Helper;
 import four.group.jahadi.Tests.Modules.SubModules.MiniParaClinic;
 import four.group.jahadi.Tests.Modules.SubModules.Visit;
 import four.group.jahadi.Utility.PairValue;
@@ -21,6 +23,9 @@ public class DoctorSeeder {
 
     public static List<Module> seed() {
 
+        SubModule oldSubModule = Helper.findSubModule("آموزش پس از پزشک", "آموزش پس از پزشک");
+        Question mainQuestion1 = Helper.findQuestionInSubModule(oldSubModule, "");
+
         return List.of(
                 Module
                         .builder()
@@ -30,10 +35,10 @@ public class DoctorSeeder {
                         .name("پزشک عمومی")
                         .subModules(
                                 List.of(
-                                        Visit.make(),
-                                        ExternalReferral.make(),
+                                        Visit.make("پزشک عمومی"),
+                                        ExternalReferral.make("پزشک عمومی"),
 //                                        MiniParaClinic.make(miniParaClinicId)
-                                        MiniParaClinic.make()
+                                        MiniParaClinic.make("پزشک عمومی")
                                 )
                         )
                         .canSuggestDrug(true)
@@ -47,9 +52,9 @@ public class DoctorSeeder {
                         .name("دورا پزشک")
                         .subModules(
                                 List.of(
-                                        Visit.make(),
-                                        ExternalReferral.make(),
-                                        MiniParaClinic.make()
+                                        Visit.make("دورا پزشک"),
+                                        ExternalReferral.make("دورا پزشک"),
+                                        MiniParaClinic.make("دورا پزشک")
                                 )
                         )
                         .canSuggestDrug(true)
@@ -64,13 +69,13 @@ public class DoctorSeeder {
                                 List.of(
                                         SubModule
                                                 .builder()
-                                                .id(new ObjectId())
+                                                .id(oldSubModule == null ? new ObjectId() : oldSubModule.getId())
                                                 .name("آموزش پس از پزشک")
                                                 .questions(
                                                         List.of(
                                                                 CheckListGroupQuestion
                                                                         .builder()
-                                                                        .id(new ObjectId())
+                                                                        .id(mainQuestion1 == null ? new ObjectId() : mainQuestion1.getId())
                                                                         .sectionTitle("")
                                                                         .options(
                                                                                 Arrays.stream(HaveOrNot.values()).map(haveOrNot ->
@@ -81,7 +86,7 @@ public class DoctorSeeder {
                                                                         .questions(List.of(
                                                                                 SimpleQuestion
                                                                                         .builder()
-                                                                                        .id(new ObjectId())
+                                                                                        .id(Helper.findSimpleQuestionInList((CheckListGroupQuestion) mainQuestion1, "آموزش"))
                                                                                         .questionType(QuestionType.SIMPLE)
                                                                                         .question("آموزش")
                                                                                         .answerType(AnswerType.TICK)
@@ -89,7 +94,7 @@ public class DoctorSeeder {
                                                                                         .build(),
                                                                                 SimpleQuestion
                                                                                         .builder()
-                                                                                        .id(new ObjectId())
+                                                                                        .id(Helper.findSimpleQuestionInList((CheckListGroupQuestion) mainQuestion1, "بروشور"))
                                                                                         .questionType(QuestionType.SIMPLE)
                                                                                         .question("بروشور")
                                                                                         .required(false)

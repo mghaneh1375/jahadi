@@ -294,7 +294,7 @@ public class EquipmentServiceInArea {
         Trip trip = tripRepository.findActiveByAreaIdAndEquipmentManager(
                 areaId, userId, Utility.getCurrLocalDateTime()
         ).orElseThrow(InvalidIdException::new);
-        AreaUtils.findStartedArea(trip, areaId);
+        AreaUtils.findStartedArea(trip, areaId, false);
 
         equipmentsInAreaRepositoryImp.countDown(areaId, equipmentId, count);
     }

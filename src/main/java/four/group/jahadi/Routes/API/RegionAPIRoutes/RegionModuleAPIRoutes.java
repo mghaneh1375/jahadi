@@ -50,7 +50,13 @@ public class RegionModuleAPIRoutes extends Router {
             HttpServletRequest request,
             @PathVariable @ObjectIdConstraint ObjectId areaId
     ) {
-        return moduleServiceInArea.modules(getId(request), areaId);
+        TokenInfo fullTokenInfo = getFullTokenInfo(request);
+        return moduleServiceInArea.modules(
+                fullTokenInfo.getAccesses().contains(Access.GROUP)
+                        ? fullTokenInfo.getGroupId()
+                        : fullTokenInfo.getUserId(),
+                areaId
+        );
     }
 
     @GetMapping(path = "getTabsInArea/{areaId}")
@@ -75,7 +81,12 @@ public class RegionModuleAPIRoutes extends Router {
             @PathVariable @ObjectIdConstraint ObjectId areaId,
             @RequestParam(value = "tabName") @NotEmpty @Size(min = 3, max = 30) String tabName
     ) {
-        return moduleServiceInArea.getModulesInTab(getId(request), areaId, tabName);
+        TokenInfo fullTokenInfo = getFullTokenInfo(request);
+        return moduleServiceInArea.getModulesInTab(
+                fullTokenInfo.getAccesses().contains(Access.GROUP)
+                        ? fullTokenInfo.getGroupId()
+                        : fullTokenInfo.getUserId(),
+                areaId, tabName);
     }
 
     @GetMapping(path = "getModuleInArea/{areaId}/{moduleId}")
@@ -86,7 +97,13 @@ public class RegionModuleAPIRoutes extends Router {
             @PathVariable @ObjectIdConstraint ObjectId areaId,
             @PathVariable @ObjectIdConstraint ObjectId moduleId
     ) {
-        return moduleServiceInArea.getModule(getId(request), areaId, moduleId);
+        TokenInfo fullTokenInfo = getFullTokenInfo(request);
+        return moduleServiceInArea.getModule(
+                fullTokenInfo.getAccesses().contains(Access.GROUP)
+                        ? fullTokenInfo.getGroupId()
+                        : fullTokenInfo.getUserId(),
+                areaId, moduleId
+        );
     }
 
     @GetMapping(path = "getSubModule/{areaId}/{moduleId}/{subModuleId}")
@@ -211,6 +228,7 @@ public class RegionModuleAPIRoutes extends Router {
                         ? fullTokenInfo.getGroupId()
                         : fullTokenInfo.getUserId()
                 , fullTokenInfo.getAccesses().contains(Access.GROUP),
+                fullTokenInfo.getGroupId(),
                 areaId, moduleId, response
         );
     }
@@ -229,7 +247,7 @@ public class RegionModuleAPIRoutes extends Router {
                         ? fullTokenInfo.getGroupId()
                         : fullTokenInfo.getUserId()
                 , fullTokenInfo.getAccesses().contains(Access.GROUP),
-                areaId,
+                areaId, fullTokenInfo.getGroupId(),
                 null, null,
                 null, null,
                 null, null,
@@ -252,6 +270,7 @@ public class RegionModuleAPIRoutes extends Router {
                         ? fullTokenInfo.getGroupId()
                         : fullTokenInfo.getUserId()
                 , fullTokenInfo.getAccesses().contains(Access.GROUP),
+                fullTokenInfo.getGroupId(),
                 areaId,
                 response
         );
@@ -272,6 +291,7 @@ public class RegionModuleAPIRoutes extends Router {
                         ? fullTokenInfo.getGroupId()
                         : fullTokenInfo.getUserId()
                 , fullTokenInfo.getAccesses().contains(Access.GROUP),
+                fullTokenInfo.getGroupId(),
                 areaId, null, response
         );
     }

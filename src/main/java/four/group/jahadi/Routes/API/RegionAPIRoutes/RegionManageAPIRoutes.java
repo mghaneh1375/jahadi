@@ -50,6 +50,12 @@ public class RegionManageAPIRoutes extends Router {
         return areaService.myCartableList(getId(request), true);
     }
 
+    @GetMapping(value = "getActiveAreaId")
+    @ResponseBody
+    public ResponseEntity<String> getActiveAreaId(HttpServletRequest request) {
+        return areaService.getActiveAreaId(getId(request));
+    }
+
     @GetMapping(value = "getGroupAreas")
     @ResponseBody
     @Operation(summary = "گرفتن لیستی از مناطقی که متعلق به یک گروه خاص می باشد و هنوز تمام نشده است توسط مسئول انبار یا مسئول ارجاع خارجی")
@@ -123,6 +129,27 @@ public class RegionManageAPIRoutes extends Router {
         );
     }
 
+    @PutMapping(value = "toggle-reception-status/{areaId}")
+    @ResponseBody
+    @Operation(summary = "تغییر وضعیت پذیرش بیمار")
+    public ResponseEntity toggleReceptionStatus(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId
+    ) {
+        areaService.toggleReceptionStatus(areaId, getId(request));
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping(value = "get-reception-status/{areaId}")
+    @ResponseBody
+    @Operation(summary = "گرفتن وضعیت پذیرش بیمار")
+    public ResponseEntity<Boolean> getReceptionStatus(
+            HttpServletRequest request,
+            @PathVariable @ObjectIdConstraint ObjectId areaId
+    ) {
+        return areaService.getReceptionStatus(areaId, getId(request));
+    }
+
     @GetMapping(value = "getRunInfo/{areaId}")
     @ResponseBody
     @Operation(summary = "گرفتن اطلاعات منطقه", description = "گرفتن اطلاعاتی نظیر شهر محل برگزاری، مختصات جغرافیایی و روز و زمان شروع و پایان")
@@ -163,7 +190,7 @@ public class RegionManageAPIRoutes extends Router {
         areaService.submitEntrance(getId(request), areaId, userId);
     }
 
-    @PutMapping(value = "updatePresenceList/{userId}/{areaId}/{presenceListId}")
+    @PutMapping(value = "updatePresenceList/{userId}/{areaId}")
     @ResponseBody
     @Operation(
             summary = "ویرایش ورود یا خروج در منطقه توسط مسئول منطقه",
@@ -173,7 +200,7 @@ public class RegionManageAPIRoutes extends Router {
             HttpServletRequest request,
             @PathVariable @ObjectIdConstraint ObjectId userId,
             @PathVariable @ObjectIdConstraint ObjectId areaId,
-            @PathVariable @ObjectIdConstraint ObjectId presenceListId,
+            @RequestParam(required = false, value = "presenceListId") ObjectId presenceListId,
             @RequestBody @Valid UpdatePresenceList data
     ) {
         areaService.updatePresenceList(

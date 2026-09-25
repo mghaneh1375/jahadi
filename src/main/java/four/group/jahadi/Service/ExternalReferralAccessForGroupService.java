@@ -9,12 +9,15 @@ import four.group.jahadi.Repository.ExternalReferralAccessForGroupRepository;
 import four.group.jahadi.Repository.UserRepository;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 public class ExternalReferralAccessForGroupService {
@@ -32,6 +35,7 @@ public class ExternalReferralAccessForGroupService {
         );
     }
 
+    @CacheEvict(value = "groupExternalReferralAccesses", allEntries = true)
     public ResponseEntity<ExternalReferralAccessJoinWithUser> store(ObjectId userId, Object... params) {
         User user = userRepository.findById(userId)
                 .orElseThrow(InvalidIdException::new);
@@ -54,7 +58,16 @@ public class ExternalReferralAccessForGroupService {
         );
     }
 
+    @CacheEvict(value = "groupExternalReferralAccesses", allEntries = true)
     public void revokeAccess(ObjectId userId, ObjectId groupId) {
         repository.revokeAccessByGroupIdAndUserId(groupId, userId);
+    }
+
+    @Cacheable(value = "groupExternalReferralAccesses", key = "#groupId")
+    public List<ObjectId> getGroupExternalReferralAccessesByGroupId(ObjectId groupId) {
+        return repository.getAccessByGroupId(groupId)
+                .stream()
+                .map(ExternalReferralAccessForGroup::getUserId)
+                .collect(Collectors.toList());
     }
 }

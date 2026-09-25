@@ -8,6 +8,7 @@ import four.group.jahadi.Models.PresenceList;
 import four.group.jahadi.Models.User;
 import four.group.jahadi.Models.UserPresenceList;
 import four.group.jahadi.Repository.Area.PresenceListRepository;
+import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,13 +16,14 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class AreaPresenceService {
 
-    @Autowired
-    private PresenceListRepository presenceListRepository;
+    private final PresenceListRepository presenceListRepository;
 
     public void submitEntrance(ObjectId areaId, ObjectId userId) {
         presenceListRepository.insert(PresenceList
@@ -37,13 +39,22 @@ public class AreaPresenceService {
             ObjectId areaId, ObjectId userId,
             ObjectId presenceListId, UpdatePresenceList data
     ) {
-        PresenceList presenceList = presenceListRepository.findById(presenceListId).orElseThrow(InvalidIdException::new);
-        if (!presenceList.getAreaId().equals(areaId) ||
-                !presenceList.getUserId().equals(userId)
-        )
-            throw new NotAccessException();
+        PresenceList presenceList;
+        if(presenceListId != null) {
+            presenceList = presenceListRepository.findById(presenceListId)
+                    .orElseThrow(InvalidIdException::new);
 
-        if(data.getJustSetExit() != null && data.getJustSetExit())
+            if (!presenceList.getAreaId().equals(areaId) ||
+                    !presenceList.getUserId().equals(userId)
+            )
+                throw new NotAccessException();
+        }
+        else {
+            presenceList = presenceListRepository.getLastPresenceByUserAndAreaId(areaId, userId)
+                    .orElseThrow(InvalidIdException::new);
+        }
+
+        if(Objects.equals(Boolean.TRUE, data.getJustSetExit()))
             presenceList.setExit(LocalDateTime.now());
         else {
             if(data.getEntrance() != null)

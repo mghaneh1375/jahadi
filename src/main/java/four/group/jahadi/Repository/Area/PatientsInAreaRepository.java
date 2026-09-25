@@ -4,6 +4,7 @@ import four.group.jahadi.DTO.dashboard.PerProvinceData;
 import four.group.jahadi.Models.Area.PatientJoinArea;
 import four.group.jahadi.Models.Area.PatientJoinForReferrals;
 import four.group.jahadi.Models.Area.PatientsInArea;
+import four.group.jahadi.Repository.Area.impl.*;
 import four.group.jahadi.Repository.FilterableRepository;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface PatientsInAreaRepository extends MongoRepository<PatientsInArea, ObjectId>, FilterableRepository<PatientsInArea> {
@@ -323,4 +325,506 @@ public interface PatientsInAreaRepository extends MongoRepository<PatientsInArea
 
     @Query(value = "{ created_at: { $gte: ?0 } }", count = true)
     Long getTotalPatientsCountInLastMonth(LocalDateTime oneMonthAgo);
+
+    @Aggregation(pipeline = {
+            "{ $match: { area_id: { $in: ?0 } } }",
+            "{ $match: { 'referrals.module_id': { $in: ?1 } } }",
+            "{ $unwind: { path: '$referrals', preserveNullAndEmptyArrays: false } }",
+            "{ $match: { 'referrals.module_id': { $in: ?1 } } }",
+            "{ $unwind: { path: '$referrals.forms', preserveNullAndEmptyArrays: true } }",
+
+            "{ $group: { " +
+                    "_id: { " +
+                    "areaId: '$area_id', " +
+                    "moduleId: '$referrals.module_id', " +
+                    "patientId: '$patient_id' " +
+                    "}, " +
+                    "accepted: { $max: '$referrals.recepted' }, " +
+                    "acceptedByDoctor: { " +
+                    "$max: { " +
+                    "$cond: [ " +
+                    "{ $eq: ['$referrals.forms.doctor_id', ?2] }, " +
+                    "true, " +
+                    "false " +
+                    "] " +
+                    "} " +
+                    "} " +
+                    "} }",
+
+            "{ $group: { " +
+                    "_id: { " +
+                    "areaId: '$_id.areaId', " +
+                    "moduleId: '$_id.moduleId' " +
+                    "}, " +
+                    "total: { $sum: 1 }, " +
+                    "accepted: { $sum: { $cond: ['$accepted', 1, 0] } }, " +
+                    "acceptedByDoctor: { $sum: { $cond: ['$acceptedByDoctor', 1, 0] } } " +
+                    "} }",
+
+            "{ $project: { " +
+                    "total: 1, " +
+                    "accepted: 1, " +
+                    "acceptedByDoctor: 1, " +
+                    "_id: 1 " +
+                    "} }",
+    })
+    List<PatientStatistics> getPatientStatisticsByAreasAndModules(
+            List<ObjectId> areaIds,
+            List<ObjectId> moduleIds,
+            ObjectId doctorId
+    );
+
+
+    @Aggregation(pipeline = {
+            "{ $match: { area_id: { $in: ?0 } } }",
+            "{ $match: { 'referrals.module_id': { $in: ?1 } } }",
+            "{ $unwind: { path: '$referrals', preserveNullAndEmptyArrays: false } }",
+            "{ $match: { 'referrals.module_id': { $in: ?1 } } }",
+            "{ $unwind: { path: '$referrals.forms', preserveNullAndEmptyArrays: true } }",
+
+            "{ $group: { " +
+                    "_id: { " +
+                    "areaId: '$area_id', " +
+                    "moduleId: '$referrals.module_id', " +
+                    "patientId: '$patient_id' " +
+                    "}, " +
+                    "accepted: { $max: '$referrals.recepted' } " +
+                    "} }",
+
+            "{ $group: { " +
+                    "_id: { " +
+                    "areaId: '$_id.areaId', " +
+                    "moduleId: '$_id.moduleId' " +
+                    "}, " +
+                    "total: { $sum: 1 }, " +
+                    "accepted: { $sum: { $cond: ['$accepted', 1, 0] } } " +
+                    "} }",
+
+            "{ $project: { " +
+                    "total: 1, " +
+                    "accepted: 1, " +
+                    "_id: 1 " +
+                    "} }",
+    })
+    List<PatientStatistics> getPatientStatisticsByAreasAndModules(
+            List<ObjectId> areaIds,
+            List<ObjectId> moduleIds
+    );
+
+    @Aggregation(pipeline = {
+            "{ $unwind: { path: '$referrals', preserveNullAndEmptyArrays: false } }",
+            "{ $unwind: { path: '$referrals.forms', preserveNullAndEmptyArrays: false } }",
+            "{ $match: { 'referrals.forms.doctor_id': ?0 } }",
+            "{ $group: { " +
+                    "_id: '$patient_id' " +
+                    "} }",
+            "{ $count: 'totalAccepted' }"
+    })
+    Integer getTotalAcceptedPatientsByDoctor(ObjectId doctorId);
+
+    @Aggregation(pipeline = {
+            "{ $match: { area_id: { $in: ?0 } } }",
+            "{ $group: { " +
+                    "_id: '$area_id', " +
+                    "totalPatients: { $sum: 1 } " +
+                    "} }",
+
+            "{ $project: { " +
+                    "totalPatients: 1, " +
+                    "_id: 1 " +
+                    "} }",
+    })
+    List<AreaPatientCount> getTotalPatientsByAreas(List<ObjectId> areaIds);
+
+    @Aggregation(pipeline = {
+            "{ $match: { " +
+                    "$expr: { " +
+                    "$and: [ " +
+                    "{ $or: [ " +
+                    "{ $eq: [?0, null] }, " +
+                    "{ $in: [?0, { $ifNull: ['$referrals.module_id', []] }] } " +
+                    "] }, " +
+                    "{ $or: [ " +
+                    "{ $eq: [?1, null] }, " +
+                    "{ $eq: ['$area_id', ?1] } " +
+                    "] } " +
+                    "] " +
+                    "} " +
+                    "} }",
+
+            "{ $unwind: { " +
+                    "path: '$referrals', " +
+                    "preserveNullAndEmptyArrays: false " +
+                    "} }",
+
+            "{ $match: { " +
+                    "$expr: { " +
+                    "$or: [ " +
+                    "{ $eq: [?0, null] }, " +
+                    "{ $eq: ['$referrals.module_id', ?0] } " +
+                    "] " +
+                    "} " +
+                    "} }",
+
+            "{ $group: { " +
+                    "_id: '$patient_id', " +
+                    "areaId: { $first: '$area_id' } " +
+                    "} }",
+
+            "{ $lookup: { " +
+                    "from: 'trip', " +
+                    "let: { areaId: '$area_id' }, " +
+                    "pipeline: [ " +
+                    "{ $unwind: '$areas' }," +
+
+                    "{ $match: { " +
+                    "$expr: { " +
+                    "$eq: ['$areas._id', '$$areaId'] " +
+                    "} " +
+                    "} }," +
+
+                    "{ $match: { " +
+                    "$or: [ " +
+                    "{ $expr: { $eq: [?2, null] } }, " +
+                    "{ $expr: { $eq: ['$_id', ?2] } } " +
+                    "] " +
+                    "} }," +
+
+                    "{ $match: { " +
+                    "'groups_with_access.group_id': ?3 " +
+                    "} }," +
+
+                    "{ $project: { " +
+                    "_id: 1 " +
+                    "} }," +
+
+                    "{ $limit: 1 } " +
+
+                    "], " +
+                    "as: 'tripInfo' " +
+                    "} }",
+
+            "{ $match: { $expr: { $gt: [ { $size: '$tripInfo' }, 0 ] } } }",
+
+            "{ $lookup: { " +
+                    "from: 'patient', " +
+                    "localField: '_id', " +
+                    "foreignField: '_id', " +
+                    "as: 'patientInfo' " +
+                    "} }",
+
+            "{ $unwind: '$patientInfo' }",
+
+            "{ $facet: { " +
+                    "total: [ " +
+                    "{ $count: 'count' } " +
+                    "], " +
+
+                    "male: [ " +
+                    "{ $match: { " +
+                    "'patientInfo.sex': 'MALE' " +
+                    "} }, " +
+                    "{ $count: 'count' } " +
+                    "], " +
+
+                    "female: [ " +
+                    "{ $match: { " +
+                    "'patientInfo.sex': 'FEMALE' " +
+                    "} }, " +
+                    "{ $count: 'count' } " +
+                    "], " +
+
+                    "child: [ " +
+                    "{ $match: { " +
+                    "'patientInfo.age_type': 'CHILD' " +
+                    "} }, " +
+                    "{ $count: 'count' } " +
+                    "], " +
+
+                    "adult: [ " +
+                    "{ $match: { " +
+                    "'patientInfo.age_type': 'ADULT' " +
+                    "} }, " +
+                    "{ $count: 'count' } " +
+                    "] " +
+
+                    "} }",
+
+            "{ $project: { " +
+                    "total: { " +
+                    "$ifNull: [ " +
+                    "{ $arrayElemAt: ['$total.count', 0] }, " +
+                    "0" +
+                    "] " +
+                    "}, " +
+
+                    "male: { " +
+                    "$ifNull: [ " +
+                    "{ $arrayElemAt: ['$male.count', 0] }, " +
+                    "0" +
+                    "] " +
+                    "}, " +
+
+                    "female: { " +
+                    "$ifNull: [ " +
+                    "{ $arrayElemAt: ['$female.count', 0] }, " +
+                    "0" +
+                    "] " +
+                    "}, " +
+
+                    "child: { " +
+                    "$ifNull: [ " +
+                    "{ $arrayElemAt: ['$child.count', 0] }, " +
+                    "0" +
+                    "] " +
+                    "}, " +
+
+                    "adult: { " +
+                    "$ifNull: [ " +
+                    "{ $arrayElemAt: ['$adult.count', 0] }, " +
+                    "0" +
+                    "] " +
+                    "}, " +
+
+                    "_id: 0 " +
+                    "} }"
+    })
+    PatientStats getPatientStatistics(
+            ObjectId moduleId,
+            ObjectId areaId,
+            ObjectId tripId,
+            ObjectId groupId
+    );
+
+    @Aggregation(pipeline = {
+            "{ $match: { " +
+                    "$or: [ " +
+                    "{ $expr: { $eq: [?4, null] } }, " +
+                    "{ $expr: { $eq: ['$area_id', ?4] } } " +
+                    "] " +
+                    "} }",
+
+            "{ $group: { " +
+                    "_id: '$patient_id', " +
+                    "uniqueArea: { $addToSet: '$area_id' }, " +
+                    "acceptedSections: { " +
+                    "$sum: { " +
+                    "$size: { " +
+                    "$filter: { " +
+                    "input: { $ifNull: ['$referrals', []] }, " +
+                    "as: 'referral', " +
+                    "cond: { $eq: ['$$referral.recepted', true] } " +
+                    "} " +
+                    "} " +
+                    "} " +
+                    "} " +
+                    "} }",
+
+            "{ $lookup: { " +
+                    "from: 'trip', " +
+                    "let: { areaIds: '$uniqueArea' }, " +
+                    "pipeline: [ " +
+
+                    "{ $match: { " +
+                    "'groups_with_access.group_id': ?2 " +
+                    "} }, " +
+
+                    "{ $unwind: '$areas' }, " +
+
+                    "{ $match: { " +
+                    "$and: [ " +
+
+                    "{ $expr: { " +
+                    "$in: ['$areas._id', '$$areaIds'] " +
+                    "} }, " +
+
+                    "{ $or: [ " +
+                    "{ $expr: { $eq: [?3, null] } }, " +
+                    "{ $expr: { $eq: ['$_id', ?3] } } " +
+                    "] } " +
+
+                    "] " +
+                    "} }, " +
+
+                    "{ $project: { " +
+                    "_id: 0, " +
+                    "areaId: '$areas._id', " +
+                    "areaName: '$areas.name', " +
+                    "tripName: '$name' " +
+                    "} } " +
+
+                    "], " +
+                    "as: 'tripInfo' " +
+                    "} }",
+
+            "{ $match: { " +
+                    "$expr: { $gt: [{ $size: '$tripInfo' }, 0] } " +
+                    "} }",
+
+            "{ $limit: 10 }",
+
+            "{ $lookup: { " +
+                    "from: 'patient', " +
+                    "localField: '_id', " +
+                    "foreignField: '_id', " +
+                    "as: 'patientInfo' " +
+                    "} }",
+
+            "{ $unwind: '$patientInfo' }",
+
+            "{ $project: { " +
+                    "acceptedSections: 1, " +
+                    "tripInfo: 1, " +
+                    "'patientInfo._id': 1, " +
+                    "'patientInfo.name': 1, " +
+                    "'patientInfo.identifier': 1, " +
+                    "'patientInfo.phone': 1, " +
+                    "'patientInfo.birth_date': 1, " +
+                    "'patientInfo.insurance': 1, " +
+                    "'patientInfo.patient_no': 1, " +
+                    "_id: 0 " +
+                    "} }"
+    })
+    List<PatientAreaReport> getGroupPatients(
+            int skip, int limit,
+            ObjectId groupId, ObjectId tripId,
+            ObjectId areaId
+    );
+
+
+    @Aggregation(pipeline = {
+            "{ $match: { " +
+                    "$or: [ " +
+                    "{ $expr: { $eq: [?2, null] } }, " +
+                    "{ $expr: { $eq: ['$area_id', ?2] } } " +
+                    "] " +
+                    "} }",
+
+            "{ $group: { " +
+                    "_id: '$patient_id', " +
+                    "uniqueArea: { $addToSet: '$area_id' } " +
+                    "} }",
+
+            "{ $lookup: { " +
+                    "from: 'trip', " +
+                    "let: { areaIds: '$uniqueArea' }, " +
+                    "pipeline: [ " +
+
+                    "{ $match: { " +
+                    "'groups_with_access.group_id': ?0 " +
+                    "} }, " +
+
+                    "{ $unwind: '$areas' }, " +
+
+                    "{ $match: { " +
+                    "$and: [ " +
+                    "{ $expr: { " +
+                    "$in: ['$areas._id', '$$areaIds'] " +
+                    "} }, " +
+                    "{ $or: [ " +
+                    "{ $expr: { $eq: [?1, null] } }, " +
+                    "{ $expr: { $eq: ['$_id', ?1] } } " +
+                    "] } " +
+                    "] " +
+                    "} }, " +
+
+                    "{ $project: { " +
+                    "_id: 1 " +
+                    "} } " +
+
+                    "], " +
+                    "as: 'tripInfo' " +
+                    "} }",
+
+            "{ $match: { " +
+                    "$expr: { $gt: [{ $size: '$tripInfo' }, 0] } " +
+                    "} }",
+
+            "{ $count: 'total' }"
+    })
+    Long getGroupPatientsCount(
+            ObjectId groupId, ObjectId tripId,
+            ObjectId areaId
+    );
+
+
+    @Aggregation(pipeline = {
+            "{ $match: { " +
+                    "$expr: { " +
+                    "$and: [ " +
+                    "{ $in: [?0, { $ifNull: ['$referrals.module_id', []] }] }, " +
+                    "{ $or: [ " +
+                    "{ $eq: [?1, null] }, " +
+                    "{ $eq: ['$area_id', ?1] } " +
+                    "] } " +
+                    "] " +
+                    "} " +
+                    "} }",
+
+            "{ $unwind: { " +
+                    "path: '$referrals', " +
+                    "preserveNullAndEmptyArrays: false " +
+                    "} }",
+
+            "{ $match: { " +
+                    "$expr: { " +
+                    "$and: [ " +
+                    "{ $eq: ['$referrals.module_id', ?0] }, " +
+                    "{ $gt: [{ $size: { $ifNull: ['$referrals.forms', []] } }, 0] } " +
+                    "] " +
+                    "} " +
+                    "} }",
+
+            "{ $lookup: { " +
+                    "from: 'trip', " +
+                    "let: { areaId: '$area_id' }, " +
+                    "pipeline: [ " +
+                    "{ $unwind: '$areas' }," +
+                    "{ $match: { " +
+                    "$expr: { " +
+                    "$eq: ['$areas._id', '$$areaId'] " +
+                    "} " +
+                    "} }," +
+
+                    "{ $match: { " +
+                    "$or: [ " +
+                    "{ $expr: { $eq: [?2, null] } }, " +
+                    "{ $expr: { $eq: ['$_id', ?2] } } " +
+                    "] " +
+                    "} }," +
+
+                    "{ $match: { " +
+                    "'groups_with_access.group_id': ?3 " +
+                    "} }," +
+
+                    "{ $project: { " +
+                    "_id: 1 " +
+                    "} }," +
+
+                    "{ $limit: 1 } " +
+
+                    "], " +
+                    "as: 'tripInfo' " +
+                    "} }",
+
+            "{ $match: { $expr: { $gt: [ { $size: '$tripInfo' }, 0 ] } } }",
+
+            "{ $unwind: '$referrals.forms' }",
+
+            "{ $unwind: '$referrals.forms.answers' }",
+
+            "{ $match: { 'referrals.forms.answers.question_id': { $in: ?4 } } }",
+
+            "{ $group: { " +
+                    "_id: '$referrals.forms.answers.question_id', " +
+                    "answers: { $push: '$referrals.forms.answers.answer' } " +
+                    "} }",
+    })
+    List<GroupedAnswer> getPatientsAnswers(
+            ObjectId moduleId,
+            ObjectId areaId,
+            ObjectId tripId,
+            ObjectId groupId,
+            Set<ObjectId> questionIds
+    );
 }

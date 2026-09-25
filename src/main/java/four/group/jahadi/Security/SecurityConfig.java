@@ -46,6 +46,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/api/user/checkSignUpFormStep2",
             "/api/user/checkSignUpFormStep3",
             "/api/user/signUp",
+            "/api/user/test",
             "/api/user/forgetPassword",
             "/api/user/resetPassword",
             "/api/drug/removeRedundants",
@@ -71,7 +72,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.authorizeRequests()
                 .antMatchers(AUTH_WHITELIST).permitAll()
                 .antMatchers("/api/admin/**").hasAuthority("ADMIN")
+                .antMatchers("/api/report/**").hasAuthority("REPORTER")
                 .antMatchers("/api/drugs/**").hasAnyAuthority("ADMIN", "DRUG")
+                .antMatchers("/api/group/trip/myTrips/**").hasAnyAuthority("ADMIN", "GROUP", "JAHADI")
                 .antMatchers("/api/group/**").hasAnyAuthority("ADMIN", "GROUP")
                 .antMatchers("/api/area/**").hasAnyAuthority("ADMIN", "GROUP")
                 .antMatchers("/api/jahadgar/**").hasAnyAuthority("ADMIN", "GROUP", "JAHADI")

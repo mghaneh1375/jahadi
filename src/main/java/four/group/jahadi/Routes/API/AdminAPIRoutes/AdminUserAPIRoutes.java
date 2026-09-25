@@ -2,19 +2,18 @@ package four.group.jahadi.Routes.API.AdminAPIRoutes;
 
 import four.group.jahadi.DTO.AdminSignInData;
 import four.group.jahadi.DTO.SignUp.PasswordData;
+import four.group.jahadi.DTO.reporter.CreateReporterUser;
 import four.group.jahadi.Enums.Access;
 import four.group.jahadi.Enums.AccountStatus;
 import four.group.jahadi.Enums.Sex;
 import four.group.jahadi.Models.User;
 import four.group.jahadi.Service.UserService;
-import four.group.jahadi.Utility.Utility;
 import four.group.jahadi.Validator.EnumValidator;
 import four.group.jahadi.Validator.ObjectIdConstraint;
 import io.swagger.v3.oas.annotations.Operation;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -107,10 +106,42 @@ public class AdminUserAPIRoutes {
         userService.remove(userId);
     }
 
-    @PostMapping(value = "signIn")
+//    @PostMapping(value = "signIn")
+//    @ResponseBody
+//    public ResponseEntity<String> signIn(@RequestBody @Valid AdminSignInData dto) {
+//        return userService.adminSignIn(dto);
+//    }
+
+    @PostMapping(value = "create-reporter")
     @ResponseBody
-    public ResponseEntity<String> signIn(@RequestBody @Valid AdminSignInData dto) {
-        return userService.adminSignIn(dto);
+    public ResponseEntity createReporter(@RequestBody @Valid CreateReporterUser dto) {
+        userService.createReporterUser(dto);
+        return ResponseEntity.ok().build();
     }
 
+    @GetMapping(value = "get-reporters")
+    @ResponseBody
+    public ResponseEntity<Page<User>> getReporters(
+            @RequestParam(required = false, value = "status") AccountStatus status,
+            @RequestParam(required = false, value = "sex") Sex sex,
+            @RequestParam(required = false, value = "NID") String NID,
+            @RequestParam(required = false, value = "phone") String phone,
+            @RequestParam(required = false, value = "name") String name,
+            @RequestParam(required = false, value = "searchKey") String searchKey,
+            @RequestParam(value = "pageIndex") @NotNull @Min(0) @Max(1000) Integer pageIndex,
+            @RequestParam(value = "pageSize") @NotNull @Min(5) @Max(1000) Integer pageSize
+    ) {
+        return userService.paginateList(
+                pageIndex, pageSize,
+                status, Access.REPORTER, name,
+                NID, phone, sex, null,
+                null, null, searchKey
+        );
+    }
+
+    @PostMapping(value = "generateTempCode/{userId}")
+    @ResponseBody
+    public ResponseEntity<String> generateTempCode(@PathVariable @NotNull @ObjectIdConstraint ObjectId userId) {
+        return userService.generateTempCode(userId);
+    }
 }

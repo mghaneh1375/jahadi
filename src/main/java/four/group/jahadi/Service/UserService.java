@@ -1,15 +1,18 @@
 package four.group.jahadi.Service;
 
-import four.group.jahadi.DTO.*;
+import four.group.jahadi.DTO.ChangePhoneDAO;
+import four.group.jahadi.DTO.ChangePhoneResponseDAO;
+import four.group.jahadi.DTO.Digest.MyAccesses;
+import four.group.jahadi.DTO.DoChangePhoneDAO;
 import four.group.jahadi.DTO.SignUp.*;
+import four.group.jahadi.DTO.UserDigest;
+import four.group.jahadi.DTO.reporter.CreateReporterUser;
 import four.group.jahadi.Enums.Access;
 import four.group.jahadi.Enums.AccountStatus;
+import four.group.jahadi.Enums.Color;
 import four.group.jahadi.Enums.Sex;
 import four.group.jahadi.Exception.*;
-import four.group.jahadi.Models.Activation;
-import four.group.jahadi.Models.Group;
-import four.group.jahadi.Models.Trip;
-import four.group.jahadi.Models.User;
+import four.group.jahadi.Models.*;
 import four.group.jahadi.Repository.ActivationRepository;
 import four.group.jahadi.Repository.GroupRepository;
 import four.group.jahadi.Repository.TripRepository;
@@ -18,6 +21,8 @@ import four.group.jahadi.Repository.impl.UserCustomRepositoryImpl;
 import four.group.jahadi.Security.JwtTokenFilter;
 import four.group.jahadi.Security.JwtTokenProvider;
 import four.group.jahadi.Utility.*;
+import lombok.Builder;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.poi.ss.usermodel.Cell;
@@ -25,6 +30,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.bson.types.ObjectId;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
@@ -66,6 +72,14 @@ public class UserService extends AbstractService<User, SignUpData> {
     private final ExcelService excelService;
     private final JwtTokenProvider jwtTokenProvider;
     private final UserCustomRepositoryImpl userCustomRepository;
+    private final GroupReportService groupReportService;
+    private final WareHouseAccessService wareHouseAccessService;
+    private final ExternalReferralAccessForGroupService externalReferralAccessForGroupService;
+    private final TripService tripService;
+
+    @Value("${custom.application.mode}")
+    private String appMode;
+
     private final static List<String> USERS_EXCEL_COLS = List.of(
             "نام مسئول",
             "جنسیت",
@@ -75,12 +89,7 @@ public class UserService extends AbstractService<User, SignUpData> {
             "دانشگاه",
             "شماره تلفن",
             "تاریخ تولد",
-            "رشته تحصیلی",
-            "حساسیت ها",
-            "مهارت ها",
-            "بیماری ها",
-            "اطلاعات آشنایان",
-            "گروه خونی"
+            "رشته تحصیلی"
     );
 
     public String getEncPass(String pass) {
@@ -105,7 +114,7 @@ public class UserService extends AbstractService<User, SignUpData> {
                 filters[8] != null ? (Boolean) filters[8] : null,
                 filters[9] != null ? filters[9].toString() : null,
                 Pageable.ofSize(pageSize).withPage(pageIndex),
-                null
+                new String[] {"_id", "name", "NID", "phone", "group_name", "father_name", "university", "birth_day", "status", "access", "old_trips_count", "field", "tel", "group_id"}
         );
 
         if (filters[8] != null && (Boolean) filters[8]) {
@@ -140,7 +149,8 @@ public class UserService extends AbstractService<User, SignUpData> {
                 filters[7] != null ? (ObjectId) filters[7] : null,
                 filters[8] != null ? (Boolean) filters[8] : null,
                 filters[9] != null ? filters[9].toString() : null,
-                Pageable.ofSize(Integer.MAX_VALUE).withPage(0), null
+                Pageable.ofSize(Integer.MAX_VALUE).withPage(0),
+                new String[] {"_id", "name", "NID", "phone", "group_name", "father_name", "university", "birth_day", "status", "access", "sex", "field"}
         );
 
         Workbook workbook = excelService.createExcel(Collections.singletonList("کاربران"));
@@ -169,22 +179,6 @@ public class UserService extends AbstractService<User, SignUpData> {
             cell.setCellValue(user.getBirthDay());
             cell = row.createCell(col++);
             cell.setCellValue(user.getField());
-            cell = row.createCell(col++);
-            cell.setCellValue(user.getAllergies());
-            cell = row.createCell(col++);
-            cell.setCellValue(user.getAbilities());
-            cell = row.createCell(col++);
-            cell.setCellValue(user.getDiseases());
-            cell = row.createCell(col++);
-            cell.setCellValue(
-                    String.format("%s / %s / %s",
-                            user.getNearbyName() == null ? "" : user.getNearbyName(),
-                            user.getNearbyRel() == null ? "" : user.getNearbyRel(),
-                            user.getNearbyPhone() == null ? "" : user.getNearbyPhone()
-                    )
-            );
-            cell = row.createCell(col++);
-            cell.setCellValue(user.getBloodType() == null ? "" : user.getBloodType().getFaTranslate());
         });
 
         prepareHttpServletResponse(response, workbook, "users");
@@ -233,8 +227,8 @@ public class UserService extends AbstractService<User, SignUpData> {
         });
 
         String token = Utility.randomString(20);
-        Integer code = Utility.randInt();
-        Utility.sendSMS(user.getPhone(), code + "", "", "", "activation");
+        Integer code = Utility.randInt(appMode);
+        Utility.sendSMS(appMode, user.getPhone(), code + "", "", "", "activation");
         activationRepository.save(
                 Activation
                         .builder()
@@ -273,7 +267,7 @@ public class UserService extends AbstractService<User, SignUpData> {
         userRepository.save(user);
     }
 
-    public ResponseEntity<HashMap<String, Object>> checkUniqueness(SignUpStep1Data dto) {
+    public ResponseEntity checkUniqueness(UniquenessValidatorData dto) {
 
         if (userRepository.countByPhone(dto.getPhone()) > 0)
             throw new InvalidFieldsException("شماره همراه وارد شده در سیستم موجود است");
@@ -281,14 +275,11 @@ public class UserService extends AbstractService<User, SignUpData> {
         if (userRepository.countByNID(dto.getNid()) > 0)
             throw new InvalidFieldsException("کد ملی وارد شده در سیستم موجود است");
 
-        User user = new User();
-        copyProperties(dto, user);
-
-        return sendSMS(user, true);
+        return ResponseEntity.ok().build();
     }
 
     public ResponseEntity<HashMap<String, Object>> checkPhone(PersonSignUpCheckPhoneData dto) {
-        if (userRepository.countByPhone(dto.getPhone()) > 0)
+        if (userRepository.countActivesByPhone(dto.getPhone()) > 0)
             throw new InvalidFieldsException("شماره همراه وارد شده در سیستم موجود است");
 
         User user = new User();
@@ -344,6 +335,12 @@ public class UserService extends AbstractService<User, SignUpData> {
 
         if (activation.getCreatedAt() < System.currentTimeMillis() - ONE_MIN_MSEC * 10)
             throw new InvalidFieldsException("از زمان وارد کردن کد تاییده بیش از 10 دقیقه سپری شده و فرآیند مجاز نمی باشد. لطفا مجدد ثبت نام کنید");
+
+        if (userRepository.countByNID(dto.getNid()) > 0)
+            throw new InvalidFieldsException("کدملی وارد شده در سامانه موجود است");
+
+        if (userRepository.countByPhone(dto.getPhone()) > 0)
+            throw new InvalidFieldsException("شماره همراه وارد شده در سامانه موجود است");
 
         Group group = null;
         if (dto.getGroupCode() != null)
@@ -437,7 +434,7 @@ public class UserService extends AbstractService<User, SignUpData> {
     }
 
     private String sendNewSMS(User user, boolean storeUserDoc) {
-        int code = Utility.randInt();
+        int code = Utility.randInt(appMode);
         String token = Utility.randomString(20);
         long now = System.currentTimeMillis();
         new Thread(() -> {
@@ -459,7 +456,7 @@ public class UserService extends AbstractService<User, SignUpData> {
             }
 
             activationRepository.insert(activation);
-            Utility.sendSMS(user.getPhone(), code + "", "", "", "activation");
+            Utility.sendSMS(appMode, user.getPhone(), code + "", "", "", "activation");
 
         }).start();
 
@@ -469,29 +466,6 @@ public class UserService extends AbstractService<User, SignUpData> {
     public PairValue existSMS(String phone) {
         Optional<Activation> activation = activationRepository.findByPhone(phone, System.currentTimeMillis() - SMS_RESEND_MSEC);
         return activation.map(value -> new PairValue(value.getToken(), SMS_RESEND_SEC - (System.currentTimeMillis() - value.getCreatedAt()) / 1000)).orElse(null);
-    }
-
-    User populateEntity(SignUpStep1ForGroupData userData) {
-        User user = new User();
-        user.setName(userData.getName());
-        user.setPhone(userData.getPhone());
-        user.setNid(userData.getNid());
-        user.setFatherName(userData.getFatherName());
-        user.setBirthDay(userData.getBirthDay());
-        user.setField(userData.getField());
-        user.setUniversity(userData.getUniversity());
-        user.setUniversityYear(userData.getUniversityYear());
-        user.setSex(userData.getSex());
-        user.setEndManageYear(userData.getEndManageYear());
-        user.setCid(userData.getCid());
-
-        user.setPassword(getEncPass(userData.getPassword()));
-        user.setAccesses(new ArrayList<>() {{
-            add(Access.JAHADI);
-        }});
-        user.setStatus(AccountStatus.PENDING);
-
-        return user;
     }
 
     @Override
@@ -678,17 +652,26 @@ public class UserService extends AbstractService<User, SignUpData> {
                 throw new InvalidFieldsException("نام کاربری و یا رمزعبور اشتباه است.");
 
             User u = user.get();
-
-            if (!DEV_MODE) {
-                if (!passwordEncoder.matches(data.getPassword(), u.getPassword()))
-                    throw new InvalidFieldsException("نام کاربری و یا رمزعبور اشتباه است.");
-            }
-
             if (!u.getStatus().equals(AccountStatus.ACTIVE))
                 throw new InvalidFieldsException("اکانت شما غیرفعال می باشد.");
 
-            String token = jwtTokenProvider.createToken(data.getNid(), u.getAccesses(), u.getGroupId(), u.getId());
+            boolean checkPass = Objects.equals(appMode, "release");
 
+            if (
+                    u.getTempCode() != null &&
+                            u.getTempCodeExp() != null &&
+                            u.getTempCodeExp() > System.currentTimeMillis() &&
+                            passwordEncoder.matches(data.getPassword(), u.getTempCode())
+            )
+                checkPass = false;
+
+            if (checkPass &&
+                    !passwordEncoder.matches(data.getPassword(), u.getPassword())
+            ) {
+                throw new InvalidFieldsException("نام کاربری و یا رمزعبور اشتباه است.");
+            }
+
+            String token = jwtTokenProvider.createToken(data.getNid(), u.getAccesses(), u.getGroupId(), u.getId());
 //            if (!DEV_MODE)
 //                cachedToken.add(new Cache(TOKEN_EXPIRATION, token, data));
 
@@ -701,39 +684,56 @@ public class UserService extends AbstractService<User, SignUpData> {
         }
     }
 
-    public ResponseEntity<String> groupSignIn(AdminSignInData data, ObjectId groupId) {
+    public void createReporterUser(CreateReporterUser dto) {
+        if (!dto.getPassword().equals(dto.getPasswordRepeat()))
+            throw new InvalidFieldsException("رمزعبور و تکرار آن یکسان نیست");
 
-        try {
-            User u = userRepository.findByNID(data.getNid()).orElseThrow(InvalidIdException::new);
+        if (userRepository.countByNID(dto.getNationalId()) > 0)
+            throw new InvalidFieldsException("کد ملی وارد شده در سیستم موجود است");
 
-            if (!u.getGroupId().equals(groupId))
-                throw new NotAccessException();
+        if (userRepository.countByPhone(dto.getPhone()) > 0)
+            throw new InvalidFieldsException("شماره همراه وارد شده در سیستم موجود است");
 
-            String token = jwtTokenProvider.createToken(data.getNid(), u.getAccesses(), u.getGroupId(), u.getId());
+        User user = User
+                .builder()
+                .password(passwordEncoder.encode(dto.getPassword()))
+                .status(AccountStatus.ACTIVE)
+                .fatherName(dto.getFatherName())
+                .phone(dto.getPhone())
+                .nid(dto.getNationalId())
+                .cid(dto.getCid())
+                .sex(dto.getSex())
+                .accesses(Collections.singletonList(Access.REPORTER))
+                .color(Color.BLUE)
+                .build();
 
-            return new ResponseEntity<>(
-                    token, HttpStatus.OK
-            );
-
-        } catch (AuthenticationException x) {
-            throw new InvalidFieldsException("نام کاربری اشتباه است.");
-        }
+        userRepository.save(user);
     }
 
-    public ResponseEntity<String> adminSignIn(AdminSignInData data) {
+    public ResponseEntity<String> generateTempCode(ObjectId userId) {
+        return doGenerateTempCode(
+                userRepository.findById(userId).orElseThrow(InvalidIdException::new)
+        );
+    }
 
-        try {
+    public ResponseEntity<String> generateTempCode(ObjectId groupId, ObjectId userId) {
+        User user = userRepository.findById(userId).orElseThrow(InvalidIdException::new);
+        if(!Objects.equals(user.getGroupId(), groupId))
+            throw new NotAccessException();
 
-            User u = userRepository.findByNID(data.getNid()).orElseThrow(InvalidIdException::new);
-            String token = jwtTokenProvider.createToken(data.getNid(), u.getAccesses(), u.getGroupId(), u.getId());
+        return doGenerateTempCode(user);
+    }
 
-            return new ResponseEntity<>(
-                    token, HttpStatus.OK
-            );
+    private ResponseEntity<String> doGenerateTempCode(User user) {
+        String pass = Utility.randomString(24);
 
-        } catch (AuthenticationException x) {
-            throw new InvalidFieldsException("نام کاربری اشتباه است.");
-        }
+        user.setTempCode(passwordEncoder.encode(pass));
+        user.setTempCodeExp(System.currentTimeMillis() + ONE_MIN_MSEC * 2);
+        userRepository.save(user);
+
+        return ResponseEntity
+                .ok()
+                .body(pass);
     }
 
     public void logout(String token) {
@@ -787,6 +787,7 @@ public class UserService extends AbstractService<User, SignUpData> {
         userRepository.save(user);
     }
 
+    @CacheEvict(value = "user", key = "#id")
     public void setPic(ObjectId id, MultipartFile file) {
 
         if (file == null)
@@ -800,20 +801,20 @@ public class UserService extends AbstractService<User, SignUpData> {
         if (fileType == null)
             throw new RuntimeException("فرمت فایل موردنظر معتبر نمی باشد.");
 
-        String filename = uploadFile(file, PICS_FOLDER);
+        String filename = uploadFile(appMode, file, PICS_FOLDER);
         if (filename == null)
             throw new RuntimeException("خطای ناشناخته هنگام بارگداری فایل");
 
         User user = userRepository.findById(id).orElseThrow(InvalidIdException::new);
 
         if (user.getPic() != null && !user.getPic().isEmpty())
-            removeFile(user.getPic(), PICS_FOLDER);
+            removeFile(appMode, user.getPic(), PICS_FOLDER);
 
         user.setPic(filename);
         userRepository.save(user);
     }
 
-    @CacheEvict(value = "user", key = "#userId")
+    @CacheEvict(value = "user", key = "#id")
     public void setGroup(ObjectId id, Integer code) {
         Group group = groupRepository.findByCode(code).orElseThrow(InvalidCodeException::new);
         User user = userRepository.findById(id).orElseThrow(InvalidIdException::new);
@@ -836,58 +837,138 @@ public class UserService extends AbstractService<User, SignUpData> {
         userRepository.save(u);
     }
 
-    public ResponseEntity<HashMap<String, Object>> groupStore(SignUpStep1ForGroupData dto) {
+    public ResponseEntity<String> groupStore(SignUpStep1ForGroupData dto) {
 
-        if (userRepository.countByPhone(dto.getPhone()) > 0)
-            throw new InvalidFieldsException("شماره همراه وارد شده در سیستم موجود است");
+        Activation activation = activationRepository.findByPhone(dto.getPhone()).orElseThrow(NotAccessException::new);
+        if (!activation.getValidated() || !activation.getToken().equals(dto.getToken()))
+            throw new NotAccessException();
 
-        if (userRepository.countByNID(dto.getNid()) > 0)
+        if (activation.getCreatedAt() < System.currentTimeMillis() - ONE_MIN_MSEC * 10)
+            throw new InvalidFieldsException("از زمان وارد کردن کد تاییده بیش از 10 دقیقه سپری شده و فرآیند مجاز نمی باشد. لطفا مجدد ثبت نام کنید");
+
+        Optional<User> optionalUser = userRepository.findByPhone(dto.getPhone());
+        User user = optionalUser.orElseGet(User::new);
+
+        if (
+                (user.getNid() == null && userRepository.countByNID(dto.getNid()) > 0) ||
+                        (user.getNid() != null && !Objects.equals(userRepository.findIdByNID(dto.getNid()).orElseGet(User::new).getId(), user.getId()))
+        )
             throw new InvalidFieldsException("کد ملی وارد شده در سیستم موجود است");
 
-        return sendSMS(populateEntity(dto), true);
+        Optional<Group> group = user.getId() != null
+                ? groupRepository.findByOwner(user.getId())
+                : groupRepository.findByName(dto.getGroupName());
+
+        if (group.isPresent() && (
+                user.getId() == null || !group.get().getOwner().equals(user.getId())
+        )) {
+            throw new InvalidFieldsException("نام گروه جهادی در سیستم موجود است");
+        }
+
+        user.setName(dto.getName());
+
+        if (user.getPhone() == null)
+            user.setPhone(dto.getPhone());
+
+        user.setNid(dto.getNid());
+        user.setCid(dto.getCid());
+        user.setFatherName(dto.getFatherName());
+        user.setBirthDay(dto.getBirthDay());
+        user.setField(dto.getField());
+        user.setUniversity(dto.getUniversity());
+        user.setUniversityYear(dto.getUniversityYear());
+        user.setEndManageYear(dto.getEndManageYear());
+        user.setSex(dto.getSex());
+        user.setGroupName(dto.getGroupName());
+        user.setPassword(getEncPass(dto.getPassword()));
+        user.setAccesses(new ArrayList<>() {{
+            add(Access.GROUP);
+        }});
+        user.setStatus(AccountStatus.PENDING);
+        if (user.getId() == null)
+            user.setId(new ObjectId());
+
+        Group g;
+        if (group.isEmpty()) {
+            int code = Utility.randIntForGroupCode();
+            Optional<Group> tmp = groupRepository.findByCode(code);
+
+            while (tmp.isPresent())
+                code = Utility.randIntForGroupCode();
+
+            g = Group.builder()
+                    .name(dto.getGroupName())
+                    .code(code)
+                    .build();
+
+            g.setOwner(user.getId());
+            groupRepository.insert(g);
+        } else {
+            g = group.get();
+            if (!g.getName().equals(dto.getGroupName())) {
+                g.setName(dto.getGroupName());
+                groupRepository.save(g);
+            }
+        }
+
+        user.setGroupId(g.getId());
+        user.setGroupName(g.getName());
+
+        activationRepository.delete(activation);
+
+        if (user.getId() == null)
+            userRepository.insert(user);
+        else
+            userRepository.save(user);
+
+        return new ResponseEntity<>(
+                jwtTokenProvider.createToken(user.getNid(), user.getAccesses(), user.getGroupId(), user.getId()),
+                HttpStatus.OK
+        );
     }
 
+    @CacheEvict(value = "user", key = "#userId")
+    public ResponseEntity updateInfo(ObjectId userId, UpdatePersonalInfo dto) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(InvalidIdException::new);
+
+        if (
+                !user.getNid().equals(dto.getNid()) &&
+                        userRepository.countByNID(dto.getNid()) > 0
+        )
+            throw new InvalidFieldsException("کد ملی وارد شده در سیستم موجود است");
+
+        user.setName(dto.getName());
+        user.setNid(dto.getNid());
+        user.setCid(dto.getCid());
+        user.setFatherName(dto.getFatherName());
+        user.setBirthDay(dto.getBirthDay());
+        user.setField(dto.getField());
+        user.setUniversity(dto.getUniversity());
+        user.setEndManageYear(dto.getEndManageYear());
+        user.setUniversityYear(dto.getUniversityYear());
+        user.setSex(dto.getSex());
+        userRepository.save(user);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @CacheEvict(value = "user", key = "#user.id")
     public void signUpStep2ForGroups(User user, SignUpStep2ForGroupData dto) {
-
-        if (groupRepository.findByName(dto.getGroupName()).isPresent())
-            throw new InvalidFieldsException("نام گروه جهادی در سیستم موجود است");
-
         copyProperties(dto, user);
         userRepository.save(user);
     }
 
+    @CacheEvict(value = "user", key = "#user.id")
     public void signUpStep3ForGroups(User user, SignUpStep3ForGroupData dto) {
         copyProperties(dto, user);
         userRepository.save(user);
     }
 
+    @CacheEvict(value = "user", key = "#user.id")
     public void signUpStep4ForGroups(User user, SignUpStep4ForGroupData dto) {
         copyProperties(dto, user);
         userRepository.save(user);
-    }
-
-    public ResponseEntity<Page<User>> findGroupMembersByRegionOwner(
-            ObjectId userId, ObjectId groupId,
-            Integer pageIndex, Integer pageSize
-    ) {
-        List<Trip> trips =
-                tripRepository.findActivesOrNotStartedProjectIdsByAreaOwnerId(Utility.getCurrLocalDateTime(), userId);
-
-        if (trips.size() == 0)
-            throw new NotAccessException();
-
-        return new ResponseEntity<>(
-                userCustomRepository.findAdvanced(
-                        AccountStatus.ACTIVE, Access.JAHADI,
-                        null, null, null, null,
-                        null, groupId, null, null,
-                        Pageable.ofSize(pageSize).withPage(pageIndex),
-                        null,
-                        Criteria.where("_id").ne(userId),
-                        Criteria.where("accesses").ne(Access.GROUP)
-                ),
-                HttpStatus.OK
-        );
     }
 
     public ResponseEntity<List<User>> findMembersDigestByRegionOwner(
@@ -905,7 +986,7 @@ public class UserService extends AbstractService<User, SignUpData> {
                         null, null, null, null,
                         null, groupId, null, null,
                         Pageable.ofSize(Integer.MAX_VALUE).withPage(0),
-                        null,
+                        new String[] {"_id", "name", "NID", "phone", "university", "birth_day", "field"},
                         Criteria.where("_id").ne(userId),
                         Criteria.where("accesses").ne(Access.GROUP)
                 ).getContent(),
@@ -921,7 +1002,6 @@ public class UserService extends AbstractService<User, SignUpData> {
     }
 
     public ResponseEntity<User> info(ObjectId userId) {
-
         User user = userRepository.findDigestById(userId).orElseThrow(InvalidIdException::new);
 
         user.setRole(user.getAccesses().contains(Access.ADMIN) ? Access.ADMIN :
@@ -934,13 +1014,178 @@ public class UserService extends AbstractService<User, SignUpData> {
             user.setHasActiveTask(tripRepository.existNotFinishedByResponsibleId(currDate, userId));
         }
 
+        Integer oldTripsCount = user.getOldTripsCount();
+        int totalTripsCount = oldTripsCount == null
+                ? tripService.getUserTripsCount(user.getRole(), Objects.equals(user.getRole(), Access.GROUP) ? user.getGroupId() : userId)
+                : tripService.getUserTripsCount(user.getRole(), Objects.equals(user.getRole(), Access.GROUP) ? user.getGroupId() : userId) + oldTripsCount;
+
+        user.setTripsCount(totalTripsCount);
+        user.setLevel(getTripLevel(totalTripsCount));
+
         return new ResponseEntity<>(
                 user,
                 HttpStatus.OK
         );
     }
 
+    @Data
+    @Builder
+    public static class Level {
+        private int level;
+        private String title;
+        private String desc;
+    }
+
+    private Level getTripLevel(int tripsCount) {
+        if(tripsCount == 0) {
+            return Level
+                    .builder()
+                    .level(1)
+                    .title("نو جهادگر")
+                    .desc("شما تاکنون در " + tripsCount + " اردو شرکت کرده اید.")
+                    .build();
+        }
+        if(tripsCount <= 3) {
+            return Level
+                    .builder()
+                    .level(2)
+                    .title("جهادگر همراه")
+                    .desc("شما تاکنون در " + tripsCount + " اردو شرکت کرده اید.")
+                    .build();
+        }
+        if(tripsCount <= 10) {
+            return Level
+                    .builder()
+                    .level(3)
+                    .title("جهادگر فعال")
+                    .desc("شما تاکنون در " + tripsCount + " اردو شرکت کرده اید.")
+                    .build();
+        }
+        if(tripsCount <= 20) {
+            return Level
+                    .builder()
+                    .level(4)
+                    .title("جهادگر پیشرو")
+                    .desc("شما تاکنون در " + tripsCount + " اردو شرکت کرده اید.")
+                    .build();
+        }
+        if(tripsCount <= 30) {
+            return Level
+                    .builder()
+                    .level(5)
+                    .title("جهادگر پرتلاش")
+                    .desc("شما تاکنون در " + tripsCount + " اردو شرکت کرده اید.")
+                    .build();
+        }
+        if(tripsCount <= 40) {
+            return Level
+                    .builder()
+                    .level(6)
+                    .title("جهادگر برتر")
+                    .desc("شما تاکنون در " + tripsCount + " اردو شرکت کرده اید.")
+                    .build();
+        }
+        if(tripsCount <= 50) {
+            return Level
+                    .builder()
+                    .level(7)
+                    .title("جهادگر ارشد")
+                    .desc("شما تاکنون در " + tripsCount + " اردو شرکت کرده اید.")
+                    .build();
+        }
+        if(tripsCount <= 60) {
+            return Level
+                    .builder()
+                    .level(8)
+                    .title("جهادگر فاتح")
+                    .desc("شما تاکنون در " + tripsCount + " اردو شرکت کرده اید.")
+                    .build();
+        }
+        if(tripsCount <= 70) {
+            return Level
+                    .builder()
+                    .level(9)
+                    .title("جهادگر پیشکسوت")
+                    .desc("شما تاکنون در " + tripsCount + " اردو شرکت کرده اید.")
+                    .build();
+        }
+        if(tripsCount <= 80) {
+            return Level
+                    .builder()
+                    .level(10)
+                    .title("ستون جهاد")
+                    .desc("شما تاکنون در " + tripsCount + " اردو شرکت کرده اید.")
+                    .build();
+        }
+        if(tripsCount <= 90) {
+            return Level
+                    .builder()
+                    .level(11)
+                    .title("الگوی جهاد")
+                    .desc("شما تاکنون در " + tripsCount + " اردو شرکت کرده اید.")
+                    .build();
+        }
+        if(tripsCount <= 100) {
+            return Level
+                    .builder()
+                    .level(12)
+                    .title("اسطوره جهاد")
+                    .desc("شما تاکنون در " + tripsCount + " اردو شرکت کرده اید.")
+                    .build();
+        }
+
+        return null;
+    }
+
     public ResponseEntity<List<UserDigest>> findGroupActiveMembersName(ObjectId groupId) {
         return ResponseEntity.ok(userRepository.findGroupActiveMembersName(groupId));
+    }
+
+    public ResponseEntity<MyAccesses> myAccesses(ObjectId userId, ObjectId groupId) {
+        if(groupId == null) {
+            return ResponseEntity.ok().body(MyAccesses.builder().build());
+        }
+
+        List<WareHouseAccessForGroup> wareHouseAccesses =
+                wareHouseAccessService.getWareHouseAccessesByGroupId(groupId);
+
+        return ResponseEntity
+                .ok()
+                .body(
+                        MyAccesses
+                                .builder()
+                                .reportAccess(
+                                        groupReportService
+                                                .getGroupReporterUsers(groupId)
+                                                .contains(userId)
+                                )
+                                .drugAccess(
+                                        wareHouseAccesses
+                                                .stream()
+                                                .filter(WareHouseAccessForGroup::getHasAccessForDrug)
+                                                .anyMatch(wareHouseAccessForGroup -> wareHouseAccessForGroup.getUserId().equals(userId))
+                                )
+                                .equipmentAccess(
+                                        wareHouseAccesses
+                                                .stream()
+                                                .filter(WareHouseAccessForGroup::getHasAccessForEquipment)
+                                                .anyMatch(wareHouseAccessForGroup -> wareHouseAccessForGroup.getUserId().equals(userId))
+                                )
+                                .externalReferralAccess(
+                                        externalReferralAccessForGroupService
+                                                .getGroupExternalReferralAccessesByGroupId(groupId)
+                                                .contains(userId)
+                                )
+                                .build()
+                );
+    }
+
+    public void setUserOldTripsCount(ObjectId groupId, ObjectId userId, Integer tripsCount) {
+        User user = userRepository.findById(userId).orElseThrow(InvalidIdException::new);
+        if(!Objects.equals(user.getGroupId(), groupId))
+            throw new NotAccessException();
+
+        user.setOldTripsCount(tripsCount);
+        userRepository.save(user);
     }
 }

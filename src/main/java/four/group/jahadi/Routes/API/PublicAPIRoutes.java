@@ -1,12 +1,14 @@
 package four.group.jahadi.Routes.API;
 
 import four.group.jahadi.Models.*;
+import four.group.jahadi.Service.Area.AreaService;
 import four.group.jahadi.Service.CityService;
 import four.group.jahadi.Service.DrugService;
 import four.group.jahadi.Service.ExperimentService;
 import four.group.jahadi.Utility.PairValue;
 import four.group.jahadi.Validator.ObjectIdConstraint;
 import io.swagger.v3.oas.annotations.Operation;
+import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,16 +20,13 @@ import java.util.List;
 @RestController
 @RequestMapping(value = "/api/public")
 @Validated
+@RequiredArgsConstructor
 public class PublicAPIRoutes {
 
-    @Autowired
-    private CityService cityService;
-
-    @Autowired
-    private ExperimentService experimentService;
-
-    @Autowired
-    private DrugService drugService;
+    private final CityService cityService;
+    private final ExperimentService experimentService;
+    private final DrugService drugService;
+    private final AreaService areaService;
 
     @GetMapping(value = "getAllAvailableExperiments")
     @ResponseBody
@@ -51,6 +50,12 @@ public class PublicAPIRoutes {
     @ResponseBody
     public ResponseEntity<List<PairValue>> getDrugUseTimeOptions() {
         return drugService.getDrugUseTimeOptions();
+    }
+
+    @GetMapping(value = "getCoOrgs")
+    @ResponseBody
+    public ResponseEntity<List<PairValue>> getCoOrganizations() {
+        return areaService.getCoOrganizations();
     }
 
     @GetMapping(value = "getDrug/{drugId}")

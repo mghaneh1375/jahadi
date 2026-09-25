@@ -11,6 +11,7 @@ import four.group.jahadi.DTO.Area.UpdateAreaData;
 import four.group.jahadi.DTO.Region.RegionRunInfoData;
 import four.group.jahadi.DTO.Region.RegionSendNotifData;
 import four.group.jahadi.DTO.UpdatePresenceList;
+import four.group.jahadi.Enums.CoOrg;
 import four.group.jahadi.Enums.Sex;
 import four.group.jahadi.Enums.Status;
 import four.group.jahadi.Exception.InvalidFieldsException;
@@ -22,11 +23,13 @@ import four.group.jahadi.Repository.Area.PatientsInAreaRepository;
 import four.group.jahadi.Repository.Area.PresenceListRepository;
 import four.group.jahadi.Repository.*;
 import four.group.jahadi.Service.*;
+import four.group.jahadi.Utility.PairValue;
 import four.group.jahadi.Utility.Utility;
 import four.group.jahadi.Utility.ValidList;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
@@ -105,6 +108,17 @@ public class AreaService extends AbstractService<Area, AreaData> {
     @Override
     public ResponseEntity<Area> store(AreaData data, Object... params) {
         return null;
+    }
+
+
+    @Cacheable(cacheNames = "coOrgOptions")
+    public ResponseEntity<List<PairValue>> getCoOrganizations() {
+        return new ResponseEntity<>(
+                Arrays.stream(CoOrg.values())
+                        .map(useTime -> new PairValue(useTime.name(), useTime.getFaTranslate()))
+                        .collect(Collectors.toList()),
+                HttpStatus.OK
+        );
     }
 
     @CacheEvict(value = "groupStatisticData", key = "#params[2]")
@@ -243,6 +257,14 @@ public class AreaService extends AbstractService<Area, AreaData> {
         }
 
         return new ResponseEntity<>(trips, HttpStatus.OK);
+    }
+
+    public ResponseEntity<String> getActiveAreaId(ObjectId userId) {
+        ObjectId areaId = tripRepository.getLastActiveAreaIdByUserId(userId, LocalDateTime.now());
+        return ResponseEntity
+                .ok()
+                .body(areaId == null ? null : areaId.toString())
+        ;
     }
 
     public ResponseEntity<List<AreaDigest>> getGroupAreas(
@@ -457,6 +479,8 @@ public class AreaService extends AbstractService<Area, AreaData> {
                 .endAt(foundArea.getEndAt())
                 .lat(foundArea.getLat())
                 .lng(foundArea.getLng())
+                .coOrg(foundArea.getCoOrg())
+                .serialPrefix(foundArea.getSerialPrefix())
                 .build();
 
         return new ResponseEntity<>(output, HttpStatus.OK);
@@ -907,5 +931,22 @@ public class AreaService extends AbstractService<Area, AreaData> {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void toggleReceptionStatus(ObjectId areaId, ObjectId userId) {
+        Trip wantedTrip = tripRepository.findByAreaIdAndOwnerId(areaId, userId)
+                .orElseThrow(NotAccessException::new);
+
+        Area foundArea = findArea(wantedTrip, areaId, userId);
+        foundArea.setStopReception(!Objects.equals(Boolean.TRUE, foundArea.getStopReception()));
+        tripRepository.save(wantedTrip);
+    }
+
+    public ResponseEntity<Boolean> getReceptionStatus(ObjectId areaId, ObjectId userId) {
+        Trip wantedTrip = tripRepository.findByAreaIdAndResponsibleId(areaId, userId)
+                .orElseThrow(NotAccessException::new);
+
+        Area foundArea = findArea(wantedTrip, areaId);
+        return ResponseEntity.ok().body(Objects.equals(Boolean.TRUE, foundArea.getStopReception()));
     }
 }

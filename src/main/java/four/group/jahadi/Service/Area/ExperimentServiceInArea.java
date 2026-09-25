@@ -57,7 +57,7 @@ public class ExperimentServiceInArea {
         Trip trip = tripRepository.findByAreaIdAndResponsibleId(areaId, userId)
                 .orElseThrow(NotAccessException::new);
 
-        Area startedArea = findStartedArea(trip, areaId);
+        Area startedArea = findStartedArea(trip, areaId, false);
         findModule(
                 startedArea, moduleId,
 //              todo:  startedArea.getOwnerId().equals(userId) ? null : userId,
@@ -79,7 +79,7 @@ public class ExperimentServiceInArea {
         Trip trip = tripRepository.findByAreaIdAndResponsibleId(areaId, userId)
                 .orElseThrow(NotAccessException::new);
 
-        Area startedArea = findStartedArea(trip, areaId);
+        Area startedArea = findStartedArea(trip, areaId, false);
         findModule(
                 startedArea, moduleId,
                 startedArea.getOwnerId().equals(userId) ? null : userId,
@@ -135,7 +135,7 @@ public class ExperimentServiceInArea {
         Trip trip = tripRepository.findByAreaIdAndResponsibleId(areaId, userId)
                 .orElseThrow(NotAccessException::new);
 
-        Area startedArea = findStartedArea(trip, areaId);
+        Area startedArea = findStartedArea(trip, areaId, false);
         findModule(
                 startedArea, moduleId,
                 startedArea.getOwnerId().equals(userId) ? null : userId,
@@ -201,7 +201,7 @@ public class ExperimentServiceInArea {
     ) {
         Trip trip = tripRepository.findByAreaIdAndResponsibleId(areaId, userId)
                 .orElseThrow(NotAccessException::new);
-        Area area = findStartedArea(trip, areaId);
+        Area area = findStartedArea(trip, areaId, false);
 
         List<PatientExperiment> experiments = new ArrayList<>();
         patientsInAreaRepository.findByAreaIdAndPatientId(areaId, patientId)

@@ -5,6 +5,7 @@ import four.group.jahadi.DTO.Trip.TripStep2Data;
 import four.group.jahadi.DTO.Trip.TripStepData;
 import four.group.jahadi.DTO.dashboard.DashboardActiveArea;
 import four.group.jahadi.DTO.profile.ProfileDigest;
+import four.group.jahadi.Enums.Access;
 import four.group.jahadi.Enums.Status;
 import four.group.jahadi.Exception.InvalidFieldsException;
 import four.group.jahadi.Exception.InvalidIdException;
@@ -227,7 +228,7 @@ public class TripService extends AbstractService<Trip, TripStepData> {
     }
 
     @Override
-    @CacheEvict(value = "groupsWithActiveTrip", allEntries = true)
+    @CacheEvict(cacheNames = {"groupsWithActiveTrip", "groupStatisticData"}, allEntries = true)
     public void update(ObjectId id, TripStepData data, Object... params) {
         Trip trip = tripRepository.findById(id).orElseThrow(InvalidIdException::new);
         boolean hasAdminAccess = (boolean) params[0];
@@ -418,5 +419,14 @@ public class TripService extends AbstractService<Trip, TripStepData> {
 
     public boolean isAreaStarted(ObjectId areaId) {
         return false;
+    }
+
+    @Cacheable(value = "usersTripCount", key = "#userId")
+    public Integer getUserTripsCount(Access role, ObjectId userId) {
+        return Math.toIntExact(
+                Objects.equals(role, Access.GROUP)
+                ? tripRepository.countByGroupId(userId)
+                : tripRepository.countByUserId(userId)
+        );
     }
 }

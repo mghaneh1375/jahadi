@@ -21,7 +21,7 @@ public class ModuleSeeder {
         put("پاراکلینیک", "icon-injection-1");
     }};
     public static HashMap<String, ObjectId> moduleIds;
-    private static ModuleRepository moduleRepository;
+    public static ModuleRepository moduleRepository;
     private static final List<Module> newItems = new ArrayList<>();
 
     public static void addModule(Module module) {
@@ -50,8 +50,6 @@ public class ModuleSeeder {
             addModule(module);
 
         for (Module module : EmpowermentSeeder.seed()) {
-            if(module.getName().equals("اتاق بینایی"))
-                continue;
             addModule(module);
         }
 

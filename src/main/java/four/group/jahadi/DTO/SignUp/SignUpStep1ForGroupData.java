@@ -11,9 +11,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 
 @Getter
 @Setter
@@ -54,11 +52,22 @@ public class SignUpStep1ForGroupData {
     @JsonDeserialize(using = PersianNumberDeserializer.class)
     private String phone;
 
+    @NotNull
     private Sex sex;
 
+    @NotBlank
     @Size(min = 6, max = 50)
     private String password;
 
+    @NotBlank
     @Size(min = 6, max = 50)
     private String passwordRepeat;
+
+    @NotBlank
+    @Size(min = 10, max = 100, message = "enter token")
+    private String token;
+
+    @NotBlank
+    @Size(min = 3, max = 50)
+    private String groupName;
 }

@@ -5,26 +5,41 @@ import four.group.jahadi.Enums.Module.DiseaseBackground;
 import four.group.jahadi.Enums.Module.DrugBackground;
 import four.group.jahadi.Enums.Module.QuestionType;
 import four.group.jahadi.Models.Question.CheckListGroupQuestion;
+import four.group.jahadi.Models.Question.Question;
 import four.group.jahadi.Models.Question.SimpleQuestion;
 import four.group.jahadi.Models.SubModule;
+import four.group.jahadi.Tests.Modules.SubModules.Helper;
 import four.group.jahadi.Utility.PairValue;
 import org.bson.types.ObjectId;
 
 import java.util.List;
 
 public class General {
-    public static SubModule make(ObjectId referToOid) {
+    public static SubModule make(String moduleName, ObjectId referToOid) {
+        String subModuleName = "غربالگری کلی";
+        SubModule oldSubModule = Helper.findSubModule(moduleName, subModuleName);
+        Question mainQuestion1 = Helper.findQuestionInSubModule(oldSubModule, "سابقه بیماری");
+        Question mainQuestion2 = Helper.findQuestionInSubModule(oldSubModule, "سابقه مصرف دارو");
+        Question mainQuestion3 = Helper.findQuestionInSubModule(oldSubModule, "قند خون ناشتا (FBS)");
+        Question mainQuestion4 = Helper.findQuestionInSubModule(oldSubModule, "قند خون غیرناشتا (BS)");
+        Question mainQuestion5 = Helper.findQuestionInSubModule(oldSubModule, "فشار خون اول (First BP)");
+        Question mainQuestion6 = Helper.findQuestionInSubModule(oldSubModule, "دارو (Medicine)");
+        Question mainQuestion7 = Helper.findQuestionInSubModule(oldSubModule, "فشار خون دوم (Second BP)");
+        Question mainQuestion8 = Helper.findQuestionInSubModule(oldSubModule, "دارو بار دوم (Medicine 2)");
+        Question mainQuestion9 = Helper.findQuestionInSubModule(oldSubModule, "فشار خون سوم (Third BP)");
+        Question mainQuestion10 = Helper.findQuestionInSubModule(oldSubModule, "توضیحات");
+
         return SubModule
                 .builder()
-                .id(new ObjectId())
-                .name("غربالگری کلی")
+                .id(oldSubModule == null ? new ObjectId() : oldSubModule.getId())
+                .name(subModuleName)
                 .referTo(referToOid)
                 .isReferral(true)
                 .questions(
                         List.of(
                                 CheckListGroupQuestion
                                         .builder()
-                                        .id(new ObjectId())
+                                        .id(mainQuestion1 == null ? new ObjectId() : mainQuestion1.getId())
                                         .questionType(QuestionType.CHECK_LIST)
                                         .sectionTitle("سابقه بیماری")
                                         .options(List.of(
@@ -40,7 +55,7 @@ public class General {
                                         .questions(List.of(
                                                 SimpleQuestion
                                                         .builder()
-                                                        .id(new ObjectId())
+                                                        .id(Helper.findSimpleQuestionInList((CheckListGroupQuestion) mainQuestion1, "دیابت ملیتوس (DM)"))
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("دیابت ملیتوس (DM)")
                                                         .answerType(AnswerType.TICK)
@@ -48,7 +63,7 @@ public class General {
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
-                                                        .id(new ObjectId())
+                                                        .id(Helper.findSimpleQuestionInList((CheckListGroupQuestion) mainQuestion1, "پرفشاری خون (HTN)"))
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("پرفشاری خون (HTN)")
                                                         .answerType(AnswerType.TICK)
@@ -56,7 +71,7 @@ public class General {
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
-                                                        .id(new ObjectId())
+                                                        .id(Helper.findSimpleQuestionInList((CheckListGroupQuestion) mainQuestion1, "مشکل تیروئید"))
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("مشکل تیروئید")
                                                         .answerType(AnswerType.TICK)
@@ -66,7 +81,7 @@ public class General {
                                         .build(),
                                 CheckListGroupQuestion
                                         .builder()
-                                        .id(new ObjectId())
+                                        .id(mainQuestion2 == null ? new ObjectId() : mainQuestion2.getId())
                                         .questionType(QuestionType.CHECK_LIST)
                                         .sectionTitle("سابقه مصرف دارو")
                                         .options(List.of(
@@ -82,7 +97,7 @@ public class General {
                                         .questions(List.of(
                                                 SimpleQuestion
                                                         .builder()
-                                                        .id(new ObjectId())
+                                                        .id(Helper.findSimpleQuestionInList((CheckListGroupQuestion) mainQuestion2, "دیابت ملیتوس (DM)"))
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("دیابت ملیتوس (DM)")
                                                         .answerType(AnswerType.TICK)
@@ -90,7 +105,7 @@ public class General {
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
-                                                        .id(new ObjectId())
+                                                        .id(Helper.findSimpleQuestionInList((CheckListGroupQuestion) mainQuestion2, "پرفشاری خون (HTN)"))
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("پرفشاری خون (HTN)")
                                                         .answerType(AnswerType.TICK)
@@ -98,7 +113,7 @@ public class General {
                                                         .build(),
                                                 SimpleQuestion
                                                         .builder()
-                                                        .id(new ObjectId())
+                                                        .id(Helper.findSimpleQuestionInList((CheckListGroupQuestion) mainQuestion2, "مشکل تیروئید"))
                                                         .questionType(QuestionType.SIMPLE)
                                                         .question("مشکل تیروئید")
                                                         .answerType(AnswerType.TICK)
@@ -108,7 +123,7 @@ public class General {
                                         .build(),
                                 SimpleQuestion
                                         .builder()
-                                        .id(new ObjectId())
+                                        .id(mainQuestion3 == null ? new ObjectId() : mainQuestion3.getId())
                                         .questionType(QuestionType.SIMPLE)
                                         .required(false)
                                         .question("قند خون ناشتا (FBS)")
@@ -117,7 +132,7 @@ public class General {
                                         .build(),
                                 SimpleQuestion
                                         .builder()
-                                        .id(new ObjectId())
+                                        .id(mainQuestion4 == null ? new ObjectId() : mainQuestion4.getId())
                                         .questionType(QuestionType.SIMPLE)
                                         .required(false)
                                         .question("قند خون غیرناشتا (BS)")
@@ -135,7 +150,7 @@ public class General {
 //                                        .build(),
                                 SimpleQuestion
                                         .builder()
-                                        .id(new ObjectId())
+                                        .id(mainQuestion5 == null ? new ObjectId() : mainQuestion5.getId())
                                         .questionType(QuestionType.SIMPLE)
                                         .required(false)
                                         .question("فشار خون اول (First BP)")
@@ -144,7 +159,7 @@ public class General {
                                         .build(),
                                 SimpleQuestion
                                         .builder()
-                                        .id(new ObjectId())
+                                        .id(mainQuestion6 == null ? new ObjectId() : mainQuestion6.getId())
                                         .questionType(QuestionType.SIMPLE)
                                         .required(false)
                                         .question("دارو (Medicine)")
@@ -153,7 +168,7 @@ public class General {
                                         .build(),
                                 SimpleQuestion
                                         .builder()
-                                        .id(new ObjectId())
+                                        .id(mainQuestion7 == null ? new ObjectId() : mainQuestion7.getId())
                                         .questionType(QuestionType.SIMPLE)
                                         .required(false)
                                         .question("فشار خون دوم (Second BP)")
@@ -162,7 +177,7 @@ public class General {
                                         .build(),
                                 SimpleQuestion
                                         .builder()
-                                        .id(new ObjectId())
+                                        .id(mainQuestion8 == null ? new ObjectId() : mainQuestion8.getId())
                                         .questionType(QuestionType.SIMPLE)
                                         .required(false)
                                         .question("دارو بار دوم (Medicine 2)")
@@ -171,7 +186,7 @@ public class General {
                                         .build(),
                                 SimpleQuestion
                                         .builder()
-                                        .id(new ObjectId())
+                                        .id(mainQuestion9 == null ? new ObjectId() : mainQuestion9.getId())
                                         .questionType(QuestionType.SIMPLE)
                                         .required(false)
                                         .question("فشار خون سوم (Third BP)")
@@ -180,7 +195,7 @@ public class General {
                                         .build(),
                                 SimpleQuestion
                                         .builder()
-                                        .id(new ObjectId())
+                                        .id(mainQuestion10 == null ? new ObjectId() : mainQuestion10.getId())
                                         .questionType(QuestionType.SIMPLE)
                                         .required(false)
                                         .question("توضیحات")

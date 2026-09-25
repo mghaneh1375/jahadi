@@ -15,6 +15,7 @@ import four.group.jahadi.Utility.FileUtils;
 import four.group.jahadi.Utility.Utility;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -48,6 +49,9 @@ public class GroupService extends AbstractService<Group, GroupData> {
     private final ExternalReferralRepository externalReferralRepository;
     private final PatientsInAreaRepository patientsInAreaRepository;
     private final WareHouseAccessForGroupRepository wareHouseAccessForGroupRepository;
+
+    @Value("${custom.application.mode}")
+    private String appMode;
 
     public static void fillGroupByUsers(List<Group> groups, UserRepository userRepository) {
         List<ObjectId> userIds = groups.stream().map(Group::getOwner).collect(Collectors.toList());
@@ -124,14 +128,14 @@ public class GroupService extends AbstractService<Group, GroupData> {
         if (fileType == null)
             throw new RuntimeException("فرمت فایل موردنظر معتبر نمی باشد.");
 
-        String filename = uploadFile(file, PICS_FOLDER);
+        String filename = uploadFile(appMode, file, PICS_FOLDER);
         if (filename == null)
             throw new RuntimeException("خطای ناشناخته هنگام بارگداری فایل");
 
         Group group = groupRepository.findById(id).orElseThrow(InvalidIdException::new);
 
         if (group.getPic() != null && !group.getPic().isEmpty())
-            removeFile(group.getPic(), PICS_FOLDER);
+            removeFile(appMode, group.getPic(), PICS_FOLDER);
 
         group.setPic(filename);
         groupRepository.save(group);

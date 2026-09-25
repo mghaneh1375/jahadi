@@ -4,8 +4,10 @@ import four.group.jahadi.Enums.Module.AnswerType;
 import four.group.jahadi.Enums.Module.QuestionType;
 import four.group.jahadi.Models.Module;
 import four.group.jahadi.Models.Question.CheckListGroupQuestion;
+import four.group.jahadi.Models.Question.Question;
 import four.group.jahadi.Models.Question.SimpleQuestion;
 import four.group.jahadi.Models.SubModule;
+import four.group.jahadi.Tests.Modules.SubModules.Helper;
 import four.group.jahadi.Utility.PairValue;
 import org.bson.types.ObjectId;
 
@@ -17,9 +19,14 @@ import static four.group.jahadi.Tests.Modules.ModuleSeeder.moduleIds;
 
 public class PsychologySeeder {
     public static Module seed() {
+        String moduleName = "روانشناس";
+        String subModuleName = "خدمات روان شناس";
+        SubModule oldSubModule = Helper.findSubModule(moduleName, subModuleName);
+        Question mainQuestion1 = Helper.findQuestionInSubModule(oldSubModule, "خدمات روان شناس");
+
         return Module
                 .builder()
-                .name("روانشناس")
+                .name(moduleName)
                 .tabName("توان بخشی")
                 .icon("")
                 .isReferral(false)
@@ -27,14 +34,14 @@ public class PsychologySeeder {
                         List.of(
                                 SubModule
                                         .builder()
-                                        .id(new ObjectId())
+                                        .id(oldSubModule == null ? new ObjectId() : oldSubModule.getId())
+                                        .name(subModuleName)
                                         .referTo(moduleIds.get("متخصص روان"))
-                                        .name("خدمات روان شناس")
                                         .questions(
                                                 List.of(
                                                         CheckListGroupQuestion
                                                                 .builder()
-                                                                .id(new ObjectId())
+                                                                .id(mainQuestion1 == null ? new ObjectId() : mainQuestion1.getId())
                                                                 .questionType(QuestionType.CHECK_LIST)
                                                                 .sectionTitle("خدمات روان شناس")
                                                                 .options(
@@ -49,7 +56,7 @@ public class PsychologySeeder {
                                                                         List.of(
                                                                                 SimpleQuestion
                                                                                         .builder()
-                                                                                        .id(new ObjectId())
+                                                                                        .id(Helper.findSimpleQuestionInList((CheckListGroupQuestion) mainQuestion1, "مشاوره"))
                                                                                         .questionType(QuestionType.SIMPLE)
                                                                                         .question("مشاوره")
                                                                                         .answerType(AnswerType.TICK)

@@ -10,9 +10,6 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
 import org.json.JSONObject;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.convention.MatchingStrategies;
-import org.modelmapper.convention.NameTransformers;
 
 import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
@@ -21,9 +18,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
-import static four.group.jahadi.Utility.StaticValues.DEV_MODE;
 import static org.apache.poi.ss.usermodel.DateUtil.isADateFormat;
 import static org.apache.poi.ss.usermodel.DateUtil.isValidExcelDate;
 
@@ -32,6 +27,7 @@ public class Utility {
     public static final ZoneId tehranZoneId = ZoneId.of("Asia/Tehran");
     private static final SimpleDateFormat simpleDateFormat;
     private static final DateTimeFormatter dateTimeFormatter;
+
 
     static {
         sdfSSSXXX = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
@@ -257,9 +253,9 @@ public class Utility {
 
     }
 
-    public static int randInt() {
+    public static int randInt(String appMode) {
 
-        if (DEV_MODE)
+        if (Objects.equals(appMode, "dev"))
             return 111111;
 
         int r = 0;
@@ -297,11 +293,11 @@ public class Utility {
         return sb.toString();
     }
 
-    public static boolean sendSMS(String receptor, String token,
-                                  String token2, String token3,
-                                  String template
+    public static boolean sendSMS(
+            String appMode, String receptor, String token,
+            String token2, String token3, String template
     ) {
-        if (DEV_MODE)
+        if (Objects.equals(appMode, "dev"))
             return true;
 
         receptor = convertPersianDigits(receptor);

@@ -27,7 +27,6 @@ public class SignUpStep4ForGroupData {
     List<MedicalSection> medicalSections;
     List<MedicalExpertise> medicalExpertises;
 
-
     private boolean adultEducation = false;
     private boolean childEducation = false;
     private boolean freeGlass = false;
@@ -43,6 +42,15 @@ public class SignUpStep4ForGroupData {
     private boolean hormonTest = false;
     private boolean movementHelpEquipments = false;
 
+    private boolean toothExtraction = false;
+    private boolean dentalRestoration = false;
+    private boolean toothNerveRemoval = false;
+    private boolean gumSurgery = false;
+    private String otherDentalServices;
 
+    private boolean surgeryRefer = false;
+    private boolean hospitalizationRefer = false;
+    private boolean freeRefer = false;
+    private String otherReferFields;
 
 }

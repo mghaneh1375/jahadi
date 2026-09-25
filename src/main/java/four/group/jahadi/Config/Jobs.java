@@ -65,5 +65,33 @@ public class Jobs {
         if (cache != null) {
             cache.clear();
         }
+        cache = cacheManager.getCache("perProvinceTrip");
+        if (cache != null) {
+            cache.clear();
+        }
+        cache = cacheManager.getCache("patientsStat");
+        if (cache != null) {
+            cache.clear();
+        }
+        cache = cacheManager.getCache("patientsAnswers");
+        if (cache != null) {
+            cache.clear();
+        }
+        cache = cacheManager.getCache("group-members-report");
+        if (cache != null) {
+            cache.clear();
+        }
+        cache = cacheManager.getCache("group-trips-per-month");
+        if (cache != null) {
+            cache.clear();
+        }
+        cache = cacheManager.getCache("group-all-trips");
+        if (cache != null) {
+            cache.clear();
+        }
+        cache = cacheManager.getCache("group-total-recepted-patients");
+        if (cache != null) {
+            cache.clear();
+        }
     }
 }

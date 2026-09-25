@@ -1,13 +1,10 @@
 package four.group.jahadi.Validator.SignUp;
 
 import four.group.jahadi.DTO.SignUp.SignUpStep2ForGroupData;
-import four.group.jahadi.Enums.GroupRegistrationPlace;
-import four.group.jahadi.Enums.Lodgment;
 import org.json.JSONObject;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
-import java.util.Objects;
 
 public class SignUpFormStep2ForGroupsValidator implements ConstraintValidator<ValidatedSignUpFormStep2ForGroups, SignUpStep2ForGroupData> {
 
@@ -21,11 +18,6 @@ public class SignUpFormStep2ForGroupsValidator implements ConstraintValidator<Va
 
         boolean isErrored = false;
         JSONObject errs = new JSONObject();
-
-        if(value.getGroupName() == null) {
-            errs.put("groupName", "لطفا نام گروه خود را وارد نمایید");
-            isErrored = true;
-        }
 
         if(value.getTotalTrips() == null) {
             errs.put("totalTrips", "لطفا تعداد کل اردوهای جهادی خود را وارد نمایید");

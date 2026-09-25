@@ -3,6 +3,10 @@ package four.group.jahadi.Utility;
 import com.mongodb.BasicDBObject;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 public class StaticValues {
 
     public final static String SERVER_ADDR = "https://statics.asar.app/";
@@ -19,10 +23,6 @@ public class StaticValues {
     public final static int TOKEN_EXPIRATION = 60 * 60 * 24 * 7 * 1000;
 
     public final static int ONE_MB = 1024 * 1024;
-
-    public final static Boolean DEV_MODE = false;
-
-    public static final BasicDBObject JUST_ID = new BasicDBObject("_id", 1);
 
     public static final String JSON_OK = new JSONObject().put("status", "ok").toString();
     public static final String JSON_NOT_VALID_TOKEN = new JSONObject().put("status", "nok").put("msg", "token is not valid").toString();

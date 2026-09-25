@@ -1,6 +1,5 @@
 package four.group.jahadi.DTO.dashboard;
 
-import four.group.jahadi.Models.ReportThreshold;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

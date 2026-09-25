@@ -1,7 +1,13 @@
 package four.group.jahadi.Routes.API.GroupAPIRoutes;
 
+import four.group.jahadi.DTO.SignUp.SignUpStep2ForGroupData;
+import four.group.jahadi.DTO.SignUp.SignUpStep3ForGroupData;
+import four.group.jahadi.DTO.SignUp.SignUpStep4ForGroupData;
+import four.group.jahadi.Exception.NotActivateAccountException;
+import four.group.jahadi.Exception.UnAuthException;
 import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Service.GroupService;
+import four.group.jahadi.Service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -11,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import java.util.HashMap;
@@ -23,9 +30,14 @@ public class ManageGroupAPIRoutes extends Router {
     @Autowired
     private GroupService groupService;
 
+    @Autowired
+    private UserService userService;
+
     @PutMapping(value = "changeCode")
-    public void changeCode(HttpServletRequest request,
-                           @RequestBody @Min(100000) @Max(111111) int code) {
+    public void changeCode(
+            HttpServletRequest request,
+            @RequestBody @Min(100000) @Max(111111) int code
+    ) {
         groupService.changeCode(getGroup(request), code);
     }
 
@@ -37,6 +49,31 @@ public class ManageGroupAPIRoutes extends Router {
     ) {
         groupService.setPic(getGroup(request), file);
     }
+
+    @PutMapping(value = "signUpStep2ForGroups")
+    public void signUpStep2ForGroups(
+            HttpServletRequest request,
+            @RequestBody @Valid SignUpStep2ForGroupData data
+    ) throws UnAuthException, NotActivateAccountException {
+        userService.signUpStep2ForGroups(getUserWithOutCheckCompleteness(request), data);
+    }
+
+    @PutMapping(value = "signUpStep3ForGroups")
+    public void signUpStep3ForGroups(
+            HttpServletRequest request,
+            @RequestBody @Valid SignUpStep3ForGroupData data
+    ) throws UnAuthException, NotActivateAccountException {
+        userService.signUpStep3ForGroups(getUserWithOutCheckCompleteness(request), data);
+    }
+
+    @PutMapping(value = "signUpStep4ForGroups")
+    public void signUpStep4ForGroups(
+            HttpServletRequest request,
+            @RequestBody @Valid SignUpStep4ForGroupData data
+    ) throws UnAuthException, NotActivateAccountException {
+        userService.signUpStep4ForGroups(getUserWithOutCheckCompleteness(request), data);
+    }
+
 
     @GetMapping(value = "statisticData")
     @ResponseBody

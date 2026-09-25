@@ -11,10 +11,9 @@ import static four.group.jahadi.Tests.Modules.ModuleSeeder.addModule;
 public class EmpowermentSeeder {
 
     public static List<Module> seed() {
-        Module m = Sight.seed();
-        addModule(m);
+        addModule(Sight.seed());
+
         return List.of(
-                m,
                 SightGharbal.seed(),
                 Audiologists.seed(),
                 PsychologySeeder.seed()

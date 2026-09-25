@@ -1,0 +1,64 @@
+spring:
+  data:
+    mongodb:
+      host: "localhost"
+      port: 27017
+      database: 'jahadi'
+#      database: "mirror"
+      auto-index-creation: true
+  #      uri: 'mongodb://localhost:27017,localhost:27020/jahadi?ReadPreference=primary&w=majority'
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: false
+      fail-on-ignored-properties: false
+      fail-on-invalid-subtype: false
+      fail-on-missing-creator-properties: false
+      fail-on-missing-external-type-id-property: false
+      fail-on-null-creator-properties: false
+      fail-on-null-for-primitives: false
+      fail-on-numbers-for-enums: false
+      fail-on-reading-dup-tree-key: false
+      fail-on-trailing-tokens: false
+      fail-on-unresolved-object-ids: false
+server:
+  port: 8081
+logging:
+  level:
+    org:
+      springframework:
+        web: "TRACE"
+        data:
+          mongodb:
+            core:
+              MongoTemplate: "DEBUG"
+token:
+  secret:
+    key:
+      custom: "D/RG6sq9~=payYb8df:@h"
+springdoc:
+  swagger-ui:
+#    enabled: true
+#    path: /swagger-ui.html
+    # Set expand mode to none (options: list, full, none)
+    doc-expansion: none
+    # Display operations in order
+    operations-sorter: alpha
+    # Display tags in order
+    tags-sorter: alpha
+    # Add filter at the top
+    filter: true
+app:
+  package-scan:
+    model: "four.group.jahadi"
+    repository: "four.group.jahadi"
+    # model: "four.group.jahadi.Models,four.group.jahadi.Models.Area"
+    # repository: "four.group.jahadi.Repository,four.group.jahadi.Repository.Area"
+  security:
+    level: "07022fc1b04d76ca568553c0411ce2547be5cf8acacd4e63c0daa5277129d8b3"
+    dev: "KJ1AZh+tkKQ9JA6XkeBuZ0gQRRVilnRYb6Xp1FmXWA=="
+  password:
+    hash: "t6DSPiQSAX77k9rCsNTqJd7Zr+tyjwY3bE0cosIrXXp+hT71AWF8gTM/GBSs1zaFD3jgkIhZmicnIXcHzTmd53sPcBzY0bR1hn1YYUXvJL4xMTF3e3Pa61gNgSQ="
+  checksum: "fnvI3ORWCQnbQTDx0JMrINMpHObVezh2nBpWCaaEu5fmnpSBfdvn3nVZM4aqthVyCGaIo0PiWU6RJKoTyruuCatzGLGq8NE5HSP1H77VtcvPYu00Wo2PS0im4g0="
+  main-file-path: 'C:\Users\user\IdeaProjects\Jahadi\target\classes\four\group\jahadi\JahadiApplication.class'
+  license:
+    key: "4Gz6P4kWiyVquji0S2oV+NsynysUwlFYSV/NbwqtrN60GUJhKvUF3CLedYBpXCn808Pqp3N/eYLeHTnAeLJAbhTR/EuzzgQYb+KrCI/G9HOQ7O6XuQP2ytnymiA="

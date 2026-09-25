@@ -10,21 +10,18 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Objects;
 
-import static four.group.jahadi.Utility.StaticValues.DEV_MODE;
-
 public class FileUtils {
 
     public final static String uploadDir = "/var/www/statics/";
 //    public final static String uploadDir_dev = "/var/www/statics/";
     public final static String uploadDir_dev = "./src/main/resources/assets/";
 
-    public static String uploadFile(MultipartFile file, String folder) {
-
+    public static String uploadFile(String appMode, MultipartFile file, String folder) {
         try {
             String[] splited = file.getOriginalFilename().split("\\.");
             String filename = System.currentTimeMillis() + "." + splited[splited.length - 1];
 
-            Path copyLocation = Paths.get(DEV_MODE ?
+            Path copyLocation = Paths.get(Objects.equals(appMode, "dev") ?
                     uploadDir_dev + folder + File.separator + filename :
                     uploadDir + folder + File.separator + filename
             );
@@ -87,9 +84,8 @@ public class FileUtils {
         }
     }
 
-    public static void removeFile(String filename, String folder) {
-
-        Path location = Paths.get(DEV_MODE ?
+    public static void removeFile(String appMode, String filename, String folder) {
+        Path location = Paths.get(Objects.equals(appMode, "dev") ?
                 uploadDir_dev + folder + File.separator + filename :
                 uploadDir + folder + File.separator + filename
         );
@@ -97,6 +93,6 @@ public class FileUtils {
         try {
             Files.delete(location);
         }
-        catch (Exception x) {}
+        catch (Exception ignore) {}
     }
 }

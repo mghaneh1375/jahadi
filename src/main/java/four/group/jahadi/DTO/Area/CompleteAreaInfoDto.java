@@ -1,6 +1,7 @@
 package four.group.jahadi.DTO.Area;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import four.group.jahadi.Enums.CoOrg;
 import four.group.jahadi.Models.JustDateSerialization;
 import four.group.jahadi.Models.ObjectIdSerialization;
 import lombok.AllArgsConstructor;
@@ -32,5 +33,6 @@ public class CompleteAreaInfoDto {
     private Double lat;
     private Double lng;
     List<UserAccess> userAccesses;
-
+    private String serialPrefix;
+    private CoOrg coOrg;
 }
