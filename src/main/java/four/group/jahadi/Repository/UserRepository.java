@@ -4,14 +4,12 @@ import four.group.jahadi.DTO.UserDigest;
 import four.group.jahadi.Models.User;
 import four.group.jahadi.Repository.Area.impl.GenderCount;
 import four.group.jahadi.Repository.Area.impl.GroupStatisticsResult;
-import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -123,8 +121,11 @@ public interface UserRepository extends MongoRepository<User, ObjectId>, Filtera
 
             "{ $lookup: { " +
                     "from: 'trip', " +
-                    "localField: '_id', " +
-                    "foreignField: 'areas.members', " +
+                    "let: { userId: '$_id' }, " +
+                    "pipeline: [ " +
+                    "{ $unwind: '$areas' }, " +
+                    "{ $match: { $expr: { $in: ['$$userId', '$areas.members'] } } } " +
+                    "], " +
                     "as: 'userTrips' " +
                     "} }",
 
@@ -137,24 +138,13 @@ public interface UserRepository extends MongoRepository<User, ObjectId>, Filtera
                     "} }",
 
             "{ $addFields: { " +
-                    "totalTrips: { " +
+                    "totalTripsCount: { " +
                     "$add: [ " +
                     "{ $ifNull: ['$oldTrips', 0] }, " +
                     "{ $ifNull: ['$userTripsCount', 0] } " +
                     "] " +
                     "} " +
                     "} }",
-
-            "{ $addFields: { " +
-                    "tripBucket: { " +
-                    "$floor: { " +
-                    "$divide: [ " +
-                    "{ $ifNull: ['$total_trips', 0] }, " +
-                    "10 " +
-                    "] " +
-                    "} } " +
-                    "} " +
-                    "}",
 
             "{ $facet: { " +
                     "byFieldOfStudy: [ " +
@@ -171,22 +161,36 @@ public interface UserRepository extends MongoRepository<User, ObjectId>, Filtera
                     "{ $sort: { decade: 1 } } " +
                     "], " +
                     "byTripBucket: [ " +
-                    "{ $group: { " +
-                    "_id: '$tripBucket', " +
-                    "count: { $sum: 1 } " +
+                    "{ $bucket: { " +
+                    "groupBy: '$totalTripsCount', " +
+                    "boundaries: [0, 1, 4, 11, 21, 31, 41, 51, 61, 71, 81, 91, 101], " +
+                    "default: 'other', " +
+                    "output: { count: { $sum: 1 } } " +
                     "} }, " +
-                    "{ $project: { " +
-                    "_id: 0, " +
-                    "bucketStart: '$_id', " +
-                    "label: { $toString: '$_id' }, " +
-                    "count: 1 " +
+                    "{ $addFields: { " +
+                    "label: { " +
+                    "$switch: { " +
+                    "branches: [ " +
+                    "{ case: { $eq: ['$_id', 0] },  then: '۰ دوره‌ای' }, " +
+                    "{ case: { $eq: ['$_id', 1] },  then: '۳ دوره‌ای' }, " +
+                    "{ case: { $eq: ['$_id', 4] },  then: '۱۰ دوره‌ای' }, " +
+                    "{ case: { $eq: ['$_id', 11] }, then: '۲۰ دوره‌ای' }, " +
+                    "{ case: { $eq: ['$_id', 21] }, then: '۳۰ دوره‌ای' }, " +
+                    "{ case: { $eq: ['$_id', 31] }, then: '۴۰ دوره‌ای' }, " +
+                    "{ case: { $eq: ['$_id', 41] }, then: '۵۰ دوره‌ای' }, " +
+                    "{ case: { $eq: ['$_id', 51] }, then: '۶۰ دوره‌ای' }, " +
+                    "{ case: { $eq: ['$_id', 61] }, then: '۷۰ دوره‌ای' }, " +
+                    "{ case: { $eq: ['$_id', 71] }, then: '۸۰ دوره‌ای' }, " +
+                    "{ case: { $eq: ['$_id', 81] }, then: '۹۰ دوره‌ای' }, " +
+                    "{ case: { $eq: ['$_id', 91] }, then: '۱۰۰ دوره‌ای' } " +
+                    "], " +
+                    "default: 'بیش از ۱۰۰ دوره' " +
+                    "} " +
+                    "}, " +
+                    "bucketStart: '$_id' " +
                     "} }, " +
                     "{ $sort: { bucketStart: 1 } }, " +
-                    "{ $project: { " +
-                    "_id: 0, " +
-                    "label: 1, " +
-                    "count: 1 " +
-                    "} } " +
+                    "{ $project: { _id: 0, label: 1, count: 1 } } " +
                     "]" +
                     "} }"
     })
