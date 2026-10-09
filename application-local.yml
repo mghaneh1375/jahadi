@@ -48,6 +48,11 @@ springdoc:
     # Add filter at the top
     filter: true
 app:
+  pdf:
+    service:
+      php-bin: "php"
+      dir: "/home/projects/Jahadi"
+      timeout-seconds: 30
   package-scan:
     model: "four.group.jahadi"
     repository: "four.group.jahadi"

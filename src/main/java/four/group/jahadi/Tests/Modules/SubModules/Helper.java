@@ -43,6 +43,10 @@ public class Helper {
                 if(wanted instanceof List) return false;
                 return Objects.equals(((GroupQuestion) question).getSectionTitle(), wanted.toString());
             }
+            if(question instanceof MultiAnswerQuestion) {
+                if(wanted instanceof List) return false;
+                return Objects.equals(((MultiAnswerQuestion) question).getSectionTitle(), wanted.toString());
+            }
             if(question instanceof SimpleQuestion) {
                 if(wanted instanceof List) return false;
                 return Objects.equals(((SimpleQuestion) question).getQuestion(), wanted.toString());
@@ -72,6 +76,19 @@ public class Helper {
     }
 
     public static ObjectId findSimpleQuestionInList(GroupQuestion parentQuestion, String questionText) {
+        if(parentQuestion == null) return new ObjectId();
+        Optional<Question> simpleQuestion = parentQuestion.getQuestions()
+                .stream()
+                .filter(question -> question instanceof SimpleQuestion && ((SimpleQuestion)question).getQuestion().equals(questionText))
+                .findFirst();
+
+        if(simpleQuestion.isPresent())
+            return simpleQuestion.get().getId();
+
+        return new ObjectId();
+    }
+
+    public static ObjectId findSimpleQuestionInList(MultiAnswerQuestion parentQuestion, String questionText) {
         if(parentQuestion == null) return new ObjectId();
         Optional<Question> simpleQuestion = parentQuestion.getQuestions()
                 .stream()

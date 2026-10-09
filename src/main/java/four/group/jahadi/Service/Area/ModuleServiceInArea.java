@@ -297,7 +297,10 @@ public class ModuleServiceInArea {
 //        );
 
         Module module = moduleRepository.findById(moduleId).orElseThrow(UnknownError::new);
-        SubModule wantedSubModule = module.getSubModules().stream().filter(subModule -> Objects.equals(subModule.getId(), subModuleId)).findFirst()
+        SubModule wantedSubModule = module.getSubModules()
+                .stream()
+                .filter(subModule -> Objects.equals(subModule.getId(), subModuleId))
+                .findFirst()
                 .orElseThrow(InvalidIdException::new);
 
         if (patientId != null) {

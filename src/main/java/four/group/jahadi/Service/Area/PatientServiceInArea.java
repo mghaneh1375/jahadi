@@ -916,13 +916,23 @@ public class PatientServiceInArea {
                         .collect(Collectors.toList())
         );
 
+        mandatoryQuestionIds.addAll(
+                questions.stream()
+                        .filter(question -> question.getQuestionType().equals(QuestionType.MULTI_ANSWER))
+                        .map(question -> ((MultiAnswerQuestion) question).getQuestions())
+                        .flatMap(List::stream)
+                        .filter(question ->
+                                question.getQuestionType().equals(QuestionType.SIMPLE) && ((SimpleQuestion) question).getRequired()
+                        )
+                        .map(Question::getId)
+                        .collect(Collectors.toList())
+        );
+
         return mandatoryQuestionIds;
     }
 
     private HashMap<ObjectId, A> getSubModuleAllQuestions(List<Question> questions) {
-
         HashMap<ObjectId, A> allQuestions = new HashMap<>();
-
         questions.stream()
                 .filter(question ->
                         question.getQuestionType().equals(QuestionType.SIMPLE))
@@ -1022,6 +1032,18 @@ public class PatientServiceInArea {
 
         if (groupQuestions.size() > 0) {
             HashMap<ObjectId, A> tmp = getSubModuleAllQuestions(groupQuestions);
+            for (ObjectId id : tmp.keySet())
+                allQuestions.put(id, tmp.get(id));
+        }
+
+        List<Question> multiAnswerQuestions = questions.stream()
+                .filter(question -> question.getQuestionType().equals(QuestionType.MULTI_ANSWER))
+                .map(question -> ((MultiAnswerQuestion) question).getQuestions())
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
+
+        if (multiAnswerQuestions.size() > 0) {
+            HashMap<ObjectId, A> tmp = getSubModuleAllQuestions(multiAnswerQuestions);
             for (ObjectId id : tmp.keySet())
                 allQuestions.put(id, tmp.get(id));
         }
@@ -1283,17 +1305,6 @@ public class PatientServiceInArea {
             ObjectId moduleId, ObjectId subModuleId,
             ObjectId patientId
     ) {
-        Trip trip = tripRepository.findByAreaIdAndResponsibleIdAndModuleId(
-                areaId, userId, moduleId
-        ).orElseThrow(NotAccessException::new);
-
-        Area area = AreaUtils.findStartedArea(trip, areaId, false);
-        AreaUtils.findModule(
-                area, moduleId,
-                null
-//              todo: userId.equals(area.getOwnerId()) ? null : userId
-        );
-
         PatientsInArea patientInArea = patientsInAreaRepository.findByAreaIdAndPatientId(
                 areaId, patientId
         ).orElseThrow(InvalidIdException::new);
@@ -1323,6 +1334,17 @@ public class PatientServiceInArea {
         )
             throw new RuntimeException("فرمی برای این ماژول ثبت نشده است");
 
+        Trip trip = tripRepository.findByAreaIdAndResponsibleIdAndModuleId(
+                areaId, userId, moduleId
+        ).orElseThrow(NotAccessException::new);
+
+        Area area = AreaUtils.findStartedArea(trip, areaId, false);
+        AreaUtils.findModule(
+                area, moduleId,
+                null
+//              todo: userId.equals(area.getOwnerId()) ? null : userId
+        );
+
         ObjectId finalWantedSubModuleId = wantedSubModuleId;
         PatientForm wantedPatientForm =
                 optionalPatientReferral.get()
@@ -1330,15 +1352,72 @@ public class PatientServiceInArea {
                         .filter(patientForm -> patientForm.getSubModuleId().equals(finalWantedSubModuleId))
                         .reduce((first, second) -> second)
                         .stream().findFirst()
-                        .orElseThrow(() -> {
-                            throw new RuntimeException("فرمی برای این ماژول ثبت نشده است");
-                        });
+                        .orElseThrow(() -> new RuntimeException("فرمی برای این ماژول ثبت نشده است"));
 
-        List<PatientAnswer> answers = wantedPatientForm.getAnswers();
+        List<PatientAnswer> finalAnswers = new ArrayList<>();
+        Optional<Question> multiAnswerQuestion = wantedSubModule
+                .getQuestions()
+                .stream()
+                .filter(question -> question.getQuestionType().equals(QuestionType.MULTI_ANSWER)).findFirst();
+
+        if(multiAnswerQuestion.isPresent()) {
+            List<ObjectId> qIds = ((MultiAnswerQuestion)multiAnswerQuestion.get())
+                    .getQuestions()
+                    .stream()
+                    .map(Question::getId)
+                    .collect(Collectors.toList());
+
+            List<PatientAnswer> thisQuestionAnswers = wantedPatientForm.getAnswers().stream()
+                    .filter(patientAnswer -> qIds.contains(patientAnswer.getQuestionId()))
+                    .collect(Collectors.toList());
+
+            finalAnswers.addAll(
+                    wantedPatientForm.getAnswers()
+                            .stream()
+                            .filter(patientAnswer -> !qIds.contains(patientAnswer.getQuestionId()))
+                            .collect(Collectors.toList())
+            );
+
+            HashMap<ObjectId, Integer> qCounters = new HashMap<>();
+            List<List<PatientAnswer>> structuredAnswers = new ArrayList<>();
+            for(PatientAnswer patientAnswer : thisQuestionAnswers) {
+                int index = -1;
+                List<PatientAnswer> tmp;
+
+                if(qCounters.containsKey(patientAnswer.getQuestionId())) {
+                    index = qCounters.get(patientAnswer.getQuestionId());
+                }
+
+                index++;
+                qCounters.put(patientAnswer.getQuestionId(), index);
+                if(index < structuredAnswers.size()) {
+                    tmp = structuredAnswers.get(index);
+                }
+                else {
+                    tmp = new ArrayList<>();
+                }
+                tmp.add(patientAnswer);
+
+                if(index >= structuredAnswers.size()) {
+                    structuredAnswers.add(tmp);
+                }
+            }
+
+            finalAnswers.add(
+                    PatientAnswer
+                            .builder()
+                            .questionId(multiAnswerQuestion.get().getId())
+                            .answer(structuredAnswers)
+                            .build()
+            );
+        }
+        else {
+            finalAnswers.addAll(wantedPatientForm.getAnswers());
+        }
 
         if (wantedPatientForm.getMark() != null)
             for (ObjectId key : wantedPatientForm.getMark().keySet())
-                answers.add(
+                finalAnswers.add(
                         PatientAnswer
                                 .builder()
                                 .questionId(key)
@@ -1347,7 +1426,7 @@ public class PatientServiceInArea {
                 );
 
         return new ResponseEntity<>(
-                answers,
+                finalAnswers,
                 HttpStatus.OK
         );
     }

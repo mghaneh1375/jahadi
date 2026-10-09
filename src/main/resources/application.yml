@@ -37,3 +37,9 @@ token:
 custom:
   application:
     mode: 'dev'
+app:
+  pdf:
+    service:
+      php-bin: "php"
+      dir: "/home/projects/Jahadi"
+      timeout-seconds: 30

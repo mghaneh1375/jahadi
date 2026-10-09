@@ -2,6 +2,7 @@ package four.group.jahadi.Tests.Modules;
 
 import four.group.jahadi.Models.Module;
 import four.group.jahadi.Tests.Modules.SubModules.ExternalReferral;
+import four.group.jahadi.Tests.Modules.SubModules.Physiotheraphy.PhysiotherapyForm;
 import four.group.jahadi.Tests.Modules.SubModules.Visit;
 
 import java.util.List;
@@ -18,8 +19,8 @@ public class Physiotherapy {
                 .subModules(
                         List.of(
                                 Visit.make(moduleName),
-                                ExternalReferral.make(moduleName)
-
+                                ExternalReferral.make(moduleName),
+                                PhysiotherapyForm.make(moduleName)
                         )
                 )
                 .build();

@@ -38,6 +38,10 @@ public class Audiologists {
         String subModuleName3 = "اتاق شنوایی 3";
         SubModule oldSubModule3 = Helper.findSubModule(moduleName, subModuleName3);
 
+
+        String subModuleName4 = "ارجاع به متخصصان گوش حلق بینی";
+        SubModule oldSubModule4 = Helper.findSubModule(moduleName, subModuleName4);
+
         Question mainQuestion31 = Helper.findQuestionInSubModule(oldSubModule3, "سوالات");
         Question mainQuestion32 = Helper.findQuestionInSubModule(oldSubModule3, "تشخیص شنوایی شناس");
 
@@ -212,28 +216,30 @@ public class Audiologists {
                                         .build()
 
                         )).build();
-//        SubModule externalRefer = SubModule
-//                .builder()
-//                .name("ارجاع به متخصصان گوش حلق بینی")
-//                .questions(
-//                        List.of(
-//                                SimpleQuestion
-//                                        .builder()
-//                                        .questionType(QuestionType.SIMPLE)
-//                                        .required(false)
-//                                        .question("علت ارجاع")
-//                                        .answerType(AnswerType.LONG_TEXT)
-//                                        .build()
-//                        )
-//                )
-//                .build();
+
+        SubModule externalRefer = SubModule
+                .builder()
+                .id(oldSubModule4 == null ? new ObjectId() : oldSubModule4.getId())
+                .name("ارجاع به متخصصان گوش حلق بینی")
+                .questions(
+                        List.of(
+                                SimpleQuestion
+                                        .builder()
+                                        .questionType(QuestionType.SIMPLE)
+                                        .required(false)
+                                        .question("علت ارجاع")
+                                        .answerType(AnswerType.LONG_TEXT)
+                                        .build()
+                        )
+                )
+                .build();
 
         return Module.builder()
                 .name(moduleName)
                 .icon("")
                 .tabName("توان بخشی")
                 .subModules(
-                        List.of(room1, room2, room3)
+                        List.of(room1, room2, room3, externalRefer)
                 )
                 .build();
     }

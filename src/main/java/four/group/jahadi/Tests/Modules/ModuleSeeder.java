@@ -59,6 +59,8 @@ public class ModuleSeeder {
         for (Module module : ExperimentTab.seed())
             addModule(module);
 
+        addModule(Physiotherapy.seed());
+
         moduleRepository.deleteAll(all);
         moduleRepository.saveAll(newItems);
     }

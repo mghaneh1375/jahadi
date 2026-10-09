@@ -4,10 +4,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import four.group.jahadi.DTO.Area.AreaData;
-import four.group.jahadi.DTO.Area.AreaDigest;
-import four.group.jahadi.DTO.Area.CompleteAreaInfoDto;
-import four.group.jahadi.DTO.Area.UpdateAreaData;
+import four.group.jahadi.DTO.Area.*;
 import four.group.jahadi.DTO.Region.RegionRunInfoData;
 import four.group.jahadi.DTO.Region.RegionSendNotifData;
 import four.group.jahadi.DTO.UpdatePresenceList;
@@ -942,11 +939,21 @@ public class AreaService extends AbstractService<Area, AreaData> {
         tripRepository.save(wantedTrip);
     }
 
-    public ResponseEntity<Boolean> getReceptionStatus(ObjectId areaId, ObjectId userId) {
+    public ResponseEntity<ReceptionStatusResponse> getReceptionStatus(ObjectId areaId, ObjectId userId) {
         Trip wantedTrip = tripRepository.findByAreaIdAndResponsibleId(areaId, userId)
                 .orElseThrow(NotAccessException::new);
 
         Area foundArea = findArea(wantedTrip, areaId);
-        return ResponseEntity.ok().body(Objects.equals(Boolean.TRUE, foundArea.getStopReception()));
+        ReceptionStatusResponse receptionStatusResponse = ReceptionStatusResponse
+                .builder()
+                .receptionStatus(
+                        Objects.equals(Boolean.TRUE, foundArea.getStopReception())
+                )
+                .canDownloadExcel(
+                        foundArea.getOwnerId().equals(userId)
+                )
+                .build();
+
+        return ResponseEntity.ok().body(receptionStatusResponse);
     }
 }

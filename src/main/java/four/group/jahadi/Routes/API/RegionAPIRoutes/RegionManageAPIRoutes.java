@@ -3,6 +3,7 @@ package four.group.jahadi.Routes.API.RegionAPIRoutes;
 import four.group.jahadi.DTO.Area.AreaDigest;
 import four.group.jahadi.DTO.Area.CompleteAreaDto;
 import four.group.jahadi.DTO.Area.CompleteAreaInfoDto;
+import four.group.jahadi.DTO.Area.ReceptionStatusResponse;
 import four.group.jahadi.DTO.Region.RegionRunInfoData;
 import four.group.jahadi.DTO.Region.RegionSendNotifData;
 import four.group.jahadi.DTO.UpdatePresenceList;
@@ -143,7 +144,7 @@ public class RegionManageAPIRoutes extends Router {
     @GetMapping(value = "get-reception-status/{areaId}")
     @ResponseBody
     @Operation(summary = "گرفتن وضعیت پذیرش بیمار")
-    public ResponseEntity<Boolean> getReceptionStatus(
+    public ResponseEntity<ReceptionStatusResponse> getReceptionStatus(
             HttpServletRequest request,
             @PathVariable @ObjectIdConstraint ObjectId areaId
     ) {

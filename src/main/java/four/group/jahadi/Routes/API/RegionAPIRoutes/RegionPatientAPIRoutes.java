@@ -10,11 +10,15 @@ import four.group.jahadi.DTO.Patient.TrainFormData;
 import four.group.jahadi.Enums.Access;
 import four.group.jahadi.Enums.Insurance;
 import four.group.jahadi.Exception.InvalidFieldsException;
+import four.group.jahadi.Exception.InvalidIdException;
 import four.group.jahadi.Models.Area.*;
 import four.group.jahadi.Models.Patient;
 import four.group.jahadi.Models.TokenInfo;
+import four.group.jahadi.Repository.Area.PatientsInAreaRepository;
+import four.group.jahadi.Repository.PatientRepository;
 import four.group.jahadi.Routes.Router;
 import four.group.jahadi.Service.Area.PatientServiceInArea;
+import four.group.jahadi.Service.Area.pdfExport.PdfReportService;
 import four.group.jahadi.Validator.ObjectIdConstraint;
 import io.swagger.v3.oas.annotations.Operation;
 import org.bson.types.ObjectId;
@@ -32,8 +36,11 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping(value = "/api/region/patient")
@@ -42,6 +49,13 @@ public class RegionPatientAPIRoutes extends Router {
 
     @Autowired
     private PatientServiceInArea patientServiceInArea;
+    @Autowired
+    private PatientRepository patientRepository;
+    @Autowired
+    private PatientsInAreaRepository patientsInAreaRepository;
+    @Autowired
+    private PdfReportService pdfReportService;
+
 
     @PutMapping(value = "createPatientAndAddToRegion/{areaId}")
     @ResponseBody
@@ -474,5 +488,35 @@ public class RegionPatientAPIRoutes extends Router {
         patientServiceInArea.patientReport(
                 patientId, null, response
         );
+    }
+
+    @GetMapping("/patientReportPdf/{patientId}")
+    public void patientReportPdf(
+            @PathVariable ObjectId patientId,
+            @RequestParam(required = false) ObjectId areaId,
+            HttpServletResponse response
+    ) throws IOException {
+
+        Patient patient = patientRepository.findById(patientId)
+                .orElseThrow(InvalidIdException::new);
+
+        List<PatientsInArea> patientForms;
+        if (areaId != null) {
+            Optional<PatientsInArea> form = patientsInAreaRepository
+                    .findByAreaIdAndPatientId(areaId, patientId);
+            patientForms = form.map(Collections::singletonList)
+                    .orElse(Collections.emptyList());
+        } else {
+            patientForms = patientsInAreaRepository.findByPatientId(patientId);
+        }
+
+        byte[] pdf = pdfReportService.generatePdf(patient, patientForms);
+
+        response.setContentType("application/pdf");
+        response.setHeader("Content-Disposition",
+                "inline; filename=\"patientReport-" + patientId + ".pdf\"");
+        response.setContentLength(pdf.length);
+        response.getOutputStream().write(pdf);
+        response.getOutputStream().flush();
     }
 }
